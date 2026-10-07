@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "name": "measured-v14",
+  "native_defaults": {
+    "source": "installed lerobot 0.6.1 SOFollowerConfig and TeleoperateConfig",
+    "control_hz": 60,
+    "max_relative_target": null,
+    "num_read_retries": 2,
+    "position_p_coefficient": 16,
+    "position_i_coefficient": 0,
+    "position_d_coefficient": 32,
+    "return_delay_time": 0,
+    "maximum_acceleration": 254,
+    "operating_mode": 0,
+    "gripper_max_torque_limit": 500,
+    "gripper_protection_current": 250,
+    "gripper_overload_torque": 25
+  },
+  "position_feedback": {
+    "version": 1,
+    "joints": {
+      "shoulder_pan": {
+        "kp": 0.5,
+        "ki": 1.5,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.08,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.0015
+      },
+      "shoulder_lift": {
+        "kp": 2.0,
+        "ki": 3.0,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.16,
+        "velocity_feedforward_s": 0.14,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.003,
+        "friction_feedforward_rad": 0.018,
+        "friction_velocity_rad_s": 0.04
+      },
+      "elbow_flex": {
+        "kp": 2.0,
+        "ki": 3.0,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.16,
+        "velocity_feedforward_s": 0.1,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.003,
+        "friction_feedforward_rad": 0.032,
+        "friction_velocity_rad_s": 0.04
+      },
+      "wrist_flex": {
+        "kp": 0.5,
+        "ki": 1.5,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.08,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.0015
+      },
+      "wrist_roll": {
+        "kp": 0.5,
+        "ki": 1.5,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.08,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.0015
+      },
+      "gripper": {
+        "kp": 0.5,
+        "ki": 0.8,
+        "max_correction_rad": 0.05,
+        "correction_rate_rad_s": 0.04,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.003
+      }
+    },
+    "native_stream": {
+      "acceleration": 20,
+      "velocity_ticks_s": 600
+    }
+  },
+  "trajectory": {
+    "version": 1,
+    "entry_speed_rad_s": 0.5,
+    "min_entry_seconds": 0.5,
+    "ramp_seconds": 1.0,
+    "control_hz": 60,
+    "reset_speed_rad_s": 0.5,
+    "period_seconds": 4.0
+  }
+}

@@ -1,0 +1,6 @@
+# Lightweight local simulation/display runtime; remote motors use uv.lock.
+# Versions verified on the existing macOS simulation workstation.
+mujoco==3.9.0
+numpy==2.4.6
+opencv-python==4.13.0.92
+Pillow==11.3.0

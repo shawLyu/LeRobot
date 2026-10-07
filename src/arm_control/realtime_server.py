@@ -1,0 +1,379 @@
+"""Remote hardware worker; stdout carries the stdio protocol."""
+
+import argparse
+import hashlib
+import json
+import queue
+import sys
+import threading
+import time
+from contextlib import ExitStack
+from pathlib import Path
+
+from .control_defaults import CONTROL_CONFIG_SHA256, CONTROL_HZ
+from .model_metadata import joint_ranges
+from .realtime import JOINTS, VERSION, WATCHDOG_SECONDS, preview_joint_target
+
+ROOT = Path(__file__).resolve().parents[2]
+SEND_LOCK = threading.Lock()
+
+
+def next_deadline(previous, finished, period):
+    """Keep a fixed time grid; skip missed slots instead of issuing catch-up bursts."""
+    deadline = previous + period
+    if deadline < finished:
+        deadline += (int((finished - deadline) / period) + 1) * period
+    return deadline
+
+
+def send(message):
+    with SEND_LOCK:
+        print(json.dumps({"version": VERSION, **message}, allow_nan=False), flush=True)
+
+
+def receive(commands, disconnected):
+    try:
+        for line in sys.stdin:
+            try:
+                if len(line) > 8192:
+                    raise ValueError("command too large")
+                commands.put_nowait((time.monotonic(), json.loads(line)))
+            except (ValueError, queue.Full) as exc:
+                send({"type": "error", "error": str(exc)})
+    finally:
+        disconnected.set()
+
+
+def save_control_trace(path, frames, gc_pauses=()):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"version": 1, "control_hz": CONTROL_HZ,
+                                "frames": list(frames), "gc_pauses": list(gc_pauses)},
+                               separators=(",", ":")) + "\n")
+
+
+def save_control_events(events):
+    # Persist after holding/closing the arm. Filesystem stalls must not interrupt
+    # the position stream; faults and recovered warnings also remain in state.
+    if events:
+        directory = ROOT / "logs"
+        directory.mkdir(parents=True, exist_ok=True)
+        for name, event in events:
+            (directory / name).write_text(json.dumps(event, indent=2) + "\n")
+
+
+def defer_cyclic_gc(stack):
+    import gc
+
+    # Tick data is acyclic and bounded; reference counting still releases it.
+    # Large cyclic collections otherwise scan the retained trace mid-motion.
+    if gc.isenabled():
+        gc.disable()
+        stack.callback(gc.enable)
+
+
+def serve(args):
+    commands = queue.Queue(maxsize=16)
+    disconnected = threading.Event()
+    with ExitStack() as stack:
+        from collections import deque
+
+        trace = deque(maxlen=36000)
+        control_events = deque(maxlen=256)
+        stack.callback(save_control_events, control_events)
+        trace_path = getattr(args, "control_log", None)
+        if trace_path:
+            import gc
+
+            gc_pauses = deque(maxlen=256)
+            gc_started = [0.0]
+
+            def gc_timing(phase, info):
+                if phase == "start":
+                    gc_started[0] = time.monotonic()
+                else:
+                    ended = time.monotonic()
+                    gc_pauses.append({"started": gc_started[0], "ended": ended,
+                                      "generation": info["generation"],
+                                      "duration_ms": (ended - gc_started[0]) * 1000})
+
+            gc.callbacks.append(gc_timing)
+            stack.callback(gc.callbacks.remove, gc_timing)
+            stack.callback(save_control_trace, trace_path, trace, gc_pauses)
+        controller = None
+        circle = None
+        last_fault = None
+        last_status_warning = None
+        from .config import load_arms
+        from .driver import connected
+
+        arm = load_arms()[args.arm]
+        bus = stack.enter_context(connected(arm))
+        low = bus.sync_read("Min_Position_Limit", normalize=False)
+        high = bus.sync_read("Max_Position_Limit", normalize=False)
+        limits = {name: [int(low[name]), int(high[name])] for name in JOINTS}
+        ranges = None
+        fingerprint = {"port": arm.port, "motors": arm.motors, "raw_limits": limits,
+                       "homing_offsets": bus.sync_read("Homing_Offset", normalize=False),
+                       "phase": bus.sync_read("Phase", normalize=False),
+                       "mode": bus.sync_read("Operating_Mode", normalize=False)}
+        if args.hardware_control:
+            from .angle_calibration import AngleCalibration
+            from .manual_control import ManualControl
+
+            identity = {**fingerprint, "model": "so101", "mjcf_sha256": hashlib.sha256(
+                args.model.read_bytes()).hexdigest()}
+            calibration = AngleCalibration(ROOT / "data/calibration/follower_mujoco.json",
+                                           identity)
+            controller = ManualControl(bus, calibration, joint_ranges(args.model), limits,
+                                       rest_path=ROOT / "data/calibration/follower_rest.json")
+            defer_cyclic_gc(stack)
+            stack.callback(controller.close)
+        if args.circle:
+            from .circle_trajectory import Circle
+
+            circle = Circle()
+            if controller:
+                controller.trajectory = circle
+        send({"type": "hello", "backend": "hardware", "joints": JOINTS,
+              "control_config_sha256": CONTROL_CONFIG_SHA256,
+              "units": "radians" if ranges else "encoder_ticks", "ranges": ranges,
+              "raw_limits": limits, "hardware_motion_enabled": args.allow_gripper,
+              "fingerprint": fingerprint,
+              "hardware_control": controller is not None,
+              "voltage_limits": ({register: bus.sync_read(register, normalize=False)
+                                  for register in ("Min_Voltage_Limit", "Max_Voltage_Limit")}
+                                 if controller else None),
+              "hz": args.hz, "control_hz": (circle.control_hz if circle else
+                                            CONTROL_HZ if controller else None),
+              "circle_available": circle is not None})
+        threading.Thread(target=receive, args=(commands, disconnected), daemon=True).start()
+        sequence = 0
+        control_cycles = 0
+        next_state = next_control = time.monotonic()
+        hardware_state = None
+        telemetry = {}
+        last_control_id = None
+
+        def save_verification(message):
+            directory = ROOT / "logs"
+            directory.mkdir(parents=True, exist_ok=True)
+            path = directory / f"gripper-verification-{time.time_ns()}.json"
+            path.write_text(json.dumps(message, indent=2) + "\n")
+
+        def motion_feedback(phase, target):
+            nonlocal sequence, telemetry
+            if disconnected.is_set():
+                raise RuntimeError("SSH disconnected during gripper verification")
+            raw = bus.sync_read("Present_Position", normalize=False)
+            telemetry = {
+                register: bus.sync_read(register, normalize=False)
+                for register in ("Torque_Enable", "Status", "Present_Voltage")
+            }
+            if any(telemetry["Status"].values()):
+                raise RuntimeError("motor fault during gripper verification")
+            sample = {"phase": phase, "target_raw": target,
+                      "position_raw": int(raw["gripper"]),
+                      "voltage_raw": int(telemetry["Present_Voltage"]["gripper"]),
+                      "status": int(telemetry["Status"]["gripper"]),
+                      "torque": int(telemetry["Torque_Enable"]["gripper"])}
+            feedback.append(sample)
+            send({"type": "state", "seq": sequence, "time_unix_ns": time.time_ns(),
+                  "raw": {name: int(raw[name]) for name in JOINTS},
+                  "telemetry": telemetry, "gripper_verification": sample})
+            sequence += 1
+
+        while not disconnected.is_set():
+            now = time.monotonic()
+            while not commands.empty():
+                received, command = commands.get_nowait()
+                command_id = command.get("id") if isinstance(command, dict) else None
+                diagnostics = None
+                try:
+                    if not isinstance(command, dict) or command.get("version") != VERSION:
+                        raise ValueError("unsupported protocol")
+                    if now - received > WATCHDOG_SECONDS:
+                        raise ValueError("stale command")
+                    operation = command.get("op")
+                    result = None
+                    if (circle and circle.active and operation not in ("ping", "circle_start")):
+                        if controller:
+                            controller.stop("circle interrupted by manual command")
+                        else:
+                            circle.cancel("manual command")
+                    if operation == "circle_start":
+                        if not circle:
+                            raise ValueError("circle was not enabled for this worker")
+                        if controller:
+                            circle.start_hardware(controller, command.get("validation"),
+                                                  laps=command.get("laps"))
+                            last_control_id = command_id
+                        result = circle.status(time.monotonic())
+                    elif operation == "ping":
+                        if controller:
+                            controller.heartbeat()
+                        result = "pong"
+                    elif controller and operation in (
+                        "enable_joint", "enable_all", "joint_target", "hold", "release_joint",
+                        "reset", "save_rest_pose",
+                    ):
+                        joint = command.get("joint")
+                        if operation == "enable_joint":
+                            controller.enable(joint)
+                        elif operation == "enable_all":
+                            controller.enable_all()
+                        elif operation == "joint_target":
+                            controller.target(joint, command.get("angle"))
+                        elif operation == "release_joint":
+                            controller.release(joint)
+                        elif operation == "reset":
+                            controller.parking.start()
+                        elif operation == "save_rest_pose":
+                            controller.parking.save()
+                        else:
+                            controller.stop()
+                        last_control_id = command_id
+                        result = controller.status()
+                    elif operation == "joint_preview":
+                        result = preview_joint_target(bus, command.get("joint"),
+                                                      command.get("delta"))
+                    elif operation == "gripper_test":
+                        from .motion import execute_motion, plan_motion
+
+                        plan = plan_motion(arm, bus, command.get("delta", 16))
+                        if command.get("execute", False):
+                            if not args.allow_gripper:
+                                raise ValueError("hardware motion disabled; use preview")
+                            from .angle_calibration import AngleCalibration
+
+                            identity = {**fingerprint, "model": "so101",
+                                        "mjcf_sha256": hashlib.sha256(
+                                            args.model.read_bytes()).hexdigest()}
+                            calibration = AngleCalibration(
+                                ROOT / "data/calibration/follower_mujoco.json", identity)
+                            calibration.check_gripper_test(plan)
+                            feedback = []
+                            diagnostics = {"plan": plan, "feedback": feedback}
+                            try:
+                                motion_feedback("preflight", plan["start_raw"])
+                                result = execute_motion(bus, plan, observer=motion_feedback)
+                                motion_feedback("completed", plan["start_raw"])
+                                result["feedback"] = feedback
+                                result["final_torque"] = feedback[-1]["torque"]
+                                save_verification({"ok": True, "result": result})
+                            finally:
+                                # This launch authorizes one bounded test, never repeated by a key.
+                                args.allow_gripper = False
+                        else:
+                            result = {"preview": True, **plan}
+                    else:
+                        raise ValueError("operation unavailable for this backend")
+                    send({"type": "ack", "id": command_id, "op": operation,
+                          "ok": True, "result": result})
+                except (ValueError, RuntimeError, TimeoutError) as exc:
+                    message = {"type": "ack", "id": command_id,
+                               "op": command.get("op") if isinstance(command, dict) else None,
+                               "ok": False, "error": str(exc)}
+                    if diagnostics is not None:
+                        try:
+                            diagnostics["final_torque"] = int(bus.read(
+                                "Torque_Enable", "gripper", normalize=False))
+                            diagnostics["final_position_raw"] = int(bus.read(
+                                "Present_Position", "gripper", normalize=False))
+                        except Exception as cleanup_error:
+                            diagnostics["final_state_error"] = str(cleanup_error)
+                        message["diagnostics"] = diagnostics
+                        save_verification(message)
+                    send(message)
+            now = time.monotonic()
+            if controller and now >= next_control:
+                from .servo_feedback import read_control_feedback
+
+                read_started = time.monotonic()
+                telemetry = read_control_feedback(bus)
+                read_finished = time.monotonic()
+                raw = telemetry.pop("Present_Position")
+                controller.step(raw, telemetry)
+                write_finished = time.monotonic()
+                if trace_path:
+                    trace.append({"time_monotonic": controller.last_tick,
+                                  "raw": dict(raw), "goal_raw": dict(controller.sent),
+                                  "nominal_qpos": dict(controller.targets),
+                                  "telemetry": {k: dict(v) for k, v in telemetry.items()},
+                                  "correction": (dict(controller.position_feedback.correction)
+                                                 if controller.position_feedback else None),
+                                  "circle": circle.status(controller.last_tick) if circle else None,
+                                  "reset_phase": controller.parking.phase})
+                    trace[-1]["read_ms"] = (read_finished - read_started) * 1000
+                    trace[-1]["step_ms"] = (write_finished - read_finished) * 1000
+                control_cycles += 1
+                hardware_state = {"raw": {name: int(raw[name]) for name in JOINTS},
+                                  "qpos": calibration.angles(raw, [0.] * len(JOINTS)),
+                                  "telemetry": telemetry, "control": controller.status()}
+                hardware_state["control"]["last_command_id"] = last_control_id
+                if controller.last_fault is not last_fault:
+                    last_fault = controller.last_fault
+                    control_events.append((f"manual-control-fault-{time.time_ns()}.json",
+                                           last_fault))
+                if controller.status_warning is not last_status_warning:
+                    last_status_warning = controller.status_warning
+                    control_events.append((f"motor-status-recovered-{time.time_ns()}.json",
+                                           last_status_warning))
+                next_control = next_deadline(next_control, time.monotonic(), 1 / CONTROL_HZ)
+                if trace_path:
+                    trace[-1]["processing_ms"] = (time.monotonic() - read_started) * 1000
+            if now >= next_state:
+                if controller:
+                    # Sync writes have no per-motor ACK. Record the actual RAM goal,
+                    # rather than treating the last transmitted value as delivery proof.
+                    state = {**hardware_state,
+                             "servo_goal_raw": hardware_state["telemetry"]["Goal_Position"]}
+                else:
+                    raw = bus.sync_read("Present_Position", normalize=False)
+                    if sequence % max(1, round(args.hz)) == 0:
+                        telemetry = {
+                            register: bus.sync_read(register, normalize=False)
+                            for register in ("Torque_Enable", "Status", "Present_Voltage", "Moving")
+                        }
+                    state = {"raw": {name: int(raw[name]) for name in JOINTS},
+                             "telemetry": telemetry}
+                send({"type": "state", "seq": sequence, "time_unix_ns": time.time_ns(),
+                      **state, "circle": circle.status(time.monotonic()) if circle else None,
+                      "control_cycles": control_cycles})
+                sequence += 1
+                next_state = next_deadline(next_state, time.monotonic(), 1 / args.hz)
+            time.sleep(0.001)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--model", type=Path, default=ROOT / "assets/so101/so101.xml")
+    parser.add_argument("--arm", default="follower")
+    parser.add_argument("--hz", type=float, default=20)
+    parser.add_argument("--allow-gripper", action="store_true",
+                        help="Enable existing bounded gripper roundtrip; requires checked power")
+    parser.add_argument("--hardware-control", action="store_true",
+                        help="Calibrated, slow manual control; joints enabled individually")
+    parser.add_argument("--circle", action="store_true",
+                        help="Load the validated circle; requires explicit circle_start trigger")
+    parser.add_argument("--control-log", type=Path,
+                        help="Retain up to ten minutes of full-rate feedback; write on exit")
+    args = parser.parse_args()
+    if not 1 <= args.hz <= 50:
+        parser.error("hz must be in 1..50")
+    if args.hardware_control and args.allow_gripper:
+        parser.error("hardware control requires launch without --allow-gripper")
+    if args.circle and (args.allow_gripper or not args.hardware_control):
+        parser.error("circle requires calibrated hardware control and local validation")
+    if args.control_log and not args.hardware_control:
+        parser.error("--control-log requires hardware control")
+    try:
+        serve(args)
+    except (BrokenPipeError, KeyboardInterrupt):
+        pass
+    except Exception as exc:
+        send({"type": "error", "error": str(exc)})
+        raise
+
+
+if __name__ == "__main__":
+    main()

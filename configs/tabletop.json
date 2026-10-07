@@ -1,0 +1,304 @@
+{
+  "camera_matrix": [
+    [
+      537.5919095054742,
+      0.0,
+      306.6767322532455
+    ],
+    [
+      0.0,
+      537.4465286147423,
+      261.9367863419509
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "dist_coeffs": [
+    -0.1052856618829329,
+    0.2550591979081858,
+    0.0041885728615206775,
+    -0.0014041346047001836,
+    -0.30373037710291856
+  ],
+  "image_size": [
+    640,
+    480
+  ],
+  "dictionary": "DICT_APRILTAG_36h10",
+  "marker_id": 1,
+  "marker_size_m": 0.15,
+  "wood_height_m": 0.006,
+  "fps": 10,
+  "max_reprojection_error_px": 2.0,
+  "min_t_iou": 0.78,
+  "black_hsv": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      179,
+      255,
+      110
+    ]
+  ],
+  "wood_hsv": [
+    [
+      15,
+      35,
+      100
+    ],
+    [
+      42,
+      255,
+      255
+    ]
+  ],
+  "additional_markers": [
+    {
+      "dictionary": "DICT_APRILTAG_16h5",
+      "id": 0
+    }
+  ],
+  "t_model": {
+    "width": 0.048,
+    "length": 0.06,
+    "cap_depth": 0.012,
+    "stem_width": 0.012
+  },
+  "occlusion_hold_s": 2.0,
+  "robot": {
+    "enabled": true,
+    "arm": "follower",
+    "feedback_hz": 20,
+    "joint_calibration": "data/calibration/follower_mujoco.json",
+    "push_height_compensation_m": 0.005,
+    "marker_size_m": 0.042,
+    "markers": [
+      {
+        "dictionary": "DICT_4X4_50",
+        "id": 7,
+        "mount": "base_parallel_to_table",
+        "marker_size_m": 0.042,
+        "corners_base_m": [
+          [
+            0.01813499778157824,
+            -0.021,
+            0.06659999830167472
+          ],
+          [
+            -0.023865002218421763,
+            -0.021,
+            0.06659999830167472
+          ],
+          [
+            -0.023865002218421763,
+            0.021,
+            0.06659999830167472
+          ],
+          [
+            0.01813499778157824,
+            0.021,
+            0.06659999830167472
+          ]
+        ],
+        "mount_calibration": {
+          "source": "user_confirmed_measurements_20261007",
+          "black_edge_m": 0.042,
+          "center_height_over_table_m": 0.069,
+          "center_to_base_foot_rear_m": 0.0195,
+          "on_base_centerline": true,
+          "lateral_center_offset_m": 0,
+          "edges_parallel_to_base": true,
+          "marker_plane": "parallel_to_table",
+          "center_to_rear_direction": "toward_arm_extension",
+          "cad_base_foot_rear_x_m": -0.02236500221842176,
+          "cad_table_contact_z_m": -0.0024000016983252853,
+          "center_base_m": [
+            -0.0028650022184217618,
+            0,
+            0.06659999830167472
+          ],
+          "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
+        },
+        "border_seed_native": [
+          [
+            715,
+            936
+          ],
+          [
+            783,
+            939
+          ],
+          [
+            779,
+            1010
+          ],
+          [
+            712,
+            1008
+          ]
+        ],
+        "prefer_observed_border": true,
+        "border_seed_source": "Actual black-border edges in logs/two-arm-markers-20261007.png; excludes white margin and surrounding dark base"
+      }
+    ],
+    "mounts": [
+      "base_parallel_to_table"
+    ],
+    "visual_alignment": false,
+    "base_constraint": "flat_on_table",
+    "base_table_z_m": 0.0024000016983252853,
+    "localization_marker_ids": [
+      7
+    ],
+    "fixed_base": {
+      "file": "data/calibration/follower_table_base.json",
+      "sample_count": 20,
+      "reference": {
+        "dictionary": "DICT_APRILTAG_36h10",
+        "id": 1,
+        "marker_size_m": 0.15
+      },
+      "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+    },
+    "physical_label": "left black follower"
+  },
+  "capture_size": [
+    1920,
+    1080
+  ],
+  "low_to_capture_affine": [
+    [
+      2.252346208834946,
+      0.0028365090307615783,
+      237.2762493262011
+    ],
+    [
+      -0.0003542134366869174,
+      2.250008329122143,
+      0.45087193031592543
+    ]
+  ],
+  "capture_mapping_source": "Measured using 8 corners of the two table markers on this camera; max residual 1.028 native px",
+  "appearance": {
+    "enabled": true,
+    "texture_size": 1024
+  },
+  "additional_robots": [
+    {
+      "enabled": true,
+      "arm": "arm1",
+      "physical_label": "right white arm",
+      "marker_size_m": 0.042,
+      "markers": [
+        {
+          "dictionary": "DICT_4X4_50",
+          "id": 6,
+          "mount": "base_parallel_to_table",
+          "marker_size_m": 0.042,
+          "corners_base_m": [
+            [
+              -0.023865002218421763,
+              0.021,
+              0.06659999830167472
+            ],
+            [
+              0.01813499778157824,
+              0.021,
+              0.06659999830167472
+            ],
+            [
+              0.01813499778157824,
+              -0.021,
+              0.06659999830167472
+            ],
+            [
+              -0.023865002218421763,
+              -0.021,
+              0.06659999830167472
+            ]
+          ],
+          "mount_calibration": {
+            "source": "user_confirmed_measurements_20261007",
+            "black_edge_m": 0.042,
+            "center_height_over_table_m": 0.069,
+            "center_to_base_foot_rear_m": 0.0195,
+            "on_base_centerline": true,
+            "lateral_center_offset_m": 0,
+            "edges_parallel_to_base": true,
+            "marker_plane": "parallel_to_table",
+            "center_to_rear_direction": "toward_arm_extension",
+            "cad_base_foot_rear_x_m": -0.02236500221842176,
+            "cad_table_contact_z_m": -0.0024000016983252853,
+            "center_base_m": [
+              -0.0028650022184217618,
+              0,
+              0.06659999830167472
+            ],
+            "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
+          },
+          "border_seed_native": [
+            [
+              1228,
+              947
+            ],
+            [
+              1301,
+              950
+            ],
+            [
+              1303,
+              1026
+            ],
+            [
+              1229,
+              1024
+            ]
+          ],
+          "prefer_observed_border": true,
+          "border_seed_source": "Actual black-border edges in logs/two-arm-markers-20261007.png; excludes white margin and verifies exact ID 6"
+        }
+      ],
+      "mounts": [
+        "base_parallel_to_table"
+      ],
+      "visual_alignment": false,
+      "base_constraint": "flat_on_table",
+      "base_table_z_m": 0.0024000016983252853,
+      "localization_marker_ids": [
+        6
+      ],
+      "fixed_base": {
+        "file": "data/calibration/arm1_table_base.json",
+        "sample_count": 20,
+        "reference": {
+          "dictionary": "DICT_APRILTAG_36h10",
+          "id": 1,
+          "marker_size_m": 0.15
+        },
+        "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "simulation": {
+        "plastic_rgb": [
+          0.88,
+          0.89,
+          0.87
+        ],
+        "preview_qpos": [
+          0,
+          1.5,
+          -1.6,
+          0.3,
+          0,
+          0.6
+        ],
+        "joint_pose_source": "unmeasured_preview"
+      }
+    }
+  ]
+}

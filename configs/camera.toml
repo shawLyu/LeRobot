@@ -1,0 +1,5 @@
+[camera]
+device = "/dev/v4l/by-id/usb-CN02KX4NLG0004ABK00_USB_Camera_CN02KX4NLG0004ABK00-video-index0"
+width = 640
+height = 480
+display_fps = 15

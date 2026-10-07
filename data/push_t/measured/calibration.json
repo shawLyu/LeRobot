@@ -1,0 +1,238 @@
+{
+  "type": "hello",
+  "version": 1,
+  "config": {
+    "camera_matrix": [
+      [
+        537.5919095054742,
+        0.0,
+        306.6767322532455
+      ],
+      [
+        0.0,
+        537.4465286147423,
+        261.9367863419509
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "dist_coeffs": [
+      -0.1052856618829329,
+      0.2550591979081858,
+      0.0041885728615206775,
+      -0.0014041346047001836,
+      -0.30373037710291856
+    ],
+    "image_size": [
+      640,
+      480
+    ],
+    "dictionary": "DICT_APRILTAG_36h10",
+    "marker_id": 1,
+    "marker_size_m": 0.15,
+    "wood_height_m": 0.006,
+    "fps": 10,
+    "max_reprojection_error_px": 2.0,
+    "min_t_iou": 0.78,
+    "black_hsv": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        179,
+        255,
+        110
+      ]
+    ],
+    "wood_hsv": [
+      [
+        15,
+        35,
+        100
+      ],
+      [
+        42,
+        255,
+        255
+      ]
+    ],
+    "additional_markers": [
+      {
+        "dictionary": "DICT_APRILTAG_16h5",
+        "id": 0
+      }
+    ],
+    "t_model": {
+      "width": 0.048,
+      "length": 0.06,
+      "cap_depth": 0.012,
+      "stem_width": 0.012
+    },
+    "occlusion_hold_s": 2.0,
+    "robot": {
+      "enabled": true,
+      "arm": "follower",
+      "feedback_hz": 20,
+      "joint_calibration": "data/calibration/follower_mujoco.json",
+      "marker_size_m": 0.02,
+      "markers": [
+        {
+          "dictionary": "DICT_ARUCO_MIP_36H12",
+          "id": 4,
+          "mount": "base_perpendicular_to_table",
+          "corners_base_m": null,
+          "dictionary_source": "decoded from live camera using user-confirmed ID"
+        },
+        {
+          "dictionary": "DICT_ARUCO_MIP_36H12",
+          "id": 5,
+          "mount": "base_parallel_to_table",
+          "corners_base_m": null,
+          "dictionary_source": "decoded from live camera using user-confirmed ID",
+          "distance_to_base_rear_m": 0.042
+        }
+      ],
+      "mounts": [
+        "base_parallel_to_table",
+        "base_perpendicular_to_table"
+      ],
+      "visual_alignment": true
+    },
+    "capture_size": [
+      1920,
+      1080
+    ],
+    "low_to_capture_affine": [
+      [
+        2.252346208834946,
+        0.0028365090307615783,
+        237.2762493262011
+      ],
+      [
+        -0.0003542134366869174,
+        2.250008329122143,
+        0.45087193031592543
+      ]
+    ],
+    "capture_mapping_source": "Measured using 8 corners of the two table markers on this camera; max residual 1.028 native px",
+    "appearance": {
+      "enabled": true,
+      "texture_size": 1024
+    }
+  },
+  "device": "/dev/v4l/by-id/usb-CN02KX4NLG0004ABK00_USB_Camera_CN02KX4NLG0004ABK00-video-index0",
+  "perception_host": "hkuit-001-Lenovo",
+  "robot": {
+    "model": "so101",
+    "joints": [
+      "shoulder_pan",
+      "shoulder_lift",
+      "elbow_flex",
+      "wrist_flex",
+      "wrist_roll",
+      "gripper"
+    ],
+    "read_only": true,
+    "fingerprint": {
+      "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+      "motors": {
+        "shoulder_pan": 1,
+        "shoulder_lift": 2,
+        "elbow_flex": 3,
+        "wrist_flex": 4,
+        "wrist_roll": 5,
+        "gripper": 6
+      },
+      "raw_limits": {
+        "shoulder_pan": [
+          844,
+          3440
+        ],
+        "shoulder_lift": [
+          809,
+          3238
+        ],
+        "elbow_flex": [
+          773,
+          3126
+        ],
+        "wrist_flex": [
+          862,
+          3192
+        ],
+        "wrist_roll": [
+          0,
+          4095
+        ],
+        "gripper": [
+          1441,
+          2982
+        ]
+      },
+      "homing_offsets": {
+        "shoulder_pan": -1214,
+        "shoulder_lift": 1932,
+        "elbow_flex": 1070,
+        "wrist_flex": -1980,
+        "wrist_roll": -1910,
+        "gripper": -1632
+      },
+      "phase": {
+        "shoulder_pan": 12,
+        "shoulder_lift": 12,
+        "elbow_flex": 12,
+        "wrist_flex": 12,
+        "wrist_roll": 12,
+        "gripper": 12
+      },
+      "mode": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "model": "so101",
+      "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+    },
+    "joint_calibration": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
+    "fits": {
+      "shoulder_pan": {
+        "zero_raw": 2143,
+        "radians_per_tick": 0.0014749261284459122,
+        "check_error_degrees": 0.5915492957746462
+      },
+      "shoulder_lift": {
+        "zero_raw": 2007,
+        "radians_per_tick": 0.0014917344034139567,
+        "check_error_degrees": 1.8803418803418854
+      },
+      "elbow_flex": {
+        "zero_raw": 2143,
+        "radians_per_tick": 0.0015445391610569286,
+        "check_error_degrees": 0.8849557522123864
+      },
+      "wrist_flex": {
+        "zero_raw": 2066,
+        "radians_per_tick": 0.0016622183352326947,
+        "check_error_degrees": 1.7142857142857184
+      },
+      "wrist_roll": {
+        "zero_raw": 2010,
+        "radians_per_tick": 0.0015818694126836822,
+        "check_error_degrees": 1.6314199395770352
+      },
+      "gripper": {
+        "zero_raw": 1620,
+        "radians_per_tick": 0.00139999672619866,
+        "check_error_degrees": 0.5614973262032035
+      }
+    }
+  }
+}

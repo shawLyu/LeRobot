@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "source_sequence": 12,
+  "source_captured_unix_ns": 1791264751346233898,
+  "perception_location": "remote",
+  "bounds": [
+    -0.8835123935141991,
+    0.1275,
+    -0.2995736170404215,
+    0.4807108504926141
+  ],
+  "texture_rows": "world +Y to -Y; MuJoCo PNG convention, vflip=false",
+  "materials_rgb": {
+    "black_t_cap": [
+      0.25747627492037195,
+      0.28006191307128175,
+      0.3252331893731014
+    ],
+    "black_t_stem": [
+      0.25295914729019,
+      0.2845790407014637,
+      0.30716467885237353
+    ],
+    "wood_t_cap": [
+      0.7950144629120256,
+      0.7904973352818436,
+      0.5149525498407439
+    ],
+    "wood_t_stem": [
+      0.8085658458025715,
+      0.8040487181723895,
+      0.5194696774709259
+    ]
+  },
+  "robot_plastic_rgb": [
+    0.0632397868225475,
+    0.07679116971309338,
+    0.10389393549418517
+  ],
+  "background_rgb": [
+    0.2549019607843137,
+    0.22745098039215686,
+    0.2627450980392157
+  ],
+  "observed_table_fraction": 0.20148944854736328,
+  "paper_material_detected": true,
+  "texture_method": "observed desk/paper colors and fine photo detail; broad lighting removed",
+  "hidden_surfaces": "inpainted or uniform estimated material",
+  "lighting": {
+    "headlight_ambient": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "main_pos": [
+      0.23697309667046051,
+      0.602233026916349,
+      1.4
+    ],
+    "main_dir": [
+      -0.6149792934275601,
+      -0.5116644101902527,
+      -1.4
+    ],
+    "main_diffuse": [
+      0.32,
+      0.31,
+      0.3
+    ],
+    "fill_diffuse": [
+      0.1,
+      0.11,
+      0.13
+    ],
+    "plane_gain": 0.8681553740585823,
+    "source": "robust bright-table exposure gradient; approximate",
+    "physically_calibrated": false
+  },
+  "texture_files": [
+    "tabletop.png",
+    "secondary_tag.png",
+    "black_t_cap.png",
+    "black_t_stem.png",
+    "wood_t_cap.png",
+    "wood_t_stem.png"
+  ]
+}

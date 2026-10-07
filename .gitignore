@@ -1,0 +1,82 @@
+# Local environments, dependencies and caches.
+.venv/
+venv/
+.tools/
+.cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Build products and package metadata.
+build/
+dist/
+*.egg-info/
+
+# Local secrets, machine overrides, editor and operating-system files.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+.codex/
+.idea/
+.vscode/
+configs/*.local.*
+.DS_Store
+._*
+*~
+*.swp
+*.swo
+.ipynb_checkpoints/
+
+# Experiment logs and recovery snapshots stay on the workstation.
+/logs/*
+!/logs/.gitkeep
+/.cleanup/
+
+# Live reconstructed scenes, appearance and copied meshes are generated.
+# The small marker image remains a scene-test input.
+/assets/tabletop/*
+!/assets/tabletop/marker.png
+
+# Keep only accepted runtime calibration and reproducible demo inputs.
+/data/*
+!/data/README.md
+!/data/calibration/
+/data/calibration/*
+!/data/calibration/.gitkeep
+!/data/calibration/follower_mujoco.json
+!/data/calibration/follower_mujoco_kinematic.json
+!/data/calibration/follower_rest.json
+!/data/calibration/follower_table_base.json
+!/data/calibration/arm1_table_base.json
+!/data/calibration/two_arm_bases.json
+!/data/trajectories/
+/data/trajectories/*
+!/data/trajectories/circle.json
+!/data/tabletop/
+/data/tabletop/*
+!/data/tabletop/static_map.json
+
+# One offline observation snapshot, without exported scenes, photos or duplicate meshes.
+!/data/push_t/
+/data/push_t/*
+!/data/push_t/measured/
+/data/push_t/measured/*
+!/data/push_t/measured/state.json
+!/data/push_t/measured/calibration.json
+!/data/push_t/measured/joint_calibration.json
+!/data/push_t/measured/marker.png
+!/data/push_t/measured/appearance/
+/data/push_t/measured/appearance/*
+!/data/push_t/measured/appearance/appearance.json
+!/data/push_t/measured/appearance/*.png

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="120mm" viewBox="0 0 100 120">
+<rect width="100" height="120" fill="white"/>
+<rect x="29" y="24" width="7" height="7" fill="black"/>
+<rect x="36" y="24" width="7" height="7" fill="black"/>
+<rect x="43" y="24" width="7" height="7" fill="black"/>
+<rect x="50" y="24" width="7" height="7" fill="black"/>
+<rect x="57" y="24" width="7" height="7" fill="black"/>
+<rect x="64" y="24" width="7" height="7" fill="black"/>
+<rect x="29" y="31" width="7" height="7" fill="black"/>
+<rect x="64" y="31" width="7" height="7" fill="black"/>
+<rect x="29" y="38" width="7" height="7" fill="black"/>
+<rect x="57" y="38" width="7" height="7" fill="black"/>
+<rect x="64" y="38" width="7" height="7" fill="black"/>
+<rect x="29" y="45" width="7" height="7" fill="black"/>
+<rect x="50" y="45" width="7" height="7" fill="black"/>
+<rect x="64" y="45" width="7" height="7" fill="black"/>
+<rect x="29" y="52" width="7" height="7" fill="black"/>
+<rect x="43" y="52" width="7" height="7" fill="black"/>
+<rect x="57" y="52" width="7" height="7" fill="black"/>
+<rect x="64" y="52" width="7" height="7" fill="black"/>
+<rect x="29" y="59" width="7" height="7" fill="black"/>
+<rect x="36" y="59" width="7" height="7" fill="black"/>
+<rect x="43" y="59" width="7" height="7" fill="black"/>
+<rect x="50" y="59" width="7" height="7" fill="black"/>
+<rect x="57" y="59" width="7" height="7" fill="black"/>
+<rect x="64" y="59" width="7" height="7" fill="black"/>
+<g font-family="sans-serif" text-anchor="middle" fill="black"><text x="50" y="12" font-size="4">ArUco DICT_4X4_50 / ID 8</text><text x="50" y="77" font-size="3.5">Black border: 42 x 42 mm</text><text x="50" y="103" font-size="3">Print at 100%; disable fit-to-page.</text><text x="50" y="109" font-size="3">Verify the ruler before mounting.</text></g>
+<path d="M29 86v6 M29 89h42 M71 86v6" stroke="black" stroke-width="0.3" fill="none"/><text x="50" y="97" text-anchor="middle" font-family="sans-serif" font-size="3.5">42 mm</text>
+</svg>

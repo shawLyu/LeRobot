@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+export UV_CACHE_DIR="$project_root/.cache/uv"
+export UV_PYTHON_INSTALL_DIR="$project_root/.tools/python"
+export UV_PROJECT_ENVIRONMENT="$project_root/.venv"
+exec "$project_root/.tools/bin/uv" --project "$project_root" "$@"

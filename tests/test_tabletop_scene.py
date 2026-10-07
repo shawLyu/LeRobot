@@ -1,0 +1,147 @@
+"""Verify articulated CAD stays intact when attached to the desktop coordinate frame."""
+
+import json
+
+import mujoco
+import numpy as np
+import pytest
+
+from arm_control.tabletop_scene import ROOT, scene_xml
+
+
+def load_scene(tmp_path):
+    config = json.loads((ROOT / "configs/tabletop.json").read_text())
+    state = {
+        "objects": {},
+        "models": {},
+        "robot": {
+            "status": "live",
+            "qpos": [-0.4, -1.45, 1.5, 0.88, 0.08, 0.31],
+            "registration": {"position": [0.2, -0.3, 0.0024], "quaternion": [1, 0, 0, 0]},
+        },
+    }
+    (tmp_path / "marker.png").write_bytes((ROOT / "assets/tabletop/marker.png").read_bytes())
+    path = tmp_path / "scene.xml"
+    path.write_text(scene_xml(state, config))
+    return mujoco.MjModel.from_xml_path(str(path))
+
+
+def test_six_joints_preserved_and_no_actuators(tmp_path):
+    model = load_scene(tmp_path)
+    assert model.nq == 6
+    assert model.nu == 0
+    assert model.nkey == 1
+    np.testing.assert_allclose(model.key_qpos[0], [-0.4, -1.45, 1.5, 0.88, 0.08, 0.31])
+    assert model.nmesh == 18
+    assert tuple(model.joint(i).name for i in range(model.njnt)) == (
+        "shoulder_pan",
+        "shoulder_lift",
+        "elbow_flex",
+        "wrist_flex",
+        "wrist_roll",
+        "gripper",
+    )
+
+
+def test_base_mocap_moves_complete_articulated_chain(tmp_path):
+    model = load_scene(tmp_path)
+    data = mujoco.MjData(model)
+    data.qpos[:] = [-0.4, -1.45, 1.5, 0.88, 0.08, 0.31]
+    mujoco.mj_forward(model, data)
+    before = data.site("gripperframe").xpos.copy()
+    mocap = model.body_mocapid[model.body("robot_root").id]
+    data.mocap_pos[mocap] += [0.07, 0.02, 0.01]
+    mujoco.mj_forward(model, data)
+    np.testing.assert_allclose(data.site("gripperframe").xpos - before, [0.07, 0.02, 0.01])
+    data.qpos[model.joint("elbow_flex").qposadr[0]] += 0.1
+    mujoco.mj_forward(model, data)
+    assert np.linalg.norm(data.site("gripperframe").xpos - before - [0.07, 0.02, 0.01]) > 0.01
+
+
+def test_original_calibrated_model_not_modified():
+    import hashlib
+
+    saved = json.loads((ROOT / "data/calibration/follower_mujoco.json").read_text())
+    actual = hashlib.sha256((ROOT / "assets/so101/so101.xml").read_bytes()).hexdigest()
+    assert saved["fingerprint"]["mjcf_sha256"] == actual
+
+
+def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(tmp_path):
+    from arm_control.tabletop_scene import scene_arms
+
+    config = json.loads((ROOT / 'configs/tabletop.json').read_text())
+    registrations = {name: json.loads((ROOT / f'data/calibration/{name}_table_base.json')
+                                      .read_text())['pose'] for name in ('follower', 'arm1')}
+    state = {'objects': {}, 'models': {}, 'base_registrations': registrations,
+             'robot': {'status': 'live', 'qpos': [0, 1.2, -1.5, .6, 0, .2],
+                       'registration': registrations['follower']}}
+    (tmp_path/'marker.png').write_bytes((ROOT/'assets/tabletop/marker.png').read_bytes())
+    path = tmp_path/'scene.xml'
+    path.write_text(scene_xml(state, config))
+    model = mujoco.MjModel.from_xml_path(str(path))
+    assert model.nq == 12 and model.nu == 0 and model.nmesh == 18
+    data = mujoco.MjData(model)
+    mujoco.mj_resetDataKeyframe(model, data, 0)
+    mujoco.mj_forward(model, data)
+    np.testing.assert_allclose(data.qpos[:6], state['robot']['qpos'])
+    np.testing.assert_allclose(data.qpos[6:], config['additional_robots'][0]['simulation']
+                              ['preview_qpos'])
+    for arm, body in [('follower', 'robot_root'), ('arm1', 'arm1__robot_root')]:
+        np.testing.assert_allclose(data.body(body).xpos, registrations[arm]['position'])
+    white = data.site('arm1__gripperframe').xpos.copy()
+    data.qpos[model.joint('shoulder_pan').qposadr[0]] += .1
+    mujoco.mj_forward(model, data)
+    np.testing.assert_allclose(data.site('arm1__gripperframe').xpos, white)
+    white_material = model.mat('arm1__base_so101_v2_material').id
+    np.testing.assert_allclose(model.mat_rgba[white_material, :3], [.88, .89, .87])
+    assert scene_arms(state, config)[1]['joint_pose_source'] == 'unmeasured_preview'
+    for name, marker in [('follower', 7), ('arm1', 6)]:
+        prefix = '' if name == 'follower' else name+'__'
+        points = [data.geom(f'{prefix}base_marker_{marker}_{row}_{col}').xpos
+                  for row in range(6) for col in range(6)]
+        # The rendered marker lies at the confirmed 69 mm height, plus its thin display face.
+        assert np.mean(points, axis=0)[2] == pytest.approx(.0691)
+
+
+def test_unlocalized_second_arm_is_not_drawn_at_an_invented_base(tmp_path):
+    model = load_scene(tmp_path)
+    assert model.nq == 6
+    assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, 'arm1__robot_root') == -1
+
+
+def test_observed_materials_compile_and_preserve_calibrated_joints(tmp_path):
+    from PIL import Image
+
+    config = json.loads((ROOT / "configs/tabletop.json").read_text())
+    model_shape = {**config["t_model"], "height": 0.006}
+    state = {
+        "models": {"wood_t": model_shape},
+        "objects": {"wood_t": {"xy": [0.1, 0.1], "yaw": 0.4}},
+        "robot": {
+            "status": "live",
+            "qpos": [-0.4, -1.45, 1.5, 0.88, 0.08, 0.31],
+            "registration": {"position": [0.2, -0.3, 0.0024], "quaternion": [1, 0, 0, 0]},
+        },
+        "appearance": {
+            "version": 1,
+            "bounds": [-0.3, 0.4, -0.5, 0.4],
+            "robot_plastic_rgb": [0.06, 0.07, 0.08],
+            "texture_files": ["tabletop.png", "wood_t_cap.png", "wood_t_stem.png"],
+        },
+    }
+    directory = tmp_path / "appearance"
+    directory.mkdir()
+    for name in state["appearance"]["texture_files"]:
+        Image.new("RGB", (16, 16), (220, 205, 120)).save(directory / name)
+    (tmp_path / "marker.png").write_bytes((ROOT / "assets/tabletop/marker.png").read_bytes())
+    path = tmp_path / "scene.xml"
+    path.write_text(scene_xml(state, config))
+    model = mujoco.MjModel.from_xml_path(str(path))
+    assert model.nq == 6 and model.nu == 0
+    assert model.ntex == 5  # Observed surfaces, anchor and room background.
+    assert model.geom("wood_t_cap").matid[0] == model.mat("observed_wood_t_cap").id
+    np.testing.assert_allclose(model.key_qpos[0], state["robot"]["qpos"])
+    assert model.light_castshadow.tolist() == [True, False]
+    for material in range(model.nmat):
+        if model.mat(material).name.endswith("_material"):
+            np.testing.assert_allclose(model.mat_rgba[material, :3], [0.06, 0.07, 0.08])

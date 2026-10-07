@@ -1,0 +1,118 @@
+{
+  "version": 2,
+  "identity": {
+    "arm": {
+      "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+      "motors": {
+        "shoulder_pan": 1,
+        "shoulder_lift": 2,
+        "elbow_flex": 3,
+        "wrist_flex": 4,
+        "wrist_roll": 5,
+        "gripper": 6
+      },
+      "raw_limits": {
+        "shoulder_pan": [
+          844,
+          3440
+        ],
+        "shoulder_lift": [
+          809,
+          3238
+        ],
+        "elbow_flex": [
+          773,
+          3126
+        ],
+        "wrist_flex": [
+          862,
+          3192
+        ],
+        "wrist_roll": [
+          0,
+          4095
+        ],
+        "gripper": [
+          1441,
+          2982
+        ]
+      },
+      "homing_offsets": {
+        "shoulder_pan": -1214,
+        "shoulder_lift": 1932,
+        "elbow_flex": 1070,
+        "wrist_flex": -1980,
+        "wrist_roll": -1910,
+        "gripper": -1632
+      },
+      "phase": {
+        "shoulder_pan": 12,
+        "shoulder_lift": 12,
+        "elbow_flex": 12,
+        "wrist_flex": 12,
+        "wrist_roll": 12,
+        "gripper": 12
+      },
+      "mode": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "model": "so101",
+      "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+    },
+    "angle_mappings": {
+      "shoulder_pan": {
+        "zero_raw": 2143,
+        "radians_per_tick": 0.0014749261284459122,
+        "check_error_degrees": 0.5915492957746462
+      },
+      "shoulder_lift": {
+        "zero_raw": 2007,
+        "radians_per_tick": 0.0014917344034139567,
+        "check_error_degrees": 1.8803418803418854
+      },
+      "elbow_flex": {
+        "zero_raw": 2143,
+        "radians_per_tick": 0.0015445391610569286,
+        "check_error_degrees": 0.8849557522123864
+      },
+      "wrist_flex": {
+        "zero_raw": 2066,
+        "radians_per_tick": 0.0016622183352326947,
+        "check_error_degrees": 1.7142857142857184
+      },
+      "wrist_roll": {
+        "zero_raw": 2010,
+        "radians_per_tick": 0.0015818694126836822,
+        "check_error_degrees": 1.6314199395770352
+      },
+      "gripper": {
+        "zero_raw": 1620,
+        "radians_per_tick": 0.00139999672619866,
+        "check_error_degrees": 0.5614973262032035
+      }
+    }
+  },
+  "raw": {
+    "shoulder_pan": 2193,
+    "shoulder_lift": 861,
+    "elbow_flex": 3113,
+    "wrist_flex": 2819,
+    "wrist_roll": 2057,
+    "gripper": 1839
+  },
+  "observed_raw": {
+    "shoulder_pan": 2193,
+    "shoulder_lift": 827,
+    "elbow_flex": 3113,
+    "wrist_flex": 2819,
+    "wrist_roll": 2057,
+    "gripper": 1839
+  },
+  "release_verified": false,
+  "unpowered_observation_seconds": 2.0
+}

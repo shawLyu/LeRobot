@@ -1,0 +1,32 @@
+# USB identities remain stable when ttyACM numbers change.
+# STS3215 and IDs 1-6 are verified. Joint names follow LeRobot's SO100/SO101 map.
+# User confirmed follower on ttyACM0 and ID 6 = physical gripper.
+# User confirmed this follower chassis is SO-101.
+[arms.follower]
+port = "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00"
+role = "follower"
+model = "sts3215"
+baudrate = 1000000
+
+[arms.follower.motors]
+shoulder_pan = 1
+shoulder_lift = 2
+elbow_flex = 3
+wrist_flex = 4
+wrist_roll = 5
+gripper = 6
+
+[arms.arm1]
+port = "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00"
+# The role of this second bus has not been confirmed.
+role = "unassigned"
+model = "sts3215"
+baudrate = 1000000
+
+[arms.arm1.motors]
+shoulder_pan = 1
+shoulder_lift = 2
+elbow_flex = 3
+wrist_flex = 4
+wrist_roll = 5
+gripper = 6

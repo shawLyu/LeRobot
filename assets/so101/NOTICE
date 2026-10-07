@@ -1,0 +1,15 @@
+SO-101 follower simulation model
+
+Source: https://github.com/google-deepmind/mujoco_menagerie/tree/4d038b3feae26ec82b46a4d586379114012a8ac7/robotstudio_so101
+Revision: 4d038b3feae26ec82b46a4d586379114012a8ac7
+License: Apache-2.0; see LICENSE in this directory.
+
+The MJCF and its 18 referenced meshes are copied without modification.
+Unused meshes, the standalone scene, images and upstream development files
+are excluded. MuJoCo Menagerie derives the model from The Robot Studio:
+https://github.com/TheRobotStudio/SO-ARM100/tree/main/Simulation/SO101
+
+Joint names and positions follow this MJCF calibration. Positions are radians;
+they are not LeRobot's normalized hardware actions or servo register values.
+The source gripperframe site defines the TCP position used by RobotSpec.
+RobotSpec retains the gripper body's orientation as its TCP orientation.

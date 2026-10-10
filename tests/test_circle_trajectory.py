@@ -6,10 +6,15 @@ import numpy as np
 import pytest
 from test_manual_control import Bus, Calibration
 
-from arm_control.circle_simulation import check_path, entry_points, validate_hardware_entry, verify
-from arm_control.circle_trajectory import ROOT, Circle
-from arm_control.manual_control import ManualControl
-from arm_control.realtime import JOINTS
+from lerobot_arm_control.control.manual_control import ManualControl
+from lerobot_arm_control.planning.circle_simulation import (
+    check_path,
+    entry_points,
+    validate_hardware_entry,
+    verify,
+)
+from lerobot_arm_control.tasks.circle.circle_trajectory import ROOT, Circle
+from lerobot_arm_control.transport.realtime import JOINTS
 
 
 def test_cartesian_circle_closes_and_remains_within_speed_bound():
@@ -42,13 +47,13 @@ def test_backends_share_timing_but_simulation_instance_cannot_enable_hardware():
         simulation.start_hardware(None, None)
     hardware = Circle()
     assert hardware.period == 4
-    assert hardware.entry_speed == 0.5
+    assert hardware.entry_speed == 0.8
     assert hardware.ramp_seconds == 1
     assert hardware.status()["profile_sha256"] == simulation.status()["profile_sha256"]
     simulation.start(simulation.points[0], 0)
     hardware.start(hardware.points[0], 0)
     assert simulation.period == 4
-    assert simulation.entry_seconds == 0.5
+    assert simulation.entry_seconds == 0.35
     assert simulation.ramp_seconds == 1
     for now in np.linspace(0, 15, 1501):
         assert simulation.sample(now) == hardware.sample(now)
@@ -61,7 +66,7 @@ def test_shared_profile_preserves_closed_smooth_path():
     initial[1] -= 1.0
     simulation.start(initial, 0, laps=2)
     hardware.start(initial, 0, laps=2)
-    assert hardware.entry_seconds == pytest.approx(1.875 / .5)
+    assert hardware.entry_seconds == pytest.approx(1.875 / .8)
     assert hardware.status()["profile_sha256"] == simulation.status()["profile_sha256"]
     for now in np.linspace(0, 16, 961):
         assert simulation.sample(now) == hardware.sample(now)
@@ -71,7 +76,7 @@ def test_shared_profile_preserves_closed_smooth_path():
 
 @pytest.mark.parametrize("period", [0, -1, math.nan, math.inf, True])
 def test_invalid_shared_period_is_rejected(monkeypatch, period):
-    from arm_control import circle_trajectory
+    from lerobot_arm_control.tasks.circle import circle_trajectory
 
     profile = dict(circle_trajectory.TRAJECTORY, period_seconds=period)
     monkeypatch.setattr(circle_trajectory, "TRAJECTORY", profile)

@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from arm_control.control_defaults import (
+from lerobot_arm_control.control.control_defaults import (
     CONTROL_HZ,
     DEFAULTS,
     POSITION_FEEDBACK,
@@ -35,10 +35,10 @@ def test_recorded_defaults_match_installed_official_lerobot():
 
 
 def test_shared_configuration_preserves_latest_measured_values():
-    # Fingerprint of the accepted V14 feedback values before this cleanup.
+    # V22 passed two repeated response trials; optical alignment remains separate.
     assert hashlib.sha256(json.dumps(POSITION_FEEDBACK, sort_keys=True).encode()).hexdigest() == (
-        "62effcc919c99dbc0e7a32f5af3dd465a05f1ced419d0e065a4aa1e34af77f95")
-    assert TRAJECTORY == {"version": 1, "entry_speed_rad_s": .5, "min_entry_seconds": .5,
+        "536351d7530f914a1d36857be638a6336f78dc71343133dcf6e7ff825ef33c63")
+    assert TRAJECTORY == {"version": 1, "entry_speed_rad_s": .8, "min_entry_seconds": .35,
                           "ramp_seconds": 1., "control_hz": 60,
                           "reset_speed_rad_s": .5, "period_seconds": 4.}
     assert TRAJECTORY["control_hz"] == CONTROL_HZ
@@ -47,10 +47,10 @@ def test_shared_configuration_preserves_latest_measured_values():
 def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
     from test_push_t_remote import Calibration, FakeBus
 
-    from arm_control.circle_trajectory import Circle
-    from arm_control.manual_control import ManualControl
-    from arm_control.push_t_motor import ENTRY_PROFILE, PushMotor
-    from arm_control.realtime import JOINTS
+    from lerobot_arm_control.control.manual_control import ManualControl
+    from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
+    from lerobot_arm_control.tasks.push_t.push_t_motor import ENTRY_PROFILE, PushMotor
+    from lerobot_arm_control.transport.realtime import JOINTS
 
     limits = {joint: [1000, 3000] for joint in JOINTS}
     bus = FakeBus(JOINTS)
@@ -60,21 +60,24 @@ def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
     assert manual.position_feedback.profile == POSITION_FEEDBACK
     assert manual.parking.planned_speed == push.control.parking.planned_speed == .5
     circle = Circle()
-    assert circle.entry_speed == ENTRY_PROFILE["entry_speed_rad_s"] == .5
+    assert circle.entry_speed == ENTRY_PROFILE["entry_speed_rad_s"] == .8
     assert circle.period == 4
-    # The actual default enable path applies V14 and restores the previous RAM values.
+    # The shared enable path restores the previous RAM values.
     manual.enable_all()
-    assert set(bus.sync_read("Acceleration").values()) == {20}
+    assert set(bus.sync_read("Acceleration").values()) == {40}
     assert set(bus.sync_read("Goal_Velocity").values()) == {600}
+    assert bus.sync_read('P_Coefficient') == {j: POSITION_FEEDBACK[
+        'native_stream']['locked_p_coefficients'].get(j, 16) for j in JOINTS}
     manual.close()
     assert set(bus.sync_read("Acceleration").values()) == {0}
     assert set(bus.sync_read("Goal_Velocity").values()) == {0}
     assert set(bus.sync_read("Torque_Enable").values()) == {1}
+    assert set(bus.sync_read('P_Coefficient').values()) == {16}
 
 
 def test_controller_instances_do_not_share_mutable_compensation_parameters():
-    from arm_control.position_feedback import PositionFeedback
-    from arm_control.realtime import JOINTS
+    from lerobot_arm_control.control.position_feedback import PositionFeedback
+    from lerobot_arm_control.transport.realtime import JOINTS
 
     limits = {joint: [-1, 1] for joint in JOINTS}
     first = PositionFeedback(POSITION_FEEDBACK, limits)
@@ -88,14 +91,15 @@ def test_controller_instances_do_not_share_mutable_compensation_parameters():
 def test_push_t_connection_checks_shared_configuration(monkeypatch, tmp_path, matches):
     import base64
 
-    from arm_control.control_defaults import CONTROL_CONFIG_SHA256
-    from arm_control.tabletop_client import TableLink
+    from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
+    from lerobot_arm_control.runtime.tabletop_client import TableLink
 
     hello = {"version": 1, "type": "hello", "config": {},
              "tag_png": base64.b64encode(b"test-marker").decode(),
              "control_config_sha256": CONTROL_CONFIG_SHA256 if matches else "outdated"}
     process = Mock(stdin=io.StringIO(), stdout=io.StringIO(json.dumps(hello) + "\n"))
-    monkeypatch.setattr("arm_control.tabletop_client.subprocess.Popen", Mock(return_value=process))
+    monkeypatch.setattr("lerobot_arm_control.runtime.tabletop_client.subprocess.Popen",
+        Mock(return_value=process))
     link = TableLink("unused", "/unused", tmp_path, server_args=("--hardware-control",))
     link.reader.join(timeout=1)
     if matches:
@@ -113,7 +117,7 @@ def test_push_t_connection_checks_shared_configuration(monkeypatch, tmp_path, ma
 def test_retired_cli_options_fail_before_starting_a_worker(monkeypatch, module_name, option):
     import importlib
 
-    module = importlib.import_module("arm_control." + module_name)
+    module = importlib.import_module("lerobot_arm_control.runtime." + module_name)
     monkeypatch.setattr("sys.argv", [module_name, option])
     startup = Mock()
     monkeypatch.setattr(module, "run" if module_name == "realtime_client" else "serve", startup)
@@ -134,10 +138,10 @@ def test_retired_cli_options_fail_before_starting_a_worker(monkeypatch, module_n
     ("Link", {"circle_period": 6}),
 ])
 def test_retired_python_parameters_cannot_bypass_shared_config(constructor, kwargs):
-    from arm_control.circle_trajectory import Circle
-    from arm_control.manual_control import ManualControl
-    from arm_control.push_t_motor import PushMotor
-    from arm_control.realtime_client import Link
+    from lerobot_arm_control.control.manual_control import ManualControl
+    from lerobot_arm_control.runtime.realtime_client import Link
+    from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
+    from lerobot_arm_control.tasks.push_t.push_t_motor import PushMotor
 
     constructors = {"ManualControl": (ManualControl, [None] * 4),
                     "PushMotor": (PushMotor, [None] * 4),

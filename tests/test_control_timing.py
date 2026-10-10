@@ -1,6 +1,6 @@
 import pytest
 
-from arm_control.realtime_server import defer_cyclic_gc, next_deadline
+from lerobot_arm_control.runtime.realtime_server import defer_cyclic_gc, next_deadline
 
 
 def test_work_does_not_accumulate_into_control_period():

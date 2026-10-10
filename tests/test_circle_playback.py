@@ -5,9 +5,9 @@ import copy
 import pytest
 from test_manual_control import Bus, Calibration
 
-from arm_control.circle_trajectory import Circle
-from arm_control.manual_control import ManualControl
-from arm_control.realtime import JOINTS
+from lerobot_arm_control.control.manual_control import ManualControl
+from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
+from lerobot_arm_control.transport.realtime import JOINTS
 
 
 @pytest.fixture

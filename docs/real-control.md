@@ -1,16 +1,23 @@
 # SO101 hardware control
 
-Default settings come from [Shared configuration](code-layout.md): V14, 60 Hz synchronous targets,
-RAM acceleration 20, velocity 600 ticks/s, and bounded position compensation.
-Native PID, protections, and measured calibration retain their existing values.
+Default settings come from [Shared configuration](code-layout.md): the current shared profile, 60 Hz synchronous targets,
+RAM acceleration 40, velocity 600 ticks/s, and bounded position compensation.
+Native I/D, protections, and measured calibration retain their existing values.
+V22 responsive passed two supervised five-joint response comparisons against V14.
+Locked session P settings of 24 (pan/lift/wrists) and 32 (elbow) restore the previous
+values on close/release. Independent 1 mm Cartesian validation has not passed.
 
 ```sh
 ./scripts/control_arm_realtime.sh
 ./scripts/control_arm_realtime.sh --circle --circle-laps 3
 ./scripts/reset_arm_remote.sh
+./scripts/verify_response.sh --execute
 ```
 
 Window control, headless Reset, circles, and Push-T share one motor configuration.
+Finite response paths also use it, with 0.8 rad/s quintic peak speed and a 0.35 s
+minimum transition. The response demo moves five joints together, leaves the jaw
+uncommanded, and retains supporting torque. See [Control performance](control-performance.md).
 The circle entry completes remote Reset, approaches the saved absolute trajectory, runs three laps, then holds with the window open.
 Without a lap count it loops. `Space` cancels pending startup or holds the current pose.
 Circle and Reset entries can cause motion after launch.

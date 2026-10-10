@@ -3,5 +3,5 @@
 set -euo pipefail
 project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
-./scripts/uv run --locked arm-control --output logs/environment.json doctor
-./scripts/uv run --locked arm-control --output logs/read-test.json read --arm all --samples 3
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware --output logs/environment.json doctor
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware --output logs/read-test.json read --arm all --samples 3

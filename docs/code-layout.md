@@ -5,15 +5,19 @@ Remote runtime root: `lerobot:/home/xy/Research/lerobot`.
 Shared control source, remote tests, and settings are deployed from the local copy.
 Simulation, planning, and display source remain local.
 
-The sole active configuration is `configs/control.json`, using measured V14 settings:
+The sole active configuration is `configs/control.json`, using V22 responsive after
+two successful five-joint speed/error comparisons against V14:
 
 | Section | Contents |
 | --- | --- |
 | `native_defaults` | Native LeRobot 0.6.1 settings, 60 Hz, two read retries |
-| `position_feedback` | Per-joint V14 PI, filtering, velocity/friction compensation; RAM acceleration 20, velocity 600 ticks/s |
-| `trajectory` | Reset/approach peak 0.5 rad/s, minimum approach 0.5 s, circle ramp 1 s, period 4 s |
+| `position_feedback` | Per-joint PI and velocity/friction compensation; first-five error filter 80 ms and correction rate 0.24 rad/s; RAM acceleration 40, velocity 600 ticks/s; locked session P 24/32 restored on exit |
+| `trajectory` | Approach peak 0.8 rad/s, minimum approach 0.35 s; Reset 0.5 rad/s; circle ramp 1 s, period 4 s |
 
-`ManualControl`, `PushMotor`, headless Reset, window control, and Push-T load this file by default.
+`ManualControl`, `PushMotor`, headless Reset, window control, Push-T, and T pick/place load this file by default.
+`joint_path.py` evaluates locally checked finite five-joint paths on the remote
+control clock. `scripts/verify_response.sh` performs local collision checks and
+records speed/tracking comparisons; this script and its MuJoCo analysis stay local.
 Local MuJoCo circle playback shares nominal trajectory timing with remote hardware; simulation does not apply hardware feedback compensation.
 Task contact speed, vision thresholds, and display frame rate remain task parameters, distinct from motor frequency.
 
@@ -43,7 +47,7 @@ Use `LEROBOT_HOST` and `LEROBOT_REMOTE_ROOT` to override the deployment host and
 
 | Path | Purpose |
 | --- | --- |
-| `src/arm_control/` | Control, feedback, trajectories, calibration, vision, Push-T |
+| `src/lerobot_arm_control/` | System modules grouped by hardware, control, calibration, perception, planning and runtime |
 | `scripts/` | User entries, deployment, verification |
 | `configs/control.json` | Sole active motor configuration |
 | `assets/so101/` | Model/meshes with original license |
@@ -79,3 +83,39 @@ On 2026-10-07, old per-frame images, traces, and duplicate session models were r
 Small JSON summaries and deletion manifests remain in each host's `logs/data-cleanup-20261007/`.
 Required calibration, circle input, registration, and the local independent snapshot were retained.
 See [Data retention](../data/README.md).
+
+Camera intrinsics are versioned in `configs/camera_intrinsics.json`; the shared
+vision configuration validates their hash and the exact processing-view mapping.
+`table_reference_calibration.py` and `scripts/calibrate_table_reference.sh` run
+locally to fit the stationary two-marker layout from camera-only observations.
+Only the accepted record and runtime map are synchronized; this fitter is not
+included in the remote runtime manifest. Saved maps bind to the native intrinsics
+hash, and fixed bases also bind to the table reference and runtime camera geometry.
+
+`pick_t.py` performs local grasp IK, collision checks, and free-payload contact
+simulation. `pick_t_client.py` sequences live stages and verifies placement from
+fresh camera observations. `pick_t_protocol.py` is shared with the remote bounded
+executor and has no physics dependency. See [T pick and place](pick-t.md).
+
+## Source execution
+
+Canonical implementations live in `src/lerobot_arm_control/`. The unified entry
+is `./scripts/lerobot-arm`, or `PYTHONPATH=src python -m lerobot_arm_control`.
+Domain imports load requested implementations on demand; basic configuration,
+protocols and hardware help do not require a physics engine or open a serial port.
+
+`core/paths.py` resolves the checkout and an optional explicit robot workspace.
+Every resource is read from that workspace, with no fallback to another robot's
+configuration. Settings load at startup; changing the workspace or control file
+requires restarting the processes.
+
+`pyproject.toml` manages the Linux dependency environment with
+`[tool.uv] package = false`. Bootstrap selects the `hardware` dependencies;
+local dependencies are in `requirements-local.txt`. No project installation or
+build step is required. Local subprocesses receive an absolute source path.
+SSH workers explicitly use the remote `src` and remote workspace.
+
+Deployment archives existing remote code, synchronizes the selected canonical
+runtime, and retires obsolete interface files after all transfers succeed.
+Existing machine configuration and calibration are preserved.
+See [System structure and operation](system.md).

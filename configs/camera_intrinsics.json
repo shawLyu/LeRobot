@@ -1,0 +1,206 @@
+{
+  "image_size": [
+    1920,
+    1080
+  ],
+  "inner_corners": [
+    10,
+    7
+  ],
+  "square_size_mm": 15,
+  "valid_images": 37,
+  "camera_matrix": [
+    [
+      1304.1496781844132,
+      0.0,
+      927.0182428337864
+    ],
+    [
+      0.0,
+      1332.5995678114334,
+      645.7472321906317
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "dist_coeffs": [
+    -0.05954119985272649,
+    0.041966213636348546,
+    -0.001866498586647926,
+    0.0023208527103808396,
+    0.014901257236407763
+  ],
+  "reprojection_rms_px": 0.7613802438870313,
+  "per_image_errors": [
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_001.png",
+      "rms_px": 0.4536326229572296
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_002.png",
+      "rms_px": 0.5308042168617249
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_003.png",
+      "rms_px": 0.6040453314781189
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_004.png",
+      "rms_px": 0.48775407671928406
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_005.png",
+      "rms_px": 0.7234094142913818
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_006.png",
+      "rms_px": 0.850354015827179
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_007.png",
+      "rms_px": 0.6002220511436462
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_008.png",
+      "rms_px": 0.5001584887504578
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_009.png",
+      "rms_px": 0.32975760102272034
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_010.png",
+      "rms_px": 0.5384548902511597
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_011.png",
+      "rms_px": 0.5057647228240967
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_012.png",
+      "rms_px": 0.3586091995239258
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_013.png",
+      "rms_px": 0.48850709199905396
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_014.png",
+      "rms_px": 0.4939713776111603
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_015.png",
+      "rms_px": 0.47658026218414307
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_016.png",
+      "rms_px": 0.37621447443962097
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_017.png",
+      "rms_px": 0.44435277581214905
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_018.png",
+      "rms_px": 0.5781522393226624
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_019.png",
+      "rms_px": 0.5129417181015015
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_020.png",
+      "rms_px": 1.1133842468261719
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_021.png",
+      "rms_px": 1.1890122890472412
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_022.png",
+      "rms_px": 1.0746066570281982
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_023.png",
+      "rms_px": 0.8791322708129883
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_024.png",
+      "rms_px": 1.2044849395751953
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_121449/image_025.png",
+      "rms_px": 1.0092530250549316
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_001.png",
+      "rms_px": 0.5915042161941528
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_002.png",
+      "rms_px": 0.631088376045227
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_003.png",
+      "rms_px": 0.6492435336112976
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_004.png",
+      "rms_px": 1.0638834238052368
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_005.png",
+      "rms_px": 1.0143983364105225
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_006.png",
+      "rms_px": 0.7236859798431396
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_007.png",
+      "rms_px": 1.436518669128418
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_008.png",
+      "rms_px": 0.6434953212738037
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_009.png",
+      "rms_px": 0.5859881043434143
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_010.png",
+      "rms_px": 0.6333633661270142
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_011.png",
+      "rms_px": 1.0090049505233765
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_012.png",
+      "rms_px": 0.963115930557251
+    }
+  ],
+  "validation": [
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_013.png",
+      "old_rms_px": 0.7219606637954712,
+      "new_rms_px": 0.7105482816696167
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_014.png",
+      "old_rms_px": 0.5685456395149231,
+      "new_rms_px": 0.5629788041114807
+    },
+    {
+      "image": "/home/hkuit-001/camera_calibration/session_20261008_135548/image_015.png",
+      "old_rms_px": 0.7230753898620605,
+      "new_rms_px": 0.751244843006134
+    }
+  ],
+  "validation_old_rms_px": 0.6751072417780751,
+  "validation_new_rms_px": 0.6797530945389286
+}

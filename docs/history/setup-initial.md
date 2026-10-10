@@ -7,7 +7,7 @@ The historical local-environment guidance below predates the separate lightweigh
 ## Environment and directories
 
 The project was located on remote host lerobot at `/home/xy/Research/lerobot`, operated as xy.
-It uses a Python src layout: project lerobot-arm-control, module arm_control,
+It uses a Python src layout: project lerobot-arm-control, module lerobot_arm_control,
 without shadowing upstream lerobot.
 
 ```text
@@ -20,7 +20,7 @@ lerobot/
 ├── .tools/bin/               # Project-local uv/uvx
 ├── .cache/                   # Installers and uv download/build cache
 ├── configs/arms.toml         # Stable USB paths, roles, motor IDs
-├── src/arm_control/          # LeRobot adapter, diagnostics, bounded motion CLI
+├── src/lerobot_arm_control/          # LeRobot adapter, diagnostics, bounded motion CLI
 ├── tests/                    # Hardware-free safety checks
 ├── scripts/                  # Installation, activation, read-only hardware checks
 ├── docs/                     # Configuration, operation, experiment records
@@ -39,7 +39,7 @@ ssh lerobot
 cd /home/xy/Research/lerobot
 
 # Already configured host: synchronize from the lock
-./scripts/uv sync --locked
+./scripts/uv sync --locked --extra hardware
 
 # Rebuild from source: install project-local uv, then synchronize
 ./scripts/bootstrap.sh
@@ -47,7 +47,7 @@ cd /home/xy/Research/lerobot
 # Optional activation for the current shell; no .zshrc edits
 source scripts/activate.sh
 python -c 'import sys, lerobot, scservo_sdk; print(sys.executable); print(lerobot.__file__)'
-uv run arm-control doctor
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware doctor
 ```
 
 scripts/uv places caches, Python downloads, and virtual environments inside the project.
@@ -55,7 +55,7 @@ scripts/uv places caches, Python downloads, and virtual environments inside the 
 System Python and other accounts' environments were not changed.
 If no matching system interpreter is available, uv can download one under `.tools/python/`.
 Update dependencies with `./scripts/uv add PACKAGE`, or edit pyproject and run
-`./scripts/uv lock && ./scripts/uv sync --locked`; retain uv.lock.
+`./scripts/uv lock && ./scripts/uv sync --locked --extra hardware`; retain uv.lock.
 Temporary uv pip installs are not persistent configuration because later sync follows pyproject/lock.
 
 ## Ports and joints at the time
@@ -79,19 +79,19 @@ further motion required checking motor voltage rating and loaded supply capabili
 
 ```bash
 # Unit checks without hardware access
-./scripts/uv run --locked pytest -q
-./scripts/uv run --locked ruff check src tests scripts
+./scripts/uv run --locked --extra hardware pytest -q
+./scripts/uv run --locked --extra hardware ruff check src tests scripts
 ./scripts/uv pip check
 
 # Read both buses three times each
 ./scripts/test_hardware.sh
 
 # Repeated follower reads
-./scripts/uv run --locked arm-control --output logs/follower-read.json \
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware --output logs/follower-read.json \
     read --arm follower --samples 10
 
 # Gripper preview: reads only, no motor register writes
-./scripts/uv run --locked arm-control --output logs/gripper-preview.json \
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware --output logs/gripper-preview.json \
     move --arm follower --delta 32
 ```
 
@@ -115,7 +115,7 @@ Only Goal_Position and Torque_Enable are changed, not EEPROM, speed, PID, or cal
 **Run only after confirming ID 6 is the physical gripper, the area is clear, and someone is observing:**
 
 ```bash
-./scripts/uv run --locked arm-control --output logs/gripper-motion.json \
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware --output logs/gripper-motion.json \
     move --arm follower --delta 32 --execute --confirm-clear
 ```
 
@@ -144,7 +144,7 @@ The initial remote downloads from PyPI and the official PyTorch index succeeded 
 Retained `.cache/uv/` supports offline resynchronization:
 
 ```bash
-./scripts/uv sync --locked --offline
+./scripts/uv sync --locked --extra hardware --offline
 ```
 
 If only the uv installer cannot download, transfer its Linux wheel from another machine.

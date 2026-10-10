@@ -7,8 +7,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from arm_control import push_t_capture as capture
-from arm_control.push_t import PushPlanner, RolloutRecorder, pose
+from lerobot_arm_control.planning.push_t import PushPlanner, RolloutRecorder, pose
+from lerobot_arm_control.tasks.push_t import push_t_capture as capture
 
 
 @pytest.fixture
@@ -108,7 +108,7 @@ def test_capture_freezes_selected_frame_and_closes_before_return(observed, monke
 
 
 def test_recording_includes_execution_and_excludes_planning(tmp_path):
-    from arm_control.push_t import PushSimulation
+    from lerobot_arm_control.planning.push_t import PushSimulation
 
     sim = PushSimulation(output=tmp_path/'sim')
     path = tmp_path/'trajectory.jsonl'

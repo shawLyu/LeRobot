@@ -7,7 +7,7 @@ import pytest
 
 cv2 = pytest.importorskip("cv2")
 
-from arm_control.tabletop_registration import BaseRegistration  # noqa: E402
+from lerobot_arm_control.perception.tabletop_registration import BaseRegistration  # noqa: E402
 
 
 class Detector:
@@ -90,12 +90,15 @@ def test_noncoplanar_tags_recover_base_in_anchor_coordinates():
 def test_table_loss_and_expired_marker_cache_are_not_fresh(monkeypatch):
     registration, table, _ = fixture()
     frame = np.zeros((480, 640, 3), np.uint8)
-    monkeypatch.setattr("arm_control.tabletop_registration.time.monotonic", lambda: 10.0)
+    monkeypatch.setattr("lerobot_arm_control.perception.tabletop_registration.time.monotonic",
+        lambda: 10.0)
     assert registration.process(frame, table)["status"] == "tracked"
     registration.detectors = {}
-    monkeypatch.setattr("arm_control.tabletop_registration.time.monotonic", lambda: 11.0)
+    monkeypatch.setattr("lerobot_arm_control.perception.tabletop_registration.time.monotonic",
+        lambda: 11.0)
     assert registration.process(frame, table)["status"] == "held"
-    monkeypatch.setattr("arm_control.tabletop_registration.time.monotonic", lambda: 13.0)
+    monkeypatch.setattr("lerobot_arm_control.perception.tabletop_registration.time.monotonic",
+        lambda: 13.0)
     result = registration.process(frame, table)
     assert result["status"] == "markers_lost"
     assert "position" not in result
@@ -112,6 +115,20 @@ def test_missing_mount_transform_never_becomes_calibrated():
     assert result["status"] == "mount_calibration_missing"
     assert result["calibrated"] is False
     assert "position" not in result
+
+
+def test_visible_marker_with_wrong_size_reports_rejection_instead_of_marker_loss():
+    registration, table, _ = fixture()
+    registration.config['markers'] = [registration.config['markers'][1]]
+    registration.config.update(base_constraint='flat_on_table', base_table_z_m=.0024)
+    corners = registration.detectors['DICT_ARUCO_MIP_36H12'].corners[1]
+    center = corners.mean(axis=1, keepdims=True)
+    corners[:] = center+(corners-center)*.5
+    result = registration.process(np.zeros((480, 640, 3), np.uint8), table)
+    assert result['status'] == 'pose_rejected'
+    assert not result['calibrated'] and 'position' not in result
+    assert result['reprojection_error_px'] > result['max_reprojection_error_px']
+    assert 'mount' in result['rejection_reason']
 
 
 def test_measured_horizontal_mount_recovers_base_without_depth_or_tilt_ambiguity():
@@ -221,7 +238,7 @@ def test_fixed_base_survives_occlusion_restart_and_clock_age(tmp_path, monkeypat
     registration, table, position = fixed_fixture(tmp_path)
     frame = np.zeros((480, 640, 3), np.uint8)
     for index in range(20):
-        monkeypatch.setattr('arm_control.tabletop_registration.time.monotonic',
+        monkeypatch.setattr('lerobot_arm_control.perception.tabletop_registration.time.monotonic',
                             lambda i=index: 10+i*.11)
         table['captured_unix_ns'] = index+1
         result = registration.process(frame, table)
@@ -243,11 +260,33 @@ def test_fixed_base_survives_occlusion_restart_and_clock_age(tmp_path, monkeypat
     assert changed.fixed_pose is None
 
 
+
+@pytest.mark.parametrize('change', ['matrix', 'distortion', 'source'])
+def test_saved_base_rejects_changed_camera_geometry(tmp_path, monkeypatch, change):
+    registration, table, _ = fixed_fixture(tmp_path)
+    frame = np.zeros((480, 640, 3), np.uint8)
+    for index in range(20):
+        monkeypatch.setattr('lerobot_arm_control.perception.tabletop_registration.time.monotonic',
+                            lambda i=index: 10+i*.11)
+        table['captured_unix_ns'] = index+1
+        registration.process(frame, table)
+    assert registration.fixed_pose is not None
+    matrix, distortion = registration.matrix.copy(), registration.distortion.copy()
+    if change == 'matrix':
+        matrix[0, 0] += 10
+    elif change == 'distortion':
+        distortion[0] += .01
+    else:
+        registration.config['fixed_base']['camera_calibration_sha256'] = 'different-source'
+    restored = BaseRegistration(registration.config, matrix, distortion)
+    assert restored.fixed_pose is None
+
+
 def test_fixed_calibration_needs_distinct_frames_and_primary_anchor(tmp_path, monkeypatch):
     registration, table, _ = fixed_fixture(tmp_path)
     frame = np.zeros((480, 640, 3), np.uint8)
     for index in range(25):
-        monkeypatch.setattr('arm_control.tabletop_registration.time.monotonic',
+        monkeypatch.setattr('lerobot_arm_control.perception.tabletop_registration.time.monotonic',
                             lambda i=index: 10+i*.11)
         registration.process(frame, table)
     assert registration.fixed_pose is None and len(registration.fixed_samples) == 1
@@ -273,7 +312,10 @@ def test_connected_tag_border_is_decoded_from_real_lines_without_filling_code_pi
 
 
 def test_two_arm_registration_keeps_separate_frames_and_distances(tmp_path, monkeypatch):
-    from arm_control.tabletop_registration import base_distances, base_registration_configs
+    from lerobot_arm_control.perception.tabletop_registration import (
+        base_distances,
+        base_registration_configs,
+    )
 
     matrix = np.array([[600., 0, 320], [0, 600., 240], [0, 0, 1]])
     distortion = np.zeros(5)
@@ -305,7 +347,7 @@ def test_two_arm_registration_keeps_separate_frames_and_distances(tmp_path, monk
         registration.detectors = {'DICT_4X4_50': Detector(image_corners, np.array([[7], [6]]))}
     frame = np.zeros((480, 640, 3), np.uint8)
     for index in range(20):
-        monkeypatch.setattr('arm_control.tabletop_registration.time.monotonic',
+        monkeypatch.setattr('lerobot_arm_control.perception.tabletop_registration.time.monotonic',
                             lambda i=index: 10+i*.11)
         table['captured_unix_ns'] = index+1
         poses = {name: registration.process(frame, table) for name, registration in group.items()}
@@ -324,7 +366,7 @@ def test_two_arm_registration_keeps_separate_frames_and_distances(tmp_path, monk
 def test_two_arms_reject_shared_identity_or_calibration_file(duplicate):
     import copy
 
-    from arm_control.tabletop_registration import base_registration_configs
+    from lerobot_arm_control.perception.tabletop_registration import base_registration_configs
 
     first = {'enabled': True, 'arm': 'follower', 'markers': [
         {'dictionary': 'DICT_4X4_50', 'id': 7}], 'fixed_base': {'file': 'follower.json'}}

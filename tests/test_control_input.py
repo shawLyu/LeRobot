@@ -1,6 +1,6 @@
 from contextlib import nullcontext
 
-from arm_control.control_input import JogCommands, ResetThenCircle
+from lerobot_arm_control.control.control_input import JogCommands, ResetThenCircle
 
 
 class Link:

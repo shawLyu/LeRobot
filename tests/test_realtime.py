@@ -9,8 +9,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from arm_control.realtime import JOINTS, raw_to_angles, validate_target
-from arm_control.realtime_client import ROOT, Link
+from lerobot_arm_control.runtime.realtime_client import ROOT, Link
+from lerobot_arm_control.transport.realtime import JOINTS, raw_to_angles, validate_target
 
 
 @pytest.mark.parametrize("invalid", [
@@ -48,7 +48,8 @@ def test_simulation_state_can_maintain_heartbeat_without_render_loop(monkeypatch
         stdout = io.StringIO(json.dumps({"version": 1, "type": "state", "seq": 0}) + "\n")
 
     process = Process()
-    monkeypatch.setattr("arm_control.realtime_client.subprocess.Popen", lambda *a, **k: process)
+    monkeypatch.setattr("lerobot_arm_control.runtime.realtime_client.subprocess.Popen",
+        lambda *a, **k: process)
     link = Link("unused", "/unused", "mujoco", keep_simulation_alive=independent)
     link.reader.join(timeout=1)
     assert not link.reader.is_alive()
@@ -69,7 +70,7 @@ def test_hardware_rejects_independent_simulation_heartbeat_before_connecting():
 def test_hardware_keeps_ssh_routing_and_control_flags(monkeypatch):
     process = Mock(stdin=io.StringIO(), stdout=io.StringIO())
     popen = Mock(return_value=process)
-    monkeypatch.setattr("arm_control.realtime_client.subprocess.Popen", popen)
+    monkeypatch.setattr("lerobot_arm_control.runtime.realtime_client.subprocess.Popen", popen)
     link = Link("robot-host", "/remote project/robot", "hardware", hardware_control=True,
                 circle=True, simulation_model="/local-only/model.xml")
     link.reader.join(timeout=1)
@@ -77,8 +78,9 @@ def test_hardware_keeps_ssh_routing_and_control_flags(monkeypatch):
     assert launch[0] == "ssh"
     assert launch[-2] == "robot-host"
     assert launch[-1] == (
-        f"cd {shlex.quote('/remote project/robot')} && exec .venv/bin/python -u "
-        "-m arm_control.realtime_server --hardware-control "
+        f"cd {shlex.quote('/remote project/robot')} && exec env PYTHONPATH=src "
+        "LEROBOT_ARM_WORKSPACE=. .venv/bin/python -u "
+        "-m lerobot_arm_control.runtime.realtime_server --hardware-control "
         "--circle"
     )
     assert link.worker_location == "remote"
@@ -87,12 +89,13 @@ def test_hardware_keeps_ssh_routing_and_control_flags(monkeypatch):
 
 @pytest.mark.parametrize("matches", [False, True])
 def test_hardware_control_rejects_configuration_drift_before_commands(monkeypatch, matches):
-    from arm_control.control_defaults import CONTROL_CONFIG_SHA256
+    from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 
     hello = {"version": 1, "type": "hello", "joints": list(JOINTS),
              "control_config_sha256": CONTROL_CONFIG_SHA256 if matches else "outdated"}
     process = Mock(stdin=io.StringIO(), stdout=io.StringIO(json.dumps(hello) + "\n"))
-    monkeypatch.setattr("arm_control.realtime_client.subprocess.Popen", Mock(return_value=process))
+    monkeypatch.setattr("lerobot_arm_control.runtime.realtime_client.subprocess.Popen",
+        Mock(return_value=process))
     link = Link("robot-host", "/remote/robot", "hardware", hardware_control=True)
     link.reader.join(timeout=1)
     if matches:

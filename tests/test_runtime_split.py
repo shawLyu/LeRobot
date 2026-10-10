@@ -2,15 +2,20 @@
 
 import ast
 import hashlib
+import importlib.util
 import json
 import math
 from pathlib import Path
 
 import pytest
 
-from arm_control.circle_trajectory import Circle
-from arm_control.control_defaults import POSITION_FEEDBACK, TRAJECTORY
-from arm_control.model_metadata import MODEL, joint_ranges
+from lerobot_arm_control.control.control_defaults import (
+    CONTROL_CONFIG,
+    POSITION_FEEDBACK,
+    TRAJECTORY,
+)
+from lerobot_arm_control.robot.so101.model_metadata import MODEL, joint_ranges
+from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -19,26 +24,40 @@ def test_remote_manifest_is_complete_and_cannot_import_local_simulation_modules(
     paths = [line for line in (ROOT/'configs/remote-runtime.txt').read_text().splitlines()
              if line and not line.startswith('#')]
     assert len(paths) == len(set(paths))
-    modules = {Path(path).stem for path in paths if path.startswith('src/')}
+    modules = {str(Path(path).with_suffix('')).removeprefix('src/').replace('/', '.')
+               .removesuffix('.__init__') for path in paths if path.startswith('src/')}
     for path in paths:
         assert (ROOT/path).is_file(), path
         if not path.startswith('src/'):
             continue
+        module = str(Path(path).with_suffix('')).removeprefix('src/').replace('/', '.')
+        package = module.rsplit('.', 1)[0]
         for node in ast.walk(ast.parse((ROOT/path).read_text())):
             if isinstance(node, ast.Import):
-                assert all(name.name != 'mujoco' for name in node.names), path
+                for name in node.names:
+                    assert name.name.split('.')[0] != 'mujoco', path
+                    if name.name.startswith('lerobot_arm_control'):
+                        assert name.name in modules, (path, name.name)
             if isinstance(node, ast.ImportFrom):
                 assert node.module != 'mujoco', path
-                if node.level:
-                    assert node.module.split('.')[0] in modules, (path, node.module)
+                imported = (importlib.util.resolve_name('.'*node.level + (node.module or ''),
+                                                       package)
+                            if node.level else node.module)
+                if imported.startswith('lerobot_arm_control'):
+                    assert imported in modules, (path, imported)
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                    and node.func.id == 'import_module' and node.args
+                    and isinstance(node.args[0], ast.Constant)):
+                imported = node.args[0].value
+                if imported.startswith('lerobot_arm_control'):
+                    assert imported in modules, (path, imported)
 
 
 def test_metadata_ranges_match_the_canonical_explicit_joint_limits():
     assert joint_ranges()[0] == [-1.91986, 1.91986]
     assert len(joint_ranges()) == 6
     assert Circle().model_hash == hashlib.sha256(MODEL.read_bytes()).hexdigest()
-    assert hashlib.sha256(json.dumps(POSITION_FEEDBACK, sort_keys=True).encode()).hexdigest() == (
-        '62effcc919c99dbc0e7a32f5af3dd465a05f1ced419d0e065a4aa1e34af77f95')
+    assert POSITION_FEEDBACK == json.loads(CONTROL_CONFIG.read_text())['position_feedback']
     assert TRAJECTORY['control_hz'] == 60
     assert TRAJECTORY['period_seconds'] == 4
 
@@ -48,7 +67,7 @@ def test_metadata_ranges_match_the_canonical_explicit_joint_limits():
 def test_camera_registration_quaternion_without_mujoco(axis, angle):
     import numpy as np
 
-    from arm_control.tabletop_registration import rotation_quaternion
+    from lerobot_arm_control.perception.tabletop_registration import rotation_quaternion
 
     cv2 = pytest.importorskip("cv2")
 

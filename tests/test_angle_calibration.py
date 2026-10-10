@@ -1,7 +1,7 @@
 import pytest
 
-from arm_control.angle_calibration import AngleCalibration
-from arm_control.realtime import JOINTS, preview_joint_target
+from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+from lerobot_arm_control.transport.realtime import JOINTS, preview_joint_target
 
 
 def samples(raw=2000, torque=0):

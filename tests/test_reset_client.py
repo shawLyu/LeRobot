@@ -1,6 +1,6 @@
 import pytest
 
-from arm_control.reset_client import run_reset
+from lerobot_arm_control.runtime.reset_client import run_reset
 
 
 class Link:

@@ -326,17 +326,14 @@ feetech = [
 
 [[package]]
 name = "lerobot-arm-control"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
+version = "0.2.0"
+source = { virtual = "." }
+
+[package.optional-dependencies]
+hardware = [
     { name = "lerobot", extra = ["feetech"] },
     { name = "torch" },
     { name = "torchvision" },
-]
-
-[package.optional-dependencies]
-simulation = [
-    { name = "mujoco" },
 ]
 
 [package.dev-dependencies]
@@ -347,13 +344,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "lerobot", extras = ["feetech"], specifier = "==0.6.1" },
-    { name = "mujoco", marker = "extra == 'simulation'", specifier = "==3.9.0" },
-    { name = "torch", specifier = "==2.11.0", index = "https://download.pytorch.org/whl/cpu" },
-    { name = "torchvision", specifier = "==0.26.0", index = "https://download.pytorch.org/whl/cpu" },
+    { name = "lerobot", extras = ["feetech"], marker = "extra == 'hardware'", specifier = "==0.6.1" },
+    { name = "torch", marker = "extra == 'hardware'", specifier = "==2.11.0", index = "https://download.pytorch.org/whl/cpu" },
+    { name = "torchvision", marker = "extra == 'hardware'", specifier = "==0.26.0", index = "https://download.pytorch.org/whl/cpu" },
 ]
-
-provides-extras = ["simulation"]
+provides-extras = ["hardware"]
 
 [package.metadata.requires-dev]
 dev = [

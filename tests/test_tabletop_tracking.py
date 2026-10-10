@@ -7,7 +7,11 @@ import pytest
 
 cv2 = pytest.importorskip("cv2", reason="Remote OpenCV perception tests")
 
-from arm_control.tabletop_tracking import TTracker, match_partial, t_outline  # noqa: E402
+from lerobot_arm_control.perception.tabletop_tracking import (  # noqa: E402
+    TTracker,
+    match_partial,
+    t_outline,
+)
 
 DIMENSIONS = {"width": .048, "length": .06, "cap_depth": .012, "stem_width": .012,
               "height": .006, "height_measured": True}

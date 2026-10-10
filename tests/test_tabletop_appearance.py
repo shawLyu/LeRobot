@@ -8,8 +8,8 @@ import pytest
 
 cv2 = pytest.importorskip("cv2")
 
-from arm_control.tabletop_appearance import ObservedAppearance  # noqa: E402
-from arm_control.tabletop_tracking import world_outline  # noqa: E402
+from lerobot_arm_control.perception.tabletop_tracking import world_outline  # noqa: E402
+from lerobot_arm_control.visualization.tabletop_appearance import ObservedAppearance  # noqa: E402
 
 
 def observation(yaw=0.0):

@@ -12,8 +12,8 @@ from test_push_t_remote import observed as observed  # noqa: F401
 
 pytest.importorskip("mujoco")
 
-from arm_control.push_t import ROOT, Push  # noqa: E402
-from arm_control.push_t_motor import (  # noqa: E402
+from lerobot_arm_control.planning.push_t import ROOT, Push  # noqa: E402
+from lerobot_arm_control.tasks.push_t.push_t_motor import (  # noqa: E402
     joint_limit_issue,
     joint_segments,
 )
@@ -21,8 +21,8 @@ from arm_control.push_t_motor import (  # noqa: E402
 
 @pytest.mark.parametrize('fixed', [False, True])
 def test_remote_recovery_plans_a_reachable_clearance_from_original_jaw_contact(tmp_path, fixed):
-    from arm_control.push_t import PushSimulation, pose
-    from arm_control.push_t_local import LocalPush
+    from lerobot_arm_control.planning.push_t import PushSimulation, pose
+    from lerobot_arm_control.tasks.push_t.push_t_local import LocalPush
 
     source = ROOT/'data/push_t/measured'
     if not source.is_dir():
@@ -84,8 +84,8 @@ def test_joint_preflight_names_violations_without_clipping_feedback():
 def test_height_compensation_raises_command_path_once_and_keeps_nominal_prediction(tmp_path):
     import mujoco
 
-    from arm_control.push_t import PushSimulation
-    from arm_control.push_t_local import LocalPush
+    from lerobot_arm_control.planning.push_t import PushSimulation
+    from lerobot_arm_control.tasks.push_t.push_t_local import LocalPush
 
     sim = PushSimulation(output=tmp_path/'sim')
     action = sim.plan()
@@ -119,7 +119,7 @@ def test_height_compensation_raises_command_path_once_and_keeps_nominal_predicti
 
 def test_remote_worker_keeps_observing_invalid_seed_then_plans_after_it_recovers(
         observed, tmp_path, monkeypatch):
-    from arm_control.push_t_local import LocalPush
+    from lerobot_arm_control.tasks.push_t.push_t_local import LocalPush
 
     planned = []
     action = Push(np.zeros(2), np.ones(2), .002, joints=[[.32]*6], approach_count=0)
@@ -158,7 +158,7 @@ def test_remote_worker_keeps_observing_invalid_seed_then_plans_after_it_recovers
 @pytest.mark.parametrize('scene_moved', [False, True])
 def test_start_reuses_preview_only_while_latest_scene_still_matches(
         observed, tmp_path, monkeypatch, scene_moved):
-    from arm_control.push_t_local import LocalPush
+    from lerobot_arm_control.tasks.push_t.push_t_local import LocalPush
 
     planned, submitted = [], []
     action = Push(np.zeros(2), np.ones(2), .002, joints=[[.32]*6], approach_count=0)
@@ -210,7 +210,7 @@ def test_start_reuses_preview_only_while_latest_scene_still_matches(
 def test_free_approach_never_shortcuts_actual_execution_or_initial_contact(tmp_path, prediction):
     import mujoco
 
-    from arm_control.push_t_local import ShortPushSimulation
+    from lerobot_arm_control.tasks.push_t.push_t_local import ShortPushSimulation
 
     source = ROOT/'data/push_t/measured'
     if not source.is_dir():

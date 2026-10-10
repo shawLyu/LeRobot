@@ -7,8 +7,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from arm_control.control_defaults import CONTROL_CONFIG_SHA256
-from arm_control.push_t_link import MotorLink
+from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
+from lerobot_arm_control.transport.push_t_link import MotorLink
 
 
 def test_motor_proxy_waits_for_acceptance_and_matching_job_completion():
@@ -45,7 +45,7 @@ def test_closing_planner_after_disconnect_does_not_raise_or_send_new_goals():
 def test_table_link_starts_local_planner_and_sends_results_only(monkeypatch, tmp_path):
     pytest.importorskip('mujoco')
     pytest.importorskip('cv2')
-    from arm_control.tabletop_client import TableLink
+    from lerobot_arm_control.runtime.tabletop_client import TableLink
 
     marker = base64.b64encode(b'marker').decode()
     hello = {'version': 1, 'type': 'hello', 'tag_png': marker, 'config': {},
@@ -55,11 +55,12 @@ def test_table_link_starts_local_planner_and_sends_results_only(monkeypatch, tmp
              'annotated_jpeg': marker, 'models': {}, 'objects': {}}
     process = Mock(stdin=io.StringIO(), stdout=io.StringIO(
         json.dumps(hello)+'\n'+json.dumps(state)+'\n'))
-    monkeypatch.setattr('arm_control.tabletop_client.subprocess.Popen', Mock(return_value=process))
+    monkeypatch.setattr('lerobot_arm_control.runtime.tabletop_client.subprocess.Popen',
+        Mock(return_value=process))
     planner = Mock()
     planner.status.return_value = {'phase': 'preview ready', 'planning_location': 'local'}
     factory = Mock(return_value=planner)
-    monkeypatch.setattr('arm_control.push_t_local.LocalPush', factory)
+    monkeypatch.setattr('lerobot_arm_control.tasks.push_t.push_t_local.LocalPush', factory)
     link = TableLink('robot-host', '/remote/robot', tmp_path, server_args=('--push-t',))
     link.reader.join(timeout=3)
     assert link.error is None
@@ -84,7 +85,7 @@ def test_hardware_handshake_requires_verified_identity_and_an_available_executor
     pytest.importorskip('cv2')
     import hashlib
 
-    from arm_control.tabletop_client import ROOT, TableLink
+    from lerobot_arm_control.runtime.tabletop_client import ROOT, TableLink
 
     model_hash = hashlib.sha256((ROOT/'assets/so101/so101.xml').read_bytes()).hexdigest()
     robot = {'fingerprint': {'mjcf_sha256': model_hash}, 'motion_available': True,
@@ -104,11 +105,12 @@ def test_hardware_handshake_requires_verified_identity_and_an_available_executor
     process = Mock(stdin=io.StringIO(), stdout=io.StringIO(
         json.dumps(hello)+'\n'+json.dumps(state)+'\n'))
     process.poll.return_value = 0
-    monkeypatch.setattr('arm_control.tabletop_client.subprocess.Popen', Mock(return_value=process))
+    monkeypatch.setattr('lerobot_arm_control.runtime.tabletop_client.subprocess.Popen',
+        Mock(return_value=process))
     planner = Mock()
     planner.status.return_value = {'phase': 'waiting for observation'}
     factory = Mock(return_value=planner)
-    monkeypatch.setattr('arm_control.push_t_local.LocalPush', factory)
+    monkeypatch.setattr('lerobot_arm_control.tasks.push_t.push_t_local.LocalPush', factory)
     link = TableLink('unused', '/unused', tmp_path,
                      server_args=('--push-t', '--hardware-control'))
     try:
@@ -138,7 +140,7 @@ def test_local_texture_worker_does_not_block_feedback_and_delivers_textures_once
     import threading
     import time
 
-    from arm_control.appearance_worker import AppearanceWorker
+    from lerobot_arm_control.visualization.appearance_worker import AppearanceWorker
 
     release, began = threading.Event(), threading.Event()
 
@@ -151,7 +153,8 @@ def test_local_texture_worker_does_not_block_feedback_and_delivers_textures_once
             release.wait(2)
             return {'metadata': {'version': 1}, 'pngs': {'tabletop.png': 'texture'}}
 
-    monkeypatch.setattr('arm_control.appearance_worker.ObservedAppearance', Extractor)
+    monkeypatch.setattr('lerobot_arm_control.visualization.appearance_worker.ObservedAppearance',
+        Extractor)
     worker = AppearanceWorker({})
     try:
         worker.offer({'jpeg': base64.b64encode(b'frame').decode()})

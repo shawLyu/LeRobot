@@ -4,9 +4,9 @@ import json
 import time
 from pathlib import Path
 
-from arm_control.config import load_arms
-from arm_control.control_defaults import CONTROL, DEFAULTS, POSITION_FEEDBACK
-from arm_control.driver import connected
+from lerobot_arm_control.control.control_defaults import CONTROL, DEFAULTS, POSITION_FEEDBACK
+from lerobot_arm_control.core.config import load_arms
+from lerobot_arm_control.robot.so101.driver import connected
 
 ROOT = Path(__file__).resolve().parents[1]
 

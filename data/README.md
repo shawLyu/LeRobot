@@ -10,7 +10,8 @@ The current code still uses these inputs:
 | `calibration/follower_mujoco.json` | Measured encoder-to-angle mapping; its name does not require a simulation engine at runtime |
 | `calibration/follower_mujoco_kinematic.json` | Optional validated height correction, bound to raw calibration and base hashes; previous correction archived after base recalibration |
 | `calibration/follower_rest.json` | Validated resting pose for hardware Reset |
-| `calibration/follower_table_base.json` | Measured fixed robot-base installation |
+| `calibration/table_reference.json` | Accepted ID 3 / ID 0 table layout and multi-frame validation |
+| `calibration/follower_table_base.json` | Accepted fixed robot-base installation when available; old ID 1 record archived |
 | `calibration/arm1_table_base.json` | Independently measured right white arm mounting pose |
 | `calibration/two_arm_bases.json` | Both poses, their separation and measurement provenance |
 | `calibration/height_samples.json` | New height measurements for local refitting; previous base-bound samples archived |
@@ -39,3 +40,9 @@ Small JSON results/status/verification summaries remain under each host's `logs/
 `manifest.json` records deletion scope and retained-file SHA-256 values.
 Historical session paths document evidence provenance; original per-frame data was removed.
 Summaries contain no complete image/trajectory data and cannot reconstruct the old sessions.
+
+The camera record selected on 2026-10-09 is versioned separately at
+`configs/camera_intrinsics.json`. The October 7 base records were archived on both hosts under
+`.cleanup/20261009-table-id3/`. They remain historical measurements: runtime signatures now bind them to the camera intrinsics,
+distortion and selected source hash, so new base registration is required with
+the selected camera calibration. Their previous separation is not a new measurement.

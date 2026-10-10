@@ -5,10 +5,12 @@ from types import SimpleNamespace
 
 import pytest
 
-pytest.importorskip("lerobot.motors")
-
-from arm_control.angle_calibration import AngleCalibration  # noqa: E402
-from arm_control.tabletop_robot import JOINTS, ROOT, calibration_identity  # noqa: E402
+from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+from lerobot_arm_control.runtime.tabletop_robot import (
+    JOINTS,
+    ROOT,
+    calibration_identity,
+)
 
 
 class ReadOnlyBus:
@@ -63,7 +65,7 @@ def test_changed_eeprom_is_rejected():
 def test_feedback_worker_has_only_reads_and_saves_every_sample(monkeypatch, hardware_control):
     from contextlib import contextmanager
 
-    from arm_control.tabletop_robot import RobotFeedback
+    from lerobot_arm_control.runtime.tabletop_robot import RobotFeedback
 
     path = ROOT / "data/calibration/follower_mujoco.json"
     saved = json.loads(path.read_text())
@@ -108,12 +110,13 @@ def test_feedback_worker_has_only_reads_and_saves_every_sample(monkeypatch, hard
     def fake_connection(arm):
         yield bus
 
-    monkeypatch.setattr("arm_control.tabletop_robot.load_arms", lambda: {"follower": arm})
-    monkeypatch.setattr("arm_control.tabletop_robot.connected", fake_connection)
+    monkeypatch.setattr("lerobot_arm_control.runtime.tabletop_robot.load_arms",
+        lambda: {"follower": arm})
+    monkeypatch.setattr("lerobot_arm_control.runtime.tabletop_robot.connected", fake_connection)
     if hardware_control:
         import gc
 
-        from arm_control.servo_feedback import FIELDS
+        from lerobot_arm_control.control.servo_feedback import FIELDS
 
         def packed_feedback(bus):
             assert not gc.isenabled()
@@ -123,7 +126,8 @@ def test_feedback_worker_has_only_reads_and_saves_every_sample(monkeypatch, hard
             return {key: raw if key == 'Present_Position' else values.get(
                 key, dict.fromkeys(JOINTS, 0)) for key in FIELDS}
 
-        monkeypatch.setattr('arm_control.tabletop_robot.read_control_feedback', packed_feedback)
+        monkeypatch.setattr('lerobot_arm_control.runtime.tabletop_robot.read_control_feedback',
+            packed_feedback)
         previously_enabled = gc.isenabled()
     feedback._run()
     assert feedback.snapshot()["status"] == "live"
@@ -149,13 +153,13 @@ def test_failed_bus_initialization_reports_error_without_a_fingerprint(
         monkeypatch, hardware_control):
     from unittest.mock import Mock
 
-    from arm_control.tabletop_robot import RobotFeedback
+    from lerobot_arm_control.runtime.tabletop_robot import RobotFeedback
 
     feedback = RobotFeedback({'arm': 'follower', 'joint_calibration': 'unused'},
                              hardware_control=hardware_control)
-    monkeypatch.setattr('arm_control.tabletop_robot.load_arms',
+    monkeypatch.setattr('lerobot_arm_control.runtime.tabletop_robot.load_arms',
                         lambda: {'follower': SimpleNamespace()})
-    monkeypatch.setattr('arm_control.tabletop_robot.connected',
+    monkeypatch.setattr('lerobot_arm_control.runtime.tabletop_robot.connected',
                         Mock(side_effect=ConnectionError('There is no status packet!')))
     feedback._run()
     metadata = feedback.metadata_snapshot()

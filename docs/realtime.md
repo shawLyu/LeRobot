@@ -18,7 +18,8 @@ The remote host handles camera perception, physical motor control, and feedback,
 Simulation uses a separate local physics process over stdio, with no SSH or motor connection.
 Hardware commands/feedback use the existing remote `.venv` over SSH stdio, without additional service ports.
 Normal entries share the [sole control configuration](code-layout.md): motor control 60 Hz, circle period 4 s,
-Reset/approach speed 0.5 rad/s. Simulation shares nominal timing; hardware adds V14 feedback compensation.
+Reset speed 0.5 rad/s and approach speed 0.8 rad/s, with a 0.35 s minimum approach.
+Simulation shares nominal timing; hardware adds the shared feedback compensation.
 
 Displayed hardware feedback is about 20 Hz, independent of the 60 Hz control loop.
 Fixed deadlines include serial processing; missed slots are skipped without burst catch-up. Targets are sent synchronously each frame.

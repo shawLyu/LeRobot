@@ -6,7 +6,7 @@ import mujoco
 import numpy as np
 import pytest
 
-from arm_control.tabletop_scene import ROOT, scene_xml
+from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_xml
 
 
 def load_scene(tmp_path):
@@ -58,6 +58,32 @@ def test_base_mocap_moves_complete_articulated_chain(tmp_path):
     assert np.linalg.norm(data.site("gripperframe").xpos - before - [0.07, 0.02, 0.01]) > 0.01
 
 
+def test_tool_marker_is_fixed_to_the_finger_and_has_a_20_mm_black_square(tmp_path):
+    model = load_scene(tmp_path)
+    data = mujoco.MjData(model)
+    mujoco.mj_resetDataKeyframe(model, data, 0)
+    mujoco.mj_forward(model, data)
+    finger = data.body('gripper')
+    center = data.site('tool_marker_8_center').xpos.copy()
+    local = (center-finger.xpos)@finger.xmat.reshape(3, 3)
+    np.testing.assert_allclose(local, [-.0352, -.000218, -.016], atol=1e-9)
+    body = model.body('tool_marker_8').id
+    assert model.body_parentid[body] == model.body('gripper').id
+    data.qpos[model.joint('gripper').qposadr[0]] += .2
+    mujoco.mj_forward(model, data)
+    np.testing.assert_allclose(data.site('tool_marker_8_center').xpos, center)
+    data.qpos[model.joint('wrist_roll').qposadr[0]] += .2
+    mujoco.mj_forward(model, data)
+    assert np.linalg.norm(data.site('tool_marker_8_center').xpos-center) > .005
+    first, last = model.geom('tool_marker_8_0_0'), model.geom('tool_marker_8_5_5')
+    assert last.pos[0]-first.pos[0]+first.size[0]+last.size[0] == pytest.approx(.020)
+    assert first.pos[1]-last.pos[1]+first.size[1]+last.size[1] == pytest.approx(.020)
+    visuals = model.geom_bodyid == body
+    assert np.all(model.geom_contype[visuals] == 0)
+    assert np.all(model.geom_conaffinity[visuals] == 0)
+    assert model.nu == 0
+
+
 def test_original_calibrated_model_not_modified():
     import hashlib
 
@@ -67,11 +93,13 @@ def test_original_calibrated_model_not_modified():
 
 
 def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(tmp_path):
-    from arm_control.tabletop_scene import scene_arms
+    from lerobot_arm_control.visualization.tabletop_scene import scene_arms
 
     config = json.loads((ROOT / 'configs/tabletop.json').read_text())
-    registrations = {name: json.loads((ROOT / f'data/calibration/{name}_table_base.json')
-                                      .read_text())['pose'] for name in ('follower', 'arm1')}
+    registrations = {
+        'follower': {'position': [-.2, 0., .0024], 'quaternion': [1., 0., 0., 0.]},
+        'arm1': {'position': [.1, .02, .0024], 'quaternion': [1., 0., 0., 0.]},
+    }
     state = {'objects': {}, 'models': {}, 'base_registrations': registrations,
              'robot': {'status': 'live', 'qpos': [0, 1.2, -1.5, .6, 0, .2],
                        'registration': registrations['follower']}}
@@ -99,8 +127,9 @@ def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(t
         prefix = '' if name == 'follower' else name+'__'
         points = [data.geom(f'{prefix}base_marker_{marker}_{row}_{col}').xpos
                   for row in range(6) for col in range(6)]
-        # The rendered marker lies at the confirmed 69 mm height, plus its thin display face.
-        assert np.mean(points, axis=0)[2] == pytest.approx(.0691)
+        # The follower height was remeasured; the other mount retains its old measurement.
+        expected_height = .0701 if name == 'follower' else .0691
+        assert np.mean(points, axis=0)[2] == pytest.approx(expected_height)
 
 
 def test_unlocalized_second_arm_is_not_drawn_at_an_invented_base(tmp_path):

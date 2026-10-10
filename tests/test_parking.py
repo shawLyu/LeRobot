@@ -3,9 +3,9 @@ import json
 import pytest
 from test_manual_control import Bus, Calibration
 
-from arm_control.manual_control import ManualControl
-from arm_control.parking import smooth_fraction
-from arm_control.realtime import JOINTS
+from lerobot_arm_control.control.manual_control import ManualControl
+from lerobot_arm_control.control.parking import smooth_fraction
+from lerobot_arm_control.transport.realtime import JOINTS
 
 
 def setup(tmp_path):
@@ -68,7 +68,7 @@ def test_reset_settling_rechecks_bulk_status_even_with_all_joints_held(tmp_path,
 
 
 def test_arrived_reset_freezes_feedback_and_resumes_only_if_pose_leaves_tolerance(tmp_path):
-    from arm_control.position_feedback import PositionFeedback
+    from lerobot_arm_control.control.position_feedback import PositionFeedback
 
     bus, control, now = setup(tmp_path)
     teach(bus, control, now)

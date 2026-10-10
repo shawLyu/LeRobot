@@ -2,12 +2,13 @@ import copy
 import json
 import math
 import shutil
+from pathlib import Path
 
 import numpy as np
 import pytest
 
-from arm_control.angle_calibration import NATIVE_HEIGHT_METHOD, AngleCalibration
-from arm_control.height_calibration import (
+from lerobot_arm_control.calibration.angle_calibration import NATIVE_HEIGHT_METHOD, AngleCalibration
+from lerobot_arm_control.calibration.height_calibration import (
     ANGLES,
     BASE,
     MODEL,
@@ -18,15 +19,18 @@ from arm_control.height_calibration import (
     fit_samples,
     read_sample,
 )
-from arm_control.manual_control import ManualControl
-from arm_control.realtime import JOINTS
+from lerobot_arm_control.control.manual_control import ManualControl
+from lerobot_arm_control.transport.realtime import JOINTS
 
 
 @pytest.fixture
 def measured(tmp_path):
     angles, base = tmp_path/ANGLES.name, tmp_path/BASE.name
     shutil.copyfile(ANGLES, angles)
-    shutil.copyfile(BASE, base)
+    # Offline tests use the recorded fixture, never an accepted live base file.
+    fixture = Path(__file__).parent/'fixtures/height-first-round-samples.json'
+    record = json.loads(fixture.read_text())
+    base.write_text(json.dumps(record['samples'][0]['base_calibration']))
     calibration = AngleCalibration(angles, json.loads(angles.read_text())['fingerprint'])
     base_record = json.loads(base.read_text())
     height = JawHeight(base_record['pose'])
@@ -207,7 +211,7 @@ def test_model_is_the_same_as_original_joint_calibration():
 
 
 def test_fresh_capture_checks_the_effective_corrected_mapping(measured):
-    from arm_control.push_t_capture import calibration_bytes
+    from lerobot_arm_control.tasks.push_t.push_t_capture import calibration_bytes
 
     candidate = fit(measured)
     _, _, angles, base = measured
@@ -224,7 +228,7 @@ def test_fresh_capture_checks_the_effective_corrected_mapping(measured):
 
 
 def test_offline_simulation_uses_corrected_encoder_limits(measured, tmp_path):
-    from arm_control.push_t import build_scene
+    from lerobot_arm_control.planning.push_t import build_scene
 
     candidate = fit(measured)
     _, _, angles, base = measured
@@ -247,8 +251,6 @@ def test_offline_simulation_uses_corrected_encoder_limits(measured, tmp_path):
 
 
 def test_native_resolution_corrects_real_contact_data_with_independent_validation(tmp_path):
-    from pathlib import Path
-
     path = Path(__file__).parent/'fixtures/height-first-round-samples.json'
     samples = json.loads(path.read_text())['samples']
     # Historical measurements retain their original base, independent of live recalibration.
@@ -268,7 +270,7 @@ def test_native_resolution_corrects_real_contact_data_with_independent_validatio
 
 
 def test_native_scale_changes_only_pitch_axes_and_keeps_the_motor_inverse_consistent(measured):
-    from arm_control.push_t_capture import calibration_bytes
+    from lerobot_arm_control.tasks.push_t.push_t_capture import calibration_bytes
 
     candidate = fit(measured)
     candidate.update(method=NATIVE_HEIGHT_METHOD, native_resolution=4096)

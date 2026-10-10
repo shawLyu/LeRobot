@@ -8,9 +8,9 @@ from pathlib import Path
 
 import mujoco
 
-from arm_control.angle_calibration import AngleCalibration
-from arm_control.circle_simulation import check_path, entry_points
-from arm_control.realtime_client import Link
+from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+from lerobot_arm_control.planning.circle_simulation import check_path, entry_points
+from lerobot_arm_control.runtime.realtime_client import Link
 
 ROOT = Path(__file__).resolve().parents[1]
 JOINT = "elbow_flex"

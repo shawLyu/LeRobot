@@ -5,7 +5,7 @@ import json
 import time
 from pathlib import Path
 
-from arm_control.realtime_client import Link
+from lerobot_arm_control.runtime.realtime_client import Link
 
 ROOT = Path(__file__).resolve().parents[1]
 

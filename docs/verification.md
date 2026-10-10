@@ -1,4 +1,28 @@
-# Measured verification: 2026-10-05, Beijing time
+# Verification records
+
+## Source cleanup: 2026-10-11, Beijing time
+
+The source-only SO-101 system was checked locally after migration to
+`lerobot_arm_control` and removal of compatibility and build interfaces.
+
+| Check | Result |
+| --- | --- |
+| Full test suite | 461 passed, 1 skipped in 49.64 s |
+| Skipped check | Upstream LeRobot default comparison; LeRobot is absent from the local simulation environment |
+| Static checks | Ruff passed for source, tests and scripts |
+| Shell syntax | 21 scripts passed |
+| Dependency lock | Offline `uv lock --check` passed with Python 3.12.13 |
+| Local runtime | Headless MuJoCo launched from /tmp, completed the worker handshake and received about 20 Hz |
+| Remote source boundary | Manifest staged into a separate directory; all listed source imported without LeRobot, PyTorch, MuJoCo or serial |
+| Deployment behavior | Mock SSH/rsync verified dry run, backup ordering, failure abort, normalized paths and retirement after successful transfer |
+| Robot execution | No deployment or physical motor operation was performed in this verification |
+
+Runtime tests use the existing Python 3.11.15 local simulation environment.
+Hardware feedback tests use fake buses and now run without importing LeRobot.
+The remote Linux dependency versions remain pinned; only the environment project
+metadata changed to source execution.
+
+## Hardware verification: 2026-10-05, Beijing time
 
 This is a historical record. The remote project was `/home/xy/Research/lerobot`, with files and `.venv` owned by `xy`.
 Current setup instructions are in [README](../README.md).

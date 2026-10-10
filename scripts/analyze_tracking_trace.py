@@ -7,8 +7,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from arm_control.angle_calibration import AngleCalibration
-from arm_control.realtime import JOINTS
+from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+from lerobot_arm_control.transport.realtime import JOINTS
 
 ROOT = Path(__file__).resolve().parents[1]
 

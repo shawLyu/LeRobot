@@ -1,7 +1,7 @@
 import pytest
 
-from arm_control.manual_control import ManualControl
-from arm_control.realtime import JOINTS
+from lerobot_arm_control.control.manual_control import ManualControl
+from lerobot_arm_control.transport.realtime import JOINTS
 
 
 class Calibration:
@@ -20,7 +20,7 @@ class Bus:
                                  "Max_Voltage_Limit": 90, "Acceleration": 0,
                                  "Maximum_Acceleration": 254, "Goal_Time": 0,
                                  "Goal_Velocity": 0, "Maximum_Velocity_Limit": 1000,
-                                 "Velocity_Unit_factor": 1}
+                                 "Velocity_Unit_factor": 1, "Lock": 1, "P_Coefficient": 16}
                           for name in JOINTS}
         self.writes = []
 
@@ -61,7 +61,7 @@ def test_enable_replaces_stale_goal_before_torque_and_only_selected_joint(setup)
     bus, control, _ = setup
     control.enable("gripper")
     assert bus.writes == [("Goal_Position", "gripper", 2200),
-                          ("Acceleration", "gripper", 20),
+                          ("Acceleration", "gripper", 40),
                           ("Goal_Velocity", "gripper", 600), ("Torque_Enable", "gripper", 1)]
     assert control.status()["enabled"] == ["gripper"]
     assert control.status()["error_rad"]["gripper"] == 0
@@ -79,6 +79,29 @@ def test_target_requires_enable_and_finite_angles_but_has_no_relative_cap(setup)
     assert control.targets["gripper"] == 1.2
     control.target("gripper", 10)
     assert control.targets["gripper"] == 1.5
+
+
+def test_settle_clears_only_selected_compensation_without_changing_goals(setup):
+    bus, control, _ = setup
+    control.enable('wrist_flex')
+    control.enable('elbow_flex')
+    control.target('wrist_flex', .5)
+    control.position_feedback.integral['wrist_flex'] = .04
+    control.position_feedback.correction['wrist_flex'] = .03
+    control.position_feedback.integral['elbow_flex'] = .02
+    before = list(bus.writes)
+    control.settle_target('wrist_flex')
+    assert control.targets['wrist_flex'] == .5
+    assert control.position_feedback.integral['wrist_flex'] == 0
+    assert control.position_feedback.correction['wrist_flex'] == .03
+    assert control.position_feedback.integral['elbow_flex'] == .02
+    assert bus.writes == before
+    assert bus.registers['wrist_flex']['Torque_Enable'] == 1
+    with pytest.raises(ValueError, match='enabled'):
+        control.settle_target('gripper')
+    control.stop()
+    with pytest.raises(ValueError, match='enabled'):
+        control.settle_target('wrist_flex')
 
 def test_hardware_uses_exact_calibrated_raw_endpoints_without_model_margins(setup):
     bus, control, now = setup
@@ -136,10 +159,11 @@ def test_persistent_encoder_lag_does_not_stop_official_position_stream(setup):
 
 
 def test_feedback_preserves_reference_and_release_order(setup):
-    from arm_control.position_feedback import PositionFeedback
+    from lerobot_arm_control.control.position_feedback import PositionFeedback
 
     bus, control, now = setup
-    profile = {"version": 1, "joints": {
+    profile = {"version": 1, "native_stream": {"acceleration": 20, "velocity_ticks_s": 600},
+               "joints": {
         j: {"kp": 0.5, "ki": 0.8, "max_correction_rad": 0.12,
             "correction_rate_rad_s": 0.08} for j in JOINTS}}
     control.position_feedback = PositionFeedback(profile, control.limits)
@@ -160,10 +184,11 @@ def test_feedback_preserves_reference_and_release_order(setup):
 
 
 def test_stop_clears_feedback_and_holds_measured_pose(setup):
-    from arm_control.position_feedback import PositionFeedback
+    from lerobot_arm_control.control.position_feedback import PositionFeedback
 
     bus, control, now = setup
-    profile = {"version": 1, "joints": {
+    profile = {"version": 1, "native_stream": {"acceleration": 20, "velocity_ticks_s": 600},
+               "joints": {
         j: {"kp": 1.0, "ki": 1.5, "max_correction_rad": 0.12,
             "correction_rate_rad_s": 0.12} for j in JOINTS}}
     control.position_feedback = PositionFeedback(profile, control.limits)
@@ -232,6 +257,49 @@ def test_native_acceleration_readback_failure_cannot_start_motion(setup):
     assert set(control.stopped) == set(JOINTS)
     assert bus.sync_read("Goal_Position") == bus.sync_read("Present_Position")
     assert not any(register == "Torque_Enable" for register, _, _ in bus.writes)
+
+
+def test_temporary_p_keeps_lock_and_restores_while_holding(setup):
+    bus, control, _ = setup
+    control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {
+        "shoulder_pan": 32}
+    control.enable('shoulder_pan')
+    assert bus.registers['shoulder_pan']['P_Coefficient'] == 32
+    assert control.status()['native_locked_p_coefficients'] == {'shoulder_pan': 32}
+    control.close()
+    assert bus.registers['shoulder_pan']['P_Coefficient'] == 16
+    assert bus.registers['shoulder_pan']['Lock'] == 1
+    assert bus.registers['shoulder_pan']['Torque_Enable'] == 1
+    assert not any(register == 'Lock' for register, _, _ in bus.writes)
+
+
+def test_unlocked_storage_cannot_receive_temporary_p(setup):
+    bus, control, _ = setup
+    control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {
+        "shoulder_pan": 32}
+    bus.registers['shoulder_pan']['Lock'] = 0
+    with pytest.raises(RuntimeError, match='storage lock'):
+        control.enable('shoulder_pan')
+    assert 'shoulder_pan' in control.stopped
+    assert not any(register == 'P_Coefficient' for register, _, _ in bus.writes)
+
+
+def test_dropped_temporary_p_is_held_and_restored_on_close(setup):
+    bus, control, _ = setup
+    control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {
+        "shoulder_pan": 32}
+    original = bus.write
+
+    def drop_trial(register, joint, value, normalize=False):
+        if not (register == 'P_Coefficient' and value == 32):
+            original(register, joint, value, normalize)
+
+    bus.write = drop_trial
+    with pytest.raises(RuntimeError, match='temporary P could not be confirmed'):
+        control.enable('shoulder_pan')
+    control.close()
+    assert bus.registers['shoulder_pan']['P_Coefficient'] == 16
+    assert bus.registers['shoulder_pan']['Torque_Enable'] == 1
 
 
 def test_reenable_keeps_original_native_setting_for_rollback(setup):
@@ -366,7 +434,7 @@ def test_enable_all_checks_every_motor_before_writing_and_uses_fresh_goals(setup
     control.enable_all()
     assert [register for register, _, _ in bus.writes] == (
         ["Goal_Position"] * 6 + ["Acceleration"] * 6
-        + ["Goal_Velocity"] * 6 + ["Torque_Enable"] * 6)
+        + ["Goal_Velocity"] * 6 + ['P_Coefficient'] * 5 + ["Torque_Enable"] * 6)
     assert all(bus.sync_read("Torque_Enable").values())
     assert bus.sync_read("Goal_Position") == bus.sync_read("Present_Position")
 
@@ -428,7 +496,7 @@ def test_transient_status_that_clears_on_independent_read_is_logged_without_hold
 
 
 def test_native_stream_is_ram_only_verified_and_restored_before_release(setup):
-    from arm_control.position_feedback import PositionFeedback
+    from lerobot_arm_control.control.position_feedback import PositionFeedback
 
     bus, control, _ = setup
     profile = {"version": 1, "native_stream": {"acceleration": 20, "velocity_ticks_s": 600},

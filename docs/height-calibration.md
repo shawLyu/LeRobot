@@ -54,7 +54,7 @@ changed raw calibration, base, or model identity invalidates old corrections.
 
 The correction is `q_corrected = q_original + offset`; inverse conversion subtracts the same offset.
 Restart processes for encoder display, Push-T, and circles to load the effective mapping;
-control settings remain the shared V14 configuration. Teach Reset again after mapping changes.
+control settings use the shared `configs/control.json` configuration. Teach Reset again after mapping changes.
 To restore the original mapping, close relevant windows, archive `follower_mujoco_kinematic.json` on both hosts, and restart.
 
 This procedure validates fixed fingertip height, not horizontal position, orientation, or absolute precision at every height.

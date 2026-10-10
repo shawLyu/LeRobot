@@ -1,11 +1,43 @@
-# SO-101 Local Simulation and Remote Robot Control
+# LeRobot Arm Control: SO-101 Control System
 
-This project provides a live SO-101 mirror, joint angle calibration, tabletop perception, circle trajectories, and Push-T demos.
+This project provides a live SO-101 mirror, joint angle calibration, tabletop perception, circle trajectories, Push-T, and T pick/place policies.
 **Maintain the complete codebase locally. All MuJoCo simulation, collision checks, inverse kinematics, and planning run locally.**
 The remote Linux host handles USB cameras, perception, motor execution, and encoder feedback. It receives locally generated trajectories or results and does not need MuJoCo.
 
 The default configuration belongs to the existing experimental setup. Offline demos can use the included snapshot. For another robot or camera, configure the devices and perform the relevant calibrations.
 Unless a section explicitly says **remote**, run its commands from the local project root.
+
+## Source structure and entry point
+
+The system runs directly from this checkout. Code lives in the
+`lerobot_arm_control` namespace, grouped by control, hardware, calibration,
+perception, planning, transport, runtime and visualization.
+
+After installing the local environment below:
+
+```bash
+./scripts/lerobot-arm --help
+./scripts/lerobot-arm view arm --headless --duration 3
+./scripts/lerobot-arm task circle --headless --duration 3
+./scripts/lerobot-arm task push-t --headless --fast --limit 1 --output data/push_t/demo
+```
+
+Existing workflow scripts use the same canonical modules. For Python callers:
+
+```python
+from lerobot_arm_control import load_arms
+from lerobot_arm_control.robot.so101 import connected, joint_ranges
+from lerobot_arm_control.control import ManualControl, PositionFeedback, JointPath
+from lerobot_arm_control.calibration import AngleCalibration
+from lerobot_arm_control.tasks.circle import Circle
+from lerobot_arm_control.planning import PushSimulation, PushPlanner, PickPlanner
+```
+
+See [System structure and operation](docs/system.md) for source APIs, environment
+selection, worker startup and deployment. The robot workspace defaults to the
+checkout, independent of the current directory. An explicit
+`LEROBOT_ARM_WORKSPACE` must contain every required resource; missing resources
+fail with their full path.
 
 ## 1. Install the local environment
 
@@ -71,6 +103,16 @@ See [Push-T](docs/push-t.md) for the algorithm, assumptions, and batch experimen
 
 ## 3. Configure and deploy the remote host
 
+The current camera configuration uses the user-selected second checkerboard
+calibration from October 8, versioned in [configs/camera_intrinsics.json](configs/camera_intrinsics.json).
+Native capture is 1920 x 1080, with a 640 x 360 processing view. Both hosts share
+these parameters through `configs/tabletop.json`. The current table origin is
+the left ID 3 marker, with left ID 0 as its auxiliary; both have 150 mm black edges.
+The [accepted table registration](data/calibration/table_reference.json) passed
+a camera restart check. The previous base records need new registration before
+hardware Push-T; physical 1 mm accuracy has not been validated. See [precision calibration](docs/precision-calibration.md#selected-camera-calibration-2026-10-09).
+
+
 The remote runtime uses Linux x86_64, Python 3.12, and LeRobot 0.6.1 with Feetech.
 Define a working alias in your local `~/.ssh/config`; replace the address and account below:
 
@@ -109,8 +151,8 @@ Then install on the **remote host**:
 ssh lerobot
 cd /home/xy/Research/lerobot    # Replace with your deployment directory
 ./scripts/bootstrap.sh        # First installation: project-local uv and locked dependencies
-# Later dependency updates: ./scripts/uv sync --locked
-./scripts/uv run --locked arm-control doctor
+# Later dependency updates: ./scripts/uv sync --locked --extra hardware
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware doctor
 ```
 
 The default remote installation excludes MuJoCo. Camera X11 preview also requires system Tk and SSH X11 forwarding.
@@ -131,8 +173,8 @@ Inspect devices on the **remote host**:
 ```bash
 ls -l /dev/serial/by-id/ /dev/serial/by-path/
 ls -l /dev/v4l/by-id/
-./scripts/uv run --locked arm-control doctor
-./scripts/uv run --locked arm-control read --arm follower --samples 3
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware doctor
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware read --arm follower --samples 3
 ```
 
 `doctor` and `read` only read hardware; they do not write targets or calibration registers.
@@ -240,7 +282,11 @@ follow the [OpenCV calibration procedure](https://docs.opencv.org/4.13.0/dc/dbb/
 check reprojection error, then populate these fields.
 Intrinsics must match the processed image size. Scaling requires scaling focal lengths and principal points; cropping also changes the principal point. Changing width and height alone is insufficient.
 
-The current tabletop anchor is AprilTag 36h10 / ID 1, with a 150 mm black border, plus an auxiliary marker.
+The tabletop anchor is AprilTag 36h10 / ID 1, with a 150 mm black border.
+Stationary auxiliaries are AprilTag 16h5 / ID 0 and AprilTag 36h11 / ID 3,
+also with 150 mm black borders. Native camera frames supply their corners,
+including markers outside the calibrated low-resolution crop. A registered,
+unmoved auxiliary retains the original frame when the primary is outside the view.
 For a new scene, verify dictionary, ID, dimensions, fixed layout, and actual object geometry. See [Tabletop perception](docs/tabletop.md).
 
 ### 6.3 Register the robot base to the tabletop
@@ -248,7 +294,8 @@ For a new scene, verify dictionary, ID, dimensions, fixed layout, and actual obj
 Measure the base marker corners and installation relationship in `configs/tabletop.json` for your actual setup.
 The current left black follower uses ArUco 4x4 / ID 7; the right white arm (`arm1`) uses ID 6.
 Both black marker borders are 42 mm square, parallel to the table, centered laterally,
-69 mm above the table and 19.5 mm forward of the base rear edge.
+19.5 mm forward of the base rear edge. The confirmed center height is 70 mm for
+the follower; the right arm retains its earlier 69 mm measurement.
 Make the primary anchor and both base markers clearly visible, then run:
 
 ```bash
@@ -259,6 +306,11 @@ The program archives each previous base calibration, accumulates 20 valid observ
 checks consistency, and saves remote `data/calibration/follower_table_base.json` and
 `data/calibration/arm1_table_base.json`. Copy both completed files back locally.
 The live stream exposes `base_registrations` and `base_distances` in one tabletop frame.
+If a table reference marker has moved, make the primary anchor and both base
+markers visible and use `--recalibrate-table` instead. This archives the auxiliary
+layout, static target, and both base poses before rebuilding them; it preserves
+joint calibration and control parameters. Do not reuse a saved auxiliary layout
+after physically moving its marker.
 Only the follower has joint feedback/control; the white arm registration supplies its mounting pose.
 The local viewer includes both six-joint models. White-arm joints use a translucent,
 unmeasured preview until separate joint calibration and feedback are available.
@@ -272,8 +324,14 @@ and [Base registration](docs/push-t-remote.md) for coordinates and acceptance co
 For moving-marker measurements, a printable wrist marker, supervised gripper
 benchmark commands and actual precision results, see
 [Dual-arm simulation and precision calibration](docs/precision-calibration.md).
-Base markers alone cannot measure end-effector error. The current elbow zero/range
-discrepancy must be resolved before whole-arm motion for this installation.
+The installed fixed-finger marker is ArUco 4x4 / ID 8 with a confirmed 20 mm black
+square, on the outer `View from X-` face, centered on its symmetry line and 11 mm
+from the upper shoulder. Inspect its CAD references and nominal mount locally
+with `./scripts/inspect_tool_mount.sh`; measured noise and the remaining sticker
+placement calibration are recorded in the precision guide. That guide also provides a
+[printable camera calibration board](assets/calibration/charuco-5x7-30mm.svg) and the native-image fitting workflow.
+Base markers alone cannot measure end-effector error. Joint zero/range mapping
+must be verified before whole-arm motion for this installation.
 
 ### 6.4 Fixed fingertip height correction
 
@@ -359,16 +417,59 @@ Closing a control window preserves supporting torque. Communication faults trigg
 See [Hardware control](docs/real-control.md), [Realtime operation](docs/realtime.md), and [Live Push-T](docs/push-t-remote.md).
 Previous V14 motion tests do not establish successful full Push-T operation on a new robot or scene.
 
+### Camera-guided T pick and place
+
+```bash
+# Fresh observations and local contact simulation; no motion targets
+./scripts/pick_t_realtime.sh
+
+# Automatically execute the checked grasp/place sequence
+./scripts/pick_t_realtime.sh --execute
+```
+
+The policy plans from the current wooden T and black target positions within the
+arm's feasible workspace. It requires accepted camera/table/joint calibration and
+a saved base in the current table frame. Simulation runs locally; the remote host
+only observes and executes bounded joint segments. See [T pick and place](docs/pick-t.md)
+for calibration, failure handling, offline replay, outputs, and validation limits.
+The current base mount fit is rejected, so physical grasp/placement validation is pending.
+
 ## 8. Configuration, layout, and data
 
-The sole active motor control configuration is [configs/control.json](configs/control.json), currently V14:
-60 Hz, RAM acceleration 20, velocity 600 ticks/s, Reset/approach peak speed 0.5 rad/s, and a 4 s circle period.
-Manual control, Reset, circles, and Push-T share it. `--fps` sets display/observation stream rate, not motor control frequency.
+The sole active motor control configuration is [configs/control.json](configs/control.json),
+currently **V22 responsive**: 60 Hz, RAM acceleration 40, velocity 600 ticks/s,
+approach speed 0.8 rad/s, minimum approach 0.35 s, Reset speed 0.5 rad/s, and a 4 s circle period.
+Manual control, Reset, circles, finite joint paths, Push-T, and T pick/place share it.
+`--fps` sets display/observation stream rate, not motor control frequency.
+Two supervised five-joint response trials shortened motion time by 36% while reducing
+encoder-model tracking RMS from 5.56 mm to 3.92–4.05 mm. Session P settings are 24
+for shoulder pan/lift and wrist pitch/roll, and 32 for elbow; storage stays locked
+and original P values are restored on close/release. I/D and protections are retained.
+See [Control performance](docs/control-performance.md) for measurements and scope.
+Independent 1 mm Cartesian validation is still pending; see [Precision calibration](docs/precision-calibration.md).
 After changing shared settings, stop old processes on both hosts, deploy, and restart. Hardware execution handshakes check the configuration hash.
+
+To run a finite five-joint response demo from an inspected, raised pose with a clear
+swept workspace and an observer present:
+
+```sh
+./scripts/verify_response.sh --execute
+# Start with a smaller excursion if needed:
+./scripts/verify_response.sh --execute --amplitudes 64
+```
+
+The default progresses through approximately 7°, 15°, and 29° maximum joint excursions,
+moving the first five joints together and returning to the starting pose. The jaw is
+not commanded. Local MuJoCo checks self/floor collision; the remote worker checks
+physical encoder limits and fresh starting feedback, executes from its own clock,
+then holds with supporting torque retained. Logs contain full-rate encoders and
+tracking metrics. Camera delay is recorded separately; the demo does not certify
+optical accuracy or collisions with unmodeled objects. Near-limit or colliding
+plans are rejected; joint ranges are never widened to accommodate a demo.
 
 | Path | Purpose / update method |
 | --- | --- |
-| `src/arm_control/` | Local clients, simulation/planning, shared logic, remote services |
+| `src/lerobot_arm_control/` | Local clients, simulation/planning, shared logic, remote services |
 | `scripts/` | User entry points; local runtime setup is centralized in `local_runtime.sh` |
 | `configs/control.json` | Shared motor control configuration, automatically deployed |
 | `configs/arms.toml` | Remote USB identities, roles, IDs; verify and edit remotely |
@@ -419,7 +520,7 @@ PYTHONPATH=src .venv/bin/python -m pytest -q --ignore=tests/test_safety.py
 .venv/bin/ruff check src tests scripts
 
 # Remote: run all tests in the deployed runtime manifest
-ssh lerobot 'cd /home/xy/Research/lerobot && ./scripts/uv run --locked pytest -q'
+ssh lerobot 'cd /home/xy/Research/lerobot && ./scripts/uv run --locked --extra hardware pytest -q'
 ```
 
 Verify both hosts when changing shared code. Update `pyproject.toml` and `uv.lock` for remote dependencies,

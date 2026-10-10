@@ -8,9 +8,9 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from arm_control.angle_calibration import AngleCalibration
-from arm_control.circle_trajectory import Circle
-from arm_control.realtime_client import Link
+from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+from lerobot_arm_control.runtime.realtime_client import Link
+from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 
 ROOT = Path(__file__).resolve().parents[1]
 

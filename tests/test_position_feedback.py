@@ -2,8 +2,8 @@ import math
 
 import pytest
 
-from arm_control.position_feedback import PositionFeedback
-from arm_control.realtime import JOINTS
+from lerobot_arm_control.control.position_feedback import PositionFeedback
+from lerobot_arm_control.transport.realtime import JOINTS
 
 
 def feedback():
@@ -97,6 +97,21 @@ def test_encoder_deadband_does_not_integrate_small_stationary_errors():
     for i in range(600):
         assert controller.target("elbow_flex", 0, .0015 * (-1)**i, 1 / 60) == 0
     assert controller.integral["elbow_flex"] == 0
+
+
+def test_finishing_ramp_unwinds_correction_within_existing_rate_limit():
+    controller = feedback()
+    joint = 'elbow_flex'
+    controller.integral[joint] = .03
+    controller.correction[joint] = .02
+    controller.reference_velocity[joint] = .1
+    controller.finish_reference([joint])
+    assert controller.integral[joint] == 0
+    assert controller.reference_velocity[joint] == 0
+    assert controller.correction[joint] == .02
+    command = controller.target(joint, 0, 0, 1/60)
+    assert command > 0
+    assert abs(command-.02) <= .08/60+1e-12
 
 
 def test_smooth_direction_feedforward_stays_bounded_through_reversal():

@@ -10,14 +10,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from arm_control.push_t_motor import (
+from lerobot_arm_control.tasks.push_t.push_t_motor import (
     PushMotor,
     joint_segments,
     observation_issue,
     recovery_issue,
     same_scene,
 )
-from arm_control.tabletop_stream import DisplayStream
+from lerobot_arm_control.transport.tabletop_stream import DisplayStream
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -47,7 +47,8 @@ class FakeBus:
                               'Max_Voltage_Limit': 90, 'Acceleration': 0,
                               'Maximum_Acceleration': 254, 'Goal_Time': 0,
                               'Goal_Velocity': 0, 'Maximum_Velocity_Limit': 1000,
-                              'Velocity_Unit_factor': 1} for j in joints}
+                              'Velocity_Unit_factor': 1, 'Lock': 1, 'P_Coefficient': 16}
+                          for j in joints}
         self.writes = []
 
     def read(self, register, joint, normalize=False):
@@ -82,7 +83,7 @@ def observed():
 
 @pytest.fixture
 def motor(observed):
-    from arm_control.realtime import JOINTS
+    from lerobot_arm_control.transport.realtime import JOINTS
 
     clock = [0.]
     bus = FakeBus(JOINTS)
@@ -167,9 +168,9 @@ def test_pre_enable_telemetry_cannot_falsely_trip_the_newly_enabled_stream(motor
     assert all(bus.sync_read('Torque_Enable').values())
 
 
-def test_push_uses_circle_v14_compensation_and_restores_native_ram_after_hold(observed):
-    from arm_control.manual_control import ManualControl
-    from arm_control.realtime import JOINTS
+def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observed):
+    from lerobot_arm_control.control.manual_control import ManualControl
+    from lerobot_arm_control.transport.realtime import JOINTS
 
     bus = FakeBus(JOINTS)
     clock = [0.]
@@ -185,25 +186,30 @@ def test_push_uses_circle_v14_compensation_and_restores_native_ram_after_hold(ob
     action = Push(np.zeros(2), np.ones(2), .004, joints=[[.35]*6], approach_count=0)
     instance.submit(observed, joint_segments([.3]*6, action, np.array([[-1., 1.]]*6)))
     tick(instance, bus)
-    assert set(bus.sync_read('Acceleration').values()) == {20}
+    assert set(bus.sync_read('Acceleration').values()) == {40}
     assert set(bus.sync_read('Goal_Velocity').values()) == {600}
     for index in range(1, 5):
         clock[0] = index/60
         instance.observe(observed, clock[0])
         tick(instance, bus)
     assert instance.control.command_angles['elbow_flex'] > instance.control.targets['elbow_flex']
-    assert not any(register in ('P_Coefficient', 'I_Coefficient', 'D_Coefficient',
+    assert bus.sync_read('P_Coefficient') == {
+        j: instance.control.position_feedback.profile['native_stream'][
+            'locked_p_coefficients'].get(j, 16) for j in JOINTS}
+    assert set(bus.sync_read('Lock').values()) == {1}
+    assert not any(register in ('Lock', 'I_Coefficient', 'D_Coefficient',
                                 'Operating_Mode', 'Homing_Offset', 'EEPROM_Lock')
                    for register, _, _ in bus.writes)
     instance.close()
     assert set(bus.sync_read('Acceleration').values()) == {0}
     assert set(bus.sync_read('Goal_Velocity').values()) == {0}
     assert set(bus.sync_read('Torque_Enable').values()) == {1}
+    assert set(bus.sync_read('P_Coefficient').values()) == {16}
     assert not any(instance.control.position_feedback.correction.values())
 
 
 def test_v14_push_compensation_also_respects_the_cad_joint_envelope():
-    from arm_control.realtime import JOINTS
+    from lerobot_arm_control.transport.realtime import JOINTS
 
     instance = PushMotor(FakeBus(JOINTS), Calibration(), [[-.31, .31]]*6,
                          {j: [1000, 3000] for j in JOINTS})
@@ -275,7 +281,7 @@ def test_circle_quintic_entry_and_bounded_push_speed_reject_out_of_limit_paths()
     segments = joint_segments([0.]*6, action, limits)
     assert all(1.875*max(abs(a-b) for a, b in zip(s['start'], s['end']))/s['seconds']
                <= s['speed_rad_s']+1e-9 for s in segments)
-    assert segments[0]['speed_rad_s'] == .5 and segments[0]['seconds'] >= .5
+    assert segments[0]['speed_rad_s'] == .8 and segments[0]['seconds'] >= .35
     assert segments[1]['speed_rad_s'] == .15
     action.joints[-1][0] = 2
     with pytest.raises(ValueError, match='joint limits'):

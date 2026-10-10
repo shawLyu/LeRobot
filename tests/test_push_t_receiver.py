@@ -8,9 +8,9 @@ import pytest
 from test_push_t_remote import motor as motor  # noqa: F401
 from test_push_t_remote import observed as observed  # noqa: F401
 
-from arm_control.control_defaults import CONTROL_CONFIG_SHA256
-from arm_control.model_metadata import MODEL
-from arm_control.push_t_receiver import PushReceiver
+from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
+from lerobot_arm_control.robot.so101.model_metadata import MODEL
+from lerobot_arm_control.tasks.push_t.push_t_receiver import PushReceiver
 
 
 @pytest.fixture
@@ -66,7 +66,7 @@ def test_bad_local_plans_are_rejected_before_any_motor_write(receiver, change):
     elif change == 'nan':
         command['segments'][0]['end'][0] = float('nan')
     elif change == 'speed':
-        command['segments'][0]['speed_rad_s'] = .6
+        command['segments'][0]['speed_rad_s'] = 1.0
     elif change == 'duration':
         command['segments'][0]['seconds'] = .06
     elif change == 'limits':

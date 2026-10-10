@@ -20,9 +20,16 @@ esac
 case "$REMOTE_ROOT" in
   *[!a-zA-Z0-9_./-]*) echo "Unsupported REMOTE_ROOT characters" >&2; exit 2 ;;
 esac
+case "$REMOTE_ROOT/" in
+  *'/../'*|*'/./'*|*'//'*) echo "REMOTE_ROOT must use a normalized project path" >&2; exit 2 ;;
+esac
 if [ -z "$DRY_RUN" ]; then
-  ssh "$HOST" "mkdir -p '$REMOTE_ROOT' && cd '$REMOTE_ROOT' && mkdir -p .cleanup &&
-    set --; for entry in src scripts tests docs configs README.md pyproject.toml uv.lock; do
+  ssh "$HOST" "set -eu
+    mkdir -p '$REMOTE_ROOT'
+    cd '$REMOTE_ROOT'
+    mkdir -p .cleanup
+    set --
+    for entry in src scripts tests docs configs README.md pyproject.toml uv.lock; do
       if [ -e \"\$entry\" ]; then set -- \"\$@\" \"\$entry\"; fi
     done;
     if [ \"\$#\" -gt 0 ]; then
@@ -43,9 +50,23 @@ rsync -az $DRY_RUN --itemize-changes "$ROOT/README.md" "$ROOT/pyproject.toml" \
   "$ROOT/uv.lock" "$ROOT/.gitignore" "$HOST:$REMOTE_ROOT/"
 # Seed a new installation while preserving every existing device configuration.
 rsync -az $DRY_RUN --ignore-existing --itemize-changes \
-  "$ROOT/configs/arms.toml" "$ROOT/configs/camera.toml" "$ROOT/configs/tabletop.json" \
+  "$ROOT/configs/camera.toml" "$ROOT/configs/tabletop.json" \
   "$HOST:$REMOTE_ROOT/configs/"
+rsync -az $DRY_RUN --ignore-existing --itemize-changes \
+  "$ROOT/configs/examples/arms.toml" "$HOST:$REMOTE_ROOT/configs/arms.toml"
 if [ "$WITH_CONFIG" = true ]; then
   rsync -az $DRY_RUN --itemize-changes "$ROOT/configs/tabletop.json" \
     "$HOST:$REMOTE_ROOT/configs/"
+fi
+# Retire the flat namespace and console scripts only after successful transfers.
+# Keep their contents recoverable alongside the pre-deployment code archive.
+if [ -z "$DRY_RUN" ]; then
+  ssh "$HOST" "cd '$REMOTE_ROOT' &&
+    retired=.cleanup/retired-interfaces-\$(date -u +%Y%m%dT%H%M%S)-\$\$ &&
+    for entry in src/arm_control .venv/bin/arm-control .venv/bin/lerobot-arm; do
+      if [ -e \"\$entry\" ]; then
+        mkdir -p \"\$retired/\$(dirname \"\$entry\")\" &&
+        mv \"\$entry\" \"\$retired/\$entry\" || exit 1
+      fi
+    done"
 fi

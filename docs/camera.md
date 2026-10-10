@@ -59,7 +59,7 @@ open -a XQuartz
 export DISPLAY="$(launchctl getenv DISPLAY)"
 ssh -X -C -o XAuthLocation=/opt/X11/bin/xauth \
     -o ForwardX11Timeout=0 -o ControlMaster=no -o ControlPath=none lerobot \
-    'cd /home/xy/Research/lerobot && ./scripts/uv run --locked scripts/camera_x11.py'
+    'cd /home/xy/Research/lerobot && ./scripts/uv run --locked --extra hardware scripts/camera_x11.py'
 ```
 
 This uses untrusted `-X` forwarding, without `-Y` or opening X11 TCP ports.
@@ -78,7 +78,7 @@ Save one image on the remote host without a GUI:
 
 ```bash
 cd /home/xy/Research/lerobot
-./scripts/uv run --locked scripts/camera_x11.py --snapshot logs/camera-snapshot.png
+./scripts/uv run --locked --extra hardware scripts/camera_x11.py --snapshot logs/camera-snapshot.png
 ```
 
 In the measured check, 640x480 capture reported 30 fps; forwarded DISPLAY was `localhost:10.0`.

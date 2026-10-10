@@ -8,7 +8,7 @@ import mujoco
 import numpy as np
 import pytest
 
-from arm_control.push_t import (
+from lerobot_arm_control.planning.push_t import (
     CONTACT_HEIGHT,
     ROOT,
     PushPlanner,
@@ -74,8 +74,11 @@ def test_ik_rejects_unreachable_and_respects_limits(sim):
 
 
 def test_no_network_camera_or_motor_driver_imports():
-    module = ROOT/'src/arm_control/push_t.py'
-    syntax = ast.parse(module.read_text())
+    import inspect
+
+    from lerobot_arm_control.planning import push_t
+
+    syntax = ast.parse(inspect.getsource(push_t))
     imports = [n.module or '' for n in ast.walk(syntax) if isinstance(n, ast.ImportFrom)]
     imports += [a.name for n in ast.walk(syntax) if isinstance(n, ast.Import) for a in n.names]
     assert not any(name in ('subprocess', 'socket', 'serial', 'cv2', 'lerobot') for name in imports)

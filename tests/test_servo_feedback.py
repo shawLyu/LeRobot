@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from arm_control.servo_feedback import FIELDS, read_control_feedback
+from lerobot_arm_control.control.servo_feedback import FIELDS, read_control_feedback
 
 TABLE = {"Torque_Enable": (40, 1), "Acceleration": (41, 1), "Goal_Position": (42, 2),
          "Present_Position": (56, 2), "Present_Velocity": (58, 2), "Present_Load": (60, 2),

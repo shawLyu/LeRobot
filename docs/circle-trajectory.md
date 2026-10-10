@@ -10,8 +10,8 @@ normal playback uses `trajectory.period_seconds=4` from `configs/control.json`.
 ```
 
 The hardware entry performs Reset first, approaches the original absolute path with quintic interpolation,
-then executes the requested laps and holds. Simulation and hardware share approach speed 0.5 rad/s,
-minimum approach duration 0.5 s, speed ramp 1 s, and 60 Hz updates.
+then executes the requested laps and holds. Simulation and hardware share approach speed 0.8 rad/s,
+minimum approach duration 0.35 s, speed ramp 1 s, and 60 Hz updates. Reset retains 0.5 rad/s.
 Period and approach speed come only from shared configuration; launch arguments no longer override them separately.
 
 Locally, the measured remote pose is used to check collisions along the circle and approach segment before sending the result.

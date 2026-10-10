@@ -1,14 +1,14 @@
 {
   "camera_matrix": [
     [
-      537.5919095054742,
+      434.7165593948044,
       0.0,
-      306.6767322532455
+      309.00608094459545
     ],
     [
       0.0,
-      537.4465286147423,
-      261.9367863419509
+      444.1998559371445,
+      215.24907739687725
     ],
     [
       0.0,
@@ -17,18 +17,18 @@
     ]
   ],
   "dist_coeffs": [
-    -0.1052856618829329,
-    0.2550591979081858,
-    0.0041885728615206775,
-    -0.0014041346047001836,
-    -0.30373037710291856
+    -0.05954119985272649,
+    0.041966213636348546,
+    -0.001866498586647926,
+    0.0023208527103808396,
+    0.014901257236407763
   ],
   "image_size": [
     640,
-    480
+    360
   ],
-  "dictionary": "DICT_APRILTAG_36h10",
-  "marker_id": 1,
+  "dictionary": "DICT_APRILTAG_36h11",
+  "marker_id": 3,
   "marker_size_m": 0.15,
   "wood_height_m": 0.006,
   "fps": 10,
@@ -88,28 +88,28 @@
           [
             0.01813499778157824,
             -0.021,
-            0.06659999830167472
+            0.06759999830167472
           ],
           [
             -0.023865002218421763,
             -0.021,
-            0.06659999830167472
+            0.06759999830167472
           ],
           [
             -0.023865002218421763,
             0.021,
-            0.06659999830167472
+            0.06759999830167472
           ],
           [
             0.01813499778157824,
             0.021,
-            0.06659999830167472
+            0.06759999830167472
           ]
         ],
         "mount_calibration": {
-          "source": "user_confirmed_measurements_20261007",
+          "source": "user_confirmed_measurements_20261009",
           "black_edge_m": 0.042,
-          "center_height_over_table_m": 0.069,
+          "center_height_over_table_m": 0.07,
           "center_to_base_foot_rear_m": 0.0195,
           "on_base_centerline": true,
           "lateral_center_offset_m": 0,
@@ -121,30 +121,10 @@
           "center_base_m": [
             -0.0028650022184217618,
             0,
-            0.06659999830167472
+            0.06759999830167472
           ],
           "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
-        },
-        "border_seed_native": [
-          [
-            715,
-            936
-          ],
-          [
-            783,
-            939
-          ],
-          [
-            779,
-            1010
-          ],
-          [
-            712,
-            1008
-          ]
-        ],
-        "prefer_observed_border": true,
-        "border_seed_source": "Actual black-border edges in logs/two-arm-markers-20261007.png; excludes white margin and surrounding dark base"
+        }
       }
     ],
     "mounts": [
@@ -160,13 +140,127 @@
       "file": "data/calibration/follower_table_base.json",
       "sample_count": 20,
       "reference": {
-        "dictionary": "DICT_APRILTAG_36h10",
-        "id": 1,
+        "dictionary": "DICT_APRILTAG_36h11",
+        "id": 3,
         "marker_size_m": 0.15
       },
-      "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+      "camera_calibration_sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca"
     },
-    "physical_label": "left black follower"
+    "physical_label": "left black follower",
+    "tool_marker": {
+      "enabled": true,
+      "dictionary": "DICT_4X4_50",
+      "id": 8,
+      "marker_size_m": 0.02,
+      "max_reprojection_error_px": 1.0,
+      "mount_description": "Outer View from X- face of the fixed follower finger; symmetry centered, 11 mm from upper rounded shoulder",
+      "size_source": "User-confirmed 20 mm black-square side, excluding white margin",
+      "tool_transform_measured": false,
+      "adaptive_thresh_constant": 3.0,
+      "corner_refinement": "contour",
+      "cad_reference": {
+        "model_file": "assets/so101/so101.xml",
+        "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+        "fixed_jaw_mesh": "wrist_roll_follower_so101_v1",
+        "mesh_sha256": "4b17b410a12d64ec39554abc3e8054d8a97384b2dc4a8d95a5ecb2a93670f5f4",
+        "body": "gripper",
+        "coordinates": "meters in gripper body frame; not table coordinates",
+        "outer_flat_surface": {
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "plane_x_m": -0.0352,
+          "mesh_tolerance_m": 1e-06,
+          "patch_bounds_m": [
+            [
+              -0.0352,
+              -0.01265,
+              -0.043158
+            ],
+            [
+              -0.035199,
+              0.012214,
+              -0.007976
+            ]
+          ],
+          "upper_rounded_edge_z_m": -0.005,
+          "symmetry_center_y_m": -0.000218,
+          "installation_correspondence": "User-confirmed View from X- face"
+        },
+        "fixed_jaw_contact_reference": {
+          "geom": "fixed_jaw_box3",
+          "position_m": [
+            -0.009,
+            0.0,
+            -0.103
+          ],
+          "definition": "Contact capsule center, not its physical contact surface"
+        },
+        "gripperframe": {
+          "position_m": [
+            0.012,
+            -0.000218,
+            -0.098127
+          ],
+          "quaternion_wxyz": [
+            0.7071067811865475,
+            0.0,
+            0.7071067811865475,
+            0.0
+          ]
+        },
+        "visual_tip_min_z_m": -0.104425,
+        "marker_pose_in_gripper": {
+          "position_m": [
+            -0.0352,
+            -0.000218,
+            -0.016
+          ],
+          "rotation": [
+            [
+              0,
+              0,
+              -1
+            ],
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              0
+            ]
+          ],
+          "center_distance_from_upper_edge_m": 0.011,
+          "upper_edge_definition": "Rounded holder shoulder on the +Z (wrist) side",
+          "position_source": "User-specified symmetry center and 11 mm edge distance; CAD surface",
+          "rotation_source": "Code axes inferred from installation photograph; not validated",
+          "sticker_thickness_m": 0,
+          "thickness_measured": false,
+          "transform_validated": false
+        },
+        "contact_offset_marker_m": [
+          -0.087,
+          0.000218,
+          -0.0262
+        ]
+      },
+      "tool_reference": {
+        "name": "fixed_jaw_contact_center",
+        "offset_marker_m": [
+          -0.087,
+          0.000218,
+          -0.0262
+        ],
+        "transform_validated": false,
+        "source": "User-specified placement and canonical fixed-jaw CAD; photograph-inferred code axes"
+      }
+    }
   },
   "capture_size": [
     1920,
@@ -174,17 +268,17 @@
   ],
   "low_to_capture_affine": [
     [
-      2.252346208834946,
-      0.0028365090307615783,
-      237.2762493262011
+      3.0,
+      0.0,
+      0.0
     ],
     [
-      -0.0003542134366869174,
-      2.250008329122143,
-      0.45087193031592543
+      0.0,
+      3.0,
+      0.0
     ]
   ],
-  "capture_mapping_source": "Measured using 8 corners of the two table markers on this camera; max residual 1.028 native px",
+  "capture_mapping_source": "Exact 3:1 full-frame processing view derived from the user-selected native 1920x1080 checkerboard calibration; no sensor crop",
   "appearance": {
     "enabled": true,
     "texture_size": 1024
@@ -241,27 +335,7 @@
               0.06659999830167472
             ],
             "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
-          },
-          "border_seed_native": [
-            [
-              1228,
-              947
-            ],
-            [
-              1301,
-              950
-            ],
-            [
-              1303,
-              1026
-            ],
-            [
-              1229,
-              1024
-            ]
-          ],
-          "prefer_observed_border": true,
-          "border_seed_source": "Actual black-border edges in logs/two-arm-markers-20261007.png; excludes white margin and verifies exact ID 6"
+          }
         }
       ],
       "mounts": [
@@ -277,11 +351,12 @@
         "file": "data/calibration/arm1_table_base.json",
         "sample_count": 20,
         "reference": {
-          "dictionary": "DICT_APRILTAG_36h10",
-          "id": 1,
+          "dictionary": "DICT_APRILTAG_36h11",
+          "id": 3,
           "marker_size_m": 0.15
         },
-        "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+        "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+        "camera_calibration_sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca"
       },
       "simulation": {
         "plastic_rgb": [
@@ -300,5 +375,27 @@
         "joint_pose_source": "unmeasured_preview"
       }
     }
-  ]
+  ],
+  "camera_controls": {
+    "autofocus": false,
+    "focus": 68
+  },
+  "camera_calibration": {
+    "file": "configs/camera_intrinsics.json",
+    "sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca",
+    "source_path": "/home/hkuit-001/camera_calibration/session_20261008_135548/calibration_optimized.json",
+    "session": "20261008_135548",
+    "selection": "User selected the second calibration dataset on 2026-10-09",
+    "native_image_size": [
+      1920,
+      1080
+    ],
+    "training_images": 37,
+    "reported_training_rms_px": 0.7613802438870313,
+    "reported_validation_rms_px": 0.6797530945389286,
+    "focus_during_calibration": "not recorded in the supplied calibration",
+    "physical_precision_validated": false,
+    "dependent_base_calibration": "requires new registration",
+    "table_frame": "ID 3 center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the second stationary table marker. Rebuilt from current observations on 2026-10-09."
+  }
 }

@@ -11,6 +11,7 @@ project_activate_root="$(cd -- "$(dirname -- "$project_activate_source")/.." && 
 export UV_CACHE_DIR="$project_activate_root/.cache/uv"
 export UV_PYTHON_INSTALL_DIR="$project_activate_root/.tools/python"
 export UV_PROJECT_ENVIRONMENT="$project_activate_root/.venv"
+export PYTHONPATH="$project_activate_root/src${PYTHONPATH:+:$PYTHONPATH}"
 export HF_LEROBOT_HOME="$project_activate_root/data/lerobot"
 export PATH="$project_activate_root/.tools/bin:$PATH"
 source "$project_activate_root/.venv/bin/activate"

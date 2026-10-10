@@ -94,7 +94,7 @@ Deployment preserves remote calibration; explicit `./scripts/deploy_code.sh --co
 ## Segment execution
 
 Push segments are at most 4 mm, reference speed 4 mm/s, contact-stage joint speed at most 0.15 rad/s.
-Free approach shares 0.5 rad/s and minimum segment duration 0.5 s with circle control.
+Free approach shares 0.8 rad/s and minimum segment duration 0.35 s with circle control.
 Both stages use quintic interpolation, with peak slope 1.875 accounted for in velocity bounds.
 MPC contact prediction uses the same interpolation/timing, original gripper geometry, and multiple friction coefficients.
 Starts/targets must lie within encoder/CAD limits. Object, base, and actual joints are rechecked before action;
@@ -108,9 +108,14 @@ Stopping/disconnection retains loaded-joint support and restores prior RAM accel
 
 ## Shared circle controller
 
-Physical Push-T reuses circle V14 ManualControl and `configs/control.json`: RAM acceleration 20,
-velocity 600 ticks/s, 120 ms feedback filtering, per-joint PI, velocity feedforward, and continuous friction feedforward.
-Native PID, EEPROM protections, and measured angle calibration remain unchanged.
+Physical Push-T reuses circle ManualControl and `configs/control.json`: RAM acceleration 40,
+velocity 600 ticks/s, 80 ms first-five-joint feedback filtering, per-joint PI,
+velocity feedforward, and continuous friction feedforward. Jaw filtering remains 120 ms.
+Native I/D, EEPROM protections, and measured angle calibration remain unchanged.
+The current V22 response profile uses locked session P coefficients 24 / 24 / 32 / 24 / 24
+for the first five joints and restores previous P on close/release. Two supervised
+free-motion trials passed response comparisons; physical contact behavior and
+1 mm Cartesian validation remain pending. See [Control performance](control-performance.md).
 Compensated push commands are additionally constrained to encoder/CAD range intersections.
 
 The loop shares two packed RAM reads, a 60 Hz grid, and skipped stale slots instead of queued catch-up.

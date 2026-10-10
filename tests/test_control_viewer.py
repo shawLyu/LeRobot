@@ -5,8 +5,8 @@ import mujoco
 import numpy as np
 from PIL import ImageFont
 
-from arm_control.control_viewer import ControlViewer, panel_lines
-from arm_control.ui import motor_fault_text
+from lerobot_arm_control.visualization.control_viewer import ControlViewer, panel_lines
+from lerobot_arm_control.visualization.ui import motor_fault_text
 
 
 def viewer_without_window():

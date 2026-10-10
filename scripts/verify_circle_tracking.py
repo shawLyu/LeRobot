@@ -13,11 +13,11 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from arm_control.angle_calibration import AngleCalibration
-from arm_control.circle_trajectory import Circle
-from arm_control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
-from arm_control.realtime import JOINTS
-from arm_control.realtime_client import Link
+from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
+from lerobot_arm_control.runtime.realtime_client import Link
+from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
+from lerobot_arm_control.transport.realtime import JOINTS
 
 ROOT = Path(__file__).resolve().parents[1]
 

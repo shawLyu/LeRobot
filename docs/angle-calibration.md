@@ -68,7 +68,7 @@ Close the live window to release the serial port, support the arm, and use a sep
 ```sh
 ssh -t lerobot
 cd /home/xy/Research/lerobot
-./scripts/uv run --locked lerobot-calibrate \
+./scripts/uv run --locked --extra hardware lerobot-calibrate \
   --robot.type=so101_follower \
   --robot.port=/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00 \
   --robot.id=xy_follower \

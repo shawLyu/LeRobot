@@ -4,8 +4,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from arm_control import driver, motion
-from arm_control.config import ArmConfig
+from lerobot_arm_control.control import motion
+from lerobot_arm_control.core.config import ArmConfig
+from lerobot_arm_control.robot.so101 import driver
 
 
 def test_serial_bus_reserved_before_any_second_connection(tmp_path, monkeypatch):
@@ -190,7 +191,7 @@ def test_read_session_never_disables_torque(arm, monkeypatch, model):
             events.append(("disconnect", disable_torque))
             self.is_connected = False
 
-    monkeypatch.setattr(driver, "FeetechMotorsBus", ReadBus)
+    monkeypatch.setattr(driver, "make_bus", lambda arm: ReadBus())
     if model == 777:
         with driver.connected(arm):
             pass

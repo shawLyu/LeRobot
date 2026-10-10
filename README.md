@@ -19,10 +19,10 @@ After installing the local environment below:
 ./scripts/lerobot-arm --help
 ./scripts/lerobot-arm view arm --headless --duration 3
 ./scripts/lerobot-arm task circle --headless --duration 3
-./scripts/lerobot-arm task push-t --headless --fast --limit 1 --output data/push_t/demo
+./scripts/lerobot-arm task push-t --headless --fast --limit 1 --output data/push_t/run
 ```
 
-Existing workflow scripts use the same canonical modules. For Python callers:
+Workflow commands use the same canonical modules. For Python callers:
 
 ```python
 from lerobot_arm_control import load_arms
@@ -53,7 +53,7 @@ uv pip install --python .venv/bin/python -r requirements-local.txt
 The local environment uses [requirements-local.txt](requirements-local.txt) for simulation and display dependencies.
 `pyproject.toml` and `uv.lock` describe the remote **Linux x86_64** environment: LeRobot, Feetech, and CPU PyTorch.
 Do not use `scripts/bootstrap.sh` or `uv sync` to install the local environment on macOS.
-The launch scripts set `PYTHONPATH=src`; installing the full LeRobot package locally is unnecessary.
+The launcher sets `PYTHONPATH=src`; installing the full LeRobot package locally is unnecessary.
 
 To reuse an existing environment:
 
@@ -71,13 +71,13 @@ See the [uv environment documentation](https://docs.astral.sh/uv/pip/environment
 
 ```bash
 # Local SO-101 window: no SSH, camera, or motor connection
-./scripts/view_arm_realtime.sh --backend mujoco
+./scripts/lerobot-arm view arm --backend mujoco
 
 # Run three circle laps automatically in local simulation
-./scripts/view_arm_realtime.sh --backend mujoco --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend mujoco --circle --circle-laps 3
 
 # Headless check with an explicit log destination
-./scripts/view_arm_realtime.sh --backend mujoco --headless --duration 3 \
+./scripts/lerobot-arm view arm --backend mujoco --headless --duration 3 \
   --log logs/simulation-smoke.json
 ```
 
@@ -88,10 +88,10 @@ The default backend is `hardware`; offline demos must explicitly use `--backend 
 
 ```bash
 # Use the included independent observation snapshot, played at simulation speed
-./scripts/simulate_push_t.sh
+./scripts/lerobot-arm task push-t
 
 # Headless, fast computation, with a separate output directory
-./scripts/simulate_push_t.sh --headless --fast --limit 10 \
+./scripts/lerobot-arm task push-t --headless --fast --limit 10 \
   --output data/push_t/my-demo
 ```
 
@@ -163,7 +163,7 @@ See [Environment and diagnostics](docs/setup.md) for initialization and upstream
 Arm, tabletop, Push-T, Reset, and height calibration clients use explicit `--host` and `--remote-root` options:
 
 ```bash
-./scripts/view_arm_realtime.sh --host my-robot --remote-root /home/robot/lerobot
+./scripts/lerobot-arm view arm --backend hardware --host my-robot --remote-root /home/robot/lerobot
 ```
 
 ## 4. Identify robots and cameras
@@ -247,7 +247,7 @@ done
 ```
 
 ```bash
-./scripts/view_arm_realtime.sh --backend hardware
+./scripts/lerobot-arm view arm --backend hardware --backend hardware
 ```
 
 This entry reads feedback and captures manually placed poses. It does not execute motion or modify EEPROM.
@@ -299,7 +299,7 @@ the follower; the right arm retains its earlier 69 mm measurement.
 Make the primary anchor and both base markers clearly visible, then run:
 
 ```bash
-./scripts/view_tabletop_realtime.sh --recalibrate-base --fps 5
+./scripts/lerobot-arm view tabletop --recalibrate-base --fps 5
 ```
 
 The program archives each previous base calibration, accumulates 20 valid observations per arm,
@@ -315,7 +315,7 @@ Only the follower has joint feedback/control; the white arm registration supplie
 The local viewer includes both six-joint models. White-arm joints use a translucent,
 unmeasured preview until separate joint calibration and feedback are available.
 For camera observation alongside a controller, use
-`./scripts/view_tabletop_realtime.sh --camera-only --fps 5`; this does not open a motor bus.
+`./scripts/lerobot-arm view tabletop --camera-only --fps 5`; this does not open a motor bus.
 Recalibrate after moving the base or primary anchor. After moving the camera, check intrinsics, localization quality, and configured marker search regions.
 Before replacing the follower base file, archive any height correction and samples bound to it,
 then collect and validate new height measurements. See [Two-arm calibration](docs/two-arm-calibration.md)
@@ -327,7 +327,7 @@ benchmark commands and actual precision results, see
 The installed fixed-finger marker is ArUco 4x4 / ID 8 with a confirmed 20 mm black
 square, on the outer `View from X-` face, centered on its symmetry line and 11 mm
 from the upper shoulder. Inspect its CAD references and nominal mount locally
-with `./scripts/inspect_tool_mount.sh`; measured noise and the remaining sticker
+with `./scripts/lerobot-arm inspect tool-mount`; measured noise and the remaining sticker
 placement calibration are recorded in the precision guide. That guide also provides a
 [printable camera calibration board](assets/calibration/charuco-5x7-30mm.svg) and the native-image fitting workflow.
 Base markers alone cannot measure end-effector error. Joint zero/range mapping
@@ -338,9 +338,9 @@ must be verified before whole-arm motion for this installation.
 After joint and base calibration, exit other serial tools. Support and manually position the arm; sampling is read-only:
 
 ```bash
-./scripts/calibrate_height.sh collect --count 10
-./scripts/calibrate_height.sh fit
-./scripts/calibrate_height.sh apply
+./scripts/lerobot-arm calibrate height collect --count 10
+./scripts/lerobot-arm calibrate height fit
+./scripts/lerobot-arm calibrate height apply
 ```
 
 Enter the measured height in millimeters from the lowest fixed finger surface to the table, then press Enter to sample.
@@ -351,7 +351,7 @@ The current STS3215 setup uses the native pitch angle scale. After collecting me
 for the current base installation, fit with:
 
 ```bash
-./scripts/calibrate_height.sh fit --native-pitch-scale --apply
+./scripts/lerobot-arm calibrate height fit --native-pitch-scale --apply
 ```
 
 `--apply` saves a correction; it does not send motion. Resample and validate after changing raw angle or base calibration.
@@ -360,7 +360,7 @@ See [Height calibration](docs/height-calibration.md) for thresholds, resampling,
 ### 6.5 Resting pose for Reset
 
 ```bash
-./scripts/control_arm_realtime.sh
+./scripts/lerobot-arm view arm --backend hardware --hardware-control
 ```
 
 Support and place the arm in a stable resting pose. With all six motors torque-off and feedback stable, press `P` to save remote
@@ -372,12 +372,12 @@ Teach the resting pose again after changing the angle mapping or kinematic corre
 ### Read-only mirrors and local planning previews
 
 ```bash
-./scripts/view_arm_realtime.sh --backend hardware
-./scripts/view_tabletop_realtime.sh --fps 10
-./scripts/push_t_realtime.sh --fps 10
+./scripts/lerobot-arm view arm --backend hardware --backend hardware
+./scripts/lerobot-arm view tabletop --fps 10
+./scripts/lerobot-arm view tabletop --push-t --fps 10
 
 # Read a fresh remote image/joint snapshot, disconnect, then simulate locally
-./scripts/simulate_push_t.sh --capture
+./scripts/lerobot-arm task push-t --capture
 ```
 
 The first three entries continuously use remote feedback; run them sequentially for the same robot.
@@ -391,16 +391,16 @@ Push-T also requires valid tabletop/object observations and base registration.
 
 ```bash
 # Manual control: E/S enables motors; arrows move the selected joint
-./scripts/control_arm_realtime.sh
+./scripts/lerobot-arm view arm --backend hardware --hardware-control
 
 # Automatically Reset, approach, and execute three laps: motion starts after launch
-./scripts/control_arm_realtime.sh --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend hardware --hardware-control --circle --circle-laps 3
 
 # Headless Reset: motion starts after launch
-./scripts/reset_arm_remote.sh
+./scripts/lerobot-arm reset
 
 # Allow real Push-T: P starts; launch itself does not send motion targets
-./scripts/push_t_realtime.sh --hardware-control --fps 10
+./scripts/lerobot-arm view tabletop --push-t --hardware-control --fps 10
 ```
 
 | Manual window key | Action |
@@ -421,10 +421,10 @@ Previous V14 motion tests do not establish successful full Push-T operation on a
 
 ```bash
 # Fresh observations and local contact simulation; no motion targets
-./scripts/pick_t_realtime.sh
+./scripts/lerobot-arm task pick-t
 
 # Automatically execute the checked grasp/place sequence
-./scripts/pick_t_realtime.sh --execute
+./scripts/lerobot-arm task pick-t --execute
 ```
 
 The policy plans from the current wooden T and black target positions within the
@@ -453,9 +453,9 @@ To run a finite five-joint response demo from an inspected, raised pose with a c
 swept workspace and an observer present:
 
 ```sh
-./scripts/verify_response.sh --execute
+./scripts/lerobot-arm verify response --execute
 # Start with a smaller excursion if needed:
-./scripts/verify_response.sh --execute --amplitudes 64
+./scripts/lerobot-arm verify response --execute --amplitudes 64
 ```
 
 The default progresses through approximately 7°, 15°, and 29° maximum joint excursions,
@@ -470,7 +470,7 @@ plans are rejected; joint ranges are never widened to accommodate a demo.
 | Path | Purpose / update method |
 | --- | --- |
 | `src/lerobot_arm_control/` | Local clients, simulation/planning, shared logic, remote services |
-| `scripts/` | User entry points; local runtime setup is centralized in `local_runtime.sh` |
+| `scripts/` | One operation launcher plus installation, deployment and camera support |
 | `configs/control.json` | Shared motor control configuration, automatically deployed |
 | `configs/arms.toml` | Remote USB identities, roles, IDs; verify and edit remotely |
 | `configs/camera.toml` | Remote independent camera preview settings |

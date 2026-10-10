@@ -8,18 +8,18 @@ import argparse
 import json
 import subprocess
 import time
-from pathlib import Path
 
 import mujoco
 import numpy as np
 
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
+from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
-from lerobot_arm_control.transport.realtime import JOINTS
+from lerobot_arm_control.transport.realtime import JOINTS, checked_command
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = workspace_root()
 
 
 def measure(proof):
@@ -100,11 +100,8 @@ def trial(laps):
         return state
 
     def command(op, **kwargs):
-        ack = link.wait_ack(link.send(op, **kwargs))
-        proof["acks"].append(ack)
-        if not ack["ok"]:
-            raise RuntimeError(ack.get("error", "command failed"))
-        return ack.get("result")
+        ack = checked_command(link, proof['acks'], op, fallback_error="command failed", **kwargs)
+        return ack.get('result')
 
     try:
         deadline = time.monotonic() + 15
@@ -170,7 +167,7 @@ def trial(laps):
     return proof["completed"]
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--laps", type=int, default=1)
     parser.add_argument("--execute", action="store_true")
@@ -178,3 +175,7 @@ if __name__ == "__main__":
     if not args.execute or not 1 <= args.laps <= 5:
         parser.error("requires --execute and 1..5 laps with an observed, clear arm")
     raise SystemExit(0 if trial(args.laps) else 1)
+
+
+if __name__ == "__main__":
+    main()

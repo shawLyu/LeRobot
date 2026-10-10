@@ -1,5 +1,24 @@
 #!/bin/sh
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-. "$ROOT/scripts/local_runtime.sh"
+if [ -n "${LEROBOT_MUJOCO_ENV:-}" ]; then
+  LOCAL_ENV=$LEROBOT_MUJOCO_ENV
+elif [ -x "$ROOT/.venv/bin/python" ]; then
+  LOCAL_ENV="$ROOT/.venv"
+elif [ "$(uname -s)" = Darwin ]; then
+  # Compatibility with the existing workstation installation.
+  LOCAL_ENV="$ROOT/../Materials/UWLab/.venv"
+else
+  LOCAL_ENV="$ROOT/.venv"
+fi
+LOCAL_PYTHON="$LOCAL_ENV/bin/python"
+if [ ! -x "$LOCAL_PYTHON" ]; then
+  echo "Python missing: $LOCAL_PYTHON. Install requirements-local.txt as described in README.md, or set LEROBOT_MUJOCO_ENV." >&2
+  exit 1
+fi
+export PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
+if [ "$(uname -s)" = Darwin ]; then
+  LOCAL_PYTHON_LIB=$("$LOCAL_PYTHON" -c 'import sys; print(sys.base_prefix + "/lib")')
+  export DYLD_LIBRARY_PATH="$LOCAL_PYTHON_LIB${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+fi
 exec "$LOCAL_PYTHON" -m lerobot_arm_control "$@"

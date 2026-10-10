@@ -52,9 +52,9 @@ described in [Precision calibration](precision-calibration.md).
 
 ```sh
 # Physical five-joint motion; close other serial tools and supervise the workspace.
-./scripts/verify_response.sh --execute
+./scripts/lerobot-arm verify response --execute
 # Smaller simultaneous excursion only.
-./scripts/verify_response.sh --execute --amplitudes 64
+./scripts/lerobot-arm verify response --execute --amplitudes 64
 ```
 
 The default path is relative to the current stable pose. `--anchor path/to/anchor.json`
@@ -91,15 +91,15 @@ these results do not demonstrate agreement with simulation throughout the worksp
 Previous tuning comparisons and configurations are retained in pre-cleanup source snapshots and historical `.cleanup/` directories.
 
 ```sh
-./scripts/control_arm_realtime.sh
-./scripts/control_arm_realtime.sh --circle --circle-laps 3
-./scripts/view_arm_realtime.sh --backend mujoco --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend hardware --hardware-control
+./scripts/lerobot-arm view arm --backend hardware --hardware-control --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend mujoco --circle --circle-laps 3
 
 # Explicit physical verification: executes motion. Close other serial tools first.
-PYTHONPATH=src ../URDFSim/.venv/bin/python scripts/verify_circle_tracking.py --execute --laps 3
+./scripts/lerobot-arm verify tracking --execute --laps 3
 ```
 
-The last command records the historical workstation environment; substitute your local simulation interpreter as needed.
-`verify_circle_tracking.py` uses current shared settings, retains full-rate trajectories and error evidence,
+The launcher selects the configured local simulation interpreter.
+`diagnostics/circle_tracking.py` uses current shared settings, retains full-rate trajectories and error evidence,
 and rejects separate tuning files. Ordinary tracking error does not stop motion; faults, lost torque, and disconnection still trigger hold.
 See [Code layout](code-layout.md) for deployment and parameter changes.

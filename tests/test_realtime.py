@@ -144,3 +144,32 @@ def test_simulation_runs_local_physics_with_no_remote_host():
 
 def test_simulation_accepts_position_steps_without_relative_action_cap():
     assert validate_target([0.9] * 6, [0] * 6, [[-1, 1]] * 6) == [0.9] * 6
+
+
+@pytest.mark.parametrize("acknowledgement", [
+    {"ok": False, "error": "motor fault"},
+    {"ok": False},
+])
+def test_checked_command_preserves_rejected_acknowledgements(acknowledgement):
+    from lerobot_arm_control.transport.realtime import checked_command
+
+    link = Mock()
+    link.send.return_value = 42
+    link.wait_ack.return_value = acknowledgement
+    recorded = []
+    with pytest.raises(RuntimeError, match=acknowledgement.get("error", "command rejected")):
+        checked_command(link, recorded, "joint_target", joint="gripper", angle=.03)
+    assert recorded == [acknowledgement]
+    link.send.assert_called_once_with("joint_target", joint="gripper", angle=.03)
+    link.wait_ack.assert_called_once_with(42)
+
+
+def test_checked_command_timeout_does_not_create_a_successful_ack():
+    from lerobot_arm_control.transport.realtime import checked_command
+
+    link = Mock()
+    link.wait_ack.side_effect = TimeoutError("no acknowledgement")
+    recorded = []
+    with pytest.raises(TimeoutError, match="no acknowledgement"):
+        checked_command(link, recorded, "hold")
+    assert recorded == []

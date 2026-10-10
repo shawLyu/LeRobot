@@ -14,12 +14,11 @@ from lerobot_arm_control.calibration.height_calibration import (
     MODEL,
     PITCH_JOINTS,
     JawHeight,
-    apply_candidate,
-    digest,
     fit_samples,
-    read_sample,
 )
+from lerobot_arm_control.calibration.height_records import apply_candidate, read_sample
 from lerobot_arm_control.control.manual_control import ManualControl
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.transport.realtime import JOINTS
 
 
@@ -49,7 +48,7 @@ def measured(tmp_path):
         sample = {'measured_height_m': h, 'qpos': q, 'stable': True,
                   'raw_span_ticks': dict.fromkeys(JOINTS, 0),
                   'samples': [{'raw': raw, 'status': dict.fromkeys(JOINTS, 0)} for _ in range(12)],
-                  'writes_performed': False, 'joint_calibration_sha256': digest(angles),
+                  'writes_performed': False, 'joint_calibration_sha256': file_digest(angles),
                   'base_calibration': base_record}
         samples.append(sample)
     return samples, offsets, angles, base
@@ -207,7 +206,7 @@ def test_sampling_uses_only_reads_and_rejects_motion_or_fault(measured):
 
 
 def test_model_is_the_same_as_original_joint_calibration():
-    assert json.loads(ANGLES.read_text())['fingerprint']['mjcf_sha256'] == digest(MODEL)
+    assert json.loads(ANGLES.read_text())['fingerprint']['mjcf_sha256'] == file_digest(MODEL)
 
 
 def test_fresh_capture_checks_the_effective_corrected_mapping(measured):

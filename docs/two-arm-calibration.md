@@ -84,10 +84,10 @@ indicates that both endpoints are saved calibrations.
 
 ```sh
 # Local preview; SSH starts remote perception and read-only follower feedback.
-./scripts/view_tabletop_realtime.sh --fps 5
+./scripts/lerobot-arm view tabletop --fps 5
 
 # Camera observations without opening the local GUI.
-./scripts/view_tabletop_realtime.sh --headless --duration 10 --fps 5
+./scripts/lerobot-arm view tabletop --headless --duration 10 --fps 5
 ```
 
 After both bases are accepted, the local viewer shows both articulated SO101
@@ -110,7 +110,7 @@ visible, deploy the installation configuration, and collect again:
 
 ```sh
 ./scripts/deploy_code.sh --config
-./scripts/view_tabletop_realtime.sh --recalibrate-base --fps 5
+./scripts/lerobot-arm view tabletop --recalibrate-base --fps 5
 ```
 
 `--recalibrate-base` archives both previous base files and collects independent

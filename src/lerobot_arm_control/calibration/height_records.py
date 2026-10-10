@@ -1,6 +1,5 @@
 """Shared read-only height records and validation of locally fitted corrections."""
 
-import hashlib
 import json
 import math
 import statistics
@@ -10,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration, validate_correction
+from lerobot_arm_control.core.files import atomic_json, file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -20,16 +20,12 @@ DATA = ROOT/'data/calibration/height_samples.json'
 CANDIDATE = ROOT/'data/calibration/follower_height_candidate.json'
 
 
-def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
 def save_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix('.tmp')
-    temporary.write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
-    temporary.replace(path)
+    atomic_json(path, value)
+
+
 def read_sample(bus, calibration, height_m, base_record, *, sleep=time.sleep):
     """Every bus operation is a read; opening/closing is handled by driver.connected."""
     if not math.isfinite(height_m) or not 0 <= height_m <= .15:
@@ -49,12 +45,12 @@ def read_sample(bus, calibration, height_m, base_record, *, sleep=time.sleep):
     raw = {joint: statistics.median(s['raw'][joint] for s in samples) for joint in JOINTS}
     return {'measured_height_m': height_m, 'qpos': calibration.angles(raw, [0.]*6),
             'stable': True, 'raw_span_ticks': spans, 'samples': samples,
-            'writes_performed': False, 'joint_calibration_sha256': digest(calibration.path),
+            'writes_performed': False, 'joint_calibration_sha256': file_digest(calibration.path),
             'base_calibration': base_record}
 
 
 def check_samples(samples, angles_path=ANGLES, base_path=BASE):
-    angles_hash = digest(angles_path)
+    angles_hash = file_digest(angles_path)
     saved_angles = json.loads(Path(angles_path).read_text())
     calibration = AngleCalibration(Path(angles_path), saved_angles['fingerprint'],
                                    use_kinematic=False)
@@ -89,8 +85,8 @@ def check_samples(samples, angles_path=ANGLES, base_path=BASE):
 
 def apply_candidate(candidate, *, angles_path=ANGLES, base_path=BASE):
     saved = json.loads(Path(angles_path).read_text())
-    validate_correction(candidate, digest(angles_path), saved['fingerprint'])
-    if digest(base_path) != candidate['base_calibration_sha256']:
+    validate_correction(candidate, file_digest(angles_path), saved['fingerprint'])
+    if file_digest(base_path) != candidate['base_calibration_sha256']:
         raise ValueError('Base changed after fitting')
     destination = Path(angles_path).with_name(Path(angles_path).stem+'_kinematic.json')
     if destination.exists():

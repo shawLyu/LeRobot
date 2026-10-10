@@ -5,7 +5,7 @@ The main model shows follower feedback; the small lower-left image is a static c
 not another control window. Previews, raw positions, acknowledgements, and capture share one window.
 
 ```sh
-./scripts/view_arm_realtime.sh --log logs/realtime-arm-live.json
+./scripts/lerobot-arm view arm --backend hardware --log logs/realtime-arm-live.json
 ```
 
 ## Measurements
@@ -54,7 +54,7 @@ Uncalibrated previews use +/-20 raw ticks; calibrated ones correspond to approxi
 The remote host validates against actual feedback and EEPROM limits, then returns the raw target.
 The main model always shows feedback rather than displaying targets as completed motion.
 This read-only entry does not execute targets. After 6/6 calibration, verify physical zero,
-direction, and feedback over several poses, then use `./scripts/control_arm_realtime.sh` for hardware control.
+direction, and feedback over several poses, then use `./scripts/lerobot-arm view arm --backend hardware --hardware-control` for hardware control.
 See [Hardware control](real-control.md). Capture and execution are launched separately; capture sends no physical targets.
 
 ## When upstream LeRobot calibration is needed

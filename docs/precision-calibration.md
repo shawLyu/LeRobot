@@ -95,9 +95,9 @@ frame-dependent height corrections and pair summaries, then collect and fit:
 
 ```sh
 ./scripts/deploy_code.sh --config
-./scripts/view_tabletop_realtime.sh --camera-only --recalibrate-table \
+./scripts/lerobot-arm view tabletop --camera-only --recalibrate-table \
   --headless --duration 30 --fps 5 --output logs/new-table-capture
-./scripts/calibrate_table_reference.sh --capture logs/new-table-capture \
+./scripts/lerobot-arm calibrate table --capture logs/new-table-capture \
   --output logs/new-table-capture/table-reference-candidate.json
 ```
 
@@ -172,11 +172,11 @@ above restored the table; both fixed bases and tool metrology remain pending.
 ## View both arms
 
 ```sh
-./scripts/view_tabletop_realtime.sh --fps 5
+./scripts/lerobot-arm view tabletop --fps 5
 
 # Camera and mounting poses only: does not open either motor bus.
 # This mode can run alongside the isolated gripper benchmark below.
-./scripts/view_tabletop_realtime.sh --camera-only --fps 5
+./scripts/lerobot-arm view tabletop --camera-only --fps 5
 ```
 
 After valid base registration, the black follower uses live calibrated encoders.
@@ -227,7 +227,7 @@ measure the printed square before using that size. Add the following under
 
 ```sh
 ./scripts/deploy_code.sh --config
-./scripts/view_tabletop_realtime.sh --camera-only --fps 5
+./scripts/lerobot-arm view tabletop --camera-only --fps 5
 ```
 
 `states.jsonl` publishes `tool_marker`: camera-measured marker-center position
@@ -255,7 +255,7 @@ Contour refinement uses the observed boundary points supported by
 Inspect the original local model without opening a camera or motor bus:
 
 ```sh
-./scripts/inspect_tool_mount.sh
+./scripts/lerobot-arm inspect tool-mount
 ```
 
 The installed marker belongs to the fixed `gripper` body and the visual mesh
@@ -441,7 +441,7 @@ and no kinematic correction or control parameter change was activated. Evidence:
 ```sh
 # Finite physical motion: support the arm with all six motors initially off.
 # Close serial viewers first; this entry starts its own camera-only observer.
-./scripts/check_marker_precision.sh --execute --amplitude-ticks 16 --cycles 3 --dwell 3
+./scripts/lerobot-arm verify joints --joint shoulder_pan --observe-marker --execute --amplitude-ticks 16 --cycles 3 --dwell 3
 ```
 
 This entry enables only shoulder pan, requires its entire target range to fit the
@@ -552,13 +552,13 @@ is reserved before connection so cooperating workers cannot open it concurrently
 
 ```sh
 # Executes a finite, small gripper-only trial, using the current shared profile.
-./scripts/check_gripper_precision.sh --execute --amplitude-ticks 16 --cycles 3
+./scripts/lerobot-arm verify joints --execute --amplitude-ticks 16 --cycles 3
 
 # Larger repeated trial, still only about 2.6 degrees of gripper rotation.
-./scripts/check_gripper_precision.sh --execute --amplitude-ticks 32 --cycles 5
+./scripts/lerobot-arm verify joints --execute --amplitude-ticks 32 --cycles 5
 
 # Use an explicit nearby encoder center for comparable trials.
-./scripts/check_gripper_precision.sh --execute --amplitude-ticks 32 --cycles 5 \
+./scripts/lerobot-arm verify joints --execute --amplitude-ticks 32 --cycles 5 \
   --reference-raw 1583 --dwell 2
 ```
 
@@ -712,12 +712,10 @@ least twenty distinct positions and tilts, covering the image. Do not move the
 stationary table markers or robot bases.
 
 ```sh
-./scripts/view_tabletop_realtime.sh --camera-only --headless --fps 5 \
+./scripts/lerobot-arm view tabletop --camera-only --headless --fps 5 \
   --duration 90 --output logs/camera-charuco-session
 
-ROOT=$PWD
-. scripts/local_runtime.sh
-PYTHONPATH=src "$LOCAL_PYTHON" -m lerobot_arm_control.calibration.camera_intrinsics \
+./scripts/lerobot-arm calibrate camera \
   --capture logs/camera-charuco-session --square-mm 30 \
   --output logs/camera-charuco-session/intrinsics-candidate.json
 ```

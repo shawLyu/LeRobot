@@ -5,8 +5,8 @@ The cleanup preserves path points and model identity. The historical period in t
 normal playback uses `trajectory.period_seconds=4` from `configs/control.json`.
 
 ```sh
-./scripts/view_arm_realtime.sh --backend mujoco --circle --circle-laps 3
-./scripts/control_arm_realtime.sh --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend mujoco --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend hardware --hardware-control --circle --circle-laps 3
 ```
 
 The hardware entry performs Reset first, approaches the original absolute path with quintic interpolation,

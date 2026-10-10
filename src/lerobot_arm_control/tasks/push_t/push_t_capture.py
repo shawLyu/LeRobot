@@ -11,10 +11,9 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from lerobot_arm_control.calibration.angle_calibration import effective_scale, validate_correction
+from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.runtime.tabletop_client import ROOT, TableLink, atomic_json
 from lerobot_arm_control.visualization.tabletop_scene import scene_xml
-
-JOINTS = ('shoulder_pan', 'shoulder_lift', 'elbow_flex', 'wrist_flex', 'wrist_roll', 'gripper')
 
 
 def session_name():

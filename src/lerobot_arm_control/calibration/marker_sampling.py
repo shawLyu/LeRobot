@@ -17,7 +17,7 @@ from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.runtime.tabletop_client import TableLink
-from lerobot_arm_control.transport.realtime import JOINTS
+from lerobot_arm_control.transport.realtime import JOINTS, checked_command
 
 ACTIVE = JOINTS[:5]
 ROOT = workspace_root()
@@ -99,11 +99,7 @@ def acquire(args):
     marker_count = 0
 
     def command(op, **payload):
-        ack = link.wait_ack(link.send(op, **payload))
-        proof['acks'].append(ack)
-        if not ack['ok']:
-            raise RuntimeError(ack.get('error', 'command rejected'))
-        return ack.get('result')
+        return checked_command(link, proof['acks'], op, **payload).get('result')
 
     def observe(settled=False):
         nonlocal last_ping, last_marker, last_seq, camera_seq, error_since, marker_count

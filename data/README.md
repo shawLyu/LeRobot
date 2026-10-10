@@ -46,3 +46,10 @@ The camera record selected on 2026-10-09 is versioned separately at
 `.cleanup/20261009-table-id3/`. They remain historical measurements: runtime signatures now bind them to the camera intrinsics,
 distortion and selected source hash, so new base registration is required with
 the selected camera calibration. Their previous separation is not a new measurement.
+
+On 2026-10-11, the unused generated `data/push_t/run/` output was moved to
+`.cleanup/20261011-unused-demo-*/run/` with a per-file SHA-256 manifest.
+The measured snapshot's 18 cached mesh files were verified byte-for-byte against
+`assets/so101/assets/` and removed (17,409,712 bytes). Offline scene creation
+uses the canonical model meshes when this cache is absent. Observation,
+calibration, marker and appearance inputs remain available for tasks and tests.

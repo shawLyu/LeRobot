@@ -1,17 +1,12 @@
 """A successful command acknowledgement must not interrupt a hardware trial."""
 
-import importlib.util
 import time
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 pytest.importorskip('mujoco')
-spec = importlib.util.spec_from_file_location(
-    'verify_response', Path(__file__).parents[1]/'scripts/verify_response.py')
-verification = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(verification)
+from lerobot_arm_control.diagnostics import response as verification  # noqa: E402
 
 
 def test_successful_ack_is_not_a_worker_error():

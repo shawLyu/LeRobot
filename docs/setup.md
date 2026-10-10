@@ -10,7 +10,7 @@ Maintain all source locally; remote Linux runs hardware services.
 | Local macOS / Linux | `uv venv --python 3.12 .venv`, then install `requirements-local.txt` | MuJoCo, NumPy, OpenCV, Pillow; LeRobot/Torch not required |
 | Remote Linux x86_64 | `./scripts/bootstrap.sh` | Python 3.12, locked LeRobot 0.6.1 / Feetech, CPU Torch, development tools; no MuJoCo |
 
-Local wrappers share `scripts/local_runtime.sh` for interpreter selection and PYTHONPATH.
+`scripts/lerobot-arm` selects the local interpreter and sets an absolute PYTHONPATH.
 `LEROBOT_MUJOCO_ENV` takes precedence, followed by project `.venv`; Mac retains the legacy UWLab fallback.
 Do not use the Linux x86_64 `uv.lock` to install a Mac environment.
 

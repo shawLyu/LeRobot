@@ -13,7 +13,7 @@ pytest.importorskip('mujoco')
 from lerobot_arm_control.calibration.marker_alignment import (  # noqa: E402
     ROOT,
     MarkerKinematics,
-    digest,
+    file_digest,
     fit,
     read_observations,
 )
@@ -81,9 +81,9 @@ def test_failed_or_stale_capture_cannot_be_rebound_to_current_geometry(tmp_path)
     path.write_text(json.dumps({'completed': False}))
     with pytest.raises(ValueError, match='Incomplete'):
         read_observations(tmp_path)
-    recorded = {'angles': digest(ROOT/'data/calibration/follower_mujoco.json'),
-                'base': digest(ROOT/'data/calibration/follower_table_base.json'),
-                'model': digest(MODEL)}
+    recorded = {'angles': file_digest(ROOT/'data/calibration/follower_mujoco.json'),
+                'base': file_digest(ROOT/'data/calibration/follower_table_base.json'),
+                'model': file_digest(MODEL)}
     path.write_text(json.dumps({'completed': True, 'input_sha256': recorded,
                                'cleanup_error': 'hold failed'}))
     with pytest.raises(ValueError, match='Incomplete'):

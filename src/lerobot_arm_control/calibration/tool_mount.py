@@ -83,6 +83,9 @@ def cad_reference(model_path=MODEL):
 
 
 def main():
+    import argparse
+
+    argparse.ArgumentParser(description=__doc__).parse_args()
     print(json.dumps(cad_reference(), indent=2))
 
 

@@ -17,9 +17,9 @@ import mujoco
 import numpy as np
 
 from lerobot_arm_control.core.paths import resource_path
+from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_xml
 
-JOINTS = ('shoulder_pan', 'shoulder_lift', 'elbow_flex', 'wrist_flex', 'wrist_roll', 'gripper')
 CONTACT_CLEARANCE = .007
 JAW_CLOSED = -.16
 CONTACT_HEIGHT = .0035

@@ -8,8 +8,8 @@ from pathlib import Path
 
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.core.paths import resource_path
+from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.tasks.circle.circle_trajectory import PLAN, ROOT, Circle, load_profile
-from lerobot_arm_control.transport.realtime import JOINTS
 
 
 def check_path(model, points, *, allow_start_tolerance=False, check_joint_limits=True):

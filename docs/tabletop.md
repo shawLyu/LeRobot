@@ -6,7 +6,7 @@ The local host receives/saves observations over SSH and displays them with MuJoC
 
 ```sh
 ./scripts/deploy_code.sh
-./scripts/view_tabletop_realtime.sh
+./scripts/lerobot-arm view tabletop
 ```
 
 The left panel shows the annotated image and observation status; the right shows complete T models.
@@ -81,7 +81,7 @@ Early sessions used ID 0 as origin; current sessions use ID 1. Compare their cal
 
 ```sh
 ssh lerobot 'cd /home/xy/Research/lerobot && .venv/bin/pytest -q tests/test_tabletop_perception.py tests/test_tabletop_tracking.py'
-./scripts/view_tabletop_realtime.sh --headless --duration 15
+./scripts/lerobot-arm view tabletop --headless --duration 15
 ```
 
 Tests cover plane back-projection, two-marker recovery, fusion fallback, moving-T completion under partial occlusion,
@@ -91,7 +91,7 @@ References: [OpenCV PnP](https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.htm
 
 ## Live SO101 mirror
 
-`scripts/view_tabletop_realtime.sh` displays the table and SO101 together.
+`./scripts/lerobot-arm view tabletop` displays the table and SO101 together.
 The remote follower bus is sampled read-only by stable USB identity, normally at 20 Hz.
 Angles use the 0/30/60-degree fit in `data/calibration/follower_mujoco.json`.
 Startup checks USB identity, motor IDs, limits, Homing Offset, Phase, Operating Mode, and original MJCF hash.

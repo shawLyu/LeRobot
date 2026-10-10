@@ -2,9 +2,20 @@
 
 import math
 
-JOINTS = ("shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper")
+from lerobot_arm_control.robot.so101.joints import JOINTS
+
 VERSION = 1
 WATCHDOG_SECONDS = 0.75
+
+
+def checked_command(link, acknowledgements, operation, *, fallback_error="command rejected",
+                    **payload):
+    """Record the acknowledgement before rejecting a failed worker command."""
+    ack = link.wait_ack(link.send(operation, **payload))
+    acknowledgements.append(ack)
+    if not ack["ok"]:
+        raise RuntimeError(ack.get("error", fallback_error))
+    return ack
 
 
 def preview_joint_target(bus, joint, delta):

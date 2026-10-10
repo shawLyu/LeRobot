@@ -1,5 +1,18 @@
 # Verification records
 
+## Script and demo cleanup: 2026-10-11, Beijing time
+
+| Check | Result |
+| --- | --- |
+| Full test suite | 466 passed, 1 skipped in 51.74 s; upstream LeRobot comparison skipped locally |
+| Scripts | 32 reduced to 9; 21 removed, 2 verification programs moved into diagnostics |
+| Shared logic | One command acknowledgement checker, byte fingerprint function, atomic JSON writer and canonical SO101 joint order |
+| Demo/model cleanup | Duplicate scene removed; 18 identical cached meshes removed (17,409,712 bytes); generated run output archived under .cleanup with hashes |
+| Static and shell checks | Ruff passed; all 7 remaining shell entries passed syntax checks |
+| Local runtime | Circle task launched from /tmp, started the circle and completed at about 20 Hz |
+| Remote source boundary | Selected runtime import and deployment tests passed |
+| Robot execution | Verification used simulation and fake buses |
+
 ## Source cleanup: 2026-10-11, Beijing time
 
 The source-only SO-101 system was checked locally after migration to

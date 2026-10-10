@@ -30,7 +30,7 @@ def test_numeric_selection_never_changes_geometry_groups():
 
 def test_actual_so101_meshes_remain_identical_after_all_selection_keys():
     model = mujoco.MjModel.from_xml_path(str(
-        Path(__file__).resolve().parents[1] / "assets/so101/scene_hardware.xml"))
+        Path(__file__).resolve().parents[1] / "assets/so101/scene_mujoco.xml"))
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     scene = mujoco.MjvScene(model, maxgeom=1000)

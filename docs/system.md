@@ -55,9 +55,36 @@ The project is never installed into site-packages or built into a distribution.
 ./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware read --arm follower --samples 3
 ```
 
+All operation commands use this one launcher. Response and circle tracking
+verification live in the diagnostics modules:
+
+```bash
+./scripts/lerobot-arm verify response --help
+./scripts/lerobot-arm verify tracking --help
+./scripts/lerobot-arm inspect tool-mount --help
+```
+
 Arguments go to the corresponding workflow parser. Hardware motion retains its
 explicit execution flags and existing checks. `task pick-t` without a snapshot
 uses the remote preview workflow; see [Pick-T](pick-t.md).
+
+## Maintained scripts
+
+Operation commands use one launcher. The remaining scripts support distinct
+environment, deployment and camera workflows:
+
+| Script | Purpose |
+| --- | --- |
+| `scripts/lerobot-arm` | Control, simulation, tasks, calibration and verification |
+| `bootstrap.sh`, `install_uv.py`, `uv`, `activate.sh` | Linux runtime installation and environment selection |
+| `deploy_code.sh` | Selected remote runtime transfer and recovery archive |
+| `test_hardware.sh` | Environment diagnosis and repeated read-only bus checks |
+| `view_camera_x11.sh`, `camera_x11.py` | SSH/X11 camera preview |
+
+The response and circle tracking implementations live in
+`diagnostics/response.py` and `diagnostics/circle_tracking.py`.
+The canonical model scene is `assets/so101/scene_mujoco.xml`;
+its meshes also serve the live control viewer tests.
 
 ## Resources and worker startup
 

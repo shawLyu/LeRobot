@@ -20,7 +20,7 @@ The mode still fits three zeros with scale fixed by hardware constants, requirin
 Numerical/observability thresholds were retained. Recompute with:
 
 ```sh
-./scripts/calibrate_height.sh fit --native-pitch-scale --apply
+./scripts/lerobot-arm calibrate height fit --native-pitch-scale --apply
 ```
 
 The following sections preserve the first capture instructions and first-round failure.
@@ -37,11 +37,11 @@ The sampler only reads registers; it neither releases/enables torque nor command
 Do not press the gripper against the table and mislabel deformation as a zero-offset error.
 
 Sampling runs remotely; fitting runs locally; accepted results are returned for remote validation/application.
-The wrapper synchronizes raw calibration, base, and samples. --apply sends only locally accepted fits for another remote check.
+The height command synchronizes raw calibration, base, and samples. --apply sends only locally accepted fits for another remote check.
 Remote sampling has no MuJoCo dependency. Run locally:
 
 ```sh
-./scripts/calibrate_height.sh collect
+./scripts/lerobot-arm calibrate height collect
 ```
 
 After placing each pose, enter actual fixed-finger minimum height in millimeters and press Enter for about 1.2 s of read-only sampling.
@@ -74,7 +74,7 @@ These were selected for remeasurement against known-height supports while retain
 Model residuals alone did not prove ruler readings wrong; new poses were allowed without exactly restoring old joint angles.
 
 ```sh
-./scripts/calibrate_height.sh resample --poses 3 5 7 --apply
+./scripts/lerobot-arm calibrate height resample --poses 3 5 7 --apply
 ```
 
 Enter 0 for table contact or the measured spacer height. Previous complete samples remain under superseded.
@@ -84,13 +84,13 @@ If reliable supported measurements still fail, investigate scale/geometry rather
 Review an accepted candidate and apply:
 
 ```sh
-./scripts/calibrate_height.sh apply
+./scripts/lerobot-arm calibrate height apply
 ```
 
 Or capture, fit, validate, and apply in one command:
 
 ```sh
-./scripts/calibrate_height.sh collect --apply
+./scripts/lerobot-arm calibrate height collect --apply
 ```
 
 --apply saves accepted corrections only and sends no physical motion.

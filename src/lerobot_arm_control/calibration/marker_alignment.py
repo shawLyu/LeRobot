@@ -1,7 +1,6 @@
 """Local-only independent camera marker fitting; candidates never activate themselves."""
 
 import argparse
-import hashlib
 import json
 import math
 from pathlib import Path
@@ -9,16 +8,13 @@ from pathlib import Path
 import numpy as np
 
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.transport.realtime import JOINTS
 
 ROOT = workspace_root()
 BOUND = math.radians(5)
-
-
-def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 class MarkerKinematics:
@@ -71,7 +67,7 @@ def read_observations(directory):
     for key, path in {'angles': ROOT/'data/calibration/follower_mujoco.json',
                       'base': ROOT/'data/calibration/follower_table_base.json',
                       'model': MODEL}.items():
-        if recorded.get(key) != digest(path):
+        if recorded.get(key) != file_digest(path):
             raise ValueError('Capture joint, base or model provenance is missing or stale')
     camera_config = json.loads((directory/'camera/calibration.json').read_text())['config']
     if camera_config != json.loads((ROOT/'configs/tabletop.json').read_text()):
@@ -172,10 +168,10 @@ def fit(poses, validation_indices, *, native_scale=True, offset_bound_deg=5):
             'native_scale': native_scale, 'native_resolution': 4096,
             'offset_bound_deg': offset_bound_deg,
             'offsets_rad': dict(zip(JOINTS, [*offsets.tolist(), 0.], strict=True)),
-            'model_sha256': digest(MODEL), 'joint_calibration_sha256':
-            digest(ROOT/'data/calibration/follower_mujoco.json'), 'base_calibration_sha256':
-            digest(ROOT/'data/calibration/follower_table_base.json'),
-            'tabletop_config_sha256': digest(ROOT/'configs/tabletop.json'),
+            'model_sha256': file_digest(MODEL), 'joint_calibration_sha256':
+            file_digest(ROOT/'data/calibration/follower_mujoco.json'), 'base_calibration_sha256':
+            file_digest(ROOT/'data/calibration/follower_table_base.json'),
+            'tabletop_config_sha256': file_digest(ROOT/'configs/tabletop.json'),
             'poses': poses, 'validation_indices': validation_indices,
             'validation': {'passed': not reasons, 'reasons': reasons,
                            'training_rmse_m': float(np.sqrt(np.mean(train**2))),

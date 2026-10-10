@@ -2,7 +2,6 @@
 scripts/activate.sh
 scripts/bootstrap.sh
 scripts/camera_x11.py
-scripts/configure_control.py
 scripts/install_uv.py
 scripts/test_hardware.sh
 scripts/uv
@@ -61,6 +60,7 @@ src/lerobot_arm_control/perception/tool_marker.py
 src/lerobot_arm_control/robot/__init__.py
 src/lerobot_arm_control/robot/so101/__init__.py
 src/lerobot_arm_control/robot/so101/driver.py
+src/lerobot_arm_control/robot/so101/joints.py
 src/lerobot_arm_control/robot/so101/model_metadata.py
 src/lerobot_arm_control/runtime/__init__.py
 src/lerobot_arm_control/runtime/realtime_server.py
@@ -79,3 +79,4 @@ src/lerobot_arm_control/transport/tabletop_stream.py
 src/lerobot_arm_control/visualization/__init__.py
 src/lerobot_arm_control/visualization/ui.py
 src/lerobot_arm_control/core/api.py
+src/lerobot_arm_control/core/files.py

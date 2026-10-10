@@ -15,6 +15,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
+from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.core.processes import remote_python
 from lerobot_arm_control.visualization.tabletop_scene import (
@@ -25,11 +26,6 @@ from lerobot_arm_control.visualization.tabletop_scene import (
 
 ROOT = workspace_root()
 
-
-def atomic_json(path, value):
-    temporary = path.with_suffix(".tmp")
-    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
-    temporary.replace(path)
 
 
 class TableLink:

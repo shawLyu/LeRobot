@@ -15,10 +15,10 @@ from lerobot_arm_control.calibration.height_records import (
     DATA,
     apply_candidate,
     check_samples,
-    digest,
     read_sample,
     save_json,
 )
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -34,7 +34,7 @@ def main():
         parser.error('--count must be at least 10')
     if args.action == 'apply':
         candidate = json.loads(CANDIDATE.read_text())
-        if candidate.get('dataset_sha256') != digest(args.data):
+        if candidate.get('dataset_sha256') != file_digest(args.data):
             raise ValueError('Samples changed after fitting; fit again before applying')
     else:
         dataset = json.loads(args.data.read_text()) if args.data.exists() else {

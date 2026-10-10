@@ -12,7 +12,8 @@ import numpy as np
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, TRAJECTORY
 from lerobot_arm_control.control.parking import smooth_fraction
-from lerobot_arm_control.planning.push_t import JOINTS, build_scene, errors, pose, rotation
+from lerobot_arm_control.planning.push_t import build_scene, errors, pose, rotation
+from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.transport.pick_t_protocol import STAGES, segment_digest
 from lerobot_arm_control.visualization.tabletop_scene import scene_arms

@@ -15,23 +15,15 @@ from lerobot_arm_control.calibration.angle_calibration import (
     AngleCalibration,
     effective_scale,
 )
-
-# Re-export shared record operations for offline callers.
 from lerobot_arm_control.calibration.height_records import (
     ANGLES,
     BASE,
     CANDIDATE,
     DATA,
     check_samples,
-    digest,
     save_json,
 )
-from lerobot_arm_control.calibration.height_records import (
-    apply_candidate as apply_candidate,
-)
-from lerobot_arm_control.calibration.height_records import (
-    read_sample as read_sample,
-)
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -161,9 +153,9 @@ def fit_samples(samples, *, angles_path=ANGLES, base_path=BASE, model_path=MODEL
     corrected.update(zip(PITCH_JOINTS, offsets.tolist()))
     result = {'version': 1, 'method': (NATIVE_HEIGHT_METHOD if native_pitch_scale
                                      else 'fixed_jaw_height_zero_offsets'),
-            'joint_calibration_sha256': digest(angles_path),
-            'model_sha256': digest(model_path), 'base_calibration_file': Path(base_path).name,
-            'base_calibration_sha256': digest(base_path), 'offsets_rad': corrected,
+            'joint_calibration_sha256': file_digest(angles_path),
+            'model_sha256': file_digest(model_path), 'base_calibration_file': Path(base_path).name,
+            'base_calibration_sha256': file_digest(base_path), 'offsets_rad': corrected,
             'created_unix_ns': time.time_ns(), 'sample_count': len(samples),
             'training_count': len(training), 'source_indices': source_indices,
             'validation_indices': validation_indices,
@@ -189,7 +181,7 @@ def main():
     args = parser.parse_args()
     samples = json.loads(args.data.read_text())['samples']
     candidate = fit_samples(samples, native_pitch_scale=args.native_pitch_scale)
-    candidate['dataset_sha256'] = digest(args.data)
+    candidate['dataset_sha256'] = file_digest(args.data)
     save_json(CANDIDATE, candidate)
     print(json.dumps({'candidate': str(CANDIDATE), 'validation': candidate['validation']},
                      indent=2), flush=True)

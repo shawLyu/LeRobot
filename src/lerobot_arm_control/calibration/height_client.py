@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 from lerobot_arm_control.calibration.height_records import ANGLES, BASE, CANDIDATE, DATA, ROOT
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import source_environment
 from lerobot_arm_control.core.processes import remote_python
 
@@ -43,10 +44,10 @@ def main():
             command.append("--native-pitch-scale")
         subprocess.run(command, cwd=ROOT, env=source_environment(), check=True)
     if args.action == "apply" or args.apply:
-        from lerobot_arm_control.calibration.height_records import apply_candidate, digest
+        from lerobot_arm_control.calibration.height_records import apply_candidate
 
         candidate = json.loads(CANDIDATE.read_text())
-        if candidate.get("dataset_sha256") != digest(DATA):
+        if candidate.get("dataset_sha256") != file_digest(DATA):
             raise ValueError("Samples changed after local fitting; fit again before applying")
         # Validate locally before sending. Both hosts enforce the original record fingerprints.
         if not candidate.get("validation", {}).get("passed"):

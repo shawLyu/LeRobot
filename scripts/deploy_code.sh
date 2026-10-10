@@ -63,7 +63,8 @@ fi
 if [ -z "$DRY_RUN" ]; then
   ssh "$HOST" "cd '$REMOTE_ROOT' &&
     retired=.cleanup/retired-interfaces-\$(date -u +%Y%m%dT%H%M%S)-\$\$ &&
-    for entry in src/arm_control .venv/bin/arm-control .venv/bin/lerobot-arm; do
+    for entry in src/arm_control .venv/bin/arm-control .venv/bin/lerobot-arm \
+      scripts/configure_control.py assets/so101/scene_hardware.xml; do
       if [ -e \"\$entry\" ]; then
         mkdir -p \"\$retired/\$(dirname \"\$entry\")\" &&
         mv \"\$entry\" \"\$retired/\$entry\" || exit 1

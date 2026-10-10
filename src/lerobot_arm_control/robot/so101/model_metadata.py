@@ -4,7 +4,7 @@ import math
 import xml.etree.ElementTree as ET
 
 from lerobot_arm_control.core.paths import resource_path
-from lerobot_arm_control.transport.realtime import JOINTS
+from lerobot_arm_control.robot.so101.joints import JOINTS
 
 MODEL = resource_path('assets/so101/so101.xml')
 

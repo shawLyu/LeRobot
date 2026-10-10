@@ -4,10 +4,10 @@ Every hardware control entry reads `configs/control.json`. Controllers and CLI t
 old native-baseline modes, separate parameter files, or independent period overrides. Deploy and restart after changing parameters.
 
 ```sh
-./scripts/control_arm_realtime.sh
-./scripts/control_arm_realtime.sh --circle --circle-laps 3
-./scripts/reset_arm_remote.sh
-./scripts/view_arm_realtime.sh --backend mujoco --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend hardware --hardware-control
+./scripts/lerobot-arm view arm --backend hardware --hardware-control --circle --circle-laps 3
+./scripts/lerobot-arm reset
+./scripts/lerobot-arm view arm --backend mujoco --circle --circle-laps 3
 ```
 
 Shared settings: V22 responsive, 60 Hz, two feedback retries, RAM acceleration 40,

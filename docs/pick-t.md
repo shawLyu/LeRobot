@@ -8,13 +8,13 @@ workspace is rejected.
 
 ```sh
 # Observe, plan, and run contact physics locally; no motion targets
-./scripts/pick_t_realtime.sh
+./scripts/lerobot-arm task pick-t
 
 # Permit physical execution after all preflight checks pass
-./scripts/pick_t_realtime.sh --execute
+./scripts/lerobot-arm task pick-t --execute
 
 # Replay an existing observation without connecting to hardware
-./scripts/pick_t_realtime.sh --snapshot logs/my-run/snapshot \
+./scripts/lerobot-arm task pick-t --snapshot logs/my-run/snapshot \
   --output logs/my-offline-run
 ```
 

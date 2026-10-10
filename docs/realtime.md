@@ -7,12 +7,12 @@ All MuJoCo simulation, collision checks, IK, contact prediction, and Push-T plan
 The remote host handles camera perception, physical motor control, and feedback, receiving locally checked trajectories/results without MuJoCo.
 
 ```sh
-./scripts/view_arm_realtime.sh --backend mujoco
-./scripts/view_arm_realtime.sh --backend mujoco --circle --circle-laps 3
-./scripts/control_arm_realtime.sh
-./scripts/control_arm_realtime.sh --circle --circle-laps 3
-./scripts/view_tabletop_realtime.sh
-./scripts/push_t_realtime.sh --fps 5
+./scripts/lerobot-arm view arm --backend mujoco
+./scripts/lerobot-arm view arm --backend mujoco --circle --circle-laps 3
+./scripts/lerobot-arm view arm --backend hardware --hardware-control
+./scripts/lerobot-arm view arm --backend hardware --hardware-control --circle --circle-laps 3
+./scripts/lerobot-arm view tabletop
+./scripts/lerobot-arm view tabletop --push-t --fps 5
 ```
 
 Simulation uses a separate local physics process over stdio, with no SSH or motor connection.
@@ -29,15 +29,15 @@ Closing the window retains supporting torque. Fresh simulation states can mainta
 Use read-only feedback and angle capture with:
 
 ```sh
-./scripts/view_arm_realtime.sh --backend hardware
+./scripts/lerobot-arm view arm --backend hardware --backend hardware
 ```
 
 This entry executes no motion. `B` enters calibration, `R` changes the reference, and `C` captures.
 See [Angle calibration](angle-calibration.md). Hardware motion requires valid calibration for all six joints.
-See [Hardware control](real-control.md) for controls and Reset. Headless Reset uses `./scripts/reset_arm_remote.sh`,
+See [Hardware control](real-control.md) for controls and Reset. Headless Reset uses `./scripts/lerobot-arm reset`,
 sending one trigger plus heartbeats rather than an angle sequence.
 
-Install local dependencies from `requirements-local.txt`; wrappers prefer the project's `.venv`.
+Install local dependencies from `requirements-local.txt`; the launcher prefers the project's `.venv`.
 `LEROBOT_MUJOCO_ENV` selects another environment; Mac retains the legacy UWLab fallback if the project environment is absent.
 See [README](../README.md) for installation. The existing remote account has dialout/video access.
 The serial port is exclusive; do not run hardware tools concurrently.

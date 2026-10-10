@@ -13,12 +13,13 @@ import numpy as np
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.joint_path import ACTIVE, plan_digest
+from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.runtime.tabletop_client import TableLink
-from lerobot_arm_control.transport.realtime import JOINTS
+from lerobot_arm_control.transport.realtime import JOINTS, checked_command
 
-ROOT = MODEL.parents[2]
+ROOT = workspace_root()
 
 
 def motor_observation(link):
@@ -148,11 +149,7 @@ def trial(args):
         return state, packet
 
     def command(operation, **fields):
-        ack = link.wait_ack(link.send(operation, **fields))
-        proof['acks'].append(ack)
-        if not ack['ok']:
-            raise RuntimeError(ack.get('error', 'command rejected'))
-        return ack['result']
+        return checked_command(link, proof['acks'], operation, **fields)['result']
 
     try:
         deadline = time.monotonic()+15
@@ -228,7 +225,7 @@ def trial(args):
     return proof['completed'] and not proof.get('cleanup_error')
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--execute', action='store_true')
     parser.add_argument('--anchor', type=Path,
@@ -241,3 +238,7 @@ if __name__ == '__main__':
             not 16 <= amplitude <= 256 for amplitude in args.amplitudes):
         parser.error('requires --execute and 1..6 amplitudes in 16..256 counts')
     raise SystemExit(0 if trial(args) else 1)
+
+
+if __name__ == "__main__":
+    main()

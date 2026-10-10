@@ -3,14 +3,14 @@
 Run closed-loop pushing from the included measured scene:
 
 ```sh
-./scripts/simulate_push_t.sh
+./scripts/lerobot-arm task push-t
 ```
 
 Initialize a complete rollout from a fresh observation:
 
 ```sh
-./scripts/simulate_push_t.sh --capture
-./scripts/simulate_push_t.sh --capture --headless --output data/push_t/new-rollout
+./scripts/lerobot-arm task push-t --capture
+./scripts/lerobot-arm task push-t --capture --headless --output data/push_t/new-rollout
 ```
 
 `--capture` opens the existing remote fixed camera, reuses camera/six-joint calibration, and reads motors only.
@@ -109,8 +109,8 @@ there is no convergence proof for all table positions, obstacles, or initial sta
 ## Replay and verification
 
 ```sh
-./scripts/simulate_push_t.sh --headless --output data/push_t/check
-./scripts/simulate_push_t.sh --headless --benchmark 20 --seed 17 --output data/push_t/continuous-contact-validation-final
+./scripts/lerobot-arm task push-t --headless --output data/push_t/check
+./scripts/lerobot-arm task push-t --headless --benchmark 20 --seed 17 --output data/push_t/continuous-contact-validation-final
 PYTHONPATH=src /Users/shawn/Research/RobotSimulator/URDFSim/.venv/bin/pytest -q tests/test_push_t.py
 ```
 

@@ -2,7 +2,7 @@
 
 ```sh
 ./scripts/deploy_code.sh
-./scripts/push_t_realtime.sh --fps 5
+./scripts/lerobot-arm view tabletop --push-t --fps 5
 ```
 
 Camera capture, calibration/undistortion, table/T localization, and robot feedback run remotely.
@@ -22,7 +22,7 @@ allowing the same frame when the primary marker is occluded. Reobserve both afte
 ## Hardware execution
 
 ```sh
-./scripts/push_t_realtime.sh --hardware-control --fps 5
+./scripts/lerobot-arm view tabletop --push-t --hardware-control --fps 5
 ```
 
 For each segment the remote executor checks shared configuration, model, limits, velocity, continuity,
@@ -77,7 +77,7 @@ then collect and validate new height measurements after registration. The previo
 After moving the base or primary anchor, archive/recollect with:
 
 ```sh
-./scripts/view_tabletop_realtime.sh --recalibrate-base --fps 5
+./scripts/lerobot-arm view tabletop --recalibrate-base --fps 5
 ```
 
 In the measured scene, follower ID 7's dark surrounding base causes an oversized contour around the white margin.

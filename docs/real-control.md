@@ -8,10 +8,10 @@ Locked session P settings of 24 (pan/lift/wrists) and 32 (elbow) restore the pre
 values on close/release. Independent 1 mm Cartesian validation has not passed.
 
 ```sh
-./scripts/control_arm_realtime.sh
-./scripts/control_arm_realtime.sh --circle --circle-laps 3
-./scripts/reset_arm_remote.sh
-./scripts/verify_response.sh --execute
+./scripts/lerobot-arm view arm --backend hardware --hardware-control
+./scripts/lerobot-arm view arm --backend hardware --hardware-control --circle --circle-laps 3
+./scripts/lerobot-arm reset
+./scripts/lerobot-arm verify response --execute
 ```
 
 Window control, headless Reset, circles, and Push-T share one motor configuration.

@@ -16,7 +16,7 @@ two successful five-joint speed/error comparisons against V14:
 
 `ManualControl`, `PushMotor`, headless Reset, window control, Push-T, and T pick/place load this file by default.
 `joint_path.py` evaluates locally checked finite five-joint paths on the remote
-control clock. `scripts/verify_response.sh` performs local collision checks and
+control clock. `./scripts/lerobot-arm verify response` performs local collision checks and
 records speed/tracking comparisons; this script and its MuJoCo analysis stay local.
 Local MuJoCo circle playback shares nominal trajectory timing with remote hardware; simulation does not apply hardware feedback compensation.
 Task contact speed, vision thresholds, and display frame rate remain task parameters, distinct from motor frequency.
@@ -86,7 +86,7 @@ See [Data retention](../data/README.md).
 
 Camera intrinsics are versioned in `configs/camera_intrinsics.json`; the shared
 vision configuration validates their hash and the exact processing-view mapping.
-`table_reference_calibration.py` and `scripts/calibrate_table_reference.sh` run
+`table_reference_calibration.py` and `./scripts/lerobot-arm calibrate table` run
 locally to fit the stationary two-marker layout from camera-only observations.
 Only the accepted record and runtime map are synchronized; this fitter is not
 included in the remote runtime manifest. Saved maps bind to the native intrinsics

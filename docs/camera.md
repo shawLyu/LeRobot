@@ -54,6 +54,9 @@ After reconnecting the second camera, confirm that its path exists with
 ```
 
 The wrapper forwards `--device`, `--width`, `--height`, `--config`, `--snapshot`, and other preview arguments.
+It uses the already prepared remote `.venv/bin/python` directly. Dependency
+installation belongs to `scripts/bootstrap.sh` or `scripts/uv sync`; preview
+does not resolve project extras or synchronize the environment on startup.
 It always starts XQuartz and uses X11 forwarding, including with `--snapshot`.
 Use plain SSH as shown below when saving a snapshot without X11.
 The window title identifies the device. Two cameras can have separate windows;
@@ -94,7 +97,7 @@ open -a XQuartz
 export DISPLAY="$(launchctl getenv DISPLAY)"
 ssh -X -C -o XAuthLocation=/opt/X11/bin/xauth \
     -o ForwardX11Timeout=0 -o ControlMaster=no -o ControlPath=none lerobot \
-    'cd /home/xy/Research/lerobot && ./scripts/uv run --locked --extra hardware scripts/camera_x11.py'
+    'cd /home/xy/Research/lerobot && .venv/bin/python scripts/camera_x11.py'
 ```
 
 This uses untrusted `-X` forwarding, without `-Y` or opening X11 TCP ports.

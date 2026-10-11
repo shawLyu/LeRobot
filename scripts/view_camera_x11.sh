@@ -10,7 +10,7 @@ camera_display="${DISPLAY:-$(launchctl getenv DISPLAY)}"
 export DISPLAY="${camera_display:-:0}"
 camera_host=${LEROBOT_HOST:-lerobot}
 printf -v camera_remote_root '%q' "${LEROBOT_REMOTE_ROOT:-/home/xy/Research/lerobot}"
-camera_command="cd $camera_remote_root && exec ./scripts/uv run --locked --extra hardware scripts/camera_x11.py"
+camera_command="cd $camera_remote_root && exec .venv/bin/python scripts/camera_x11.py"
 for camera_argument in "$@"; do
     printf -v camera_quoted_argument '%q' "$camera_argument"
     camera_command+=" $camera_quoted_argument"

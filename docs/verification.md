@@ -1,5 +1,17 @@
 # Verification records
 
+## Camera preview launcher: 2026-10-11, Beijing time
+
+The Mac X11 wrapper now launches the prepared remote `.venv/bin/python`
+directly, separating preview from dependency synchronization. The default
+remote project defines the `hardware` extra and its `uv run` help check passed;
+the user's reported missing-extra error was not reproduced in that project.
+
+The updated wrapper completed a real SSH/X11-forwarded snapshot at 640x480,
+saved remotely as `logs/camera-extra-fix-20261011.png`. Eleven launcher/deployment
+tests passed, including arguments containing spaces; Ruff and shell syntax
+passed. This check used snapshot mode, without opening a Tk preview window.
+
 ## Remote deployment: 2026-10-11, Beijing time
 
 The runtime at `/home/xy/Research/lerobot` was updated to source version 0.2.0.

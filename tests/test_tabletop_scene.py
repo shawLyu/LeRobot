@@ -111,6 +111,17 @@ def test_leader_trigger_mesh_uses_the_upstream_fixed_rpy_frame():
     np.testing.assert_allclose(actual.reshape(3, 3), expected, atol=1e-10)
 
 
+def test_leader_trigger_joint_and_actuator_cover_the_configured_full_travel():
+    import math
+
+    from lerobot_arm_control.control.follow import load_follow_config
+
+    model = mujoco.MjModel.from_xml_path(str(ROOT/'assets/so101/scene_leader.xml'))
+    expected = list(map(math.radians, load_follow_config()['leader_trigger_degrees']))
+    np.testing.assert_allclose(model.joint('gripper').range, expected, atol=1e-10)
+    np.testing.assert_allclose(model.actuator('gripper').ctrlrange, expected, atol=1e-10)
+
+
 def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(tmp_path):
     from lerobot_arm_control.visualization.tabletop_scene import scene_arms
 
@@ -127,6 +138,7 @@ def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(t
     path.write_text(scene_xml(state, config))
     model = mujoco.MjModel.from_xml_path(str(path))
     assert model.nq == 12 and model.nu == 0 and model.nmesh == 21
+    assert model.joint('arm1__gripper').range[1] == pytest.approx(np.deg2rad(118))
     head = model.body('arm1__gripper').id
     meshes = {model.mesh(int(index)).name for index in model.geom_dataid[
         (model.geom_bodyid == head) & (model.geom_type == mujoco.mjtGeom.mjGEOM_MESH)]}

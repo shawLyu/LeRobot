@@ -20,12 +20,25 @@ def test_mirror_slew_limit_joint_bounds_and_trigger_normalization():
     config['max_speed_rad_s'] = 2
     mapping = JointFollower(config, [0]*6)
     for _ in range(80):
-        target = mapping.step([10, 0, 0, 0, 0, math.radians(15)], .05)
+        target = mapping.step([10, 0, 0, 0, 0, math.radians(59)], .05)
     assert target[0] == pytest.approx(mapping.limits[0][1])
     assert target[5] == pytest.approx(math.radians(45))
     previous = list(target)
     target = mapping.step([-10]*6, .01)
     assert max(abs(a-b) for a, b in zip(target, previous, strict=True)) <= .02000001
+
+
+@pytest.mark.parametrize('leader_degrees, follower_degrees',
+                         [(-5, 0), (0, 0), (30, 90 * 30 / 118), (59, 45),
+                          (90, 90 * 90 / 118), (118, 90), (125, 90)])
+def test_trigger_uses_full_118_degree_travel_without_saturating_at_calibration_points(
+        leader_degrees, follower_degrees):
+    config = load_follow_config()
+    assert config['leader_trigger_degrees'] == [0, 118]
+    mapping = JointFollower(config, [0]*6)
+    for _ in range(120):
+        target = mapping.step([0]*5+[math.radians(leader_degrees)], .05)
+    assert math.degrees(target[5]) == pytest.approx(follower_degrees)
 
 
 def test_stale_samples_latch_hold_until_explicit_resume():

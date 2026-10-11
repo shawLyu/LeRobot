@@ -129,7 +129,7 @@ The follow demo also has `simulation_shared_calibration: false`.
 White arm1 now has the official SO-101 acquisition handle/trigger geometry in
 both calibration and tabletop views. Black follower retains its gripper. Existing
 base and black joint calibration reference hashes are preserved. Model sources,
-independent mappings and the user-confirmed 0–30-degree trigger travel are saved
+independent mappings and the user-confirmed 0–118-degree trigger travel are saved
 with the scene. The leader joint and actuator limits use the same measured range.
 Run `./scripts/lerobot-arm demo follow` for physical white-leader/black-follower control.
 Use `--simulate` for a read-only real-leader preview, or `--source synthetic --auto`

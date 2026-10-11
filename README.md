@@ -116,7 +116,7 @@ black follower has a gripper. Real following is the default; simulation is expli
 keeping the window open; recovery requires another `E`. The default follower is physical and
 requires independent white calibration and measured trigger travel;
 the current scene now has accepted white 6/6 calibration and user-confirmed
-0–30° trigger travel. See [follow demo](docs/follow.md).
+0–118° trigger travel. See [follow demo](docs/follow.md).
 
 ## 3. Configure and deploy the remote host
 

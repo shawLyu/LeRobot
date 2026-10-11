@@ -50,8 +50,9 @@ before torque is enabled; reposition those manually. The passive white leader is
 
 `Space` holds. Targets begin at the current follower
 pose and approach the live leader pose at at most 0.6 rad/s. Five arm joints mirror
-angles in the existing canonical frame; trigger travel maps proportionally to
-follower gripper opening. Values are clipped to the configured model/encoder limits.
+angles in the existing canonical frame; white trigger travel 0–118° maps proportionally
+to black gripper opening 0–90° (59° gives 45°). Calibration references 0/15/30°
+do not define the travel endpoints. Values are clipped to the configured model/encoder limits.
 Stale samples, motor faults, client heartbeat loss and connection close hold the
 physical follower. Holding preserves support on gravity-loaded joints. Resume
 requires `E`; it does not restart automatically. The leader bus remains read-only.
@@ -62,9 +63,9 @@ close it and relaunch after resolving the connection or motor fault.
 
 ## Enable the physical follower after independent measurements
 
-White-arm independent alignment is complete (6/6). The user confirmed the released/fully
-pressed trigger endpoints as 0/30 degrees on 2026-10-11, and the current follow
-configuration uses this measured range. Both arms require their own valid mapping.
+White-arm independent alignment is complete (6/6). The user corrected the released/fully
+pressed trigger endpoints to 0/118 degrees on 2026-10-11, and the current
+follow configuration uses this range. Both arms require their own valid mapping.
 The latest read-only capture recorded follower `shoulder_lift` at -100.85 degrees,
 just below its -100-degree model limit. This small violation is eligible for the
 default bounded initialization after `E`.
@@ -81,7 +82,7 @@ storage locks and calibration were unchanged. Production speed remains 0.6 rad/s
    Copy the accepted `data/calibration/arm1_mujoco.json` to the remote calibration directory.
 2. Measure the leader trigger's closed/open angles in that reference frame. Set
    `leader_trigger_degrees` and `trigger_range_measured: true` in `configs/follow.json`.
-   This installation now uses the confirmed 0–30° endpoints; repeat measurement
+   This installation now uses the confirmed 0–118° endpoints; repeat measurement
    after replacing or rebuilding the leader handle.
    Check the configured follower gripper opening `[0, 90]` degrees against the actual jaw.
 3. Deploy the same follow parameters and code to the remote host:
@@ -123,6 +124,6 @@ pinned at `a758567c3978dfeefe282ede0500085a48fe8f78`, under Apache-2.0.
 `so101_leader.xml` converts that head subtree into our canonical arm frame. The
 canonical black follower XML is unchanged, preserving accepted encoder/base hashes.
 The leader's inherited `gripperframe` is a compatibility frame, not a measured
-leader grasp point. Our joint/actuator limits use the measured 0–30° travel.
+leader grasp point. Our joint/actuator limits use the user-confirmed 0–118° travel.
 Upstream printed-part inertia remains provisional; see its
 [model README](https://github.com/TheRobotStudio/SO-ARM100/blob/a758567c3978dfeefe282ede0500085a48fe8f78/Simulation/SO101/README.md).

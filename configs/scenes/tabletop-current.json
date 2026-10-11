@@ -1222,7 +1222,7 @@
     },
     "follow.json": {
       "file": "configs/follow.json",
-      "sha256": "cbc7716002f3b18eb6d2b34b4270643d641b4fb26a8884ee7e874709adc95ba0"
+      "sha256": "fc72c94b16deaad3e34519ac0818be7126e75934834b5ac55a54803f83d45165"
     }
   },
   "calibration_records": {
@@ -1291,12 +1291,12 @@
       "role": "leader",
       "end_effector": "acquisition_handle_and_trigger",
       "model_file": "assets/so101/so101_leader.xml",
-      "sha256": "0b52713c43f247d9358ba22d71283a505084cc629edbbe24b4ff7c4b0bbfb0bd",
+      "sha256": "182031e5ca5f329c8dd2edf57af6e0e7a6ab1572ecd79ba816e0b5cba7329c79",
       "upstream_revision": "a758567c3978dfeefe282ede0500085a48fe8f78",
       "trigger_limits_measured": true,
       "trigger_limits_degrees": [
         0,
-        30
+        118
       ]
     },
     "follower": {
@@ -1328,14 +1328,14 @@
     "max_sample_age_seconds": 0.25,
     "leader_trigger_degrees": [
       0,
-      30
+      118
     ],
     "follower_gripper_degrees": [
       0,
       90
     ],
     "trigger_range_measured": true,
-    "trigger_range_source": "User confirmed released/fully pressed endpoints at 0/30 degrees on 2026-10-11; independent arm1 angle calibration",
+    "trigger_range_source": "User corrected white arm1 maximum travel to 118 degrees on 2026-10-11; zero endpoint retained at 0 degrees; 0/15/30 are calibration reference points",
     "simulation_shared_calibration": false,
     "initialization": {
       "max_correction_degrees": 2,

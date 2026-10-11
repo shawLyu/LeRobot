@@ -8,8 +8,11 @@ Run these commands on the local MuJoCo workstation. Close the tabletop viewer an
 arm-calibration window first: each USB bus has one exclusive owner.
 
 ```sh
-# Move the real white leader by hand; the black follower is simulated.
+# Real white leader -> real black follower (default); E starts, Space holds.
 ./scripts/lerobot-arm demo follow
+
+# Read-only real leader input -> simulated black follower.
+./scripts/lerobot-arm demo follow --simulate
 
 # Entirely offline, using the preserved desktop bases and dimensions.
 ./scripts/lerobot-arm demo follow --source synthetic --auto
@@ -18,7 +21,13 @@ arm-calibration window first: each USB bus has one exclusive owner.
 ./scripts/lerobot-arm demo follow --source synthetic
 ```
 
-The preview is a kinematic visualization of commanded follower joint angles, not
+The default command selects the physical follower and requires independent
+six-joint calibration of both arms and measured trigger travel. It does not
+silently fall back to simulation when those measurements are missing. The
+window starts held; press `E` to begin following. `--execute` remains an explicit
+alias for the hardware mode. Synthetic input selects an offline simulated follower.
+
+The `--simulate` preview is a kinematic visualization of commanded follower joint angles, not
 a physical torque/contact simulation. The hardware preview reads both buses but
 writes no motor registers. White angles are explicitly marked temporary/shared
 until its own six-joint file exists. An incomplete or invalid white file is rejected.
@@ -52,7 +61,7 @@ drive the physical follower.
 4. With the workspace clear and the leader supported, launch:
 
 ```sh
-./scripts/lerobot-arm demo follow --execute
+./scripts/lerobot-arm demo follow
 ```
 
 The window initially holds. Press `E` to enable the calibrated black follower.

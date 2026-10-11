@@ -126,6 +126,8 @@ White arm1 now has the official SO-101 acquisition handle/trigger geometry in
 both calibration and tabletop views. Black follower retains its gripper. Existing
 base and black joint calibration reference hashes are preserved. Model sources,
 temporary mapping and the provisional trigger range are saved with the scene.
-Run `./scripts/lerobot-arm demo follow` for real-leader input to a simulated follower,
-or add `--source synthetic --auto` for an offline demonstration. See
+Run `./scripts/lerobot-arm demo follow` for physical white-leader/black-follower control.
+Use `--simulate` for a read-only real-leader preview, or `--source synthetic --auto`
+for an offline demonstration. Missing independent calibration blocks the default
+hardware mode rather than silently selecting simulation. See
 [follow demo](follow.md) for physical execution prerequisites and controls.

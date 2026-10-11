@@ -104,15 +104,16 @@ See [Push-T](docs/push-t.md) for the algorithm, assumptions, and batch experimen
 ### Acquisition leader and follower
 
 The white arm1 model uses the official SO-101 acquisition handle/trigger; the
-black follower has a gripper. Preview real leader input or animate both offline:
+black follower has a gripper. Real following is the default; simulation is explicit:
 
 ```sh
 ./scripts/lerobot-arm demo follow
+./scripts/lerobot-arm demo follow --simulate
 ./scripts/lerobot-arm demo follow --source synthetic --auto
 ```
 
-`E` resumes and `Space` holds. The default follower is simulated. Physical mode
-`--execute` requires independent white calibration and measured trigger travel;
+`E` starts/resumes and `Space` holds. The default follower is physical and
+requires independent white calibration and measured trigger travel;
 the temporary black-arm mapping cannot enable it. See [follow demo](docs/follow.md).
 
 ## 3. Configure and deploy the remote host
@@ -200,7 +201,8 @@ Configure the remote `configs/arms.toml`: port, role, baud rate, and motor IDs. 
 `by-path` describes a physical connection path. Multiple aliases may point to the same device; they do not prove that multiple arms are connected.
 `ttyACM0/1` numbering can change after reconnection and cannot identify the follower by itself.
 
-The existing follower is an SO-101 with USB serial `5B8E114461`. Device `5B91028324` is configured as `arm1`, with an unconfirmed role.
+The existing black follower is an SO-101 with USB serial `5B8E114461`.
+Device `5B91028324` is the confirmed white leader `arm1`, with an acquisition handle and trigger.
 The standard IDs are shoulder pan 1, shoulder lift 2, elbow 3, wrist pitch 4, wrist roll 5, and gripper 6. Verify them on each new device.
 Calibration binds to USB identity and motor registers. Renaming another robot to follower does not make the original calibration valid.
 Only one process should own a serial port at a time.

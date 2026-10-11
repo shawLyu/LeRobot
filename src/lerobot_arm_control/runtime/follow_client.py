@@ -176,8 +176,11 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', choices=('hardware', 'synthetic'), default='hardware')
-    parser.add_argument('--execute', action='store_true',
-                        help='Enable calibrated real follower with E')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--execute', action='store_true', default=None,
+                      help='Use the real follower (default with hardware input); E starts it')
+    mode.add_argument('--simulate', dest='execute', action='store_false',
+                      help='Explicitly preview a simulated follower; no motor writes')
     parser.add_argument('--host', default='lerobot')
     parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
     parser.add_argument('--snapshot', type=Path,
@@ -188,8 +191,11 @@ def main():
     parser.add_argument('--screenshot', type=Path)
     parser.add_argument('--log', type=Path, default=workspace_root()/'logs/follow-latest.json')
     args = parser.parse_args()
+    if args.execute is None:
+        args.execute = args.source == 'hardware'
     if args.execute and (args.source != 'hardware' or args.headless):
-        parser.error('--execute requires hardware input and the interactive window')
+        parser.error('real following requires hardware input and the interactive window; '
+                     'use --simulate for a read-only preview')
     if args.auto and args.source != 'synthetic':
         parser.error('--auto requires --source synthetic')
     if args.duration is not None and (not math.isfinite(args.duration) or args.duration <= 0):

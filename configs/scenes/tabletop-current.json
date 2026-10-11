@@ -1451,5 +1451,13 @@
     "trigger_range_measured": false,
     "trigger_range_source": "TheRobotStudio SO101 leader URDF provisional CAD range; measure before hardware execution",
     "simulation_shared_calibration": true
+  },
+  "follow_demo_interface": {
+    "default_command": "./scripts/lerobot-arm demo follow",
+    "default_follower": "hardware",
+    "simulation_option": "--simulate",
+    "synthetic_input": "--source synthetic",
+    "start_or_resume_key": "E",
+    "hold_key": "Space"
   }
 }

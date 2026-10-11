@@ -15,11 +15,13 @@ backend setting, not a measured sustained stream rate. PipeWire had an open
 camera descriptor; the snapshot still succeeded without stopping it. This check
 did not test the X11 live window or the new tabletop worker.
 
-The remote host still lacks `src/lerobot_arm_control/runtime/tabletop_server.py`.
-Raw preview and snapshots work through the existing script. The unified
-`view tabletop` command requires deploying the current source first. Local
-documentation was updated during the October 11 source cleanup; remote README
-and camera documentation differ from the current local copies.
+After that initial snapshot check, the remote runtime was updated to source
+version 0.2.0 on the same day. The unified `view tabletop --camera-only`
+entry completed a 10-second session with 16 received frames, confirming fixed
+focus 68 by hardware readback. Its hello message carried the current shared
+control-configuration hash. The base and tool markers were unavailable in this
+view; the session does not validate robot motion. Code and parameter deployment
+checks are recorded in [Verification](verification.md).
 
 ## Choose an entry
 
@@ -27,7 +29,7 @@ and camera documentation differ from the current local copies.
 | --- | --- | --- |
 | Raw live image on Mac | Local `scripts/view_camera_x11.sh` | Remote `configs/camera.toml`, optional preview overrides |
 | One image without X11 | Remote `.venv/bin/python scripts/camera_x11.py --snapshot ...` | Remote `configs/camera.toml` |
-| Tracked objects, markers and recorded observations | Local `scripts/lerobot-arm view tabletop --camera-only` after deployment | Remote `camera.toml` selects the device; `tabletop.json` supplies perception and calibration |
+| Tracked objects, markers and recorded observations | Local `scripts/lerobot-arm view tabletop --camera-only` | Remote `camera.toml` selects the device; `tabletop.json` supplies perception and calibration |
 | Frames in a Python program | Remote OpenCV `VideoCapture`, example below | Remote `configs/camera.toml` |
 
 Default capture uses USB Camera's `video-index0` and its stable USB path,
@@ -119,13 +121,14 @@ scp lerobot:/home/xy/Research/lerobot/logs/camera-snapshot.png ./logs/camera-sna
 The snapshot path is remote; `scp` copies it locally. Use a new filename to
 retain earlier captures. A snapshot does not require `DISPLAY` or XQuartz.
 
-## Tabletop perception after deployment
+## Tabletop perception
 
 Run from the local checkout:
 
 ```bash
-./scripts/deploy_code.sh --dry-run
-./scripts/deploy_code.sh
+# When installing or updating another remote runtime:
+./scripts/deploy_code.sh --dry-run --config
+./scripts/deploy_code.sh --config
 
 # Camera and perception view; no motor bus is opened.
 ./scripts/lerobot-arm view tabletop --camera-only --fps 5

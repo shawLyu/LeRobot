@@ -192,9 +192,9 @@ Only one process should own a serial port at a time.
 Live check on October 11: the configured USB Camera captured a 640x480 snapshot
 successfully. Only this camera is currently enumerated; the previous icspring
 camera must be reconnected before using the second-camera command below.
-The remote host has not yet received the new `lerobot_arm_control` source, so
-the unified tabletop view requires deployment first. See [camera entry points
-and current device status](docs/camera.md).
+The remote runtime was updated to `lerobot_arm_control` 0.2.0 on the same day.
+The unified camera-only tabletop entry completed a 10-second capture and verified
+fixed focus 68. See [camera entry points and current device status](docs/camera.md).
 
 On macOS, install [XQuartz](https://www.xquartz.org/), then run locally:
 

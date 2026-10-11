@@ -67,6 +67,14 @@ def test_success_archives_before_transfers_and_retires_only_afterwards(commands)
     assert all(name == "rsync" for name, _ in calls[1:-1])
     assert "retired-interfaces" in calls[-1][1][-1]
     assert "mv " in calls[-1][1][-1]
+    assert "scripts/view_tabletop_realtime.sh" in calls[-1][1][-1]
+    assert "scripts/control_arm_realtime.sh" in calls[-1][1][-1]
+    assert "scripts/lerobot-arm " not in calls[-1][1][-1]
+
+
+def test_remote_runtime_includes_the_source_launcher():
+    manifest = (ROOT / "configs/remote-runtime.txt").read_text().splitlines()
+    assert "scripts/lerobot-arm" in manifest
 
 
 @pytest.mark.parametrize("failed_command", ["ssh", "rsync"])

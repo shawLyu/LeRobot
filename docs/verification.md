@@ -1,5 +1,33 @@
 # Verification records
 
+## Remote deployment: 2026-10-11, Beijing time
+
+The runtime at `/home/xy/Research/lerobot` was updated to source version 0.2.0.
+Existing code/configuration was backed up under remote `.cleanup/code-before-*`;
+obsolete flat modules and scripts were moved to `.cleanup/retired-interfaces-*`.
+The unified source launcher is now included in the remote runtime manifest.
+
+| Check | Result |
+| --- | --- |
+| Files and parameters | 115 deployed files checked by SHA-256 against local source, including all configuration, documentation and the three shared calibration records |
+| Loaded control | Canonical source module; `measured-v22-responsive`, 60 Hz, config hash `5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591` |
+| Loaded perception | 1920x1080 capture, 640x360 processing, selected intrinsic session `20261008_135548`; source calibration hash and converted runtime matrix validated |
+| Camera pipeline | Unified camera-only headless entry completed 10 seconds, 16 frames, fixed focus 68 verified; no motor bus opened |
+| Live localization scope | Table anchor visible; wood T observed, black T came from the existing static cache; base and tool markers unavailable |
+| Arms and joint identity | Both buses connected together; all 12 motors replied over three rounds, all Status=0; follower EEPROM/model identity matched the joint calibration |
+| Dependency environment | Locked offline sync succeeded; obsolete installed project and simulation dependencies removed; all 51 remaining packages compatible |
+| Deployment checks | 39 local deployment/source-boundary tests passed; shell syntax and changed test Ruff checks passed |
+
+Device configuration, control configuration, camera intrinsics and shared
+calibration already matched the current local parameters before transfer.
+`--config` explicitly synchronized tabletop settings. The newer remote static
+object map remains runtime observation data; it was not replaced by the offline
+snapshot. No motor targets, torque state or EEPROM parameters were written.
+
+Reports are local `logs/remote-deployment-verification-20261011.json` and
+`logs/remote-updated-camera-20261011/`. This deployment does not certify loaded
+motion, base registration or physical positioning accuracy.
+
 ## Live device checks: 2026-10-11, Beijing time
 
 | Check | Result |
@@ -10,7 +38,7 @@
 | Camera inventory | One USB Camera, video0/video1; configured stable video-index0 resolves to video0; previous icspring device absent |
 | Camera capture | Existing remote preview script saved `logs/camera-check-20261011.png`, actual 640x480; backend fps setting 30 |
 | Camera ownership | PipeWire held video0 open; snapshot succeeded without stopping it |
-| Deployment/docs | Remote canonical tabletop worker absent; remote README/camera doc hashes differ from local; raw snapshot works, new tabletop entry awaits deployment |
+| Deployment/docs at the initial check | Canonical tabletop worker was absent and docs differed; the subsequent deployment above updated both |
 
 Arm report: local `logs/two-arm-connection-20261011T021656Z.json`.
 The camera check did not exercise the X11 window, tabletop perception or loaded

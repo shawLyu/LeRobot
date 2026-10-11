@@ -43,7 +43,7 @@ rsync -az $DRY_RUN --itemize-changes --files-from="$ROOT/configs/remote-runtime.
 for directory in docs configs; do
   rsync -az $DRY_RUN --itemize-changes \
     --exclude='__pycache__/' --exclude='*.pyc' --exclude='._*' --exclude='.DS_Store' \
-    --exclude='arms.toml' --exclude='camera.toml' --exclude='tabletop.json' \
+    --exclude='/arms.toml' --exclude='/camera.toml' --exclude='/tabletop.json' \
     "$ROOT/$directory/" "$HOST:$REMOTE_ROOT/$directory/"
 done
 rsync -az $DRY_RUN --itemize-changes "$ROOT/README.md" "$ROOT/pyproject.toml" \
@@ -64,7 +64,18 @@ if [ -z "$DRY_RUN" ]; then
   ssh "$HOST" "cd '$REMOTE_ROOT' &&
     retired=.cleanup/retired-interfaces-\$(date -u +%Y%m%dT%H%M%S)-\$\$ &&
     for entry in src/arm_control .venv/bin/arm-control .venv/bin/lerobot-arm \
-      scripts/configure_control.py assets/so101/scene_hardware.xml; do
+      scripts/analyze_control_video.py scripts/analyze_tracking_trace.py \
+      scripts/calibrate_height.sh scripts/calibrate_table_reference.sh \
+      scripts/check_gripper_precision.sh scripts/check_marker_precision.sh \
+      scripts/configure_control.py scripts/control_arm_realtime.sh \
+      scripts/inspect_tool_mount.sh scripts/local_runtime.sh \
+      scripts/pick_t_realtime.sh scripts/push_t_realtime.sh \
+      scripts/record_control_camera.py scripts/reset_arm_remote.sh \
+      scripts/simulate_push_t.sh scripts/verify_circle_parity.py \
+      scripts/verify_circle_tracking.py scripts/verify_gripper_jog.py \
+      scripts/verify_joint_response.py scripts/verify_response.py \
+      scripts/verify_response.sh scripts/view_arm_realtime.sh \
+      scripts/view_tabletop_realtime.sh assets/so101/scene_hardware.xml; do
       if [ -e \"\$entry\" ]; then
         mkdir -p \"\$retired/\$(dirname \"\$entry\")\" &&
         mv \"\$entry\" \"\$retired/\$entry\" || exit 1

@@ -17,7 +17,7 @@ from lerobot_arm_control.visualization.ui import motor_fault_text
 
 class ManualControl:
     def __init__(self, bus, calibration, model_ranges, raw_limits, clock=time.monotonic,
-                 rest_path=None):
+                 rest_path=None, position_feedback_profile=None):
         if calibration.count() != 6:
             raise ValueError("real control requires all six calibrated joints")
         self.bus = bus
@@ -54,7 +54,9 @@ class ManualControl:
                     or self.limits[joint][0] >= self.limits[joint][1]):
                 raise ValueError(f"invalid control limits: {joint}")
             self.rest_limits[joint] = self.limits[joint]
-        self.position_feedback = PositionFeedback(POSITION_FEEDBACK, self.limits)
+        self.position_feedback = PositionFeedback(
+            POSITION_FEEDBACK if position_feedback_profile is None else position_feedback_profile,
+            self.limits)
         from lerobot_arm_control.control.parking import Parking
 
         self.parking = Parking(self, rest_path)
@@ -71,6 +73,9 @@ class ManualControl:
         self.last_heartbeat = self.clock()
 
     def prepare_position_stream(self, joints):
+        stream = self.position_feedback.profile.get('native_stream')
+        if stream is None:
+            return
         # Fresh hold goals must already be confirmed. Lock=1 keeps optional P
         # changes volatile on ST firmware; never unlock storage or drop torque.
         current = {joint: int(self.bus.read("Acceleration", joint, normalize=False))
@@ -80,7 +85,6 @@ class ManualControl:
         if any(not 0 <= current[joint] <= 254 or not 1 <= maximum[joint] <= 254
                for joint in joints):
             raise ValueError("invalid native acceleration configuration")
-        stream = self.position_feedback.profile["native_stream"]
         acceleration = stream["acceleration"]
         requested = {joint: min(acceleration, maximum[joint]) for joint in joints}
         for joint in joints:
@@ -380,7 +384,7 @@ class ManualControl:
                 "error_rad": {joint: self.targets[joint] - self.angle(
                     joint, self.measured[joint]) for joint in self.enabled},
                 "limits": self.limits, "max_speed_rad_s": self.motion_speed(),
-                "controller_profile": "measured",
+                "controller_profile": self.position_feedback.profile.get('name', 'measured'),
                 "control_hz": CONTROL_HZ,
                 "max_relative_target": DEFAULTS["max_relative_target"],
                 "tracking_error_stop_rad": None,

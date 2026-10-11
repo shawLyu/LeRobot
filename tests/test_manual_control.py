@@ -1,5 +1,6 @@
 import pytest
 
+from lerobot_arm_control.control.follow import native_position_profile
 from lerobot_arm_control.control.manual_control import ManualControl
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -55,6 +56,38 @@ def step(bus, control, now, elapsed):
     control.step({name: regs["Present_Position"] for name, regs in bus.registers.items()},
                  {key: {name: regs[key] for name, regs in bus.registers.items()}
                   for key in ("Status", "Torque_Enable", "Goal_Position")})
+
+
+def test_follow_enables_unlocked_servos_and_sends_nominal_goals_without_tuning():
+    bus, now = Bus(), [0.0]
+    for registers in bus.registers.values():
+        registers.update(Lock=0, Acceleration=254)
+    originals = {joint: dict(registers) for joint, registers in bus.registers.items()}
+    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
+                            {name: [1000, 3000] for name in JOINTS},
+                            clock=lambda: now[0],
+                            position_feedback_profile=native_position_profile())
+    control.enable_all()
+    assert control.enabled == set(JOINTS)
+    assert not control.stopped
+    assert control.status()['controller_profile'] == 'native_position'
+    assert {register for register, _, _ in bus.writes} == {'Goal_Position', 'Torque_Enable'}
+    for index, joint in enumerate(JOINTS):
+        control.target(joint, .33 + index * .015)
+    bus.writes.clear()
+    for _ in range(10):
+        control.heartbeat()
+        step(bus, control, now, 1 / 30)
+        assert control.sent == {joint: 2220 + index * 10
+                                for index, joint in enumerate(JOINTS)}
+    assert len(bus.writes) == 60
+    control.close()
+    assert {register for register, _, _ in bus.writes} == {'Goal_Position'}
+    for joint, registers in bus.registers.items():
+        assert registers['Torque_Enable'] == 1
+        assert registers['Goal_Position'] == registers['Present_Position']
+        for register in ('P_Coefficient', 'Acceleration', 'Goal_Velocity', 'Lock'):
+            assert registers[register] == originals[joint][register]
 
 
 def test_enable_replaces_stale_goal_before_torque_and_only_selected_joint(setup):

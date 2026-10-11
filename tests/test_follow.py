@@ -143,7 +143,8 @@ def test_real_execution_rejects_unmeasured_trigger_before_any_controller_writes(
         follow_server.serve(SimpleNamespace(config=None, hardware_control=True))
 
 
-@pytest.mark.parametrize('initialization', ['inside', 'recover', 'timeout', 'too_far'])
+@pytest.mark.parametrize('initialization',
+                         ['inside', 'recover', 'recover_lag', 'timeout', 'too_far'])
 def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
         remote, monkeypatch, initialization):
     config, _, packets = remote
@@ -157,8 +158,10 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     monkeypatch.setattr(follow_server, 'joint_ranges', lambda: limits)
 
     class Controller:
-        def __init__(self, bus, calibration, limits, raw_limits):
+        def __init__(self, bus, calibration, limits, raw_limits, *, position_feedback_profile):
             assert bus.arm.name == 'follower'
+            assert position_feedback_profile['name'] == 'native_position'
+            assert 'native_stream' not in position_feedback_profile
             self.limits = {joint: [-1, 1] for joint in JOINTS}
             self.stopped = {}
 
@@ -195,7 +198,8 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     def send(packet):
         packets.append(packet)
         if packet['type'] == 'state':
-            if initialization == 'recover' and packet['stage'] == 'initializing':
+            if initialization in ('recover', 'recover_lag') and packet['stage'] == 'initializing':
+                assert packet['seq'] < 100, 'initialization must finish despite encoder lag'
                 return
             raise StopIteration('client disconnected')
 
@@ -212,16 +216,22 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     with pytest.raises(StopIteration, match='disconnected'):
         follow_server.serve(SimpleNamespace(config=None, hardware_control=True))
     assert events[-1] == 'close_hold'
-    if initialization in ('inside', 'recover'):
+    if initialization in ('inside', 'recover', 'recover_lag'):
         assert all(joint in events for joint in JOINTS)
         assert packets[-1]['following'] is True
+        assert packets[-1]['control']['control_hz'] == config['hz']
     else:
         assert packets[-1]['stage'] == 'held'
         assert packets[-1]['following'] is False
-    if initialization == 'recover':
+    if initialization in ('recover', 'recover_lag'):
         first = next(p for p in packets if p['type'] == 'state')
         assert first['stage'] == 'initializing'
         assert first['target_qpos'][5] == pytest.approx(.3)
+    if initialization == 'recover_lag':
+        assert packets[-1]['qpos'][1] == pytest.approx(.3)
+        assert packets[-1]['target_qpos'][1] >= limits[1][0]
     if initialization == 'too_far':
         assert 'enable_follower' not in events
         assert any(p.get('ok') is False and 'too far' in p['error'] for p in packets)
+        assert 'too far' in packets[-1]['notice']
+        assert packets[-1]['command_error'] in packets[-1]['notice']

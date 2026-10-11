@@ -194,7 +194,10 @@ def run(args):
                     saved = True
                 frames.append({'time_seconds': now-started, 'leader_qpos': list(leader_qpos),
                                'follower_qpos': list(follower_qpos), 'stage': stage,
-                               'notice': notice, 'stream_age_seconds': age})
+                               'notice': notice, 'stream_age_seconds': age,
+                               'command_error': packet.get('command_error') if link else None,
+                               'control': packet.get('control') if link else None,
+                               'target_qpos': packet.get('target_qpos') if link else None})
                 if len(frames) > 10000:
                     del frames[:1000]
                 time.sleep(max(0, 1/config['hz']-(time.monotonic()-now)))

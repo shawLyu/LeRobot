@@ -5,7 +5,7 @@ Remote runtime root: `lerobot:/home/xy/Research/lerobot`.
 Shared control source, remote tests, and settings are deployed from the local copy.
 Simulation, planning, and display source remain local.
 
-The sole active configuration is `configs/control.json`, using V22 responsive after
+The shared precision-control configuration is `configs/control.json`, using V22 responsive after
 two successful five-joint speed/error comparisons against V14:
 
 | Section | Contents |
@@ -15,6 +15,9 @@ two successful five-joint speed/error comparisons against V14:
 | `trajectory` | Approach peak 0.8 rad/s, minimum approach 0.35 s; Reset 0.5 rad/s; circle ramp 1 s, period 4 s |
 
 `ManualControl`, `PushMotor`, headless Reset, window control, Push-T, and T pick/place load this file by default.
+The follow worker selects `native_position` from `configs/follow.json`: zero software
+compensation and no temporary servo tuning. It uses the same calibrated controller,
+fresh-goal enabling, fault handling and watchdog, with its own 30 Hz bounded mirroring.
 `joint_path.py` evaluates locally checked finite five-joint paths on the remote
 control clock. `./scripts/lerobot-arm verify response` performs local collision checks and
 records speed/tracking comparisons; this script and its MuJoCo analysis stay local.

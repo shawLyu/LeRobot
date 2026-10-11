@@ -13,6 +13,8 @@ def load_follow_config(path=None):
     config = json.loads(path.read_text())
     if config.get('version') != 1 or config['leader'] == config['follower']:
         raise ValueError('follow requires two different configured arms')
+    if config.get('controller_profile') != 'native_position':
+        raise ValueError('follow requires the native_position controller profile')
     for name, low, high in (('hz', 1, 60), ('max_speed_rad_s', 0, 2),
                             ('max_sample_age_seconds', 0, .5)):
         value = config[name]
@@ -25,14 +27,21 @@ def load_follow_config(path=None):
             raise ValueError(f'invalid follow range: {name}')
     initialization = config['initialization']
     for name, maximum in (('max_correction_degrees', 2), ('margin_degrees', 1),
-                          ('settle_tolerance_degrees', .5), ('timeout_seconds', 10)):
+                          ('target_tolerance_degrees', .5), ('timeout_seconds', 10)):
         value = initialization[name]
         if (type(value) not in (int, float) or not math.isfinite(value)
                 or not 0 < value <= maximum):
             raise ValueError(f'invalid initialization parameter: {name}')
-    if initialization['settle_tolerance_degrees'] >= initialization['margin_degrees']:
+    if initialization['target_tolerance_degrees'] >= initialization['margin_degrees']:
         raise ValueError('initialization tolerance must be smaller than its margin')
     return config
+
+
+def native_position_profile():
+    """Send nominal targets through the servo's existing position controller."""
+    return {'name': 'native_position', 'version': 1, 'joints': {
+        joint: {'kp': 0, 'ki': 0, 'max_correction_rad': 0, 'correction_rate_rad_s': 0}
+        for joint in JOINTS}}
 
 
 def initialization_target(config, measured, limits, encoder_limits):

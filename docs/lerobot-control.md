@@ -2,6 +2,10 @@
 
 Every hardware control entry reads `configs/control.json`. Controllers and CLI tools no longer expose
 old native-baseline modes, separate parameter files, or independent period overrides. Deploy and restart after changing parameters.
+Precision trajectories use its V22 feedback profile. The leader/follower demo uses
+`configs/follow.json` with `controller_profile: native_position`, preserving existing
+servo gains, acceleration and velocity rather than applying temporary V22 tuning.
+It retains the shared feedback retries and connection configuration hash checks.
 
 ```sh
 ./scripts/lerobot-arm view arm --backend hardware --hardware-control

@@ -2,6 +2,7 @@
   "version": 1,
   "leader": "arm1",
   "follower": "follower",
+  "controller_profile": "native_position",
   "hz": 30,
   "max_speed_rad_s": 0.6,
   "max_sample_age_seconds": 0.25,
@@ -13,7 +14,7 @@
   "initialization": {
     "max_correction_degrees": 2,
     "margin_degrees": 0.5,
-    "settle_tolerance_degrees": 0.25,
+    "target_tolerance_degrees": 0.25,
     "timeout_seconds": 5
   }
 }

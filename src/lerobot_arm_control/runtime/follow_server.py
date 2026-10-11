@@ -15,6 +15,7 @@ from lerobot_arm_control.control.follow import (
     JointFollower,
     initialization_target,
     load_follow_config,
+    native_position_profile,
 )
 from lerobot_arm_control.control.manual_control import ManualControl
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
@@ -79,7 +80,8 @@ def serve(args):
         limits = joint_ranges()
         if args.hardware_control:
             controller = ManualControl(follower_bus, calibration, limits,
-                                       follower_metadata['fingerprint']['raw_limits'])
+                                       follower_metadata['fingerprint']['raw_limits'],
+                                       position_feedback_profile=native_position_profile())
             stack.callback(controller.close)
             limits = [(max(bounds[0], controller.limits[joint][0]),
                        min(bounds[1], controller.limits[joint][1]))
@@ -88,7 +90,7 @@ def serve(args):
                 raise ValueError('follower has no usable calibrated motion range')
         mapping = JointFollower(config, measured, limits)
         active = not args.hardware_control
-        initialize_to, initialization_started = None, 0
+        initialize_to, initialization_started, command_error = None, 0, None
         if not active:
             mapping.hold(measured)
         send({'type': 'hello', 'backend': 'hardware', 'joints': JOINTS,
@@ -114,6 +116,7 @@ def serve(args):
                             controller.heartbeat()
                     elif op == 'hold':
                         active = False
+                        command_error = None
                         initialize_to = None
                         mapping.hold(measured if controller else mapping.target)
                         if controller:
@@ -133,6 +136,7 @@ def serve(args):
                         mapping.resume(measured if controller else mapping.target)
                         active = True
                         heartbeat = time.monotonic()
+                        command_error = None
                         notice = ('Initializing follower into its model range'
                                   if initialize_to else 'Following')
                     else:
@@ -142,7 +146,7 @@ def serve(args):
                     active = False
                     initialize_to = None
                     mapping.hold(measured if controller else mapping.target)
-                    notice = str(exc)
+                    notice = command_error = str(exc)
                     if controller:
                         controller.stop('follow command failed: hold')
                     send({'type': 'ack', 'id': command.get('id'), 'ok': False, 'error': str(exc)})
@@ -168,12 +172,14 @@ def serve(args):
                 if controller:
                     controller.stop(notice)
             if initialize_to is not None:
-                tolerance = math.radians(config['initialization']['settle_tolerance_degrees'])
+                tolerance = math.radians(config['initialization']['target_tolerance_degrees'])
+                # This initializes the nominal command ramp. Native servo tracking
+                # error remains observable; it must not gate teleoperation forever.
                 if all(low <= value <= high and abs(value-goal) <= tolerance
                        for value, goal, (low, high) in zip(
-                           measured, initialize_to, limits, strict=True)):
+                           mapping.target, initialize_to, limits, strict=True)):
                     initialize_to = None
-                    mapping.resume(measured)
+                    mapping.resume(mapping.target)
                     notice = 'Initialized; following'
                 elif now-initialization_started > config['initialization']['timeout_seconds']:
                     active = False
@@ -193,14 +199,16 @@ def serve(args):
                     active = False
                     initialize_to = None
                     mapping.hold(measured)
-                    notice = 'Follower held: '+str(controller.stopped)
+                    notice = command_error or 'Follower held: '+str(controller.stopped)
             send({'type': 'state', 'seq': sequence, 'time_unix_ns': time.time_ns(),
                   'raw': raw, 'qpos': measured, 'leader_qpos': leader_qpos,
                   'target_qpos': target, 'following': active and initialize_to is None,
                   'stage': ('initializing' if initialize_to is not None else
                             'following' if active else 'held'), 'notice': notice,
+                  'command_error': command_error,
                   'leader_status': leader_status, 'sample_age_ms': (now-sampled)*1000,
-                  'control': controller.status() if controller else None})
+                  'control': (controller.status() | {'control_hz': config['hz']}
+                              if controller else None)})
             sequence += 1
             previous = now
             deadline = next_deadline(deadline, time.monotonic(), 1/config['hz'])

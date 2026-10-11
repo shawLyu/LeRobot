@@ -39,7 +39,11 @@ the follower from a fresh current-position hold. Small model-limit violations ar
 corrected at the normal speed limit to 0.5 degrees inside the usable range; the
 entire correction must be at most 2 degrees.
 Initialization does not move the other joints or remap the follower gripper. Once all
-joints are inside their limits and within 0.25 degrees of that target, following begins.
+commanded targets are inside their limits and within 0.25 degrees of the initialization
+target, following begins from that command, preserving the speed bound. This is a
+command-ramp initialization, not precision settling: native encoder tracking error
+is displayed and recorded without blocking teleoperation. Physical encoder travel,
+mode, voltage, fault and torque checks still apply.
 An initialization lasting over 5 seconds holds and requires `E` to retry. Larger
 model-limit violations or positions outside calibrated encoder travel are rejected
 before torque is enabled; reposition those manually. The passive white leader is read-only.
@@ -58,13 +62,19 @@ close it and relaunch after resolving the connection or motor fault.
 
 ## Enable the physical follower after independent measurements
 
-The real mode is implemented but **has not been run on this scene**. White-arm
-independent alignment is complete (6/6). The user confirmed the released/fully
+White-arm independent alignment is complete (6/6). The user confirmed the released/fully
 pressed trigger endpoints as 0/30 degrees on 2026-10-11, and the current follow
 configuration uses this measured range. Both arms require their own valid mapping.
 The latest read-only capture recorded follower `shoulder_lift` at -100.85 degrees,
 just below its -100-degree model limit. This small violation is eligible for the
 default bounded initialization after `E`.
+
+On 2026-10-11, real-bus validation confirmed enabling with all six storage locks
+still at 0, native goal writes and actual multi-joint motion. A subsequent short
+0.02 rad/s run completed held → initializing → following → held with no command
+errors. After exit, black goals matched its measured positions and all six torques
+remained on; the white arm remained torque-off. P=16, acceleration=254, velocity=0,
+storage locks and calibration were unchanged. Production speed remains 0.6 rad/s.
 
 1. Complete white `arm1` alignment in `view arm --backend hardware --arm arm1`.
    Joints 1–5 use 0/30/60 degrees; trigger joint 6 uses 0/15/30 degrees.
@@ -85,16 +95,24 @@ default bounded initialization after `E`.
 
 The window initially holds. Press `E` to initialize and enable the calibrated black follower.
 Fresh current-position goals are confirmed before torque is enabled; the existing
-controller restores its temporary RAM acceleration/velocity/P settings on close.
+servo position loop receives synchronized nominal targets. `controller_profile` in
+`configs/follow.json` is `native_position`: follow does not apply the V22 PI/feedforward
+or temporary P/acceleration/velocity tuning used by precision trajectories.
+Existing servo gains and motion settings remain unchanged, including when Lock=0.
 No EEPROM calibration, offsets, modes or travel limits are rewritten.
 Runtime records go to `logs/follow-latest.json`; choose `--log` to keep another run.
-They include initialization/hold/follow stages, feedback age, faults and the exit reason.
+They include initialization/hold/follow stages, feedback age, command errors,
+controller status, target angles and the exit reason. A rejected `E` retains its
+specific error in subsequent held-state packets instead of replacing it with a
+generic pause message.
 
 ## Open-source references and model provenance
 
 The joint-space flow follows upstream LeRobot's
 [SO leader `get_action`](https://github.com/huggingface/lerobot/blob/main/src/lerobot/teleoperators/so_leader/so_leader.py)
-and [teleoperation loop](https://github.com/huggingface/lerobot/blob/main/src/lerobot/scripts/lerobot_teleoperate.py).
+and [teleoperation loop](https://github.com/huggingface/lerobot/blob/main/src/lerobot/scripts/lerobot_teleoperate.py),
+with synchronized `Goal_Position` writes as in the
+[SO follower `send_action`](https://github.com/huggingface/lerobot/blob/main/src/lerobot/robots/so_follower/so_follower.py).
 This implementation reuses our measured-radian controller and exclusive low-level
 bus connections. Upstream high-level connections also configure/calibrate motors;
 they are not used to alter this installation's EEPROM.

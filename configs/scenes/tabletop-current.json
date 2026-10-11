@@ -1222,7 +1222,7 @@
     },
     "follow.json": {
       "file": "configs/follow.json",
-      "sha256": "49fbfe1d8c98bad745874270900ed1e18373e03d6571db859b052acc534b266f"
+      "sha256": "ba86d24f34f855ecfeda47888e075eece33a944f935afdb5034a60d71f89de0e"
     }
   },
   "calibration_records": {
@@ -1312,7 +1312,9 @@
     "simulation_option": "--simulate",
     "synthetic_input": "--source synthetic",
     "start_or_resume_key": "E",
-    "hold_key": "Space"
+    "hold_key": "Space",
+    "initialization": "E: fresh-position hold, bounded model-range recovery, then follow",
+    "stream_timeout_behavior": "hold; keep window open; explicit E after fresh feedback"
   },
   "pending_calibration": {},
   "follow_demo": {
@@ -1332,6 +1334,12 @@
     ],
     "trigger_range_measured": true,
     "trigger_range_source": "User confirmed released/fully pressed endpoints at 0/30 degrees on 2026-10-11; independent arm1 angle calibration",
-    "simulation_shared_calibration": false
+    "simulation_shared_calibration": false,
+    "initialization": {
+      "max_correction_degrees": 2,
+      "margin_degrees": 0.5,
+      "settle_tolerance_degrees": 0.25,
+      "timeout_seconds": 5
+    }
   }
 }

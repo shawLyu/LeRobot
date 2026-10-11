@@ -5,6 +5,7 @@ import math
 
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
+from lerobot_arm_control.transport.realtime import JOINTS
 
 
 def load_follow_config(path=None):
@@ -22,7 +23,33 @@ def load_follow_config(path=None):
         if (len(values) != 2 or any(type(v) not in (int, float) or not math.isfinite(v)
                                   for v in values) or values[0] >= values[1]):
             raise ValueError(f'invalid follow range: {name}')
+    initialization = config['initialization']
+    for name, maximum in (('max_correction_degrees', 2), ('margin_degrees', 1),
+                          ('settle_tolerance_degrees', .5), ('timeout_seconds', 10)):
+        value = initialization[name]
+        if (type(value) not in (int, float) or not math.isfinite(value)
+                or not 0 < value <= maximum):
+            raise ValueError(f'invalid initialization parameter: {name}')
+    if initialization['settle_tolerance_degrees'] >= initialization['margin_degrees']:
+        raise ValueError('initialization tolerance must be smaller than its margin')
     return config
+
+
+def initialization_target(config, measured, limits, encoder_limits):
+    """Recover only small model-limit violations, always within physical travel."""
+    target = JointFollower.validate(measured)
+    maximum = math.radians(config['initialization']['max_correction_degrees'])
+    margin = math.radians(config['initialization']['margin_degrees'])
+    for index, joint in enumerate(JOINTS):
+        value = target[index]
+        if not encoder_limits[joint][0] <= value <= encoder_limits[joint][1]:
+            raise ValueError(f'{joint}: outside calibrated encoder travel; reposition manually')
+        low, high = limits[index]
+        if value < low or value > high:
+            if max(low-value, value-high)+margin > maximum or high-low <= 2*margin:
+                raise ValueError(f'{joint}: too far outside model range; reposition manually')
+            target[index] = low+margin if value < low else high-margin
+    return target
 
 
 class JointFollower:
@@ -46,7 +73,7 @@ class JointFollower:
         self.target = self.validate(measured)
         self.holding = False
 
-    def step(self, leader, elapsed, *, sample_age=0):
+    def step(self, leader, elapsed, *, sample_age=0, map_trigger=True):
         desired = self.validate(leader)
         if (not math.isfinite(elapsed) or elapsed < 0
                 or not math.isfinite(sample_age) or sample_age < 0):
@@ -55,10 +82,11 @@ class JointFollower:
             self.holding = True
         if self.holding:
             return list(self.target)
-        low, high = map(math.radians, self.config['leader_trigger_degrees'])
-        fraction = max(0, min(1, (desired[5]-low)/(high-low)))
-        closed, opened = map(math.radians, self.config['follower_gripper_degrees'])
-        desired[5] = closed+fraction*(opened-closed)
+        if map_trigger:
+            low, high = map(math.radians, self.config['leader_trigger_degrees'])
+            fraction = max(0, min(1, (desired[5]-low)/(high-low)))
+            closed, opened = map(math.radians, self.config['follower_gripper_degrees'])
+            desired[5] = closed+fraction*(opened-closed)
         maximum = self.config['max_speed_rad_s']*min(elapsed, self.config['max_sample_age_seconds'])
         for index, bounds in enumerate(self.limits):
             goal = max(bounds[0], min(bounds[1], desired[index]))

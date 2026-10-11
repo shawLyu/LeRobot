@@ -52,11 +52,24 @@ def run(args):
     keys = queue.Queue()
     link, viewer = None, None
     started, frames, saved = time.monotonic(), [], False
+    issues, failure, exit_reason = [], None, 'window_closed'
+    stream_delayed, resume_after_delay = False, False
     initial = [0, -.4, .6, .1, 0, math.radians(20)]
     leader_qpos = list(initial)
     follower_qpos = list(initial)
     mapping = JointFollower(config, follower_qpos)
     selected, notice, hello = 0, 'Synthetic leader; motor writes OFF', None
+
+    def send_follow_command(operation):
+        nonlocal failure
+        try:
+            link.send(operation)
+            return True
+        except (OSError, RuntimeError) as exc:
+            failure = f'{type(exc).__name__}: {exc}'
+            issues.append({'time_seconds': time.monotonic()-started, 'error': failure})
+            return False
+
     try:
         if args.source == 'hardware':
             link = Link(args.host, args.remote_root, 'hardware', hardware_control=args.execute,
@@ -71,6 +84,9 @@ def run(args):
             if hello['config'] != config:
                 raise ValueError('Local/remote follow parameters differ; '
                                  'deploy configs/follow.json')
+            packet = link.snapshot()[1]
+            leader_qpos = list(packet['leader_qpos'])
+            follower_qpos = list(packet['qpos'])
         with tempfile.TemporaryDirectory(prefix='lerobot-follow-') as temp:
             # Textures resolve against the snapshot; mesh paths are explicit local source paths.
             model_path = Path(temp)/'scene.xml'
@@ -107,21 +123,36 @@ def run(args):
                 now = time.monotonic()
                 elapsed = now-previous
                 previous = now
+                stage, age = 'synthetic', 0
                 if link:
-                    if link.error or link.process.poll() is not None:
-                        raise RuntimeError(link.error or 'follow worker exited')
+                    worker_error = failure or link.error or (
+                        'follow worker exited' if link.process.poll() is not None else None)
                     _, packet, received, *_ = link.snapshot()
                     age = now-received
-                    if age > config['max_sample_age_seconds']:
-                        raise TimeoutError('stale follow stream; closing worker to hold follower')
                     leader_qpos = packet['leader_qpos']
                     follower_qpos = packet['qpos'] if args.execute else packet['target_qpos']
-                    notice = packet['notice']
+                    if worker_error:
+                        if failure != worker_error:
+                            issues.append({'time_seconds': now-started, 'error': worker_error})
+                        failure = worker_error
+                        stage, notice = 'disconnected', 'Worker stopped; follower held\n'+failure
+                    elif age > config['max_sample_age_seconds']:
+                        if not stream_delayed:
+                            send_follow_command('hold')
+                            issues.append({'time_seconds': now-started,
+                                           'error': 'delayed feedback', 'age_seconds': age})
+                        stream_delayed, resume_after_delay = True, True
+                        stage, notice = 'held', 'Feedback delayed; HOLD; waiting for fresh data'
+                    else:
+                        stream_delayed = False
+                        stage = packet.get('stage', 'following' if packet['following'] else 'held')
+                        notice = ('Feedback recovered; held; E initializes/resumes'
+                                  if resume_after_delay else packet['notice'])
+                        if now-last_ping > .2:
+                            send_follow_command('ping')
+                            last_ping = now
                     if hello['leader']['mode'] != 'independent':
                         notice += '\nTEMP shared calibration: white angles unverified'
-                    if now-last_ping > .2:
-                        link.send('ping')
-                        last_ping = now
                 else:
                     if args.auto:
                         leader_qpos = [initial[i]+(.22 if i < 5 else .15)*math.sin(
@@ -135,7 +166,10 @@ def run(args):
                         leader_qpos[selected] += math.radians(2)*(1 if key == 265 else -1)
                     elif key in (32, 69):
                         if link:
-                            link.send('hold' if key == 32 else 'resume')
+                            if not failure and (key == 32 or not stream_delayed):
+                                sent = send_follow_command('hold' if key == 32 else 'resume')
+                                if key == 69 and sent:
+                                    resume_after_delay = False
                         elif key == 32:
                             mapping.hold(follower_qpos)
                         else:
@@ -149,7 +183,8 @@ def run(args):
                         f"Follower: {config['follower']} | gripper",
                         ('REAL FOLLOWER' if args.execute
                          else 'SIMULATED FOLLOWER | motor writes OFF'),
-                        notice, 'E: start/resume | Space: hold',
+                        f'State: {stage}', notice,
+                        'E: initialize/start/resume | Space: hold',
                         'Synthetic: 1-6 select, Up/Down move (without --auto)',
                         f'Selected: {JOINTS[selected]}',
                         'Leader deg: '+str([round(math.degrees(q), 1) for q in leader_qpos]),
@@ -158,10 +193,16 @@ def run(args):
                     viewer.sync(args.screenshot if args.screenshot and not saved else None)
                     saved = True
                 frames.append({'time_seconds': now-started, 'leader_qpos': list(leader_qpos),
-                               'follower_qpos': list(follower_qpos)})
+                               'follower_qpos': list(follower_qpos), 'stage': stage,
+                               'notice': notice, 'stream_age_seconds': age})
                 if len(frames) > 10000:
                     del frames[:1000]
                 time.sleep(max(0, 1/config['hz']-(time.monotonic()-now)))
+            if args.duration is not None and time.monotonic()-started >= args.duration:
+                exit_reason = 'duration_completed'
+    except Exception as exc:
+        failure, exit_reason = f'{type(exc).__name__}: {exc}', 'error'
+        raise
     finally:
         try:
             if viewer:
@@ -170,7 +211,8 @@ def run(args):
             if link:
                 link.close()
             atomic_json(args.log, {'version': 1, 'source': args.source, 'execute': args.execute,
-                                   'config': config, 'hello': hello, 'frames': frames})
+                                   'config': config, 'hello': hello, 'frames': frames,
+                                   'exit_reason': exit_reason, 'error': failure, 'issues': issues})
 
 
 def main():

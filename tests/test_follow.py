@@ -6,7 +6,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from lerobot_arm_control.control.follow import JointFollower, load_follow_config
+from lerobot_arm_control.control.follow import (
+    JointFollower,
+    initialization_target,
+    load_follow_config,
+)
 from lerobot_arm_control.runtime import follow_server
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -33,6 +37,31 @@ def test_stale_samples_latch_hold_until_explicit_resume():
     for pose in ([0]*5, [0]*5+[float('nan')], [True]*6):
         with pytest.raises(ValueError):
             mapping.step(pose, .1)
+
+
+def test_initialization_recovers_small_model_violation_without_remapping_the_gripper():
+    config = load_follow_config()
+    measured = [0, math.radians(-100.85), 0, 0, 0, .3]
+    limits = [(-2, 2)]*6
+    limits[1] = tuple(map(math.radians, (-100, 100)))
+    encoders = {joint: (-3, 3) for joint in JOINTS}
+    goal = initialization_target(config, measured, limits, encoders)
+    assert goal[1] == pytest.approx(math.radians(-99.5))
+    assert goal[5] == measured[5]
+    mapping = JointFollower(config, measured, limits)
+    target = mapping.step(goal, .01, map_trigger=False)
+    assert target[1]-measured[1] == pytest.approx(.006)
+    assert target[5] == measured[5]
+    measured[1] = math.radians(-103)
+    with pytest.raises(ValueError, match='too far'):
+        initialization_target(config, measured, limits, encoders)
+    measured[1] = math.radians(-101.6)
+    with pytest.raises(ValueError, match='too far'):
+        initialization_target(config, measured, limits, encoders)
+    measured[1] = math.radians(-100.85)
+    encoders['shoulder_lift'] = (-1.75, 2)
+    with pytest.raises(ValueError, match='encoder travel'):
+        initialization_target(config, measured, limits, encoders)
 
 
 @pytest.mark.parametrize('raw', [{j: -1 for j in JOINTS}, {j: 65535 for j in JOINTS}, {}])
@@ -114,10 +143,18 @@ def test_real_execution_rejects_unmeasured_trigger_before_any_controller_writes(
         follow_server.serve(SimpleNamespace(config=None, hardware_control=True))
 
 
-def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(remote, monkeypatch):
+@pytest.mark.parametrize('initialization', ['inside', 'recover', 'timeout', 'too_far'])
+def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
+        remote, monkeypatch, initialization):
     config, _, packets = remote
     config['trigger_range_measured'] = True
     events = []
+    limits = [(-1, 1)]*6
+    if initialization != 'inside':
+        limits[1] = (.35 if initialization == 'too_far' else .315, 1)
+    if initialization == 'timeout':
+        config['initialization']['timeout_seconds'] = 1e-9
+    monkeypatch.setattr(follow_server, 'joint_ranges', lambda: limits)
 
     class Controller:
         def __init__(self, bus, calibration, limits, raw_limits):
@@ -138,6 +175,10 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(remo
         def status(self):
             return {'writes_enabled': True}
 
+        def stop(self, reason):
+            self.stopped = {'shoulder_lift': reason}
+            events.append('stop_hold')
+
         def close(self):
             events.append('close_hold')
 
@@ -154,15 +195,33 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(remo
     def send(packet):
         packets.append(packet)
         if packet['type'] == 'state':
+            if initialization == 'recover' and packet['stage'] == 'initializing':
+                return
             raise StopIteration('client disconnected')
 
     monkeypatch.setattr(follow_server, 'ManualControl', Controller)
     monkeypatch.setattr(follow_server.threading, 'Thread', Thread)
     monkeypatch.setattr(follow_server, 'send', send)
-    monkeypatch.setattr(follow_server, 'read_control_feedback', lambda bus:
-                        {'Present_Position': {j: 2200 for j in JOINTS}})
+    def feedback(bus):
+        raw = {joint: 2200 for joint in JOINTS}
+        if initialization == 'recover' and any(p['type'] == 'state' for p in packets):
+            raw['shoulder_lift'] = 2216
+        return {'Present_Position': raw}
+
+    monkeypatch.setattr(follow_server, 'read_control_feedback', feedback)
     with pytest.raises(StopIteration, match='disconnected'):
         follow_server.serve(SimpleNamespace(config=None, hardware_control=True))
-    assert all(joint in events for joint in JOINTS)
     assert events[-1] == 'close_hold'
-    assert packets[-1]['following'] is True
+    if initialization in ('inside', 'recover'):
+        assert all(joint in events for joint in JOINTS)
+        assert packets[-1]['following'] is True
+    else:
+        assert packets[-1]['stage'] == 'held'
+        assert packets[-1]['following'] is False
+    if initialization == 'recover':
+        first = next(p for p in packets if p['type'] == 'state')
+        assert first['stage'] == 'initializing'
+        assert first['target_qpos'][5] == pytest.approx(.3)
+    if initialization == 'too_far':
+        assert 'enable_follower' not in events
+        assert any(p.get('ok') is False and 'too far' in p['error'] for p in packets)

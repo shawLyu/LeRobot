@@ -133,3 +133,8 @@ Use `--simulate` for a read-only real-leader preview, or `--source synthetic --a
 for an offline demonstration. Missing independent calibration blocks the default
 hardware mode rather than silently selecting simulation. See
 [follow demo](follow.md) for physical execution prerequisites and controls.
+The default start key `E` now includes a fresh-position hold and bounded follower
+initialization before following. The stored -100.85-degree shoulder pose is eligible
+for a correction to -99.5 degrees. Initialization corrections are at most 2 degrees;
+larger corrections or violations of encoder travel require manual repositioning.
+Feedback delays request hold while leaving the window open, and recovery requires `E`.

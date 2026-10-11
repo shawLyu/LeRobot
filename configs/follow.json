@@ -9,5 +9,11 @@
   "follower_gripper_degrees": [0, 90],
   "trigger_range_measured": true,
   "trigger_range_source": "User confirmed released/fully pressed endpoints at 0/30 degrees on 2026-10-11; independent arm1 angle calibration",
-  "simulation_shared_calibration": false
+  "simulation_shared_calibration": false,
+  "initialization": {
+    "max_correction_degrees": 2,
+    "margin_degrees": 0.5,
+    "settle_tolerance_degrees": 0.25,
+    "timeout_seconds": 5
+  }
 }

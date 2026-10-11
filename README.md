@@ -112,7 +112,8 @@ black follower has a gripper. Real following is the default; simulation is expli
 ./scripts/lerobot-arm demo follow --source synthetic --auto
 ```
 
-`E` starts/resumes and `Space` holds. The default follower is physical and
+`E` initializes/starts/resumes and `Space` holds. Feedback delay pauses motion while
+keeping the window open; recovery requires another `E`. The default follower is physical and
 requires independent white calibration and measured trigger travel;
 the current scene now has accepted white 6/6 calibration and user-confirmed
 0–30° trigger travel. See [follow demo](docs/follow.md).

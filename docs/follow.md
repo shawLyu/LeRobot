@@ -8,7 +8,7 @@ Run these commands on the local MuJoCo workstation. Close the tabletop viewer an
 arm-calibration window first: each USB bus has one exclusive owner.
 
 ```sh
-# Real white leader -> real black follower (default); E starts, Space holds.
+# Real white leader -> real black follower; E initializes/starts, Space holds.
 ./scripts/lerobot-arm demo follow
 
 # Read-only real leader input -> simulated black follower.
@@ -24,7 +24,7 @@ arm-calibration window first: each USB bus has one exclusive owner.
 The default command selects the physical follower and requires independent
 six-joint calibration of both arms and measured trigger travel. It does not
 silently fall back to simulation when those measurements are missing. The
-window starts held; press `E` to begin following. `--execute` remains an explicit
+window starts held; press `E` to initialize and begin following. `--execute` remains an explicit
 alias for the hardware mode. Synthetic input selects an offline simulated follower.
 
 The `--simulate` preview is a kinematic visualization of commanded follower joint angles, not
@@ -34,13 +34,27 @@ calibration; temporary sharing is disabled. An incomplete or invalid white file 
 The simulation uses `data/tabletop/current-scene/` when available and falls back
 to the versioned `configs/scenes/tabletop-current.json` for a fresh checkout.
 
-`E` starts/resumes following; `Space` holds. Targets begin at the current follower
+Connection initializes the displayed poses from live encoder feedback. `E` starts/resumes
+the follower from a fresh current-position hold. Small model-limit violations are
+corrected at the normal speed limit to 0.5 degrees inside the usable range; the
+entire correction must be at most 2 degrees.
+Initialization does not move the other joints or remap the follower gripper. Once all
+joints are inside their limits and within 0.25 degrees of that target, following begins.
+An initialization lasting over 5 seconds holds and requires `E` to retry. Larger
+model-limit violations or positions outside calibrated encoder travel are rejected
+before torque is enabled; reposition those manually. The passive white leader is read-only.
+
+`Space` holds. Targets begin at the current follower
 pose and approach the live leader pose at at most 0.6 rad/s. Five arm joints mirror
 angles in the existing canonical frame; trigger travel maps proportionally to
 follower gripper opening. Values are clipped to the configured model/encoder limits.
 Stale samples, motor faults, client heartbeat loss and connection close hold the
 physical follower. Holding preserves support on gravity-loaded joints. Resume
 requires `E`; it does not restart automatically. The leader bus remains read-only.
+Feedback delays above 0.25 seconds request hold and leave the window open. Fresh
+feedback restores the display while motion remains held until another `E`.
+If the remote worker exits, the window displays the cause and remains open;
+close it and relaunch after resolving the connection or motor fault.
 
 ## Enable the physical follower after independent measurements
 
@@ -49,8 +63,8 @@ independent alignment is complete (6/6). The user confirmed the released/fully
 pressed trigger endpoints as 0/30 degrees on 2026-10-11, and the current follow
 configuration uses this measured range. Both arms require their own valid mapping.
 The latest read-only capture recorded follower `shoulder_lift` at -100.85 degrees,
-just below its -100-degree model limit. Return the supported follower inside its
-configured range before pressing `E`; otherwise the start check rejects motion.
+just below its -100-degree model limit. This small violation is eligible for the
+default bounded initialization after `E`.
 
 1. Complete white `arm1` alignment in `view arm --backend hardware --arm arm1`.
    Joints 1–5 use 0/30/60 degrees; trigger joint 6 uses 0/15/30 degrees.
@@ -69,11 +83,12 @@ configured range before pressing `E`; otherwise the start check rejects motion.
 ./scripts/lerobot-arm demo follow
 ```
 
-The window initially holds. Press `E` to enable the calibrated black follower.
+The window initially holds. Press `E` to initialize and enable the calibrated black follower.
 Fresh current-position goals are confirmed before torque is enabled; the existing
 controller restores its temporary RAM acceleration/velocity/P settings on close.
 No EEPROM calibration, offsets, modes or travel limits are rewritten.
 Runtime records go to `logs/follow-latest.json`; choose `--log` to keep another run.
+They include initialization/hold/follow stages, feedback age, faults and the exit reason.
 
 ## Open-source references and model provenance
 

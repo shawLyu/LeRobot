@@ -2,6 +2,7 @@
 
 import argparse
 import hashlib
+import math
 import queue
 import threading
 import time
@@ -10,7 +11,11 @@ from pathlib import Path
 
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
-from lerobot_arm_control.control.follow import JointFollower, load_follow_config
+from lerobot_arm_control.control.follow import (
+    JointFollower,
+    initialization_target,
+    load_follow_config,
+)
 from lerobot_arm_control.control.manual_control import ManualControl
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
 from lerobot_arm_control.core.config import load_arms
@@ -83,6 +88,7 @@ def serve(args):
                 raise ValueError('follower has no usable calibrated motion range')
         mapping = JointFollower(config, measured, limits)
         active = not args.hardware_control
+        initialize_to, initialization_started = None, 0
         if not active:
             mapping.hold(measured)
         send({'type': 'hello', 'backend': 'hardware', 'joints': JOINTS,
@@ -92,7 +98,7 @@ def serve(args):
         threading.Thread(target=receive, args=(commands, disconnected), daemon=True).start()
         sequence, previous, deadline = 0, time.monotonic(), time.monotonic()
         heartbeat = previous
-        notice = ('Press E to start; Space holds' if controller
+        notice = ('Connected; E initializes then follows; Space holds' if controller
                   else 'Read-only hardware -> simulated follower')
         while not disconnected.is_set():
             started = time.monotonic()
@@ -108,26 +114,33 @@ def serve(args):
                             controller.heartbeat()
                     elif op == 'hold':
                         active = False
+                        initialize_to = None
                         mapping.hold(measured if controller else mapping.target)
                         if controller:
                             controller.stop('follow paused: hold')
                         notice = 'Held; E resumes from current follower position'
                     elif op == 'resume':
                         if controller:
-                            if any(not low <= value <= high for value, (low, high)
-                                   in zip(measured, limits, strict=True)):
-                                raise ValueError('follower is outside the configured '
-                                                 'model/encoder range')
+                            measured = angles(follower_bus.sync_read(
+                                'Present_Position', normalize=False), follower_fits)
+                            goal = initialization_target(config, measured, limits,
+                                                         controller.limits)
+                            if any(leader_bus.sync_read('Status', normalize=False).values()):
+                                raise ValueError('leader motor fault; cannot initialize')
                             controller.enable_all()
+                            initialize_to = goal if goal != measured else None
+                            initialization_started = time.monotonic()
                         mapping.resume(measured if controller else mapping.target)
                         active = True
                         heartbeat = time.monotonic()
-                        notice = 'Following'
+                        notice = ('Initializing follower into its model range'
+                                  if initialize_to else 'Following')
                     else:
                         raise ValueError('unknown follow command')
                     send({'type': 'ack', 'id': command['id'], 'op': op, 'ok': True})
                 except (ValueError, RuntimeError) as exc:
                     active = False
+                    initialize_to = None
                     mapping.hold(measured if controller else mapping.target)
                     notice = str(exc)
                     if controller:
@@ -149,11 +162,28 @@ def serve(args):
                      or now-heartbeat > WATCHDOG_SECONDS)
             if active and (stale or any(leader_status.values())):
                 active = False
+                initialize_to = None
                 mapping.hold(measured if controller else mapping.target)
                 notice = 'Stale/faulted leader or client: held; E required to resume'
                 if controller:
                     controller.stop(notice)
-            target = mapping.step(leader_qpos, now-previous, sample_age=now-sampled)
+            if initialize_to is not None:
+                tolerance = math.radians(config['initialization']['settle_tolerance_degrees'])
+                if all(low <= value <= high and abs(value-goal) <= tolerance
+                       for value, goal, (low, high) in zip(
+                           measured, initialize_to, limits, strict=True)):
+                    initialize_to = None
+                    mapping.resume(measured)
+                    notice = 'Initialized; following'
+                elif now-initialization_started > config['initialization']['timeout_seconds']:
+                    active = False
+                    initialize_to = None
+                    mapping.hold(measured)
+                    controller.stop('initialization timed out: hold')
+                    notice = 'Initialization timed out; held; E retries'
+            target = mapping.step(initialize_to if initialize_to is not None else leader_qpos,
+                                  now-previous, sample_age=now-sampled,
+                                  map_trigger=initialize_to is None)
             if controller:
                 if active:
                     for joint, angle in zip(JOINTS, target, strict=True):
@@ -161,11 +191,14 @@ def serve(args):
                 controller.step(raw, telemetry)
                 if controller.stopped:
                     active = False
+                    initialize_to = None
                     mapping.hold(measured)
                     notice = 'Follower held: '+str(controller.stopped)
             send({'type': 'state', 'seq': sequence, 'time_unix_ns': time.time_ns(),
                   'raw': raw, 'qpos': measured, 'leader_qpos': leader_qpos,
-                  'target_qpos': target, 'following': active, 'notice': notice,
+                  'target_qpos': target, 'following': active and initialize_to is None,
+                  'stage': ('initializing' if initialize_to is not None else
+                            'following' if active else 'held'), 'notice': notice,
                   'leader_status': leader_status, 'sample_age_ms': (now-sampled)*1000,
                   'control': controller.status() if controller else None})
             sequence += 1

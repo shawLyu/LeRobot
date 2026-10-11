@@ -187,6 +187,26 @@ The standard IDs are shoulder pan 1, shoulder lift 2, elbow 3, wrist pitch 4, wr
 Calibration binds to USB identity and motor registers. Renaming another robot to follower does not make the original calibration valid.
 Only one process should own a serial port at a time.
 
+### Leader / Follower teleoperation
+
+To move the Follower by hand-guiding a physical SO-101 Leader, use the new
+`teleoperate` entry on the Linux host with both USB arms connected. It launches
+the locked upstream `lerobot-teleoperate` implementation, without a camera or MuJoCo.
+Confirm the second device's role and each arm's upstream calibration first;
+the existing `arm1` remains unassigned until its hardware role is verified.
+
+```bash
+# Remote host, project root. Preview only; add --execute to move.
+./scripts/uv run --locked --extra hardware python -m lerobot_arm_control teleoperate \
+  --leader arm1 --follower follower \
+  --leader-id my_so101_leader --follower-id my_so101_follower --duration 10
+```
+
+See [Leader / Follower walkthrough](docs/teleoperate.md) for device selection,
+calibration, execution, stopping behavior and troubleshooting. This upstream
+workflow has different motor configuration and torque cleanup from the project's
+keyboard controller; it does not use `configs/control.json`.
+
 ## 5. View cameras and set resolution
 
 On macOS, install [XQuartz](https://www.xquartz.org/), then run locally:

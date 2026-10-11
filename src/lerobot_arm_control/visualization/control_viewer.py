@@ -130,6 +130,9 @@ class ControlViewer:
 
     def sync(self, capture_path=None):
         glfw.poll_events()
+        # Offscreen reference rendering can replace the current GL context.
+        glfw.make_context_current(self.window)
+        mujoco.mjr_setBuffer(mujoco.mjtFramebuffer.mjFB_WINDOW, self.context)
         width, height = glfw.get_framebuffer_size(self.window)
         window_width, _ = glfw.get_window_size(self.window)
         if width <= 0 or height <= 0 or window_width <= 0:
@@ -201,6 +204,7 @@ class ControlViewer:
 
     def close(self):
         if getattr(self, "context", None):
+            glfw.make_context_current(self.window)
             self.context.free()
             self.context = None
         self.scene = None  # MjvScene releases native storage in its Python destructor.

@@ -296,6 +296,7 @@ def run(args):
         calibration_mode = False
         calibration_notice = calibration_error or "B: calibration mode; capture measured poses only"
         last_reference = None
+        screenshot_saved = False
         last_ping = last_log = 0.0
         jogs = JogCommands()
         loop_started = time.monotonic()
@@ -519,7 +520,12 @@ def run(args):
                     overlays.append((None, mujoco.mjtGridPos.mjGRID_BOTTOMLEFT,
                                      "REFERENCE: other joints at zero; measure 0/30/60 deg", ""))
                 viewer.set_texts(overlays)
-                viewer.sync()
+                capture_path = getattr(args, 'screenshot', None) if not screenshot_saved else None
+                if capture_path:
+                    capture_path.parent.mkdir(parents=True, exist_ok=True)
+                viewer.sync(capture_path=capture_path)
+                if capture_path:
+                    screenshot_saved = True
             if now - last_log > 1:
                 report = {"backend": args.backend, "worker_location": link.worker_location,
                           'arm': getattr(args, 'arm', 'follower'),
@@ -551,12 +557,14 @@ def run(args):
         print(json.dumps({"event": "finished", "received_hz": rate}), flush=True)
     finally:
         try:
-            if "viewer" in locals() and viewer:
-                viewer.close()
             if "reference_renderer" in locals() and reference_renderer:
                 reference_renderer.close()
         finally:
-            link.close()
+            try:
+                if "viewer" in locals() and viewer:
+                    viewer.close()
+            finally:
+                link.close()
 
 
 def main():
@@ -570,6 +578,7 @@ def main():
     parser.add_argument("--calibration", type=Path,
                         help='Defaults to data/calibration/<arm>_mujoco.json')
     parser.add_argument("--headless", action="store_true")
+    parser.add_argument('--screenshot', type=Path, help='Save the first rendered local GUI frame')
     parser.add_argument("--smoke-test", action="store_true")
     parser.add_argument("--verify-gripper", action="store_true",
                         help="Execute one +32 tick gripper roundtrip after onsite clearance")

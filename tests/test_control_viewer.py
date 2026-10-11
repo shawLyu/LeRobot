@@ -1,9 +1,13 @@
+import ctypes
+import os
+import sys
 from pathlib import Path
 
 import glfw
 import mujoco
 import numpy as np
-from PIL import ImageFont
+import pytest
+from PIL import Image, ImageFont
 
 from lerobot_arm_control.visualization.control_viewer import ControlViewer, panel_lines
 from lerobot_arm_control.visualization.ui import motor_fault_text
@@ -46,6 +50,57 @@ def test_actual_so101_meshes_remain_identical_after_all_selection_keys():
     for key in range(glfw.KEY_1, glfw.KEY_6 + 1):
         viewer.on_key(None, key, 0, glfw.PRESS, 0)
         assert geometry() == baseline
+
+
+def test_reference_renderer_does_not_blank_live_window(tmp_path, monkeypatch):
+    if sys.platform == 'linux' and not os.environ.get('DISPLAY'):
+        pytest.skip('A window display is required for GL context switching')
+    if not glfw.init():
+        pytest.skip('GLFW display unavailable')
+    if sys.platform == 'darwin':
+        library = ctypes.CDLL('/System/Library/Frameworks/OpenGL.framework/OpenGL')
+        library.CGLGetCurrentContext.restype = ctypes.c_void_p
+        current_context = library.CGLGetCurrentContext
+    else:
+        def current_context():
+            return ctypes.cast(glfw.get_current_context(), ctypes.c_void_p).value
+
+    model = mujoco.MjModel.from_xml_path(str(
+        Path(__file__).resolve().parents[1]/'assets/so101/scene_mujoco.xml'))
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    viewer = ControlViewer(model, data, lambda key: None, 'Calibration render regression',
+                           hold_on_focus_loss=False)
+    renderer = None
+    try:
+        window_context = current_context()
+        viewer.cam.lookat[:] = [0., 0., .15]
+        viewer.cam.distance = .75
+        viewer.set_texts([(None, None, 'Six-joint calibration: live model and reference', '')])
+        renderer = mujoco.Renderer(model, height=300, width=420)
+        render = mujoco.mjr_render
+
+        def check_window_context(*args):
+            assert current_context() == window_context
+            return render(*args)
+
+        for index in range(2):
+            # Reference rendering uses its own context, including after a joint change.
+            monkeypatch.setattr(mujoco, 'mjr_render', render)
+            data.qpos[0] = index*.5
+            mujoco.mj_forward(model, data)
+            renderer.update_scene(data)
+            pixels = renderer.render()
+            viewer.set_images((mujoco.MjrRect(12, 55, 420, 300), pixels))
+            screenshot = tmp_path/f'calibration-{index}.png'
+            monkeypatch.setattr(mujoco, 'mjr_render', check_window_context)
+            viewer.sync(capture_path=screenshot)
+            frame = np.asarray(Image.open(screenshot))
+            assert frame[:, int(frame.shape[1]*.38):].std() > 10
+    finally:
+        if renderer:
+            renderer.close()
+        viewer.close()
 
 
 def test_repeated_enable_does_not_reset_target_but_arrows_repeat():

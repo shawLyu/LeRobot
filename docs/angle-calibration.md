@@ -55,6 +55,11 @@ For the right white arm, select its own hardware identity and independent file:
   --log logs/arm1-angle-calibration.json
 ```
 
+Run the display command on the local MuJoCo workstation; SSH reads the remote arm.
+The window shows the live model plus the selected joint's reference pose in the lower left.
+For display verification, add `--screenshot logs/arm1-calibration.png` to save its first frame.
+Window rendering restores its own graphics context after every offscreen reference image.
+
 The default output becomes `data/calibration/arm1_mujoco.json`; this measurement entry
 does not copy or overwrite follower mappings. The same B / 1–6 / R / C procedure applies.
 Additional arms use this entry for read-only alignment; physical-control and gripper-test

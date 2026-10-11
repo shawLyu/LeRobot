@@ -32,6 +32,21 @@ class ReadOnlyBus:
         ]
 
 
+def test_missing_white_mapping_is_explicit_and_does_not_open_a_bus(tmp_path, monkeypatch):
+    from lerobot_arm_control.runtime import tabletop_robot
+
+    monkeypatch.setattr(tabletop_robot, 'ROOT', tmp_path)
+    config = {'additional_robots': [{'arm': 'arm1', 'enabled': True,
+                                     'joint_calibration': 'data/calibration/arm1_mujoco.json'}]}
+    feedback = tabletop_robot.start_additional_feedback(config)
+    state = feedback['arm1'].snapshot()
+    assert state['status'] == 'uncalibrated' and state['read_only'] is True
+    assert 'qpos' not in state
+    assert feedback['arm1'].worker.ident is None
+    feedback['arm1'].close()
+    assert not tabletop_robot.start_additional_feedback(config, camera_only=True)
+
+
 def test_hardware_identity_reuses_all_six_existing_fits():
     path = ROOT / "data/calibration/follower_mujoco.json"
     saved = json.loads(path.read_text())

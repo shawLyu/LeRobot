@@ -1,0 +1,1203 @@
+{
+  "version": 1,
+  "sequence": 111,
+  "captured_unix_ns": 1791689399037224416,
+  "units": "m",
+  "reference": "anchor AprilTag center; +X right; +Y up; +Z out",
+  "table": {
+    "anchor": {
+      "dictionary": "DICT_APRILTAG_36h10",
+      "marker_id": 1,
+      "marker_size_m": 0.15
+    },
+    "workspace_bounds_m": [
+      -0.8787784959877911,
+      0.1275,
+      -0.3124316534922962,
+      0.48011450664773964
+    ],
+    "extent_source": "workspace patch; desk perimeter not measured",
+    "secondary_layouts": {
+      "DICT_APRILTAG_16h5:0": [
+        [
+          -0.8258528173158785,
+          0.42761450664773965,
+          0.0
+        ],
+        [
+          -0.675853421324867,
+          0.4271888279758269,
+          0.0
+        ],
+        [
+          -0.6762790999967797,
+          0.27718943198481544,
+          0.0
+        ],
+        [
+          -0.8262784959877911,
+          0.27761511065672817,
+          0.0
+        ]
+      ]
+    }
+  },
+  "camera": {
+    "device": "/dev/v4l/by-id/usb-CN02KX4NLG0004ABK00_USB_Camera_CN02KX4NLG0004ABK00-video-index0",
+    "position": [
+      -0.3187107439345183,
+      -0.08139138632802857,
+      0.6317667488568667
+    ],
+    "rotation": [
+      [
+        0.9974105669816573,
+        0.006791467600448953,
+        -0.07159634656293944
+      ],
+      [
+        -0.010952151627805762,
+        -0.9695757186516014,
+        -0.24454647038130042
+      ],
+      [
+        -0.07107890860198986,
+        0.2446973677199302,
+        -0.9669906860890063
+      ]
+    ],
+    "controls": {
+      "autofocus": false,
+      "focus": 68.0,
+      "verified": true
+    },
+    "anchor_visible": true,
+    "pose_source": "both",
+    "reprojection_error_px": 0.3771905905471408
+  },
+  "arms": {
+    "follower": {
+      "registration": {
+        "status": "fixed",
+        "markers": [],
+        "marker_size_m": 0.042,
+        "reference": "primary tabletop anchor",
+        "calibrated": true,
+        "reprojection_error_px": 0.16972777869175226,
+        "max_reprojection_error_px": 1.5,
+        "constraint": "base_flat_on_table",
+        "position": [
+          -0.4693182947632566,
+          -0.05728449061302131,
+          0.002400001698325327
+        ],
+        "quaternion": [
+          0.706085521402854,
+          0,
+          0,
+          0.7081265681114216
+        ],
+        "pose_source": "fixed_marker_calibration",
+        "fixed_calibration_samples": 20,
+        "fixed_calibration_required": 20,
+        "fixed_to_table": true,
+        "calibrated_unix_ns": 1791689384797157944,
+        "calibration_position_spread_m": 0.0002542149876749605,
+        "calibration_yaw_spread_rad": 0.0006551030531696256,
+        "calibration_age_s": 14.322246678
+      },
+      "qpos": [
+        -0.06342182352317423,
+        1.7393623143806736,
+        -1.5074702211915623,
+        -0.1894928902165272,
+        -1.7938399139832957,
+        -0.1819995744058258
+      ],
+      "joint_pose_source": "live_encoders",
+      "feedback_status": "live"
+    },
+    "arm1": {
+      "registration": {
+        "status": "fixed",
+        "markers": [],
+        "marker_size_m": 0.042,
+        "reference": "primary tabletop anchor",
+        "calibrated": true,
+        "reprojection_error_px": 0.147268913211,
+        "max_reprojection_error_px": 1.5,
+        "constraint": "base_flat_on_table",
+        "position": [
+          -0.17588661221718044,
+          -0.0599132971415117,
+          0.002400001698325327
+        ],
+        "quaternion": [
+          0.7181765750215744,
+          0,
+          0,
+          0.6958609107359609
+        ],
+        "pose_source": "fixed_marker_calibration",
+        "fixed_calibration_samples": 20,
+        "fixed_calibration_required": 20,
+        "fixed_to_table": true,
+        "calibrated_unix_ns": 1791689384849461546,
+        "calibration_position_spread_m": 0.0002545087086934618,
+        "calibration_yaw_spread_rad": 0.0011957311821417793,
+        "calibration_age_s": 14.269972686
+      },
+      "qpos": [
+        0,
+        1.5,
+        -1.6,
+        0.3,
+        0,
+        0.6
+      ],
+      "joint_pose_source": "unmeasured_preview",
+      "feedback_status": "uncalibrated"
+    }
+  },
+  "base_distances": [
+    {
+      "arms": [
+        "follower",
+        "arm1"
+      ],
+      "relative_position_m": [
+        0.29343168254607616,
+        -0.0026288065284903947,
+        0.0
+      ],
+      "center_distance_m": 0.2934434578340186,
+      "planar_distance_m": 0.2934434578340186,
+      "both_fixed": true
+    }
+  ],
+  "objects": {
+    "black_t": {
+      "iou": 0.9277824978759558,
+      "xy": [
+        -0.38989992470690005,
+        0.23416347064102383
+      ],
+      "yaw": 3.1066860685499065,
+      "width": 0.048,
+      "length": 0.06,
+      "cap_depth": 0.012,
+      "stem_width": 0.012,
+      "contour_xy": [
+        [
+          -0.39082959294319153,
+          0.26340073347091675
+        ],
+        [
+          -0.3940503001213074,
+          0.2617594599723816
+        ],
+        [
+          -0.39483362436294556,
+          0.21705244481563568
+        ],
+        [
+          -0.3964006006717682,
+          0.2154073417186737
+        ],
+        [
+          -0.41242310404777527,
+          0.21586740016937256
+        ],
+        [
+          -0.41376781463623047,
+          0.20579002797603607
+        ],
+        [
+          -0.36764800548553467,
+          0.20454148948192596
+        ],
+        [
+          -0.3677169680595398,
+          0.2129197120666504
+        ],
+        [
+          -0.38201606273651123,
+          0.21331557631492615
+        ],
+        [
+          -0.38525113463401794,
+          0.21677909791469574
+        ],
+        [
+          -0.38430604338645935,
+          0.2614276707172394
+        ]
+      ],
+      "height": 0,
+      "height_measured": true,
+      "dimension_source": "user_measurement",
+      "tracking_status": "observed",
+      "observed": true,
+      "pose_valid": true,
+      "observation_age_s": 0.0,
+      "z": 0.0,
+      "complete_outline_xy": [
+        [
+          -0.3669615297595168,
+          0.20334415790959093
+        ],
+        [
+          -0.4149322894564334,
+          0.20501933375131098
+        ],
+        [
+          -0.41451349549600336,
+          0.21701202367554012
+        ],
+        [
+          -0.3965244606096596,
+          0.21638383273489512
+        ],
+        [
+          -0.39484928476793957,
+          0.2643545924318117
+        ],
+        [
+          -0.38285659484371043,
+          0.2639357984713817
+        ],
+        [
+          -0.3845317706854305,
+          0.2159650387744651
+        ],
+        [
+          -0.36654273579908675,
+          0.21533684783382007
+        ]
+      ]
+    },
+    "wood_t": {
+      "iou": 0.8900487125956854,
+      "xy": [
+        -0.34109264382051263,
+        0.21782959476967098
+      ],
+      "yaw": 3.0543261909900767,
+      "width": 0.048,
+      "length": 0.06,
+      "cap_depth": 0.012,
+      "stem_width": 0.012,
+      "contour_xy": [
+        [
+          -0.34214210510253906,
+          0.24820953607559204
+        ],
+        [
+          -0.34689098596572876,
+          0.2313474416732788
+        ],
+        [
+          -0.34843969345092773,
+          0.20463912189006805
+        ],
+        [
+          -0.3515549600124359,
+          0.20141538977622986
+        ],
+        [
+          -0.3562437891960144,
+          0.20319072902202606
+        ],
+        [
+          -0.36718323826789856,
+          0.20182594656944275
+        ],
+        [
+          -0.3655926287174225,
+          0.19848090410232544
+        ],
+        [
+          -0.3671024441719055,
+          0.19193877279758453
+        ],
+        [
+          -0.3221534192562103,
+          0.18593895435333252
+        ],
+        [
+          -0.31905633211135864,
+          0.18749257922172546
+        ],
+        [
+          -0.3189381957054138,
+          0.19893568754196167
+        ],
+        [
+          -0.3328775465488434,
+          0.20093320310115814
+        ],
+        [
+          -0.3359661102294922,
+          0.2059655338525772
+        ],
+        [
+          -0.3326432704925537,
+          0.24791385233402252
+        ]
+      ],
+      "height": 0.006,
+      "height_measured": true,
+      "dimension_source": "user_measurement",
+      "tracking_status": "observed",
+      "observed": true,
+      "pose_valid": true,
+      "observation_age_s": 0.0,
+      "z": 0.003,
+      "complete_outline_xy": [
+        [
+          -0.3197986433487405,
+          0.1858520160009748
+        ],
+        [
+          -0.36761598885714425,
+          0.1900354916528624
+        ],
+        [
+          -0.3665701199441724,
+          0.20198982802996335
+        ],
+        [
+          -0.348638615378521,
+          0.20042102466050551
+        ],
+        [
+          -0.3444551397266334,
+          0.2482383701689093
+        ],
+        [
+          -0.3325008033495324,
+          0.2471925012559374
+        ],
+        [
+          -0.33668427900142,
+          0.19937515574753362
+        ],
+        [
+          -0.3187527744357686,
+          0.19780635237807576
+        ]
+      ]
+    }
+  },
+  "models": {
+    "black_t": {
+      "width": 0.048,
+      "length": 0.06,
+      "cap_depth": 0.012,
+      "stem_width": 0.012,
+      "height": 0,
+      "height_measured": true,
+      "dimension_source": "user_measurement"
+    },
+    "wood_t": {
+      "width": 0.048,
+      "length": 0.06,
+      "cap_depth": 0.012,
+      "stem_width": 0.012,
+      "height": 0.006,
+      "height_measured": true,
+      "dimension_source": "user_measurement"
+    }
+  },
+  "wood_height_measured": true,
+  "appearance": {
+    "version": 1,
+    "source_sequence": 1,
+    "source_captured_unix_ns": 1791689379509952393,
+    "perception_location": "remote",
+    "bounds": [
+      -0.8787784959877911,
+      0.1275,
+      -0.3124316534922962,
+      0.48011450664773964
+    ],
+    "texture_rows": "world +Y to -Y; MuJoCo PNG convention, vflip=false",
+    "materials_rgb": {
+      "black_t_cap": [
+        0.18068510520727854,
+        0.21682212624873426,
+        0.21682212624873426
+      ],
+      "black_t_stem": [
+        0.15358233942618676,
+        0.18520223283746054,
+        0.18971936046764248
+      ],
+      "wood_t_cap": [
+        0.7814630800214798,
+        0.7633945695007519,
+        0.44267850775783246
+      ],
+      "wood_t_stem": [
+        0.7814630800214798,
+        0.7679116971309338,
+        0.46526414590874227
+      ]
+    },
+    "robot_plastic_rgb": [
+      0.08582542497345731,
+      0.126479573645095,
+      0.126479573645095
+    ],
+    "background_rgb": [
+      0.3411764705882353,
+      0.3333333333333333,
+      0.34509803921568627
+    ],
+    "observed_table_fraction": 0.17280101776123047,
+    "paper_material_detected": true,
+    "texture_method": "observed desk/paper colors and fine photo detail; broad lighting removed",
+    "hidden_surfaces": "inpainted or uniform estimated material",
+    "lighting": {
+      "headlight_ambient": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "main_pos": [
+        0.37691074104537425,
+        -0.18757801634594737,
+        1.4
+      ],
+      "main_dir": [
+        -0.7525499890392698,
+        0.2714194429236691,
+        -1.4
+      ],
+      "main_diffuse": [
+        0.32,
+        0.31,
+        0.3
+      ],
+      "fill_diffuse": [
+        0.1,
+        0.11,
+        0.13
+      ],
+      "plane_gain": 0.8681553740585823,
+      "source": "robust bright-table exposure gradient; approximate",
+      "physically_calibrated": false
+    },
+    "texture_files": [
+      "tabletop.png",
+      "secondary_tag.png",
+      "black_t_cap.png",
+      "black_t_stem.png",
+      "wood_t_cap.png",
+      "wood_t_stem.png"
+    ]
+  },
+  "config": {
+    "camera_matrix": [
+      [
+        434.7165593948044,
+        0.0,
+        309.00608094459545
+      ],
+      [
+        0.0,
+        444.1998559371445,
+        215.24907739687725
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "dist_coeffs": [
+      -0.05954119985272649,
+      0.041966213636348546,
+      -0.001866498586647926,
+      0.0023208527103808396,
+      0.014901257236407763
+    ],
+    "image_size": [
+      640,
+      360
+    ],
+    "dictionary": "DICT_APRILTAG_36h10",
+    "marker_id": 1,
+    "marker_size_m": 0.15,
+    "wood_height_m": 0.006,
+    "fps": 10,
+    "max_reprojection_error_px": 2.0,
+    "min_t_iou": 0.78,
+    "black_hsv": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        179,
+        255,
+        110
+      ]
+    ],
+    "wood_hsv": [
+      [
+        15,
+        35,
+        100
+      ],
+      [
+        42,
+        255,
+        255
+      ]
+    ],
+    "additional_markers": [
+      {
+        "dictionary": "DICT_APRILTAG_16h5",
+        "id": 0
+      }
+    ],
+    "t_model": {
+      "width": 0.048,
+      "length": 0.06,
+      "cap_depth": 0.012,
+      "stem_width": 0.012
+    },
+    "occlusion_hold_s": 2.0,
+    "robot": {
+      "enabled": true,
+      "arm": "follower",
+      "feedback_hz": 20,
+      "joint_calibration": "data/calibration/follower_mujoco.json",
+      "push_height_compensation_m": 0.005,
+      "marker_size_m": 0.042,
+      "markers": [
+        {
+          "dictionary": "DICT_4X4_50",
+          "id": 7,
+          "mount": "base_parallel_to_table",
+          "marker_size_m": 0.042,
+          "corners_base_m": [
+            [
+              0.01813499778157824,
+              -0.021,
+              0.06759999830167472
+            ],
+            [
+              -0.023865002218421763,
+              -0.021,
+              0.06759999830167472
+            ],
+            [
+              -0.023865002218421763,
+              0.021,
+              0.06759999830167472
+            ],
+            [
+              0.01813499778157824,
+              0.021,
+              0.06759999830167472
+            ]
+          ],
+          "mount_calibration": {
+            "source": "user_confirmed_measurements_20261009",
+            "black_edge_m": 0.042,
+            "center_height_over_table_m": 0.07,
+            "center_to_base_foot_rear_m": 0.0195,
+            "on_base_centerline": true,
+            "lateral_center_offset_m": 0,
+            "edges_parallel_to_base": true,
+            "marker_plane": "parallel_to_table",
+            "center_to_rear_direction": "toward_arm_extension",
+            "cad_base_foot_rear_x_m": -0.02236500221842176,
+            "cad_table_contact_z_m": -0.0024000016983252853,
+            "center_base_m": [
+              -0.0028650022184217618,
+              0,
+              0.06759999830167472
+            ],
+            "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
+          },
+          "border_seed_native": [
+            [
+              627,
+              874
+            ],
+            [
+              723,
+              875
+            ],
+            [
+              719,
+              977
+            ],
+            [
+              622,
+              975
+            ]
+          ],
+          "prefer_observed_border": true
+        }
+      ],
+      "mounts": [
+        "base_parallel_to_table"
+      ],
+      "visual_alignment": false,
+      "base_constraint": "flat_on_table",
+      "base_table_z_m": 0.0024000016983252853,
+      "localization_marker_ids": [
+        7
+      ],
+      "fixed_base": {
+        "file": "data/calibration/follower_table_base.json",
+        "sample_count": 20,
+        "reference": {
+          "dictionary": "DICT_APRILTAG_36h10",
+          "id": 1,
+          "marker_size_m": 0.15
+        },
+        "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+        "camera_calibration_sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca"
+      },
+      "physical_label": "left black follower",
+      "tool_marker": {
+        "enabled": true,
+        "dictionary": "DICT_4X4_50",
+        "id": 8,
+        "marker_size_m": 0.02,
+        "max_reprojection_error_px": 1.0,
+        "mount_description": "Outer View from X- face of the fixed follower finger; symmetry centered, 11 mm from upper rounded shoulder",
+        "size_source": "User-confirmed 20 mm black-square side, excluding white margin",
+        "tool_transform_measured": false,
+        "adaptive_thresh_constant": 3.0,
+        "corner_refinement": "contour",
+        "cad_reference": {
+          "model_file": "assets/so101/so101.xml",
+          "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+          "fixed_jaw_mesh": "wrist_roll_follower_so101_v1",
+          "mesh_sha256": "4b17b410a12d64ec39554abc3e8054d8a97384b2dc4a8d95a5ecb2a93670f5f4",
+          "body": "gripper",
+          "coordinates": "meters in gripper body frame; not table coordinates",
+          "outer_flat_surface": {
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "plane_x_m": -0.0352,
+            "mesh_tolerance_m": 1e-06,
+            "patch_bounds_m": [
+              [
+                -0.0352,
+                -0.01265,
+                -0.043158
+              ],
+              [
+                -0.035199,
+                0.012214,
+                -0.007976
+              ]
+            ],
+            "upper_rounded_edge_z_m": -0.005,
+            "symmetry_center_y_m": -0.000218,
+            "installation_correspondence": "User-confirmed View from X- face"
+          },
+          "fixed_jaw_contact_reference": {
+            "geom": "fixed_jaw_box3",
+            "position_m": [
+              -0.009,
+              0.0,
+              -0.103
+            ],
+            "definition": "Contact capsule center, not its physical contact surface"
+          },
+          "gripperframe": {
+            "position_m": [
+              0.012,
+              -0.000218,
+              -0.098127
+            ],
+            "quaternion_wxyz": [
+              0.7071067811865475,
+              0.0,
+              0.7071067811865475,
+              0.0
+            ]
+          },
+          "visual_tip_min_z_m": -0.104425,
+          "marker_pose_in_gripper": {
+            "position_m": [
+              -0.0352,
+              -0.000218,
+              -0.016
+            ],
+            "rotation": [
+              [
+                0,
+                0,
+                -1
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0
+              ]
+            ],
+            "center_distance_from_upper_edge_m": 0.011,
+            "upper_edge_definition": "Rounded holder shoulder on the +Z (wrist) side",
+            "position_source": "User-specified symmetry center and 11 mm edge distance; CAD surface",
+            "rotation_source": "Code axes inferred from installation photograph; not validated",
+            "sticker_thickness_m": 0,
+            "thickness_measured": false,
+            "transform_validated": false
+          },
+          "contact_offset_marker_m": [
+            -0.087,
+            0.000218,
+            -0.0262
+          ]
+        },
+        "tool_reference": {
+          "name": "fixed_jaw_contact_center",
+          "offset_marker_m": [
+            -0.087,
+            0.000218,
+            -0.0262
+          ],
+          "transform_validated": false,
+          "source": "User-specified placement and canonical fixed-jaw CAD; photograph-inferred code axes"
+        }
+      }
+    },
+    "capture_size": [
+      1920,
+      1080
+    ],
+    "low_to_capture_affine": [
+      [
+        3.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        3.0,
+        0.0
+      ]
+    ],
+    "capture_mapping_source": "Exact 3:1 full-frame processing view derived from the user-selected native 1920x1080 checkerboard calibration; no sensor crop",
+    "appearance": {
+      "enabled": true,
+      "texture_size": 1024
+    },
+    "additional_robots": [
+      {
+        "enabled": true,
+        "arm": "arm1",
+        "physical_label": "right white arm",
+        "marker_size_m": 0.042,
+        "markers": [
+          {
+            "dictionary": "DICT_4X4_50",
+            "id": 6,
+            "mount": "base_parallel_to_table",
+            "marker_size_m": 0.042,
+            "corners_base_m": [
+              [
+                -0.023865002218421763,
+                0.021,
+                0.06659999830167472
+              ],
+              [
+                0.01813499778157824,
+                0.021,
+                0.06659999830167472
+              ],
+              [
+                0.01813499778157824,
+                -0.021,
+                0.06659999830167472
+              ],
+              [
+                -0.023865002218421763,
+                -0.021,
+                0.06659999830167472
+              ]
+            ],
+            "mount_calibration": {
+              "source": "user_confirmed_measurements_20261007",
+              "black_edge_m": 0.042,
+              "center_height_over_table_m": 0.069,
+              "center_to_base_foot_rear_m": 0.0195,
+              "on_base_centerline": true,
+              "lateral_center_offset_m": 0,
+              "edges_parallel_to_base": true,
+              "marker_plane": "parallel_to_table",
+              "center_to_rear_direction": "toward_arm_extension",
+              "cad_base_foot_rear_x_m": -0.02236500221842176,
+              "cad_table_contact_z_m": -0.0024000016983252853,
+              "center_base_m": [
+                -0.0028650022184217618,
+                0,
+                0.06659999830167472
+              ],
+              "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
+            },
+            "border_seed_native": [
+              [
+                1314,
+                883
+              ],
+              [
+                1417,
+                886
+              ],
+              [
+                1420,
+                990
+              ],
+              [
+                1317,
+                987
+              ]
+            ],
+            "prefer_observed_border": true
+          }
+        ],
+        "mounts": [
+          "base_parallel_to_table"
+        ],
+        "visual_alignment": false,
+        "base_constraint": "flat_on_table",
+        "base_table_z_m": 0.0024000016983252853,
+        "localization_marker_ids": [
+          6
+        ],
+        "fixed_base": {
+          "file": "data/calibration/arm1_table_base.json",
+          "sample_count": 20,
+          "reference": {
+            "dictionary": "DICT_APRILTAG_36h10",
+            "id": 1,
+            "marker_size_m": 0.15
+          },
+          "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+          "camera_calibration_sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca"
+        },
+        "simulation": {
+          "plastic_rgb": [
+            0.88,
+            0.89,
+            0.87
+          ],
+          "preview_qpos": [
+            0,
+            1.5,
+            -1.6,
+            0.3,
+            0,
+            0.6
+          ],
+          "joint_pose_source": "unmeasured_preview"
+        },
+        "joint_calibration": "data/calibration/arm1_mujoco.json",
+        "feedback_hz": 20
+      }
+    ],
+    "camera_controls": {
+      "autofocus": false,
+      "focus": 68
+    },
+    "camera_calibration": {
+      "file": "configs/camera_intrinsics.json",
+      "sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca",
+      "source_path": "/home/hkuit-001/camera_calibration/session_20261008_135548/calibration_optimized.json",
+      "session": "20261008_135548",
+      "selection": "User selected the second calibration dataset on 2026-10-09",
+      "native_image_size": [
+        1920,
+        1080
+      ],
+      "training_images": 37,
+      "reported_training_rms_px": 0.7613802438870313,
+      "reported_validation_rms_px": 0.6797530945389286,
+      "focus_during_calibration": "not recorded in the supplied calibration",
+      "physical_precision_validated": false,
+      "dependent_base_calibration": "Both bases registered against current ID 1 tabletop reference on 2026-10-11",
+      "table_frame": "ID 1 (DICT_APRILTAG_36h10) center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the stationary auxiliary. Rebuilt from current observations on 2026-10-11."
+    }
+  },
+  "control_config_sha256": "5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591",
+  "joint_calibrations": {
+    "arm1": {
+      "model": "so101",
+      "joints": [
+        "shoulder_pan",
+        "shoulder_lift",
+        "elbow_flex",
+        "wrist_flex",
+        "wrist_roll",
+        "gripper"
+      ],
+      "read_only": true,
+      "joint_calibration": "data/calibration/arm1_mujoco.json",
+      "status": "uncalibrated",
+      "error": "Six-joint calibration required: data/calibration/arm1_mujoco.json",
+      "motion_available": false
+    },
+    "follower": {
+      "model": "so101",
+      "joints": [
+        "shoulder_pan",
+        "shoulder_lift",
+        "elbow_flex",
+        "wrist_flex",
+        "wrist_roll",
+        "gripper"
+      ],
+      "read_only": true,
+      "fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            844,
+            3440
+          ],
+          "shoulder_lift": [
+            809,
+            3238
+          ],
+          "elbow_flex": [
+            773,
+            3126
+          ],
+          "wrist_flex": [
+            862,
+            3192
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            1441,
+            2982
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -1214,
+          "shoulder_lift": 1932,
+          "elbow_flex": 1070,
+          "wrist_flex": -1980,
+          "wrist_roll": -1910,
+          "gripper": -1632
+        },
+        "phase": {
+          "shoulder_pan": 12,
+          "shoulder_lift": 12,
+          "elbow_flex": 12,
+          "wrist_flex": 12,
+          "wrist_roll": 12,
+          "gripper": 12
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "joint_calibration": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
+      "kinematic_correction": null,
+      "fits": {
+        "shoulder_pan": {
+          "zero_raw": 2143.0,
+          "radians_per_tick": 0.0014749261284459122,
+          "check_error_degrees": 0.5915492957746462
+        },
+        "shoulder_lift": {
+          "zero_raw": 2007.0,
+          "radians_per_tick": 0.0014917344034139567,
+          "check_error_degrees": 1.8803418803418854
+        },
+        "elbow_flex": {
+          "zero_raw": 2143.0,
+          "radians_per_tick": 0.0015445391610569286,
+          "check_error_degrees": 0.8849557522123864
+        },
+        "wrist_flex": {
+          "zero_raw": 2066.0,
+          "radians_per_tick": 0.0016622183352326947,
+          "check_error_degrees": 1.7142857142857184
+        },
+        "wrist_roll": {
+          "zero_raw": 2010.0,
+          "radians_per_tick": 0.0015818694126836822,
+          "check_error_degrees": 1.6314199395770352
+        },
+        "gripper": {
+          "zero_raw": 1620.0,
+          "radians_per_tick": 0.00139999672619866,
+          "check_error_degrees": 0.5614973262032035
+        }
+      },
+      "motion_available": false,
+      "status": "connecting"
+    }
+  },
+  "snapshot_directory": "data/tabletop/current-scene",
+  "pending_calibration": {
+    "arm1": {
+      "status": "0/6 aligned",
+      "file": "data/calibration/arm1_mujoco.json",
+      "fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            699,
+            3416
+          ],
+          "shoulder_lift": [
+            795,
+            3280
+          ],
+          "elbow_flex": [
+            807,
+            3094
+          ],
+          "wrist_flex": [
+            794,
+            3200
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            1512,
+            2759
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -2030,
+          "shoulder_lift": 1084,
+          "elbow_flex": 924,
+          "wrist_flex": -1986,
+          "wrist_roll": 1818,
+          "gripper": 1844
+        },
+        "phase": {
+          "shoulder_pan": 76,
+          "shoulder_lift": 12,
+          "elbow_flex": 76,
+          "wrist_flex": 76,
+          "wrist_roll": 76,
+          "gripper": 76
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      },
+      "reference_model": "assets/so101/scene_mujoco.xml",
+      "required_angles_deg": [
+        0,
+        30,
+        60
+      ],
+      "joint_order": [
+        "shoulder_pan",
+        "shoulder_lift",
+        "elbow_flex",
+        "wrist_flex",
+        "wrist_roll",
+        "gripper"
+      ],
+      "requires_physical_measurement": true
+    }
+  },
+  "calibration_records": {
+    "table_reference.json": {
+      "file": "data/calibration/table_reference.json",
+      "sha256": "fcecc4955dac5a2c2b16c343bed9006438c62c3f61abd2b3ca62c1400e754591",
+      "snapshot_file": "calibration_records/table_reference.json"
+    },
+    "follower_table_base.json": {
+      "file": "data/calibration/follower_table_base.json",
+      "sha256": "ed3034c884707ee09adaf285406420b1e7a2e2fccb94b2365ce3e0116e538c93",
+      "snapshot_file": "calibration_records/follower_table_base.json"
+    },
+    "arm1_table_base.json": {
+      "file": "data/calibration/arm1_table_base.json",
+      "sha256": "f957767b5c394e1a4a2e0ffa9ec5e2b17a65391cfab58927f8bee0c7b8f0105c",
+      "snapshot_file": "calibration_records/arm1_table_base.json"
+    },
+    "two_arm_bases.json": {
+      "file": "data/calibration/two_arm_bases.json",
+      "sha256": "45db56f9d0ad049ab4921e035218174d163ed02bb1beb164ecf3cce73998aa0a",
+      "snapshot_file": "calibration_records/two_arm_bases.json"
+    },
+    "follower_mujoco.json": {
+      "file": "data/calibration/follower_mujoco.json",
+      "sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "snapshot_file": "calibration_records/follower_mujoco.json"
+    }
+  },
+  "configuration_files": {
+    "tabletop.json": {
+      "file": "configs/tabletop.json",
+      "sha256": "135ef28142274479111aa41f6bad6aa1b79f97cabb881b52977db716c98c8a64"
+    },
+    "camera_intrinsics.json": {
+      "file": "configs/camera_intrinsics.json",
+      "sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca"
+    },
+    "camera.toml": {
+      "file": "configs/camera.toml",
+      "sha256": "219cdd27ce07b979a04b2ae1d8606e990344a8f64b0776cbc01053d7e14d3520"
+    },
+    "arms.toml": {
+      "file": "configs/arms.toml",
+      "sha256": "9a9f4fc7685cce2b5892c5562f19411b040a04203db43c814cd3f7312193a095"
+    },
+    "control.json": {
+      "file": "configs/control.json",
+      "sha256": "5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591"
+    }
+  }
+}

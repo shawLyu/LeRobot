@@ -23,6 +23,26 @@ from lerobot_arm_control.transport.realtime import JOINTS
 ROOT = workspace_root()
 
 
+def start_additional_feedback(config, *, camera_only=False):
+    """Additional arms read their own measured mapping; missing mappings stay explicit."""
+    feedback = {}
+    if camera_only:
+        return feedback
+    for entry in config.get('additional_robots', []):
+        if not entry.get('enabled') or not entry.get('joint_calibration'):
+            continue
+        robot = RobotFeedback(entry)
+        if (ROOT/entry['joint_calibration']).exists():
+            robot.start()
+        else:
+            path = entry['joint_calibration']
+            robot.latest.update(status='uncalibrated', read_only=True,
+                                error=f'Six-joint calibration required: {path}')
+            robot.metadata['joint_calibration'] = entry['joint_calibration']
+        feedback[entry['arm']] = robot
+    return feedback
+
+
 def calibration_identity(bus, arm, model_path):
     low = bus.sync_read("Min_Position_Limit", normalize=False)
     high = bus.sync_read("Max_Position_Limit", normalize=False)
@@ -151,4 +171,5 @@ class RobotFeedback:
 
     def close(self):
         self.stopped.set()
-        self.worker.join(timeout=3)
+        if self.worker.ident is not None:
+            self.worker.join(timeout=3)

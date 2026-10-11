@@ -17,7 +17,7 @@ Initialize a complete rollout from a fresh observation:
 It freezes the black target T, yellow wood T, fixed-base registration, six joint angles, and session textures/lighting.
 Both Ts require current visible full/partial observations, and camera/joint data younger than 500 ms at selection.
 Static caches, held poses, and lost localization cannot initialize a new rollout.
-The black follower base uses one-time ArUco 4x4 ID 7 registration against tabletop AprilTag 36h11 ID 3;
+The black follower base uses one-time ArUco 4x4 ID 7 registration against tabletop AprilTag 36h10 ID 1;
 the white arm uses its own ID 6 registration. A fixed base does not expire with visual timestamps,
 while camera, Ts, and joints still require fresh data. Old snapshots retain their original base-estimation labels.
 The remote connection closes before the entirely local contact rollout; physical motors do not execute simulated actions.
@@ -39,6 +39,12 @@ On 2026-10-11, replaying 210 saved frames with the current border search regions
 observations (median error 0.55 px). A read-only remote capture then saved 20-sample fixed follower
 registration with 0.59 px error and 0.36 mm maximum position spread. A second capture restored that
 registration and selected a fresh initialization on frame 4. This verifies capture startup, not task completion.
+The later October 11 current-scene check found a different visible desktop installation:
+right ID 1 and left ID 0. It replaced the ID 3 reference, verified the new layout, and
+recollected both bases; current parameters are in [the saved scene](current-scene.md).
+When a snapshot includes another robot, offline Push-T preserves that robot's recorded
+posture as static geometry. It keeps the six follower joints and wood free joint as
+the dynamic state; additional unactuated joints cannot reset to zero or fall under gravity.
 
 Each observation is saved under `observations/<timestamp>/` with state.json, initialization.json,
 calibration.json, joint_calibration.json, frame.jpg, native_frame.jpg, annotated.jpg, raw observations, materials, and CAD.

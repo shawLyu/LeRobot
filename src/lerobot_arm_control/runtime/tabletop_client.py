@@ -196,8 +196,8 @@ class TableLink:
                             'joint_pose_source': arm['joint_pose_source'], 'qpos': arm['qpos']}
                             for arm in scene_arms(message, self.hello['config'])}
                         if self.hello.get("robot"):
-                            manifest["robot"] = self.hello["robot"]
-                            manifest["robot"]["registration"] = message["robot"]["registration"]
+                            manifest["robot"] = {**self.hello["robot"],
+                                'registration': message['robot']['registration']}
                         atomic_json(self.output / "model.json", manifest)
                         xml = scene_xml(message, self.hello["config"], "robot_assets")
                         (self.output / "scene.xml").write_text(xml)
@@ -432,7 +432,8 @@ def run(args):
                              "Base: VISUAL ESTIMATE" if estimated else
                              "Robot position: UNREGISTERED PREVIEW")
                 other_bases = '\n'.join(
-                    f"{name} base: {pose.get('status', 'disabled')} | joints: unmeasured preview"
+                    f"{name} base: {pose.get('status', 'disabled')} | joints: "
+                    f"{state.get('robot_feedback', {}).get(name, {}).get('status', 'unmeasured')}"
                     for name, pose in state.get('base_registrations', {}).items()
                     if name != hello['config'].get('robot', {}).get('arm'))
                 distances = '\n'.join(
@@ -510,6 +511,11 @@ def run(args):
                                   "robot_status": robot.get("status"),
                                   "robot_error": robot.get("error"),
                                   "base_status": registration.get("status"),
+                                  'base_registrations': {
+                                      name: pose.get('status') for name, pose
+                                      in state.get('base_registrations', {}).items()},
+                                  'joint_feedback': {name: feedback.get('status') for name, feedback
+                                                     in state.get('robot_feedback', {}).items()},
                                   "tool_marker": {key: state.get('tool_marker', {}).get(key)
                                                   for key in ('id', 'status', 'position_valid',
                                                               'orientation_valid',
@@ -521,6 +527,11 @@ def run(args):
         if viewer:
             viewer.close()
         link.close()
+        hello, latest, *_ = link.snapshot()
+        if hello and latest:
+            from lerobot_arm_control.visualization.tabletop_snapshot import save_scene_snapshot
+
+            save_scene_snapshot(output, latest[0], hello)
         summary = {"frames": link.count, "output": str(output), "model_names": sorted(model_names),
                    "elapsed_s": time.monotonic()-started, "error": link.error}
         atomic_json(output / "summary.json", summary)

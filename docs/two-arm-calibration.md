@@ -1,23 +1,20 @@
 # Two-arm tabletop base calibration
 
-As of 2026-10-09, the table frame is the lower left AprilTag
-`DICT_APRILTAG_36h11` / ID 3, with upper left `DICT_APRILTAG_16h5` / ID 0
-as its auxiliary. Both black borders are 150 mm. The new table registration
-uses the user-selected second October 8 camera calibration and passed a
-49-frame restart check. See [current table registration](precision-calibration.md#current-table-reference-2026-10-09).
-
-Both old mounting records were archived on local and remote hosts under
-`.cleanup/20261009-table-id3/`. Current markers decode, but the user-reconfirmed
-42 mm black edge and 70 mm follower center height do not pass the current projection check;
-no new fixed base or pair separation is active. Do not infer current base
-positions from the historical measurements below. Simulation remains local.
+As of 2026-10-11, the actual visible right marker is
+`DICT_APRILTAG_36h10` / ID 1, with left `DICT_APRILTAG_16h5` / ID 0 as auxiliary.
+Both black borders are 150 mm. The October 9 ID 3 installation is archived.
+The user-selected second October 8 camera calibration remains active.
+Both bases now pass registration using their actual black-border edges and current search regions.
+Each saved record contains 20 accepted observations; current separation is **293.443 mm**.
+See [current scene](current-scene.md) for poses, independent table validation and complete saved parameters.
+The measurements in the historical section below remain historical. Simulation remains local.
 
 ## Physical identities and confirmed geometry
 
 | Arm | Appearance in the current camera view | Base marker | Joint feedback/control |
 | --- | --- | --- | --- |
 | `follower` | Left black arm | ArUco `DICT_4X4_50` / ID 7 | Existing follower bus |
-| `arm1` | Right white arm | ArUco `DICT_4X4_50` / ID 6 | Mounting pose only; role unassigned |
+| `arm1` | Right white arm | ArUco `DICT_4X4_50` / ID 6 | Current base; independent six-joint alignment pending |
 
 The original dimensions were confirmed for both arms; the follower center height
 was remeasured as 70 mm on 2026-10-09:
@@ -74,8 +71,8 @@ separate `fixed_base.file`; duplicate names, markers or file paths are rejected.
 - `data/calibration/arm1_table_base.json`: white arm fixed pose and mount signature.
 - `data/calibration/two_arm_bases.json`: both measured poses, separation, quality and provenance.
 
-These three records are currently archived; their paths are reserved for new
-accepted measurements in the current table frame.
+These three records now contain accepted October 11 measurements in the current ID 1 frame.
+Their prior versions are archived independently of the active records.
 The live stream contains `base_registrations`, indexed by arm name, and
 `base_distances`, containing pairwise displacement and separation in meters.
 The existing follower `robot.registration` field remains available.
@@ -92,8 +89,9 @@ indicates that both endpoints are saved calibrations.
 
 After both bases are accepted, the local viewer shows both articulated SO101
 models, base statuses and their separation. The follower uses live encoder angles; arm1 joint angles remain an
-explicit translucent, unmeasured preview because they have not been calibrated
-or streamed. No motor targets were written during registration.
+explicit translucent, unmeasured preview until its independent angle file is completed.
+The additional feedback worker then validates its device identity and streams its own six angles.
+No motor targets were written during registration. See [white-arm alignment](current-scene.md#white-arm-six-joint-alignment).
 At the time of this registration, `configs/control.json` (V14), the original follower encoder calibration, and the
 existing rest pose were preserved. The rest pose identity still matches the
 active raw angle mapping.
@@ -119,9 +117,9 @@ the two base files back locally and refresh the pair summary. Saved mounting
 poses load on restart without requiring the robot markers to remain visible.
 Moving a base or the primary tabletop marker requires new registration.
 
-The previous camera's `border_seed_native` regions were removed from the active
-configuration after its viewpoint changed. Inspect fresh source corners before
-adding new border search regions. Preserve the user-confirmed marker size,
+Current `border_seed_native` regions were measured from October 11 source frames.
+Inspect fresh source corners after changing the viewpoint; the previous regions
+are not valid for another installation. Preserve the user-confirmed marker size,
 height and CAD mount until a new physical measurement establishes a change.
 
 ## Height calibration dependency

@@ -10,13 +10,15 @@ The current code still uses these inputs:
 | `calibration/follower_mujoco.json` | Measured encoder-to-angle mapping; its name does not require a simulation engine at runtime |
 | `calibration/follower_mujoco_kinematic.json` | Optional validated height correction, bound to raw calibration and base hashes; previous correction archived after base recalibration |
 | `calibration/follower_rest.json` | Validated resting pose for hardware Reset |
-| `calibration/table_reference.json` | Accepted ID 3 / ID 0 table layout and multi-frame validation |
-| `calibration/follower_table_base.json` | Accepted fixed robot-base installation when available; old ID 1 record archived |
+| `calibration/table_reference.json` | Current accepted ID 1 / ID 0 table layout and independent frame validation |
+| `calibration/follower_table_base.json` | Current fixed black-arm base in the ID 1 frame |
 | `calibration/arm1_table_base.json` | Independently measured right white arm mounting pose |
 | `calibration/two_arm_bases.json` | Both poses, their separation and measurement provenance |
+| `calibration/arm1_mujoco.json` | White-arm angle mapping after its own physical 0/30/60-degree measurements; currently pending |
 | `calibration/height_samples.json` | New height measurements for local refitting; previous base-bound samples archived |
 | `trajectories/circle.json` | Circle trajectory input |
 | `tabletop/static_map.json` | Persistent auxiliary marker registration |
+| `tabletop/current-scene/` | Complete October 11 scene, photos, textures, meshes and final observation; mirrored remotely |
 | `push_t/measured/` | Independent local offline/test observation snapshot; not deployed remotely |
 
 Active control settings always live in `configs/control.json`.
@@ -40,6 +42,11 @@ Small JSON results/status/verification summaries remain under each host's `logs/
 `manifest.json` records deletion scope and retained-file SHA-256 values.
 Historical session paths document evidence provenance; original per-frame data was removed.
 Summaries contain no complete image/trajectory data and cannot reconstruct the old sessions.
+
+On 2026-10-11, the actual visible right marker decoded as AprilTag 36h10 / ID 1.
+The previous ID 3 records were archived before rebuilding both bases and the table layout.
+`configs/scenes/tabletop-current.json` is the versioned parameter/provenance record;
+the complete generated scene is preserved on both hosts at `data/tabletop/current-scene/`.
 
 The camera record selected on 2026-10-09 is versioned separately at
 `configs/camera_intrinsics.json`. The October 7 base records were archived on both hosts under

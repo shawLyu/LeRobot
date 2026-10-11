@@ -46,6 +46,9 @@ On 2026-10-09, the exposed ID 7 was decoded, but the reconfirmed 42 mm black bor
 at 70 mm height produced about 7.1 native-pixel mount-fit error, exceeding the
 4.5 native-pixel acceptance limit. No new fixed pose was accepted. Physical grasp
 and placement have therefore not yet been validated with this camera setup.
+The later [October 11 current scene](current-scene.md) corrected the black-border
+corner selection and actual tabletop reference. Both bases now have accepted fixed
+records; that update verifies observation and registration, not physical grasping.
 
 ## Planning and execution
 

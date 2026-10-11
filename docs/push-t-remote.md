@@ -66,7 +66,7 @@ Known corner height and a flat-base constraint solve planar position/yaw while r
 Old MIP ID 4/5/6 installation geometry has been removed from the active configuration.
 See [Two-arm calibration](two-arm-calibration.md) for measurements and saved poses.
 
-Initial registration requires visible primary ID 3 and 20 valid observations with distinct capture times spanning at least 1 s.
+Initial registration requires visible primary ID 1 and 20 valid observations with distinct capture times spanning at least 1 s.
 Position deviations from the median must be below 2 mm and yaw deviations below 0.025 rad.
 Results are atomically saved remotely as `data/calibration/follower_table_base.json` and
 `data/calibration/arm1_table_base.json`, then copied locally. Each arm requires its own 20 accepted observations.

@@ -1,6 +1,7 @@
 """Physical offline Push-T checks; never import or connect hardware drivers."""
 
 import ast
+import json
 import math
 import shutil
 
@@ -36,6 +37,31 @@ def test_offline_snapshot_runs_without_generated_scenes_photos_or_duplicate_mesh
     canonical = ROOT/'assets/so101/assets'
     for mesh in canonical.glob('*.stl'):
         assert (output/'robot_assets'/mesh.name).read_bytes() == mesh.read_bytes()
+
+
+def test_two_arm_snapshot_preserves_white_pose_without_uncontrolled_joints(tmp_path):
+    source = tmp_path/'snapshot'
+    shutil.copytree(ROOT/'data/push_t/measured', source)
+    state = json.loads((source/'state.json').read_text())
+    metadata = json.loads((source/'calibration.json').read_text())
+    config = json.loads((ROOT/'configs/tabletop.json').read_text())
+    metadata['config']['additional_robots'] = config['additional_robots']
+    base = [.15, .02, .0024]
+    state['base_registrations'] = {'arm1': {'position': base, 'quaternion': [1., 0., 0., 0.]}}
+    (source/'state.json').write_text(json.dumps(state))
+    (source/'calibration.json').write_text(json.dumps(metadata))
+    simulation = PushSimulation(source, tmp_path/'simulation')
+    assert simulation.model.nq == 13 and simulation.model.nu == 6
+    assert simulation.model.nmocap == 0
+    white_model = mujoco.MjModel.from_xml_path(str(ROOT/'assets/so101/so101.xml'))
+    white_data = mujoco.MjData(white_model)
+    white_data.qpos[:] = config['additional_robots'][0]['simulation']['preview_qpos']
+    mujoco.mj_forward(white_model, white_data)
+    expected = white_data.site('gripperframe').xpos+base
+    np.testing.assert_allclose(simulation.data.site('arm1__gripperframe').xpos, expected, atol=1e-9)
+    for _ in range(100):
+        mujoco.mj_step(simulation.model, simulation.data)
+    np.testing.assert_allclose(simulation.data.site('arm1__gripperframe').xpos, expected, atol=1e-9)
 
 
 def test_scene_preserves_measured_poses_and_has_real_contact_physics(sim):

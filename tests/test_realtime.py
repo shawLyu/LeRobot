@@ -67,6 +67,29 @@ def test_hardware_rejects_independent_simulation_heartbeat_before_connecting():
         Link("unused", "/unused", "hardware", keep_simulation_alive=True)
 
 
+def test_white_arm_calibration_routes_to_its_own_read_only_bus(monkeypatch):
+    process = Mock(stdin=io.StringIO(), stdout=io.StringIO())
+    popen = Mock(return_value=process)
+    monkeypatch.setattr('lerobot_arm_control.runtime.realtime_client.subprocess.Popen', popen)
+    link = Link('robot-host', '/remote/robot', 'hardware', arm='arm1')
+    link.reader.join(timeout=1)
+    command = popen.call_args.args[0][-1]
+    assert '--arm arm1' in command
+    assert '--hardware-control' not in command and '--allow-gripper' not in command
+    with pytest.raises(ValueError, match='read-only angle calibration'):
+        Link('robot-host', '/remote/robot', 'hardware', arm='arm1', hardware_control=True)
+
+
+def test_white_arm_defaults_to_its_own_calibration_file(monkeypatch):
+    from lerobot_arm_control.runtime import realtime_client
+
+    run = Mock()
+    monkeypatch.setattr(realtime_client, 'run', run)
+    monkeypatch.setattr(sys, 'argv', ['arm', '--backend', 'hardware', '--arm', 'arm1'])
+    realtime_client.main()
+    assert run.call_args.args[0].calibration == ROOT/'data/calibration/arm1_mujoco.json'
+
+
 def test_hardware_keeps_ssh_routing_and_control_flags(monkeypatch):
     process = Mock(stdin=io.StringIO(), stdout=io.StringIO())
     popen = Mock(return_value=process)

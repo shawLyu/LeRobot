@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "table_reference": {
+    "dictionary": "DICT_APRILTAG_36h10",
+    "id": 1,
+    "marker_size_m": 0.15
+  },
+  "source": "data/tabletop/current-scene",
+  "captured_unix_ns": 1791689399037224416,
+  "units": "m",
+  "arms": {
+    "follower": {
+      "file": "data/calibration/follower_table_base.json",
+      "sha256": "ed3034c884707ee09adaf285406420b1e7a2e2fccb94b2365ce3e0116e538c93",
+      "signature": "b2976d4472096817739c8c98efc7cf948e265035b66c308fd304a25154c2360f",
+      "pose": {
+        "status": "fixed",
+        "markers": [],
+        "marker_size_m": 0.042,
+        "reference": "primary tabletop anchor",
+        "calibrated": true,
+        "reprojection_error_px": 0.16972777869175226,
+        "max_reprojection_error_px": 1.5,
+        "constraint": "base_flat_on_table",
+        "position": [
+          -0.4693182947632566,
+          -0.05728449061302131,
+          0.002400001698325327
+        ],
+        "quaternion": [
+          0.706085521402854,
+          0,
+          0,
+          0.7081265681114216
+        ],
+        "pose_source": "fixed_marker_calibration",
+        "fixed_calibration_samples": 20,
+        "fixed_calibration_required": 20,
+        "fixed_to_table": true,
+        "calibrated_unix_ns": 1791689384797157944,
+        "calibration_position_spread_m": 0.0002542149876749605,
+        "calibration_yaw_spread_rad": 0.0006551030531696256
+      }
+    },
+    "arm1": {
+      "file": "data/calibration/arm1_table_base.json",
+      "sha256": "f957767b5c394e1a4a2e0ffa9ec5e2b17a65391cfab58927f8bee0c7b8f0105c",
+      "signature": "27aa7142d12c04c5c806579a8062e28db8cd06152b002aab85fb117bcb213f8b",
+      "pose": {
+        "status": "fixed",
+        "markers": [],
+        "marker_size_m": 0.042,
+        "reference": "primary tabletop anchor",
+        "calibrated": true,
+        "reprojection_error_px": 0.147268913211,
+        "max_reprojection_error_px": 1.5,
+        "constraint": "base_flat_on_table",
+        "position": [
+          -0.17588661221718044,
+          -0.0599132971415117,
+          0.002400001698325327
+        ],
+        "quaternion": [
+          0.7181765750215744,
+          0,
+          0,
+          0.6958609107359609
+        ],
+        "pose_source": "fixed_marker_calibration",
+        "fixed_calibration_samples": 20,
+        "fixed_calibration_required": 20,
+        "fixed_to_table": true,
+        "calibrated_unix_ns": 1791689384849461546,
+        "calibration_position_spread_m": 0.0002545087086934618,
+        "calibration_yaw_spread_rad": 0.0011957311821417793
+      }
+    }
+  },
+  "base_distances": [
+    {
+      "arms": [
+        "follower",
+        "arm1"
+      ],
+      "relative_position_m": [
+        0.29343168254607616,
+        -0.0026288065284903947,
+        0.0
+      ],
+      "center_distance_m": 0.2934434578340186,
+      "planar_distance_m": 0.2934434578340186,
+      "both_fixed": true
+    }
+  ],
+  "physical_precision_validated": false
+}

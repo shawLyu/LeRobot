@@ -80,6 +80,25 @@ def fit_capture(directory, config):
     validation = [s for index, s in enumerate(samples) if index % 5 == 4]
     if len(training) < 20 or len(validation) < 5:
         raise ValueError('Need at least 20 training frames and five held-out frames with both tags')
+    # A fixed camera has one extrinsic pose. Estimating its tilt separately from
+    # four noisy corners in every frame amplifies errors at the distant auxiliary.
+    primary = np.median([sample['primary'] for sample in training], axis=0)
+    fixed_camera = perception.estimate_pose(perception.tag_points, primary, square=True)
+    if fixed_camera is None:
+        raise ValueError('Stationary camera reference could not be estimated')
+    mapping = np.asarray(config['low_to_capture_affine'], dtype=float)
+    primary_motion = []
+    for sample in samples:
+        delta = (sample['primary']-primary)@mapping[:, :2].T
+        primary_motion.append(float(np.sqrt(np.mean(np.sum(delta**2, axis=1)))))
+        measured = pixels_on_plane(sample['auxiliary'], perception.matrix, perception.distortion,
+                                   fixed_camera[1], fixed_camera[2])[:, :2]
+        center = measured.mean(axis=0)
+        left, _, right = np.linalg.svd(source.T@(measured-center))
+        rotation = left@right
+        sample.update(center=center, yaw=float(np.arctan2(rotation[0, 1], rotation[0, 0])))
+    if max(primary_motion) > 2.:
+        raise ValueError('Camera moved during stationary table calibration')
     centers = np.asarray([s['center'] for s in training])
     center = np.median(centers, axis=0)
     yaws = np.unwrap([s['yaw'] for s in training])
@@ -91,7 +110,6 @@ def fit_capture(directory, config):
     rotation = np.array([[np.cos(yaw), np.sin(yaw)], [-np.sin(yaw), np.cos(yaw)]])
     layout = np.column_stack((source@rotation+center, np.zeros(4)))
     objects = np.vstack((perception.tag_points, layout))
-    mapping = np.asarray(config['low_to_capture_affine'], dtype=float)
     errors = []
     for sample in validation:
         pixels = np.vstack((sample['primary'], sample['auxiliary']))
@@ -112,7 +130,9 @@ def fit_capture(directory, config):
             'auxiliary': {**auxiliary, 'black_border_side_m': perception.scale,
                           'center_m': [*center.tolist(), 0.], 'yaw_rad': yaw,
                           'center_distance_m': float(np.linalg.norm(center))},
-            'quality': {'training_frames': len(training), 'held_out_frames': len(validation),
+            'quality': {'method': 'stationary_camera_median_primary_corners',
+                        'max_primary_corner_motion_native_px': max(primary_motion),
+                        'training_frames': len(training), 'held_out_frames': len(validation),
                         'position_std_xy_m': centers.std(axis=0).tolist(),
                         'max_position_deviation_m': spread, 'max_yaw_deviation_rad': yaw_spread,
                         'shape_residual_median_m': float(np.median([

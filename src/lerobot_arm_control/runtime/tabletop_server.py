@@ -131,6 +131,9 @@ def main():
         raise
     stopped, lock = threading.Event(), threading.Lock()
     robot = None
+    from lerobot_arm_control.runtime.tabletop_robot import start_additional_feedback
+
+    additional_feedback = start_additional_feedback(config, camera_only=args.camera_only)
     if config.get("robot", {}).get("enabled") and not args.camera_only:
         from lerobot_arm_control.runtime.tabletop_robot import RobotFeedback
 
@@ -202,6 +205,8 @@ def main():
                       "device": device, "perception_host": os.uname().nodename,
                       'camera_controls': camera_controls,
                       "robot": robot.metadata_snapshot() if robot else None,
+                      'robot_feedback': {name: feedback.metadata_snapshot()
+                                         for name, feedback in additional_feedback.items()},
                       'push_t': push.status() if push else None,
                       "tag_png": base64.b64encode(encoded).decode("ascii"),
           "planning_location": "local", "execution_protocol": 1})
@@ -248,6 +253,8 @@ def main():
                 state["robot"] = robot.snapshot()
                 state["robot"]["registration"] = registration
                 state["motor_samples"] = robot.drain_samples()
+            state['robot_feedback'] = {name: feedback.snapshot()
+                                       for name, feedback in additional_feedback.items()}
             state["capture_sequence"] = last_count
             state["capture_age_at_send_ms"] = (time.monotonic() - captured_at) * 1000
             if push:
@@ -268,6 +275,8 @@ def main():
             push.close()
         if robot:
             robot.close()
+        for feedback in additional_feedback.values():
+            feedback.close()
 
 
 if __name__ == "__main__":

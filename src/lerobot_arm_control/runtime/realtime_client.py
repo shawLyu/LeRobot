@@ -26,11 +26,13 @@ ROOT = workspace_root()
 class Link:
     def __init__(self, host, remote_root, backend, *, allow_gripper=False, hardware_control=False,
                  circle=False, keep_simulation_alive=False,
-                 simulation_model=None, control_log=None):
+                 simulation_model=None, control_log=None, arm='follower'):
         if backend not in ("mujoco", "hardware"):
             raise ValueError("unknown backend")
         if keep_simulation_alive and backend != "mujoco":
             raise ValueError("independent heartbeat is simulation-only")
+        if arm != 'follower' and (hardware_control or allow_gripper):
+            raise ValueError('Additional arms support read-only angle calibration only')
         worker_args = ["-m", "lerobot_arm_control.runtime.simulation_server" if backend == "mujoco"
                        else "lerobot_arm_control.runtime.realtime_server"]
         if allow_gripper:
@@ -49,6 +51,8 @@ class Link:
             launch = [sys.executable, "-u", *worker_args]
             self.worker_location = "local"
         else:
+            if arm != 'follower':
+                worker_args.extend(('--arm', arm))
             command = remote_python(remote_root, worker_args[1], worker_args[2:])
             launch = ["ssh", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10",
                       "-o", "ControlMaster=no", "-o", "ControlPath=none",
@@ -195,7 +199,7 @@ def calibration_text(count, testing, joint, degrees, mode, notice):
 def run(args):
     import mujoco
 
-    model_path = args.model or ROOT / f"assets/so101/scene_{args.backend}.xml"
+    model_path = args.model or resource_path('assets/so101/scene_mujoco.xml')
     model = mujoco.MjModel.from_xml_path(str(model_path))
     data = mujoco.MjData(model)
     if tuple(model.joint(i).name for i in range(model.njnt)) != JOINTS:
@@ -205,7 +209,8 @@ def run(args):
                 hardware_control=args.hardware_control, circle=args.circle,
                 keep_simulation_alive=args.backend == "mujoco",
                 simulation_model=model_path,
-                control_log=getattr(args, "control_log", None))
+                control_log=getattr(args, "control_log", None),
+                arm=getattr(args, 'arm', 'follower'))
     started = time.monotonic()
     try:
         while link.latest is None:
@@ -268,7 +273,8 @@ def run(args):
             data.qpos[:] = angles_for_state(hello, state, ranges)
             mujoco.mj_forward(model, data)
             viewer = ControlViewer(model, data, keys.put,
-                                   "SO101 - live arm control" if args.backend == "hardware"
+                                   f"SO101 {getattr(args, 'arm', 'follower')} - live arm control"
+                                   if args.backend == "hardware"
                                    else "SO101 - local MuJoCo control",
                                    hold_on_focus_loss=args.backend == "hardware")
             with viewer.lock():
@@ -516,6 +522,10 @@ def run(args):
                 viewer.sync()
             if now - last_log > 1:
                 report = {"backend": args.backend, "worker_location": link.worker_location,
+                          'arm': getattr(args, 'arm', 'follower'),
+                          'fingerprint': hello.get('fingerprint'),
+                          'joint_calibration_file': (str(args.calibration)
+                                                     if args.backend == 'hardware' else None),
                           "state": state,
                           "state_age_ms": age * 1000, "frames_received": count,
                           "last_ack": ack, "qpos_display": qpos,
@@ -555,9 +565,10 @@ def main():
     parser.add_argument("--remote-root", default="/home/xy/Research/lerobot",
                         help="Hardware worker project directory; unused in simulation")
     parser.add_argument("--backend", choices=("hardware", "mujoco"), default="hardware")
+    parser.add_argument('--arm', default='follower', help='Configured physical arm identity')
     parser.add_argument("--model", type=Path)
     parser.add_argument("--calibration", type=Path,
-                        default=ROOT / "data/calibration/follower_mujoco.json")
+                        help='Defaults to data/calibration/<arm>_mujoco.json')
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--smoke-test", action="store_true")
     parser.add_argument("--verify-gripper", action="store_true",
@@ -573,6 +584,12 @@ def main():
     parser.add_argument("--duration", type=float)
     parser.add_argument("--log", type=Path, default=ROOT / "logs/realtime-latest.json")
     args = parser.parse_args()
+    if Path(args.arm).name != args.arm or args.arm in ('.', '..'):
+        parser.error('arm must be a configured name, not a path')
+    if args.arm != 'follower' and (args.hardware_control or args.verify_gripper):
+        parser.error('Additional arms support read-only angle calibration only')
+    if args.calibration is None:
+        args.calibration = ROOT/'data/calibration'/f'{args.arm}_mujoco.json'
     if args.verify_gripper and args.backend != "hardware":
         parser.error("--verify-gripper is available only for the physical follower")
     if args.hardware_control and (args.backend != "hardware" or args.verify_gripper):

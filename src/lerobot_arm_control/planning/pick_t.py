@@ -22,7 +22,8 @@ from lerobot_arm_control.visualization.tabletop_scene import scene_arms
 class PickPlanner:
     def __init__(self, snapshot, output):
         self.output = Path(output)
-        self.state, self.config, path = build_scene(snapshot, self.output)
+        self.state, self.config, path = build_scene(snapshot, self.output,
+                                                   freeze_bystanders=False)
         self.dim = self.state['models']['wood_t']
         if not self.dim.get('height_measured') or not .004 <= self.dim['height'] <= .015:
             raise ValueError('pick/place requires measured wood thickness in 4..15 mm')

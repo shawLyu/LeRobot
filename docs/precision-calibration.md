@@ -64,7 +64,20 @@ Postflight feedback reported no servo faults. The first five joints remain
 powered to support the arm; the gripper remains unpowered. No controller gains,
 EEPROM settings, angle calibration, or accepted base transforms were changed.
 
+## Current table reference (2026-10-11)
+
+The visible scene now uses right `DICT_APRILTAG_36h10` / ID 1 and left
+`DICT_APRILTAG_16h5` / ID 0. Their black borders remain 150 mm. The previous ID 3
+reference was archived and both bases were independently recollected in the actual ID 1 frame.
+The accepted table record uses 51 training and 12 held-out frames with a fixed-camera
+median primary-corner fit; maximum held-out RMS is 1.25 native pixels, below the unchanged
+2 px limit. Both 20-observation base fits are below 0.18 processing pixels; separation is 293.443 mm.
+The saved [current scene](current-scene.md) records all parameter sources and pending
+white-arm angle alignment. Image consistency does not establish absolute physical 1 mm accuracy.
+
 ## Current table reference (2026-10-09)
+
+This section describes the previous installation and is superseded by the October 11 record above.
 
 The user requested a new registration from the two complete markers on the left.
 The lower `DICT_APRILTAG_36h11` / **ID 3** is now the origin; its decoded right,

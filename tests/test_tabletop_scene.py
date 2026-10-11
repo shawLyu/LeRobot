@@ -138,6 +138,62 @@ def test_unlocalized_second_arm_is_not_drawn_at_an_invented_base(tmp_path):
     assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, 'arm1__robot_root') == -1
 
 
+@pytest.fixture
+def two_arm_scene(tmp_path):
+    from lerobot_arm_control.robot.so101.joints import JOINTS
+
+    config = json.loads((ROOT/'configs/tabletop.json').read_text())
+    bases = {name: {'status': 'fixed', 'position': position, 'quaternion': [1., 0., 0., 0.]}
+             for name, position in [('follower', [0., .1, .0024]), ('arm1', [1.2, .2, .0024])]}
+    state = {'sequence': 12, 'captured_unix_ns': 123, 'units': 'm', 'marker_visible': True,
+             'objects': {}, 'models': {}, 'wood_height_measured': True,
+             'capture_age_at_send_ms': 20, 'base_registrations': bases,
+             'robot': {'status': 'live', 'qpos': [0., 1., -1., .5, .1, .2],
+                       'joints': list(JOINTS), 'sample_age_at_send_ms': 20,
+                       'registration': bases['follower']},
+             'robot_feedback': {'arm1': {'status': 'live', 'qpos': [.3, .8, -1.2, .3, .2, .1],
+                                        'joints': list(JOINTS), 'sample_age_at_send_ms': 20}}}
+    (tmp_path/'marker.png').write_bytes((ROOT/'assets/tabletop/marker.png').read_bytes())
+    (tmp_path/'robot_assets').symlink_to(ROOT/'assets/so101/assets', target_is_directory=True)
+    return state, config
+
+
+def test_white_live_joints_update_independently_and_stop_on_stale_feedback(tmp_path, two_arm_scene):
+    from lerobot_arm_control.visualization.tabletop_scene import update_scene_robots
+
+    state, config = two_arm_scene
+    path = tmp_path/'scene.xml'
+    path.write_text(scene_xml(state, config, 'robot_assets'))
+    model = mujoco.MjModel.from_xml_path(str(path))
+    data = mujoco.MjData(model)
+    update_scene_robots(model, data, state, config, .01)
+    np.testing.assert_allclose(data.qpos[:6], state['robot']['qpos'])
+    np.testing.assert_allclose(data.qpos[6:], state['robot_feedback']['arm1']['qpos'])
+    white_joint = model.joint('arm1__shoulder_pan').qposadr[0]
+    state['robot_feedback']['arm1'].update(sample_age_at_send_ms=600, qpos=[.9]*6)
+    update_scene_robots(model, data, state, config, .01)
+    assert data.qpos[white_joint] == pytest.approx(.3)
+    np.testing.assert_allclose(data.qpos[:6], state['robot']['qpos'])
+
+
+def test_workspace_and_saved_keyframe_cover_both_current_arms(tmp_path, two_arm_scene):
+    from lerobot_arm_control.perception.tabletop_geometry import workspace_bounds
+    from lerobot_arm_control.visualization.tabletop_snapshot import save_scene_snapshot
+
+    state, config = two_arm_scene
+    assert workspace_bounds(state, config)[1] > 1.4
+    state['robot_feedback']['arm1'] = {'status': 'uncalibrated'}
+    parameters = save_scene_snapshot(tmp_path, state, {'config': config})
+    assert parameters['arms']['arm1']['joint_pose_source'] == 'unmeasured_preview'
+    assert parameters['arms']['arm1']['feedback_status'] == 'uncalibrated'
+    assert json.loads((tmp_path/'state.json').read_text()) == state
+    model = mujoco.MjModel.from_xml_path(str(tmp_path/'scene.xml'))
+    assert model.nq == 12 and model.nu == 0
+    np.testing.assert_allclose(model.key_qpos[0, :6], state['robot']['qpos'])
+    np.testing.assert_allclose(model.key_qpos[0, 6:], parameters['arms']['arm1']['qpos'])
+    np.testing.assert_allclose(model.body('arm1__robot_root').pos, [1.2, .2, .0024])
+
+
 def test_observed_materials_compile_and_preserve_calibrated_joints(tmp_path):
     from PIL import Image
 

@@ -26,7 +26,8 @@ def scene_arms(state, config):
             continue
         prefix = '' if index == 0 else name+'__'
         preview = entry.get('simulation', {}).get('preview_qpos', [0.]*6)
-        measured = state.get('robot', {}) if index == 0 else {}
+        measured = (state.get('robot', {}) if index == 0 else
+                    state.get('robot_feedback', {}).get(name, {}))
         qpos = measured.get('qpos', preview) if measured.get('status') == 'live' else preview
         if len(qpos) != 6 or not all(math.isfinite(value) for value in qpos):
             raise ValueError(f'{name}: invalid six-joint simulation pose')
@@ -251,7 +252,8 @@ def update_scene_robots(model, data, state, config, age):
             body = model.body(root_name).id
         except KeyError:
             continue
-        robot = state.get('robot', {}) if name == primary else {}
+        robot = (state.get('robot', {}) if name == primary else
+                 state.get('robot_feedback', {}).get(name, {}))
         live = (robot.get('status') == 'live' and age < .5
                 and age+robot.get('sample_age_at_send_ms', 1000)/1000 < .5)
         registration = state.get('base_registrations', {}).get(name, {})
@@ -267,7 +269,8 @@ def update_scene_robots(model, data, state, config, age):
             data.mocap_quat[mocap] = registration['quaternion']
         if live:
             for joint, angle in zip(robot['joints'], robot['qpos'], strict=True):
-                data.qpos[model.joint(joint).qposadr[0]] = angle
+                prefix = '' if name == primary else name+'__'
+                data.qpos[model.joint(prefix+joint).qposadr[0]] = angle
         alpha = 1. if live and (placed or estimated) else .4 if live else .25 if placed else .15
         visuals = (model.geom_group == 2) & (model.body_rootid[model.geom_bodyid] == body)
         model.geom_rgba[visuals, 3] = alpha

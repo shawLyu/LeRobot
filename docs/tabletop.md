@@ -18,13 +18,13 @@ Keep markers fully visible with a white margin outside the black border. Run one
 `configs/tabletop.json` contains the calibrated 640x360 processing intrinsics, five distortion coefficients, and geometry.
 Both tabletop markers have **150 mm** outer black borders:
 
-- AprilTag 36h11 / ID 3: fixed world anchor.
+- AprilTag 36h10 / ID 1: fixed world anchor, right side of the current image.
 - AprilTag 16h5 / ID 0: auxiliary localization marker.
 
-The world origin is ID 3's center; +X points right in its decoded orientation, +Y upward, and +Z away from the table.
-Seeing both markers learns ID 0 relative to ID 3. Later localization can combine them or use registered ID 0 if ID 3 is occluded,
-while retaining the ID 3 origin. An unregistered ID 0 alone at startup waits for ID 3.
-When fusion error is excessive but ID 3 remains visible, the system falls back to `pose_source=anchor_fallback`.
+The world origin is ID 1's center; +X points right in its decoded orientation, +Y upward, and +Z away from the table.
+Seeing both markers learns ID 0 relative to ID 1. Later localization can combine them or use registered ID 0 if ID 1 is occluded,
+while retaining the ID 1 origin. An unregistered ID 0 alone at startup waits for ID 1.
+When fusion error is excessive but ID 1 remains visible, the system falls back to `pose_source=anchor_fallback`.
 Keep their relative layout fixed; restart and relearn after moving markers.
 
 The confirmed T dimensions are **48 mm width, 60 mm length, 12 mm cap depth, 12 mm stem width**.
@@ -111,13 +111,21 @@ is 70 mm above the table; arm1's configured height is 69 mm. Both centers are
 19.5 mm forward of each base rear edge, on its centerline.
 See [Two-arm calibration](two-arm-calibration.md) for the measured poses and separation.
 `base_registrations` carries both mounting poses; `base_distances` carries their measured separation.
-Only the follower has live joint feedback and hardware control.
+The follower has live calibrated joint feedback. An additional arm reads its own
+`joint_calibration` when that file exists and passes device identity/angle validation.
+Missing white-arm calibration reports `uncalibrated`, opens no white motor bus,
+and uses the explicitly unmeasured translucent preview. Additional feedback is read-only.
 The local scene includes a separate six-joint white-arm model at its measured
 base. Its joints are a translucent, unmeasured preview. `--camera-only` skips the
 motor bus entirely and can run alongside a controller. See
 [Precision calibration](precision-calibration.md) for independent wrist-marker
 measurement and the current physical validation limits.
 Missing geometry returns `mount_calibration_missing`; such a preview cannot support hardware execution.
+Closing a live view freezes its final observation in `state.json`, `scene_parameters.json`,
+`model.json` and the `scene.xml` recorded keyframe. The parameters distinguish measured
+encoders from unmeasured previews and include the actual camera/table frame and both bases.
+The accepted October 11 scene is preserved separately at `data/tabletop/current-scene/`;
+see [saved scene and white-arm alignment](current-scene.md).
 The old CAD silhouette fitting interface is retired; the remote host loads no mesh or forward kinematics.
 
 For precisely measured marker installations, populate `corners_base_m` under robot markers in `configs/tabletop.json`.

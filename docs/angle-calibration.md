@@ -47,6 +47,20 @@ After local capture, close the window, verify the same device identity, and copy
 ordinary deployment preserves remote calibration.
 Archive an existing `follower_mujoco_kinematic.json` before raw angle recapture.
 
+For the right white arm, select its own hardware identity and independent file:
+
+```sh
+./scripts/lerobot-arm view arm --backend hardware --arm arm1 \
+  --log logs/arm1-angle-calibration.json
+```
+
+The default output becomes `data/calibration/arm1_mujoco.json`; follower mappings
+are not reused or overwritten. The same B / 1–6 / R / C measurement procedure applies.
+Additional arms use this entry for read-only alignment; physical-control and gripper-test
+flags are rejected. After 6/6 valid mappings and transfer to the remote host, the
+tabletop viewer starts white-arm read-only feedback independently. See
+[current white-arm alignment](current-scene.md#white-arm-six-joint-alignment).
+
 ## Preview and hardware control
 
 In normal mode, 1–6 selects a joint; arrows send a bounded preview to the remote host.

@@ -57,6 +57,10 @@ configs/*.local.*
 !/data/calibration/follower_mujoco.json
 !/data/calibration/follower_mujoco_kinematic.json
 !/data/calibration/follower_rest.json
+!/data/calibration/arm1_mujoco.json
+!/data/calibration/follower_table_base.json
+!/data/calibration/arm1_table_base.json
+!/data/calibration/two_arm_bases.json
 !/data/calibration/table_reference.json
 !/data/trajectories/
 /data/trajectories/*

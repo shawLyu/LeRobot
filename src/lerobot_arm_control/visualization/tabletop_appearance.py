@@ -13,6 +13,7 @@ import numpy as np
 
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.perception.tabletop_geometry import workspace_bounds
+from lerobot_arm_control.visualization.tabletop_scene import scene_arms
 
 
 def encode_png(picture):
@@ -70,29 +71,27 @@ class ObservedAppearance:
 
     def robot_mask(self, frame, state, native):
         mask = np.zeros(frame.shape[:2], np.uint8)
-        robot = state.get("robot", {})
-        pose = robot.get("registration", {})
-        if self.robot_model is None or "position" not in pose or "qpos" not in robot:
+        if self.robot_model is None:
             return mask
-        self.robot_data.qpos[:] = robot["qpos"]
-        mujoco.mj_forward(self.robot_model, self.robot_data)
-        rotation = np.zeros(9)
-        mujoco.mju_quat2Mat(rotation, np.asarray(pose["quaternion"]))
-        rotation = rotation.reshape(3, 3)
-        for geom in np.flatnonzero(self.robot_model.geom_group == 2):
-            mesh = self.robot_model.geom_dataid[geom]
-            address, count = (
-                self.robot_model.mesh_vertadr[mesh],
-                self.robot_model.mesh_vertnum[mesh],
-            )
-            points = self.robot_model.mesh_vert[address : address + count]
-            points = (
-                points @ self.robot_data.geom_xmat[geom].reshape(3, 3).T
-                + self.robot_data.geom_xpos[geom]
-            )
-            world = points @ rotation.T + pose["position"]
-            pixels = self.project(world, state, native).astype(np.float32)
-            cv2.fillConvexPoly(mask, np.int32(cv2.convexHull(pixels)), 255)
+        for arm in scene_arms(state, self.config):
+            pose = arm['registration']
+            if 'position' not in pose:
+                continue
+            self.robot_data.qpos[:] = arm['qpos']
+            mujoco.mj_forward(self.robot_model, self.robot_data)
+            rotation = np.zeros(9)
+            mujoco.mju_quat2Mat(rotation, np.asarray(pose['quaternion']))
+            rotation = rotation.reshape(3, 3)
+            for geom in np.flatnonzero(self.robot_model.geom_group == 2):
+                mesh = self.robot_model.geom_dataid[geom]
+                address, count = (self.robot_model.mesh_vertadr[mesh],
+                                  self.robot_model.mesh_vertnum[mesh])
+                points = self.robot_model.mesh_vert[address:address+count]
+                points = (points @ self.robot_data.geom_xmat[geom].reshape(3, 3).T
+                          + self.robot_data.geom_xpos[geom])
+                world = points @ rotation.T + pose['position']
+                pixels = self.project(world, state, native).astype(np.float32)
+                cv2.fillConvexPoly(mask, np.int32(cv2.convexHull(pixels)), 255)
         radius = 25 if native else 11
         return cv2.dilate(mask, np.ones((radius, radius), np.uint8))
 
@@ -145,14 +144,13 @@ class ObservedAppearance:
         static[polygon_mask([[-half, -half], [half, -half], [half, half], [-half, half]], 7)] = (
             False
         )
-        base = state.get("robot", {}).get("registration", {}).get("position")
-        if base:
-            # Remove the fixed base and its low nearby shadow before drawing dynamic shadows.
-            static[((x - base[0]) ** 2 + (y - base[1]) ** 2) < 0.12**2] = False
-        if base:
-            supported_points.extend(
-                [[base[0] + dx, base[1] + dy] for dx in (-0.08, 0.08) for dy in (-0.08, 0.08)]
-            )
+        for arm in scene_arms(state, self.config):
+            base = arm['registration'].get('position')
+            if base:
+                # Remove both bases and their low shadows before drawing dynamic shadows.
+                static[((x-base[0])**2+(y-base[1])**2) < .12**2] = False
+                supported_points.extend([[base[0]+dx, base[1]+dy]
+                                         for dx in (-.08, .08) for dy in (-.08, .08)])
         hull = cv2.convexHull(np.asarray(supported_points, dtype=np.float32)).reshape(-1, 2)
         static &= polygon_mask(hull)
         # Only table/paper pixels survive: hands, dark CAD, tags and T silhouettes are excluded.
@@ -286,6 +284,7 @@ class ObservedAppearance:
                 materials[name + "_" + part] = (color[::-1] / 255 / plane_gain).clip(0, 1).tolist()
         # Color comes from observed dark pixels in the physical robot's image footprint.
         robot_color = [0.055, 0.06, 0.065]
+        base = state.get('robot', {}).get('registration', {}).get('position')
         if base:
             location = self.project([base], state, native)[0]
             u, v = np.int32(location)

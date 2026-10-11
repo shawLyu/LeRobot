@@ -27,8 +27,8 @@
     640,
     360
   ],
-  "dictionary": "DICT_APRILTAG_36h11",
-  "marker_id": 3,
+  "dictionary": "DICT_APRILTAG_36h10",
+  "marker_id": 1,
   "marker_size_m": 0.15,
   "wood_height_m": 0.006,
   "fps": 10,
@@ -127,20 +127,20 @@
         },
         "border_seed_native": [
           [
-            755,
-            865
+            627,
+            874
           ],
           [
-            852,
-            866
+            723,
+            875
           ],
           [
-            850,
-            968
+            719,
+            977
           ],
           [
-            752,
-            967
+            622,
+            975
           ]
         ],
         "prefer_observed_border": true
@@ -159,8 +159,8 @@
       "file": "data/calibration/follower_table_base.json",
       "sample_count": 20,
       "reference": {
-        "dictionary": "DICT_APRILTAG_36h11",
-        "id": 3,
+        "dictionary": "DICT_APRILTAG_36h10",
+        "id": 1,
         "marker_size_m": 0.15
       },
       "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
@@ -357,20 +357,20 @@
           },
           "border_seed_native": [
             [
-              1450,
-              872
+              1314,
+              883
             ],
             [
-              1553,
-              875
+              1417,
+              886
             ],
             [
-              1558,
-              980
+              1420,
+              990
             ],
             [
-              1455,
-              977
+              1317,
+              987
             ]
           ],
           "prefer_observed_border": true
@@ -389,8 +389,8 @@
         "file": "data/calibration/arm1_table_base.json",
         "sample_count": 20,
         "reference": {
-          "dictionary": "DICT_APRILTAG_36h11",
-          "id": 3,
+          "dictionary": "DICT_APRILTAG_36h10",
+          "id": 1,
           "marker_size_m": 0.15
         },
         "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
@@ -411,7 +411,9 @@
           0.6
         ],
         "joint_pose_source": "unmeasured_preview"
-      }
+      },
+      "joint_calibration": "data/calibration/arm1_mujoco.json",
+      "feedback_hz": 20
     }
   ],
   "camera_controls": {
@@ -433,7 +435,7 @@
     "reported_validation_rms_px": 0.6797530945389286,
     "focus_during_calibration": "not recorded in the supplied calibration",
     "physical_precision_validated": false,
-    "dependent_base_calibration": "requires new registration",
-    "table_frame": "ID 3 center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the second stationary table marker. Rebuilt from current observations on 2026-10-09."
+    "dependent_base_calibration": "Both bases registered against current ID 1 tabletop reference on 2026-10-11",
+    "table_frame": "ID 1 (DICT_APRILTAG_36h10) center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the stationary auxiliary. Rebuilt from current observations on 2026-10-11."
   }
 }

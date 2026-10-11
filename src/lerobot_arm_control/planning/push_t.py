@@ -18,7 +18,7 @@ import numpy as np
 
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.robot.so101.joints import JOINTS
-from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_xml
+from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_arms, scene_xml
 
 CONTACT_CLEARANCE = .007
 JAW_CLOSED = -.16
@@ -55,7 +55,35 @@ def objective(current, target):
     return distance**2 + (.024*yaw)**2
 
 
-def build_scene(snapshot, output):
+def freeze_additional_arms(world, state, config):
+    """Keep observed bystander robots fixed while only the follower executes pushes."""
+    arms = [arm for arm in scene_arms(state, config) if arm['prefix']]
+    if not arms:
+        return
+    model = mujoco.MjModel.from_xml_path(str(resource_path('assets/so101/so101.xml')))
+    data = mujoco.MjData(model)
+    for arm in arms:
+        data.qpos[:] = arm['qpos']
+        mujoco.mj_forward(model, data)
+        root = world.find(f"body[@name='{arm['root']}']")
+        root.attrib.pop('mocap')
+        for body in root.iter('body'):
+            try:
+                index = model.body(body.get('name').removeprefix(arm['prefix'])).id
+            except KeyError:
+                continue
+            parent = model.body_parentid[index]
+            rotation = data.xmat[parent].reshape(3, 3).T
+            position = rotation@(data.xpos[index]-data.xpos[parent])
+            quaternion = np.empty(4)
+            mujoco.mju_mat2Quat(quaternion, (rotation@data.xmat[index].reshape(3, 3)).ravel())
+            body.set('pos', ' '.join(map(str, position)))
+            body.set('quat', ' '.join(map(str, quaternion)))
+            for joint in body.findall('joint'):
+                body.remove(joint)
+
+
+def build_scene(snapshot, output, *, freeze_bystanders=True):
     source = Path(snapshot)
     state = json.loads((source/'state.json').read_text())
     config = json.loads((source/'calibration.json').read_text())['config']
@@ -76,6 +104,8 @@ def build_scene(snapshot, output):
                                      integrator='implicitfast', cone='elliptic', iterations='30')
     root.remove(root.find('keyframe'))
     world = root.find('worldbody')
+    if freeze_bystanders:
+        freeze_additional_arms(world, state, config)
     world.find("body[@name='robot_root']").attrib.pop('mocap')
     black = world.find("body[@name='black_t']")
     black.attrib.pop('mocap')
@@ -126,7 +156,9 @@ def build_scene(snapshot, output):
         ET.SubElement(actuator, 'position', name='sim_'+joint, joint=joint,
                       kp='700', kv='12', ctrlrange=limits, forcerange='-2.94 2.94')
     wood_pose = state['objects']['wood_t']
-    recorded = [*state['robot']['qpos'], *wood_pose['xy'], .00305,
+    robot_qpos = (state['robot']['qpos'] if freeze_bystanders else
+                  [q for arm in scene_arms(state, config) for q in arm['qpos']])
+    recorded = [*robot_qpos, *wood_pose['xy'], .00305,
                 math.cos(wood_pose['yaw']/2), 0, 0, math.sin(wood_pose['yaw']/2)]
     ET.SubElement(ET.SubElement(root, 'keyframe'), 'key', name='measured_start',
                   qpos=' '.join(map(str, recorded)),

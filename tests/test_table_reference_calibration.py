@@ -73,6 +73,34 @@ def test_changed_configuration_cannot_relabel_old_observations(tmp_path):
         fit_capture(tmp_path, config)
 
 
+def test_small_primary_corner_noise_does_not_become_false_auxiliary_motion(tmp_path):
+    config, center, yaw = capture(tmp_path)
+    path = tmp_path/'states.jsonl'
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    rng = np.random.default_rng(17)
+    for row in rows:
+        corners = np.asarray(row['detected_markers'][0]['corners'])
+        row['detected_markers'][0]['corners'] = (corners+rng.normal(0, .08, (4, 2))).tolist()
+    path.write_text(''.join(json.dumps(row)+'\n' for row in rows))
+    result = fit_capture(tmp_path, config)
+    np.testing.assert_allclose(result['auxiliary']['center_m'], center, atol=.001)
+    assert result['auxiliary']['yaw_rad'] == pytest.approx(yaw, abs=.01)
+    assert result['quality']['passed'] is True
+    assert max(result['quality']['held_out_native_rms_px']) < 2
+
+
+def test_moving_camera_cannot_pass_stationary_table_calibration(tmp_path):
+    config, _, _ = capture(tmp_path)
+    path = tmp_path/'states.jsonl'
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    for index, row in enumerate(rows):
+        for marker in row['detected_markers']:
+            marker['corners'] = (np.asarray(marker['corners'])+[index*.2, 0]).tolist()
+    path.write_text(''.join(json.dumps(row)+'\n' for row in rows))
+    with pytest.raises(ValueError, match='Camera moved'):
+        fit_capture(tmp_path, config)
+
+
 def test_duplicate_capture_timestamps_are_rejected(tmp_path):
     config, _, _ = capture(tmp_path)
     path = tmp_path/'states.jsonl'

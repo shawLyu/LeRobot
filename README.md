@@ -107,10 +107,13 @@ The current camera configuration uses the user-selected second checkerboard
 calibration from October 8, versioned in [configs/camera_intrinsics.json](configs/camera_intrinsics.json).
 Native capture is 1920 x 1080, with a 640 x 360 processing view. Both hosts share
 these parameters through `configs/tabletop.json`. The current table origin is
-the left ID 3 marker, with left ID 0 as its auxiliary; both have 150 mm black edges.
-The [accepted table registration](data/calibration/table_reference.json) passed
-a camera restart check. The previous base records need new registration before
-hardware Push-T; physical 1 mm accuracy has not been validated. See [precision calibration](docs/precision-calibration.md#selected-camera-calibration-2026-10-09).
+the right AprilTag 36h10 / ID 1 marker, with left AprilTag 16h5 / ID 0 as its auxiliary;
+both have 150 mm black edges. The [accepted table registration](data/calibration/table_reference.json)
+passed independent frame validation on October 11. Both bases have current fixed registration.
+The [saved current scene](configs/scenes/tabletop-current.json) includes camera, table, objects,
+both bases and joint measurement sources. The black arm has live joint feedback; the white arm
+awaits its own six-joint alignment. See [current scene](docs/current-scene.md).
+Physical 1 mm accuracy and completed physical Push-T have not been validated.
 
 
 The remote runtime uses Linux x86_64, Python 3.12, and LeRobot 0.6.1 with Feetech.
@@ -304,8 +307,8 @@ check reprojection error, then populate these fields.
 Intrinsics must match the processed image size. Scaling requires scaling focal lengths and principal points; cropping also changes the principal point. Changing width and height alone is insufficient.
 
 The tabletop anchor is AprilTag 36h10 / ID 1, with a 150 mm black border.
-Stationary auxiliaries are AprilTag 16h5 / ID 0 and AprilTag 36h11 / ID 3,
-also with 150 mm black borders. Native camera frames supply their corners,
+The current stationary auxiliary is AprilTag 16h5 / ID 0, also with a 150 mm
+black border. The previous ID 3 installation is archived. Native camera frames supply their corners,
 including markers outside the calibrated low-resolution crop. A registered,
 unmoved auxiliary retains the original frame when the primary is outside the view.
 For a new scene, verify dictionary, ID, dimensions, fixed layout, and actual object geometry. See [Tabletop perception](docs/tabletop.md).

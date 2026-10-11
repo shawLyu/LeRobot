@@ -189,13 +189,20 @@ Only one process should own a serial port at a time.
 
 ## 5. View cameras and set resolution
 
+Live check on October 11: the configured USB Camera captured a 640x480 snapshot
+successfully. Only this camera is currently enumerated; the previous icspring
+camera must be reconnected before using the second-camera command below.
+The remote host has not yet received the new `lerobot_arm_control` source, so
+the unified tabletop view requires deployment first. See [camera entry points
+and current device status](docs/camera.md).
+
 On macOS, install [XQuartz](https://www.xquartz.org/), then run locally:
 
 ```bash
 # Default camera; remote camera.toml requests 640x480 by default
 ./scripts/view_camera_x11.sh
 
-# Second camera: open another terminal for simultaneous viewing
+# After reconnecting the second camera: open another terminal
 ./scripts/view_camera_x11.sh \
   --device /dev/v4l/by-id/usb-icSpring_icspring_camera-video-index0
 
@@ -204,9 +211,9 @@ On macOS, install [XQuartz](https://www.xquartz.org/), then run locally:
 ./scripts/view_camera_x11.sh --device /dev/video2 --width 1280 --height 720
 ```
 
-In the existing setup, USB Camera exposes video0/video1 and icspring exposes video2/video3.
-Each pair belongs to one USB device; the verified image capture nodes are video0 and video2. Prefer `by-id` paths ending in `video-index0`.
-The current first camera supports up to 1920x1080, the second up to 1280x720. The program reports requested and actual dimensions; arbitrary sizes may not be supported.
+In the earlier two-camera setup, USB Camera exposed video0/video1 and icspring exposed video2/video3.
+Each pair belongs to one USB device; the image capture nodes verified in that setup were video0 and video2. Prefer `by-id` paths ending in `video-index0`.
+Earlier enumeration reported the first camera supporting up to 1920x1080 and the second up to 1280x720. The program reports requested and actual dimensions; arbitrary sizes may not be supported.
 Press `Esc` or close the window to exit. Change **remote** `configs/camera.toml` fields `width` and `height` for persistent preview defaults.
 Independent preview resolution does not change the Push-T camera intrinsics.
 
@@ -222,6 +229,20 @@ cd /home/xy/Research/lerobot
 
 Exit other capture programs before opening an already occupied camera.
 See [Camera preview](docs/camera.md) for device and X11 troubleshooting.
+
+For a snapshot from the Mac without XQuartz:
+
+```bash
+ssh lerobot 'cd /home/xy/Research/lerobot && .venv/bin/python scripts/camera_x11.py --snapshot logs/camera-snapshot.png'
+```
+
+After deploying the current source, capture camera/perception observations
+locally without opening either motor bus:
+
+```bash
+./scripts/lerobot-arm view tabletop --camera-only --headless \
+  --duration 10 --fps 5 --output logs/camera-session-01
+```
 
 ## 6. Calibration workflow
 

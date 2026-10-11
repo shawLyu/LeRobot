@@ -1,5 +1,21 @@
 # Verification records
 
+## Live device checks: 2026-10-11, Beijing time
+
+| Check | Result |
+| --- | --- |
+| SSH host | `lerobot`, project `/home/xy/Research/lerobot`; remote LeRobot 0.6.1 |
+| Two arm connections | Current local config loader and driver loaded in memory remotely, using remote arms.toml; both buses open together, six STS3215 motors each, three state-read rounds successful |
+| Motor state | All Status=0, Moving=0, Torque_Enable=0; 24–26 C; no motion, configuration writes or torque changes |
+| Camera inventory | One USB Camera, video0/video1; configured stable video-index0 resolves to video0; previous icspring device absent |
+| Camera capture | Existing remote preview script saved `logs/camera-check-20261011.png`, actual 640x480; backend fps setting 30 |
+| Camera ownership | PipeWire held video0 open; snapshot succeeded without stopping it |
+| Deployment/docs | Remote canonical tabletop worker absent; remote README/camera doc hashes differ from local; raw snapshot works, new tabletop entry awaits deployment |
+
+Arm report: local `logs/two-arm-connection-20261011T021656Z.json`.
+The camera check did not exercise the X11 window, tabletop perception or loaded
+motor motion. Current camera instructions are in [Camera](camera.md).
+
 ## Script and demo cleanup: 2026-10-11, Beijing time
 
 | Check | Result |

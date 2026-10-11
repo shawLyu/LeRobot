@@ -1,7 +1,36 @@
-# Live camera preview over SSH -X
+# Camera capture, preview and perception
 
-The existing remote setup has two cameras: USB Camera exposes video0/video1, and icspring exposes video2/video3.
-Each pair belongs to one USB device. Default capture uses USB Camera's `video-index0` and its stable USB path,
+## Live check: 2026-10-11, Beijing time
+
+The host `lerobot` at `/home/xy/Research/lerobot` currently enumerates **one**
+USB Camera, exposing `/dev/video0` and `/dev/video1`. The configured capture
+path ending in `video-index0` resolves to `/dev/video0`. These two nodes belong
+to one camera. The previously used icspring camera is absent from the current
+device inventory; its commands below apply after it is reconnected.
+
+The existing remote `scripts/camera_x11.py` successfully captured a 640x480
+snapshot, with the backend reporting 30 fps, saved at
+`logs/camera-check-20261011.png` on the remote host. The reported fps is the
+backend setting, not a measured sustained stream rate. PipeWire had an open
+camera descriptor; the snapshot still succeeded without stopping it. This check
+did not test the X11 live window or the new tabletop worker.
+
+The remote host still lacks `src/lerobot_arm_control/runtime/tabletop_server.py`.
+Raw preview and snapshots work through the existing script. The unified
+`view tabletop` command requires deploying the current source first. Local
+documentation was updated during the October 11 source cleanup; remote README
+and camera documentation differ from the current local copies.
+
+## Choose an entry
+
+| Need | Entry | Configuration |
+| --- | --- | --- |
+| Raw live image on Mac | Local `scripts/view_camera_x11.sh` | Remote `configs/camera.toml`, optional preview overrides |
+| One image without X11 | Remote `.venv/bin/python scripts/camera_x11.py --snapshot ...` | Remote `configs/camera.toml` |
+| Tracked objects, markers and recorded observations | Local `scripts/lerobot-arm view tabletop --camera-only` after deployment | Remote `camera.toml` selects the device; `tabletop.json` supplies perception and calibration |
+| Frames in a Python program | Remote OpenCV `VideoCapture`, example below | Remote `configs/camera.toml` |
+
+Default capture uses USB Camera's `video-index0` and its stable USB path,
 independent of video numbering after reconnection.
 `configs/camera.toml` requests 640x480 and targets 15 display fps by default.
 
@@ -15,13 +44,16 @@ The existing Mac uses XQuartz 2.8.6. Run from the local project root:
 ./scripts/view_camera_x11.sh
 ```
 
-View the second camera in another local terminal:
+After reconnecting the second camera, confirm that its path exists with
+`ssh lerobot 'ls -l /dev/v4l/by-id/'`, then view it in another local terminal:
 
 ```bash
 ./scripts/view_camera_x11.sh --device /dev/v4l/by-id/usb-icSpring_icspring_camera-video-index0
 ```
 
 The wrapper forwards `--device`, `--width`, `--height`, `--config`, `--snapshot`, and other preview arguments.
+It always starts XQuartz and uses X11 forwarding, including with `--snapshot`.
+Use plain SSH as shown below when saving a snapshot without X11.
 The window title identifies the device. Two cameras can have separate windows;
 close Push-T or other capture programs before opening an occupied camera.
 Prefer by-id paths because video numbers can change.
@@ -34,8 +66,9 @@ Prefer by-id paths because video numbers can change.
 ./scripts/view_camera_x11.sh --device /dev/video2 --width 1280 --height 720
 ```
 
-The current USB Camera supports up to 1920x1080; icspring up to 1280x720.
-Both support 640x480, 800x600, and 1280x720. Startup reports requested and actual dimensions.
+Earlier device enumeration reported USB Camera support up to 1920x1080 and
+icspring up to 1280x720, with both supporting 640x480, 800x600 and 1280x720.
+Startup reports requested and actual dimensions.
 Persistent preview defaults are remote `configs/camera.toml` fields `width` and `height`.
 CLI sizes affect only that launch; restart to change resolution.
 Independent preview configuration does not modify Push-T intrinsics or capture dimensions.
@@ -72,14 +105,84 @@ Preview does not record video, change exposure, or operate motors.
 The existing remote account xy belongs to video. Group changes require a new SSH login.
 For permission failures, check `id`, `ls -l /dev/video0`, and camera ownership by other applications.
 
-## Snapshot and measured check
+## Snapshot without X11
 
 Save one image on the remote host without a GUI:
 
+Run on the Mac, using the already installed remote environment:
+
 ```bash
-cd /home/xy/Research/lerobot
-./scripts/uv run --locked --extra hardware scripts/camera_x11.py --snapshot logs/camera-snapshot.png
+ssh lerobot 'cd /home/xy/Research/lerobot && .venv/bin/python scripts/camera_x11.py --snapshot logs/camera-snapshot.png'
+scp lerobot:/home/xy/Research/lerobot/logs/camera-snapshot.png ./logs/camera-snapshot.png
 ```
+
+The snapshot path is remote; `scp` copies it locally. Use a new filename to
+retain earlier captures. A snapshot does not require `DISPLAY` or XQuartz.
+
+## Tabletop perception after deployment
+
+Run from the local checkout:
+
+```bash
+./scripts/deploy_code.sh --dry-run
+./scripts/deploy_code.sh
+
+# Camera and perception view; no motor bus is opened.
+./scripts/lerobot-arm view tabletop --camera-only --fps 5
+
+# Finite capture without a local window; choose a fresh output directory.
+./scripts/lerobot-arm view tabletop --camera-only --headless \
+  --duration 10 --fps 5 --output logs/camera-session-01
+```
+
+Deployment preserves existing remote device configuration and calibration.
+For a different host, deployment uses `LEROBOT_HOST` and
+`LEROBOT_REMOTE_ROOT`; the tabletop client uses `--host` and `--remote-root`.
+This tabletop entry uses the local Python/MuJoCo environment and does not need
+XQuartz. It saves `frames/`, `annotated/`, available native-resolution images
+in `native/`, `states.jsonl`, `latest.json` and session metadata in
+`calibration.json` locally. `--fps` controls the display stream rate.
+
+The device comes from remote `camera.toml`; tabletop capture dimensions,
+intrinsics, marker definitions and focus controls come from remote
+`tabletop.json`. When configured, the worker applies and verifies fixed camera
+focus, and can save observed table registration. `--camera-only` prevents motor
+bus access; it still runs the camera/perception pipeline. The current calibration
+belongs to the configured USB Camera. Switching to icspring requires calibration
+for that camera before using measured coordinates.
+
+## Frames from Python
+
+Run this in the remote project with `.venv/bin/python`; the camera is attached
+to Linux, so a local Mac `VideoCapture('/dev/video0')` cannot access it:
+
+```python
+import tomllib
+
+import cv2
+
+with open('configs/camera.toml', 'rb') as stream:
+    settings = tomllib.load(stream)['camera']
+camera = cv2.VideoCapture(settings['device'], cv2.CAP_V4L2)
+try:
+    if not camera.isOpened():
+        raise RuntimeError('Camera could not be opened')
+    camera.set(cv2.CAP_PROP_FRAME_WIDTH, settings['width'])
+    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, settings['height'])
+    for _ in range(5):
+        ok, frame = camera.read()
+        if not ok:
+            raise RuntimeError('Camera returned no frame')
+    # frame is a BGR NumPy array. Pass it to your processing code here.
+    print(frame.shape)
+finally:
+    camera.release()
+```
+
+Close an active capture application before starting another reader on the same
+camera. To inspect current users, run `ssh lerobot 'fuser /dev/video0'`.
+
+## Earlier X11 verification
 
 In the measured check, 640x480 capture reported 30 fps; forwarded DISPLAY was `localhost:10.0`.
 The local `LeRobot USB Camera — live via ssh -X` window received and displayed frames continuously.

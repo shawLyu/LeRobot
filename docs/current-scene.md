@@ -9,11 +9,12 @@ The former ID 3 reference and old image search regions have been archived.
 ./scripts/lerobot-arm view tabletop --fps 5
 ```
 
-Camera capture/perception and black-arm read-only encoder feedback run remotely;
+Camera capture/perception and both arms' read-only encoder feedback run remotely;
 the local MuJoCo view updates the table, Ts and independently registered bases.
-The current view shows both arms. White joints remain translucent and explicitly
-`uncalibrated` until their own six measured mappings exist. Base markers do not
-measure articulated joint angles. No motors were driven during this scene capture.
+The current view shows both arms with separate encoder streams. White joints temporarily
+use the validated black follower's angle mapping, explicitly labelled `TEMP shared from follower`.
+This is a simulation estimate, not independently measured white joint alignment.
+Each base keeps its own accepted marker registration. No motors were driven during this capture.
 The table is the observed workspace patch; its full physical perimeter is unmeasured.
 
 Run offline Push-T from this preserved desktop observation with:
@@ -24,14 +25,14 @@ Run offline Push-T from this preserved desktop observation with:
 
 This uses a frozen observation. It does not mirror subsequent physical changes.
 Only the black follower executes simulated pushes; the additional white model remains
-fixed in its recorded measured/preview posture. Its displayed joint-source label stays
-unmeasured until alignment is complete. Startup from this two-arm snapshot was checked;
+fixed in its recorded posture. Its joint source remains `live_encoders_shared_calibration`
+until independent alignment is complete. Startup from this two-arm snapshot was checked;
 that check does not establish completion of the pushing task.
 
 ## Preserved parameters
 
 - `configs/scenes/tabletop-current.json`: complete versioned parameters, calibration
-  hashes, measurement sources and pending white-arm alignment identity.
+  hashes, independent/shared measurement sources and pending white-arm alignment identity.
 - `data/tabletop/current-scene/`: final `state.json`, `scene_parameters.json`,
   `scene.xml` recorded keyframe, config copies, camera/annotated/native images,
   textures and the shared CAD meshes. The same directory is saved remotely.
@@ -61,7 +62,22 @@ Base separation is 293.443 mm. Both 20-observation base records have maximum
 position spread about 0.255 mm. Camera movement, tag movement or a changed robot
 installation requires checking the marker search regions and new registration.
 
-## White-arm six-joint alignment
+## Independent six-joint alignment interfaces
+
+Close the tabletop viewer before opening a calibration window. Each arm has its
+own `--arm` selector and output file; no mapping or EEPROM identity is overwritten.
+
+```sh
+./scripts/lerobot-arm view arm --backend hardware --arm follower \
+  --log logs/follower-angle-calibration.json
+./scripts/lerobot-arm view arm --backend hardware --arm arm1 \
+  --log logs/arm1-angle-calibration.json
+```
+
+These commands are separate sessions, not simultaneous readers on the same serial bus.
+Keep the existing follower result unless intentionally recalibrating it.
+
+### White-arm six-joint alignment
 
 The new entry selects the white USB identity ending `5B91028324-if00`, preserves
 all EEPROM registers, and saves to its own `data/calibration/arm1_mujoco.json`.
@@ -90,5 +106,15 @@ rsync -az data/calibration/arm1_mujoco.json lerobot:/home/xy/Research/lerobot/da
 The remote feedback worker verifies the white arm's identity and six fits, then the
 viewer updates its prefixed joints independently of the black arm. A stale or invalid
 white mapping cannot become live joint feedback. Ordinary deployment preserves this file.
-The frozen October 11 snapshot still records its original unmeasured white joint pose;
-capture a new scene after alignment to preserve measured angles.
+The current snapshot records the temporary shared white mapping and its original provenance;
+capture a new scene after alignment to preserve independently measured white angles.
+
+## Temporary shared mapping
+
+`additional_robots[].joint_calibration` stays `data/calibration/arm1_mujoco.json`.
+Its explicit `joint_calibration_fallback` is `{"mode": "simulation_only", "arm": "follower"}`.
+Only fits from the validated connected follower can activate this fallback; both buses keep
+their own fingerprints. The source file is not copied into a fake white calibration file.
+The fallback never enables physical white-arm control. An existing invalid or incomplete
+white file reports an error rather than hiding it with shared fits. Remove the fallback
+configuration to require independent white calibration before any joint display.

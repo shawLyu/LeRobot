@@ -133,13 +133,14 @@ def main():
     robot = None
     from lerobot_arm_control.runtime.tabletop_robot import start_additional_feedback
 
-    additional_feedback = start_additional_feedback(config, camera_only=args.camera_only)
     if config.get("robot", {}).get("enabled") and not args.camera_only:
         from lerobot_arm_control.runtime.tabletop_robot import RobotFeedback
 
         robot = RobotFeedback(config["robot"], hardware_control=args.hardware_control,
                               task='pick_t' if args.pick_t else 'push_t')
         robot.start()
+    additional_feedback = start_additional_feedback(config, camera_only=args.camera_only,
+                                                    primary_feedback=robot)
     if (args.push_t or args.pick_t) and robot is None:
         raise ValueError('Robot policies require configured SO101 feedback')
     push = None

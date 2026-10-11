@@ -111,8 +111,9 @@ the right AprilTag 36h10 / ID 1 marker, with left AprilTag 16h5 / ID 0 as its au
 both have 150 mm black edges. The [accepted table registration](data/calibration/table_reference.json)
 passed independent frame validation on October 11. Both bases have current fixed registration.
 The [saved current scene](configs/scenes/tabletop-current.json) includes camera, table, objects,
-both bases and joint measurement sources. The black arm has live joint feedback; the white arm
-awaits its own six-joint alignment. See [current scene](docs/current-scene.md).
+both bases and joint measurement sources. Both arms have read-only live feedback; the white arm
+temporarily uses the black arm's angle mapping while awaiting independent six-joint alignment.
+See [current scene](docs/current-scene.md).
 Physical 1 mm accuracy and completed physical Push-T have not been validated.
 
 
@@ -335,9 +336,11 @@ markers visible and use `--recalibrate-table` instead. This archives the auxilia
 layout, static target, and both base poses before rebuilding them; it preserves
 joint calibration and control parameters. Do not reuse a saved auxiliary layout
 after physically moving its marker.
-Only the follower has joint feedback/control; the white arm registration supplies its mounting pose.
-The local viewer includes both six-joint models. White-arm joints use a translucent,
-unmeasured preview until separate joint calibration and feedback are available.
+The local viewer includes both six-joint models with independent base poses and encoder streams.
+White joints temporarily reuse the validated follower mapping, labelled `TEMP shared from follower`.
+This fallback is read-only and does not establish white-arm physical accuracy.
+Its independent `arm1_mujoco.json` takes priority when present and valid; neither arm's
+calibration file is overwritten. Only the calibrated follower supports physical task control.
 For camera observation alongside a controller, use
 `./scripts/lerobot-arm view tabletop --camera-only --fps 5`; this does not open a motor bus.
 Recalibrate after moving the base or primary anchor. After moving the camera, check intrinsics, localization quality, and configured marker search regions.

@@ -42,7 +42,8 @@ others retain travel-range estimates until all six are calibrated.
 The local file `data/calibration/follower_mujoco.json` is saved automatically and supports resuming later.
 It binds stable USB identity, IDs, limits, offsets, mode, Phase, and MJCF checksum.
 Device replacement or upstream EEPROM recalibration invalidates it; archive before recapture.
-The included completed calibration belongs to the existing experimental device and cannot be reused for another robot.
+The included completed calibration belongs to the existing experimental device. Reuse for another robot
+is explicitly temporary simulation estimation, not independent physical calibration or motion authorization.
 After local capture, close the window, verify the same device identity, and copy the file to the same remote path;
 ordinary deployment preserves remote calibration.
 Archive an existing `follower_mujoco_kinematic.json` before raw angle recapture.
@@ -54,11 +55,13 @@ For the right white arm, select its own hardware identity and independent file:
   --log logs/arm1-angle-calibration.json
 ```
 
-The default output becomes `data/calibration/arm1_mujoco.json`; follower mappings
-are not reused or overwritten. The same B / 1–6 / R / C measurement procedure applies.
+The default output becomes `data/calibration/arm1_mujoco.json`; this measurement entry
+does not copy or overwrite follower mappings. The same B / 1–6 / R / C procedure applies.
 Additional arms use this entry for read-only alignment; physical-control and gripper-test
 flags are rejected. After 6/6 valid mappings and transfer to the remote host, the
-tabletop viewer starts white-arm read-only feedback independently. See
+tabletop viewer switches from its explicit temporary follower mapping to white-arm
+read-only feedback with independently validated fits. Close the tabletop viewer before
+opening either arm's calibration window so only one reader uses each serial bus. See
 [current white-arm alignment](current-scene.md#white-arm-six-joint-alignment).
 
 ## Preview and hardware control

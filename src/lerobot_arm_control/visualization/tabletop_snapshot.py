@@ -12,6 +12,9 @@ def save_scene_snapshot(output, state, hello):
     config = hello['config']
     arms = {arm['arm']: {'registration': arm['registration'], 'qpos': arm['qpos'],
                          'joint_pose_source': arm['joint_pose_source'],
+                         'calibration_mode': arm['calibration_mode'],
+                         'calibration_source_arm': arm['calibration_source_arm'],
+                         'independently_calibrated': arm['independently_calibrated'],
                          'feedback_status': (state.get('robot', {}) if arm['arm'] ==
                              config.get('robot', {}).get('arm') else
                              state.get('robot_feedback', {}).get(arm['arm'], {})).get(

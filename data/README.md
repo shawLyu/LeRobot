@@ -7,7 +7,7 @@ The current code still uses these inputs:
 
 | Path | Purpose |
 | --- | --- |
-| `calibration/follower_mujoco.json` | Measured encoder-to-angle mapping; its name does not require a simulation engine at runtime |
+| `calibration/follower_mujoco.json` | Measured black-arm mapping; currently also the explicitly temporary white-arm simulation mapping source |
 | `calibration/follower_mujoco_kinematic.json` | Optional validated height correction, bound to raw calibration and base hashes; previous correction archived after base recalibration |
 | `calibration/follower_rest.json` | Validated resting pose for hardware Reset |
 | `calibration/table_reference.json` | Current accepted ID 1 / ID 0 table layout and independent frame validation |

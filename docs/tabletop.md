@@ -113,17 +113,23 @@ See [Two-arm calibration](two-arm-calibration.md) for the measured poses and sep
 `base_registrations` carries both mounting poses; `base_distances` carries their measured separation.
 The follower has live calibrated joint feedback. An additional arm reads its own
 `joint_calibration` when that file exists and passes device identity/angle validation.
-Missing white-arm calibration reports `uncalibrated`, opens no white motor bus,
-and uses the explicitly unmeasured translucent preview. Additional feedback is read-only.
+The current white configuration explicitly sets `joint_calibration_fallback` to
+`{"mode": "simulation_only", "arm": "follower"}`. With no independent white file,
+its own bus is sampled using the validated follower fits, labelled `TEMP shared from follower`.
+The white identity remains separate; this does not count as independently measured calibration.
+An existing invalid white file reports an error and never silently falls back.
+Without either an independent mapping or a validated configured fallback, it reports
+`uncalibrated` and opens no white bus. Additional feedback is read-only.
 The local scene includes a separate six-joint white-arm model at its measured
-base. Its joints are a translucent, unmeasured preview. `--camera-only` skips the
+base; its temporary shared-calibration pose is slightly translucent. `--camera-only` skips the
 motor bus entirely and can run alongside a controller. See
 [Precision calibration](precision-calibration.md) for independent wrist-marker
 measurement and the current physical validation limits.
 Missing geometry returns `mount_calibration_missing`; such a preview cannot support hardware execution.
 Closing a live view freezes its final observation in `state.json`, `scene_parameters.json`,
 `model.json` and the `scene.xml` recorded keyframe. The parameters distinguish measured
-encoders from unmeasured previews and include the actual camera/table frame and both bases.
+independent encoder mappings, temporary shared mappings and unmeasured previews,
+and include the actual camera/table frame and both bases.
 The accepted October 11 scene is preserved separately at `data/tabletop/current-scene/`;
 see [saved scene and white-arm alignment](current-scene.md).
 The old CAD silhouette fitting interface is retired; the remote host loads no mesh or forward kinematics.

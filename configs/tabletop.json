@@ -413,7 +413,11 @@
         "joint_pose_source": "unmeasured_preview"
       },
       "joint_calibration": "data/calibration/arm1_mujoco.json",
-      "feedback_hz": 20
+      "feedback_hz": 20,
+      "joint_calibration_fallback": {
+        "mode": "simulation_only",
+        "arm": "follower"
+      }
     }
   ],
   "camera_controls": {

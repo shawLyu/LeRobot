@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "sequence": 111,
-  "captured_unix_ns": 1791689399037224416,
+  "sequence": 53,
+  "captured_unix_ns": 1791690631828111492,
   "units": "m",
   "reference": "anchor AprilTag center; +X right; +Y up; +Z out",
   "table": {
@@ -13,7 +13,7 @@
     "workspace_bounds_m": [
       -0.8787784959877911,
       0.1275,
-      -0.3124316534922962,
+      -0.3124132971415117,
       0.48011450664773964
     ],
     "extent_source": "workspace patch; desk perimeter not measured",
@@ -45,25 +45,25 @@
   "camera": {
     "device": "/dev/v4l/by-id/usb-CN02KX4NLG0004ABK00_USB_Camera_CN02KX4NLG0004ABK00-video-index0",
     "position": [
-      -0.3187107439345183,
-      -0.08139138632802857,
-      0.6317667488568667
+      -0.31907757429432293,
+      -0.08138294639516183,
+      0.6318974320150145
     ],
     "rotation": [
       [
-        0.9974105669816573,
-        0.006791467600448953,
-        -0.07159634656293944
+        0.9974483671959904,
+        0.006656459576879059,
+        -0.0710805622090416
       ],
       [
-        -0.010952151627805762,
-        -0.9695757186516014,
-        -0.24454647038130042
+        -0.010961922125646565,
+        -0.9695569154651144,
+        -0.24462057136938467
       ],
       [
-        -0.07107890860198986,
-        0.2446973677199302,
-        -0.9669906860890063
+        -0.07054495758991791,
+        0.24477556908252576,
+        -0.9670099946427453
       ]
     ],
     "controls": {
@@ -73,7 +73,7 @@
     },
     "anchor_visible": true,
     "pose_source": "both",
-    "reprojection_error_px": 0.3771905905471408
+    "reprojection_error_px": 0.4173458998377828
   },
   "arms": {
     "follower": {
@@ -104,17 +104,20 @@
         "calibrated_unix_ns": 1791689384797157944,
         "calibration_position_spread_m": 0.0002542149876749605,
         "calibration_yaw_spread_rad": 0.0006551030531696256,
-        "calibration_age_s": 14.322246678
+        "calibration_age_s": 1247.109996982
       },
       "qpos": [
-        -0.06342182352317423,
-        1.7393623143806736,
-        -1.5074702211915623,
-        -0.1894928902165272,
-        -1.7938399139832957,
-        -0.1819995744058258
+        -0.0722713802938497,
+        1.827374644182097,
+        -1.668102293941483,
+        -0.18783067188129451,
+        -1.7954217833959794,
+        0.034999918154966496
       ],
       "joint_pose_source": "live_encoders",
+      "calibration_mode": "independent",
+      "calibration_source_arm": "follower",
+      "independently_calibrated": true,
       "feedback_status": "live"
     },
     "arm1": {
@@ -145,18 +148,21 @@
         "calibrated_unix_ns": 1791689384849461546,
         "calibration_position_spread_m": 0.0002545087086934618,
         "calibration_yaw_spread_rad": 0.0011957311821417793,
-        "calibration_age_s": 14.269972686
+        "calibration_age_s": 1247.057725682
       },
       "qpos": [
-        0,
-        1.5,
-        -1.6,
-        0.3,
-        0,
-        0.6
+        -0.08112093706452517,
+        1.8467671914264785,
+        -1.5661627093117256,
+        -1.0206020578328745,
+        -0.6786219780412996,
+        -0.12459970863168074
       ],
-      "joint_pose_source": "unmeasured_preview",
-      "feedback_status": "uncalibrated"
+      "joint_pose_source": "live_encoders_shared_calibration",
+      "calibration_mode": "temporary_shared",
+      "calibration_source_arm": "follower",
+      "independently_calibrated": false,
+      "feedback_status": "live"
     }
   },
   "base_distances": [
@@ -177,60 +183,56 @@
   ],
   "objects": {
     "black_t": {
-      "iou": 0.9277824978759558,
+      "iou": 0.9252533783783784,
       "xy": [
-        -0.38989992470690005,
-        0.23416347064102383
+        -0.3901998610266039,
+        0.2335168426269722
       ],
-      "yaw": 3.1066860685499065,
+      "yaw": 3.115412714809878,
       "width": 0.048,
       "length": 0.06,
       "cap_depth": 0.012,
       "stem_width": 0.012,
       "contour_xy": [
         [
-          -0.39082959294319153,
-          0.26340073347091675
+          -0.3940563201904297,
+          0.2618861198425293
         ],
         [
-          -0.3940503001213074,
-          0.2617594599723816
+          -0.3948456346988678,
+          0.21716929972171783
         ],
         [
-          -0.39483362436294556,
-          0.21705244481563568
+          -0.39641299843788147,
+          0.21552368998527527
         ],
         [
-          -0.3964006006717682,
-          0.2154073417186737
+          -0.4124370515346527,
+          0.21598219871520996
         ],
         [
-          -0.41242310404777527,
-          0.21586740016937256
+          -0.4137831926345825,
+          0.20590272545814514
         ],
         [
-          -0.41376781463623047,
-          0.20579002797603607
+          -0.36765795946121216,
+          0.20465826988220215
         ],
         [
-          -0.36764800548553467,
-          0.20454148948192596
+          -0.36772578954696655,
+          0.21303841471672058
         ],
         [
-          -0.3677169680595398,
-          0.2129197120666504
+          -0.38202694058418274,
+          0.2134329378604889
         ],
         [
-          -0.38201606273651123,
-          0.21331557631492615
+          -0.38526201248168945,
+          0.2168968915939331
         ],
         [
-          -0.38525113463401794,
-          0.21677909791469574
-        ],
-        [
-          -0.38430604338645935,
-          0.2614276707172394
+          -0.38431084156036377,
+          0.26155561208724976
         ]
       ],
       "height": 0,
@@ -243,44 +245,44 @@
       "z": 0.0,
       "complete_outline_xy": [
         [
-          -0.3669615297595168,
-          0.20334415790959093
+          -0.36699339367642675,
+          0.20289887611831653
         ],
         [
-          -0.4149322894564334,
-          0.20501933375131098
+          -0.41497694527525353,
+          0.20415536963709444
         ],
         [
-          -0.41451349549600336,
-          0.21701202367554012
+          -0.41466282189555903,
+          0.21615125753680114
         ],
         [
-          -0.3965244606096596,
-          0.21638383273489512
+          -0.396668990045999,
+          0.2156800724672594
         ],
         [
-          -0.39484928476793957,
-          0.2643545924318117
+          -0.39541249652722105,
+          0.2636636240660862
         ],
         [
-          -0.38285659484371043,
-          0.2639357984713817
+          -0.38341660862751437,
+          0.2633495006863917
         ],
         [
-          -0.3845317706854305,
-          0.2159650387744651
+          -0.3846731021462923,
+          0.21536594908756493
         ],
         [
-          -0.36654273579908675,
-          0.21533684783382007
+          -0.36667927029673225,
+          0.2148947640180232
         ]
       ]
     },
     "wood_t": {
-      "iou": 0.8900487125956854,
+      "iou": 0.836404663407296,
       "xy": [
-        -0.34109264382051263,
-        0.21782959476967098
+        -0.3433517379206603,
+        0.2183966142599134
       ],
       "yaw": 3.0543261909900767,
       "width": 0.048,
@@ -289,60 +291,60 @@
       "stem_width": 0.012,
       "contour_xy": [
         [
-          -0.34214210510253906,
-          0.24820953607559204
+          -0.34214460849761963,
+          0.2483401745557785
         ],
         [
-          -0.34689098596572876,
-          0.2313474416732788
+          -0.3453178107738495,
+          0.24160665273666382
         ],
         [
-          -0.34843969345092773,
-          0.20463912189006805
+          -0.3484494388103485,
+          0.20475786924362183
         ],
         [
-          -0.3515549600124359,
-          0.20141538977622986
+          -0.3531261682510376,
+          0.20157362520694733
         ],
         [
-          -0.3562437891960144,
-          0.20319072902202606
+          -0.3734486401081085,
+          0.20045320689678192
         ],
         [
-          -0.36718323826789856,
-          0.20182594656944275
+          -0.3671700358390808,
+          0.1986371874809265
         ],
         [
-          -0.3655926287174225,
-          0.19848090410232544
+          -0.36554521322250366,
+          0.19037307798862457
         ],
         [
-          -0.3671024441719055,
-          0.19193877279758453
+          -0.32523009181022644,
+          0.18775595724582672
         ],
         [
-          -0.3221534192562103,
-          0.18593895435333252
+          -0.3237014412879944,
+          0.18609154224395752
         ],
         [
-          -0.31905633211135864,
-          0.18749257922172546
+          -0.3175213932991028,
+          0.18757304549217224
         ],
         [
-          -0.3189381957054138,
-          0.19893568754196167
+          -0.3189423382282257,
+          0.1990557163953781
         ],
         [
-          -0.3328775465488434,
-          0.20093320310115814
+          -0.33288460969924927,
+          0.2010524868965149
         ],
         [
-          -0.3359661102294922,
-          0.2059655338525772
+          -0.3359731435775757,
+          0.20608583092689514
         ],
         [
-          -0.3326432704925537,
-          0.24791385233402252
+          -0.3326437771320343,
+          0.2480456829071045
         ]
       ],
       "height": 0.006,
@@ -355,36 +357,36 @@
       "z": 0.003,
       "complete_outline_xy": [
         [
-          -0.3197986433487405,
-          0.1858520160009748
+          -0.32205773744888816,
+          0.18641903549121724
         ],
         [
-          -0.36761598885714425,
-          0.1900354916528624
+          -0.36987508295729193,
+          0.19060251114310484
         ],
         [
-          -0.3665701199441724,
-          0.20198982802996335
+          -0.36882921404432006,
+          0.20255684752020578
         ],
         [
-          -0.348638615378521,
-          0.20042102466050551
+          -0.35089770947866866,
+          0.20098804415074795
         ],
         [
-          -0.3444551397266334,
-          0.2482383701689093
+          -0.34671423382678107,
+          0.24880538965915172
         ],
         [
-          -0.3325008033495324,
-          0.2471925012559374
+          -0.3347598974496801,
+          0.24775952074617982
         ],
         [
-          -0.33668427900142,
-          0.19937515574753362
+          -0.3389433731015677,
+          0.19994217523777605
         ],
         [
-          -0.3187527744357686,
-          0.19780635237807576
+          -0.3210118685359163,
+          0.1983733718683182
         ]
       ]
     }
@@ -413,48 +415,48 @@
   "appearance": {
     "version": 1,
     "source_sequence": 1,
-    "source_captured_unix_ns": 1791689379509952393,
+    "source_captured_unix_ns": 1791690622224274668,
     "perception_location": "remote",
     "bounds": [
       -0.8787784959877911,
       0.1275,
-      -0.3124316534922962,
+      -0.3124132971415117,
       0.48011450664773964
     ],
     "texture_rows": "world +Y to -Y; MuJoCo PNG convention, vflip=false",
     "materials_rgb": {
       "black_t_cap": [
-        0.18068510520727854,
-        0.21682212624873426,
-        0.21682212624873426
+        0.18520223283746054,
+        0.20778787098837034,
+        0.20327074335818837
       ],
       "black_t_stem": [
         0.15358233942618676,
-        0.18520223283746054,
-        0.18971936046764248
+        0.17165084994691462,
+        0.1761679775770966
       ],
       "wood_t_cap": [
-        0.7814630800214798,
-        0.7633945695007519,
-        0.44267850775783246
+        0.7679116971309338,
+        0.749843186610206,
+        0.4381613801276505
       ],
       "wood_t_stem": [
-        0.7814630800214798,
-        0.7679116971309338,
-        0.46526414590874227
+        0.7724288247611157,
+        0.749843186610206,
+        0.44719563538801443
       ]
     },
     "robot_plastic_rgb": [
-      0.08582542497345731,
-      0.126479573645095,
-      0.126479573645095
+      0.09034255260363927,
+      0.11292819075454909,
+      0.12196244601491302
     ],
     "background_rgb": [
-      0.3411764705882353,
-      0.3333333333333333,
+      0.34901960784313724,
+      0.32941176470588235,
       0.34509803921568627
     ],
-    "observed_table_fraction": 0.17280101776123047,
+    "observed_table_fraction": 0.1714801788330078,
     "paper_material_detected": true,
     "texture_method": "observed desk/paper colors and fine photo detail; broad lighting removed",
     "hidden_surfaces": "inpainted or uniform estimated material",
@@ -465,13 +467,13 @@
         0.5
       ],
       "main_pos": [
-        0.37691074104537425,
-        -0.18757801634594737,
+        0.35655509153421183,
+        -0.23847136031132093,
         1.4
       ],
       "main_dir": [
-        -0.7525499890392698,
-        0.2714194429236691,
+        -0.7321943395281074,
+        0.3223219650644349,
         -1.4
       ],
       "main_diffuse": [
@@ -912,7 +914,11 @@
           "joint_pose_source": "unmeasured_preview"
         },
         "joint_calibration": "data/calibration/arm1_mujoco.json",
-        "feedback_hz": 20
+        "feedback_hz": 20,
+        "joint_calibration_fallback": {
+          "mode": "simulation_only",
+          "arm": "follower"
+        }
       }
     ],
     "camera_controls": {
@@ -951,10 +957,173 @@
         "gripper"
       ],
       "read_only": true,
-      "joint_calibration": "data/calibration/arm1_mujoco.json",
-      "status": "uncalibrated",
-      "error": "Six-joint calibration required: data/calibration/arm1_mujoco.json",
-      "motion_available": false
+      "joint_calibration": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
+      "joint_calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "independent_joint_calibration": "/home/xy/Research/lerobot/data/calibration/arm1_mujoco.json",
+      "calibration_mode": "temporary_shared",
+      "calibration_source_arm": "follower",
+      "calibration_source_fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            844,
+            3440
+          ],
+          "shoulder_lift": [
+            809,
+            3238
+          ],
+          "elbow_flex": [
+            773,
+            3126
+          ],
+          "wrist_flex": [
+            862,
+            3192
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            1441,
+            2982
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -1214,
+          "shoulder_lift": 1932,
+          "elbow_flex": 1070,
+          "wrist_flex": -1980,
+          "wrist_roll": -1910,
+          "gripper": -1632
+        },
+        "phase": {
+          "shoulder_pan": 12,
+          "shoulder_lift": 12,
+          "elbow_flex": 12,
+          "wrist_flex": 12,
+          "wrist_roll": 12,
+          "gripper": 12
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "independently_calibrated": false,
+      "kinematic_correction": null,
+      "fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            699,
+            3416
+          ],
+          "shoulder_lift": [
+            795,
+            3280
+          ],
+          "elbow_flex": [
+            807,
+            3094
+          ],
+          "wrist_flex": [
+            794,
+            3200
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            1512,
+            2759
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -2030,
+          "shoulder_lift": 1084,
+          "elbow_flex": 924,
+          "wrist_flex": -1986,
+          "wrist_roll": 1818,
+          "gripper": 1844
+        },
+        "phase": {
+          "shoulder_pan": 76,
+          "shoulder_lift": 12,
+          "elbow_flex": 76,
+          "wrist_flex": 76,
+          "wrist_roll": 76,
+          "gripper": 76
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "fits": {
+        "shoulder_pan": {
+          "zero_raw": 2143.0,
+          "radians_per_tick": 0.0014749261284459122,
+          "check_error_degrees": 0.5915492957746462
+        },
+        "shoulder_lift": {
+          "zero_raw": 2007.0,
+          "radians_per_tick": 0.0014917344034139567,
+          "check_error_degrees": 1.8803418803418854
+        },
+        "elbow_flex": {
+          "zero_raw": 2143.0,
+          "radians_per_tick": 0.0015445391610569286,
+          "check_error_degrees": 0.8849557522123864
+        },
+        "wrist_flex": {
+          "zero_raw": 2066.0,
+          "radians_per_tick": 0.0016622183352326947,
+          "check_error_degrees": 1.7142857142857184
+        },
+        "wrist_roll": {
+          "zero_raw": 2010.0,
+          "radians_per_tick": 0.0015818694126836822,
+          "check_error_degrees": 1.6314199395770352
+        },
+        "gripper": {
+          "zero_raw": 1620.0,
+          "radians_per_tick": 0.00139999672619866,
+          "check_error_degrees": 0.5614973262032035
+        }
+      },
+      "motion_available": false,
+      "status": "live"
     },
     "follower": {
       "model": "so101",
@@ -967,6 +1136,12 @@
         "gripper"
       ],
       "read_only": true,
+      "joint_calibration": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
+      "joint_calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "kinematic_correction": null,
+      "calibration_mode": "independent",
+      "calibration_source_arm": "follower",
+      "independently_calibrated": true,
       "fingerprint": {
         "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
         "motors": {
@@ -1030,8 +1205,6 @@
         "model": "so101",
         "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
       },
-      "joint_calibration": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
-      "kinematic_correction": null,
       "fits": {
         "shoulder_pan": {
           "zero_raw": 2143.0,
@@ -1065,13 +1238,13 @@
         }
       },
       "motion_available": false,
-      "status": "connecting"
+      "status": "live"
     }
   },
   "snapshot_directory": "data/tabletop/current-scene",
   "pending_calibration": {
     "arm1": {
-      "status": "0/6 aligned",
+      "status": "0/6 independently aligned; deferred; temporary follower mapping active",
       "file": "data/calibration/arm1_mujoco.json",
       "fingerprint": {
         "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
@@ -1132,7 +1305,9 @@
           "wrist_flex": 0,
           "wrist_roll": 0,
           "gripper": 0
-        }
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
       },
       "reference_model": "assets/so101/scene_mujoco.xml",
       "required_angles_deg": [
@@ -1149,6 +1324,28 @@
         "gripper"
       ],
       "requires_physical_measurement": true
+    }
+  },
+  "configuration_files": {
+    "tabletop.json": {
+      "file": "configs/tabletop.json",
+      "sha256": "a3849fa6c95d8a75fdd046116f6d32ecc178a89f033607f07083d9c841b73101"
+    },
+    "camera_intrinsics.json": {
+      "file": "configs/camera_intrinsics.json",
+      "sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca"
+    },
+    "camera.toml": {
+      "file": "configs/camera.toml",
+      "sha256": "219cdd27ce07b979a04b2ae1d8606e990344a8f64b0776cbc01053d7e14d3520"
+    },
+    "arms.toml": {
+      "file": "configs/arms.toml",
+      "sha256": "9a9f4fc7685cce2b5892c5562f19411b040a04203db43c814cd3f7312193a095"
+    },
+    "control.json": {
+      "file": "configs/control.json",
+      "sha256": "5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591"
     }
   },
   "calibration_records": {
@@ -1178,26 +1375,26 @@
       "snapshot_file": "calibration_records/follower_mujoco.json"
     }
   },
-  "configuration_files": {
-    "tabletop.json": {
-      "file": "configs/tabletop.json",
-      "sha256": "135ef28142274479111aa41f6bad6aa1b79f97cabb881b52977db716c98c8a64"
+  "calibration_interfaces": {
+    "follower": {
+      "file": "data/calibration/follower_mujoco.json",
+      "command": "./scripts/lerobot-arm view arm --backend hardware --arm follower",
+      "required_angles_deg": [
+        0,
+        30,
+        60
+      ],
+      "writes_motor_registers": false
     },
-    "camera_intrinsics.json": {
-      "file": "configs/camera_intrinsics.json",
-      "sha256": "bf1aca2304736e8c099c7b4f2723fc389be39ad5239b15faae34e149127078ca"
-    },
-    "camera.toml": {
-      "file": "configs/camera.toml",
-      "sha256": "219cdd27ce07b979a04b2ae1d8606e990344a8f64b0776cbc01053d7e14d3520"
-    },
-    "arms.toml": {
-      "file": "configs/arms.toml",
-      "sha256": "9a9f4fc7685cce2b5892c5562f19411b040a04203db43c814cd3f7312193a095"
-    },
-    "control.json": {
-      "file": "configs/control.json",
-      "sha256": "5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591"
+    "arm1": {
+      "file": "data/calibration/arm1_mujoco.json",
+      "command": "./scripts/lerobot-arm view arm --backend hardware --arm arm1",
+      "required_angles_deg": [
+        0,
+        30,
+        60
+      ],
+      "writes_motor_registers": false
     }
   }
 }

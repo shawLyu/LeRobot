@@ -34,8 +34,14 @@ def scene_arms(state, config):
         arms.append({'arm': name, 'config': entry, 'prefix': prefix,
                      'root': 'robot_root' if index == 0 else prefix+'robot_root',
                      'registration': registration, 'qpos': list(qpos),
-                     'joint_pose_source': 'live_encoders' if measured.get('status') == 'live'
-                     else 'unmeasured_preview'})
+                     'joint_pose_source': (
+                         'live_encoders_shared_calibration'
+                         if measured.get('calibration_mode') == 'temporary_shared' else
+                         'live_encoders') if measured.get('status') == 'live'
+                     else 'unmeasured_preview',
+                     'calibration_mode': measured.get('calibration_mode', 'uncalibrated'),
+                     'calibration_source_arm': measured.get('calibration_source_arm'),
+                     'independently_calibrated': measured.get('independently_calibrated', False)})
     return arms
 
 
@@ -272,5 +278,7 @@ def update_scene_robots(model, data, state, config, age):
                 prefix = '' if name == primary else name+'__'
                 data.qpos[model.joint(prefix+joint).qposadr[0]] = angle
         alpha = 1. if live and (placed or estimated) else .4 if live else .25 if placed else .15
+        if live and robot.get('calibration_mode') == 'temporary_shared':
+            alpha = min(alpha, .8)
         visuals = (model.geom_group == 2) & (model.body_rootid[model.geom_bodyid] == body)
         model.geom_rgba[visuals, 3] = alpha

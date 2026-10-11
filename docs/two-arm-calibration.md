@@ -14,7 +14,7 @@ The measurements in the historical section below remain historical. Simulation r
 | Arm | Appearance in the current camera view | Base marker | Joint feedback/control |
 | --- | --- | --- | --- |
 | `follower` | Left black arm | ArUco `DICT_4X4_50` / ID 7 | Existing follower bus |
-| `arm1` | Right white arm | ArUco `DICT_4X4_50` / ID 6 | Current base; independent six-joint alignment pending |
+| `arm1` | Right white arm | ArUco `DICT_4X4_50` / ID 6 | Read-only stream with temporary follower mapping; independent alignment pending |
 
 The original dimensions were confirmed for both arms; the follower center height
 was remeasured as 70 mm on 2026-10-09:
@@ -80,7 +80,7 @@ Held or missing poses are excluded from distance calculations; `both_fixed`
 indicates that both endpoints are saved calibrations.
 
 ```sh
-# Local preview; SSH starts remote perception and read-only follower feedback.
+# Local preview; SSH starts remote perception and both read-only encoder streams.
 ./scripts/lerobot-arm view tabletop --fps 5
 
 # Camera observations without opening the local GUI.
@@ -88,9 +88,10 @@ indicates that both endpoints are saved calibrations.
 ```
 
 After both bases are accepted, the local viewer shows both articulated SO101
-models, base statuses and their separation. The follower uses live encoder angles; arm1 joint angles remain an
-explicit translucent, unmeasured preview until its independent angle file is completed.
-The additional feedback worker then validates its device identity and streams its own six angles.
+models, base statuses and their separation. Each reads its own encoder stream.
+The follower uses its independently measured mapping; arm1 temporarily reuses that mapping
+for simulation, labelled `temporary_shared`. Its independent file takes priority and must
+pass its own device identity and six-angle validation. Shared fits cannot enable white-arm control.
 No motor targets were written during registration. See [white-arm alignment](current-scene.md#white-arm-six-joint-alignment).
 At the time of this registration, `configs/control.json` (V14), the original follower encoder calibration, and the
 existing rest pose were preserved. The rest pose identity still matches the

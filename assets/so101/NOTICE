@@ -22,7 +22,9 @@ License: Apache-2.0; see LICENSE in this directory.
 so101_leader_new_calib.urdf and Handle_SO101.stl, Trigger_SO101.stl,
 Wrist_Roll_SO101.stl are upstream copies. so101_leader.xml adapts the
 leader head subtree to the canonical follower arm; scene_leader.xml supplies a floor.
-The upstream trigger zero/travel (0-45 degrees) and printed-part inertias are
-provisional CAD estimates, not measured hardware calibration. The gripperframe
+The upstream trigger travel (0-45 degrees) is a provisional CAD estimate.
+Our adapted joint/actuator range is 0-30 degrees, confirmed by the user for
+arm1 on 2026-10-11 with independent 0/15/30-degree encoder alignment.
+Printed-part inertias remain upstream CAD estimates. The gripperframe
 site remains a follower compatibility frame, not the physical leader tool tip.
 Canonical so101.xml and the original 18 meshes remain unchanged.

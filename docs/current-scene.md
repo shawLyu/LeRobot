@@ -11,9 +11,9 @@ The former ID 3 reference and old image search regions have been archived.
 
 Camera capture/perception and both arms' read-only encoder feedback run remotely;
 the local MuJoCo view updates the table, Ts and independently registered bases.
-The current view shows both arms with separate encoder streams. White joints temporarily
-use the validated black follower's angle mapping, explicitly labelled `TEMP shared from follower`.
-This is a simulation estimate, not independently measured white joint alignment.
+The current view shows both arms with separate encoder streams and independent
+six-joint angle mappings. White arm1 alignment was completed on 2026-10-11;
+temporary sharing of the black follower mapping is disabled.
 Each base keeps its own accepted marker registration. No motors were driven during this capture.
 The table is the observed workspace patch; its full physical perimeter is unmeasured.
 
@@ -25,14 +25,14 @@ Run offline Push-T from this preserved desktop observation with:
 
 This uses a frozen observation. It does not mirror subsequent physical changes.
 Only the black follower executes simulated pushes; the additional white model remains
-fixed in its recorded posture. Its joint source remains `live_encoders_shared_calibration`
-until independent alignment is complete. Startup from this two-arm snapshot was checked;
+fixed in its recorded posture. Both recorded joint sources are `live_encoders`,
+using their own accepted mappings. Startup from this two-arm snapshot was checked;
 that check does not establish completion of the pushing task.
 
 ## Preserved parameters
 
 - `configs/scenes/tabletop-current.json`: complete versioned parameters, calibration
-  hashes, independent/shared measurement sources and pending white-arm alignment identity.
+  hashes, independent measurement sources and both arm identities.
 - `data/tabletop/current-scene/`: final `state.json`, `scene_parameters.json`,
   `scene.xml` recorded keyframe, config copies, camera/annotated/native images,
   textures and the shared CAD meshes. The same directory is saved remotely.
@@ -107,25 +107,27 @@ rsync -az data/calibration/arm1_mujoco.json lerobot:/home/xy/Research/lerobot/da
 The remote feedback worker verifies the white arm's identity and six fits, then the
 viewer updates its prefixed joints independently of the black arm. A stale or invalid
 white mapping cannot become live joint feedback. Ordinary deployment preserves this file.
-The current snapshot records the temporary shared white mapping and its original provenance;
-capture a new scene after alignment to preserve independently measured white angles.
+The current snapshot was refreshed after alignment with 39 observed camera frames;
+both robot feedback streams were live and independently calibrated. The accepted
+white file has SHA-256 `87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963`.
+All six third-reference checks are below 2 degrees; the largest is 1.91 degrees.
+The previous snapshot is preserved under `.cleanup/scene-before-independent-arm1-*`.
 
-## Temporary shared mapping
+## Independent mappings
 
 `additional_robots[].joint_calibration` stays `data/calibration/arm1_mujoco.json`.
-Its explicit `joint_calibration_fallback` is `{"mode": "simulation_only", "arm": "follower"}`.
-Only fits from the validated connected follower can activate this fallback; both buses keep
-their own fingerprints. The source file is not copied into a fake white calibration file.
-The fallback never enables physical white-arm control. An existing invalid or incomplete
-white file reports an error rather than hiding it with shared fits. Remove the fallback
-configuration to require independent white calibration before any joint display.
+The former `joint_calibration_fallback` has been removed from the current configuration.
+Both buses retain their own fingerprints and accepted files. Missing, invalid or
+incomplete white calibration reports an error instead of borrowing black-arm fits.
+The follow demo also has `simulation_shared_calibration: false`.
 
 ## Leader geometry and follow demo
 
 White arm1 now has the official SO-101 acquisition handle/trigger geometry in
 both calibration and tabletop views. Black follower retains its gripper. Existing
 base and black joint calibration reference hashes are preserved. Model sources,
-temporary mapping and the provisional trigger range are saved with the scene.
+independent mappings and the user-confirmed 0–30-degree trigger travel are saved
+with the scene. The leader joint and actuator limits use the same measured range.
 Run `./scripts/lerobot-arm demo follow` for physical white-leader/black-follower control.
 Use `--simulate` for a read-only real-leader preview, or `--source synthetic --auto`
 for an offline demonstration. Missing independent calibration blocks the default

@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "model": "so101",
+  "fingerprint": {
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+    "motors": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 2,
+      "elbow_flex": 3,
+      "wrist_flex": 4,
+      "wrist_roll": 5,
+      "gripper": 6
+    },
+    "raw_limits": {
+      "shoulder_pan": [
+        699,
+        3416
+      ],
+      "shoulder_lift": [
+        795,
+        3280
+      ],
+      "elbow_flex": [
+        807,
+        3094
+      ],
+      "wrist_flex": [
+        794,
+        3200
+      ],
+      "wrist_roll": [
+        0,
+        4095
+      ],
+      "gripper": [
+        1512,
+        2759
+      ]
+    },
+    "homing_offsets": {
+      "shoulder_pan": -2030,
+      "shoulder_lift": 1084,
+      "elbow_flex": 924,
+      "wrist_flex": -1986,
+      "wrist_roll": 1818,
+      "gripper": 1844
+    },
+    "phase": {
+      "shoulder_pan": 76,
+      "shoulder_lift": 12,
+      "elbow_flex": 76,
+      "wrist_flex": 76,
+      "wrist_roll": 76,
+      "gripper": 76
+    },
+    "mode": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "model": "so101",
+    "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+  },
+  "leader_trigger": true,
+  "points": {
+    "shoulder_pan": {
+      "0": {
+        "raw": 1991,
+        "sample_count": 9,
+        "time_unix_ns": 1791693995279697487
+      },
+      "30": {
+        "raw": 2344,
+        "sample_count": 9,
+        "time_unix_ns": 1791694007830042513
+      },
+      "60": {
+        "raw": 2679,
+        "sample_count": 9,
+        "time_unix_ns": 1791694082680002304
+      }
+    },
+    "shoulder_lift": {
+      "0": {
+        "raw": 2042,
+        "sample_count": 9,
+        "time_unix_ns": 1791694768530230332
+      },
+      "30": {
+        "raw": 2368,
+        "sample_count": 9,
+        "time_unix_ns": 1791694787829807677
+      },
+      "60": {
+        "raw": 2698,
+        "sample_count": 9,
+        "time_unix_ns": 1791694804379483861
+      }
+    },
+    "elbow_flex": {
+      "0": {
+        "raw": 2087,
+        "sample_count": 9,
+        "time_unix_ns": 1791694335280437725
+      },
+      "30": {
+        "raw": 2430,
+        "sample_count": 9,
+        "time_unix_ns": 1791694380580431025
+      },
+      "60": {
+        "raw": 2756,
+        "sample_count": 9,
+        "time_unix_ns": 1791694400280204460
+      }
+    },
+    "wrist_flex": {
+      "0": {
+        "raw": 1984,
+        "sample_count": 9,
+        "time_unix_ns": 1791694422979892669
+      },
+      "30": {
+        "raw": 2297,
+        "sample_count": 9,
+        "time_unix_ns": 1791694472629905884
+      },
+      "60": {
+        "raw": 2629,
+        "sample_count": 9,
+        "time_unix_ns": 1791694517430281500
+      }
+    },
+    "wrist_roll": {
+      "0": {
+        "raw": 2027,
+        "sample_count": 9,
+        "time_unix_ns": 1791694547529904123
+      },
+      "30": {
+        "raw": 2367,
+        "sample_count": 9,
+        "time_unix_ns": 1791694594033440777
+      },
+      "60": {
+        "raw": 2698,
+        "sample_count": 9,
+        "time_unix_ns": 1791694657180194682
+      }
+    },
+    "gripper": {
+      "0": {
+        "raw": 1531,
+        "sample_count": 9,
+        "time_unix_ns": 1791694675730063214
+      },
+      "15": {
+        "raw": 1688,
+        "sample_count": 9,
+        "time_unix_ns": 1791694714380217031
+      },
+      "30": {
+        "raw": 1865,
+        "sample_count": 9,
+        "time_unix_ns": 1791694741630206984
+      }
+    }
+  }
+}

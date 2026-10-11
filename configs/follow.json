@@ -5,9 +5,9 @@
   "hz": 30,
   "max_speed_rad_s": 0.6,
   "max_sample_age_seconds": 0.25,
-  "leader_trigger_degrees": [0, 45],
+  "leader_trigger_degrees": [0, 30],
   "follower_gripper_degrees": [0, 90],
-  "trigger_range_measured": false,
-  "trigger_range_source": "TheRobotStudio SO101 leader URDF provisional CAD range; measure before hardware execution",
-  "simulation_shared_calibration": true
+  "trigger_range_measured": true,
+  "trigger_range_source": "User confirmed released/fully pressed endpoints at 0/30 degrees on 2026-10-11; independent arm1 angle calibration",
+  "simulation_shared_calibration": false
 }

@@ -16,7 +16,7 @@ def test_mirror_slew_limit_joint_bounds_and_trigger_normalization():
     config['max_speed_rad_s'] = 2
     mapping = JointFollower(config, [0]*6)
     for _ in range(80):
-        target = mapping.step([10, 0, 0, 0, 0, math.radians(22.5)], .05)
+        target = mapping.step([10, 0, 0, 0, 0, math.radians(15)], .05)
     assert target[0] == pytest.approx(mapping.limits[0][1])
     assert target[5] == pytest.approx(math.radians(45))
     previous = list(target)
@@ -44,6 +44,8 @@ def test_invalid_encoder_packets_cannot_produce_follow_targets(raw):
 @pytest.fixture
 def remote(monkeypatch, tmp_path):
     config = load_follow_config()
+    config['simulation_shared_calibration'] = True
+    config['trigger_range_measured'] = False
     arms = {name: SimpleNamespace(name=name, role=role)
             for name, role in [('arm1', 'leader'), ('follower', 'follower')]}
     calls, packets = [], []

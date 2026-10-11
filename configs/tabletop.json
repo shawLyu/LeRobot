@@ -411,18 +411,14 @@
           -1.6,
           0.3,
           0,
-          0.6
+          0.5
         ],
         "joint_pose_source": "unmeasured_preview",
         "end_effector": "leader_handle",
         "role": "leader"
       },
       "joint_calibration": "data/calibration/arm1_mujoco.json",
-      "feedback_hz": 20,
-      "joint_calibration_fallback": {
-        "mode": "simulation_only",
-        "arm": "follower"
-      }
+      "feedback_hz": 20
     }
   ],
   "camera_controls": {

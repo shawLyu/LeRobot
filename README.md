@@ -114,7 +114,8 @@ black follower has a gripper. Real following is the default; simulation is expli
 
 `E` starts/resumes and `Space` holds. The default follower is physical and
 requires independent white calibration and measured trigger travel;
-the temporary black-arm mapping cannot enable it. See [follow demo](docs/follow.md).
+the current scene now has accepted white 6/6 calibration and user-confirmed
+0–30° trigger travel. See [follow demo](docs/follow.md).
 
 ## 3. Configure and deploy the remote host
 
@@ -353,10 +354,9 @@ layout, static target, and both base poses before rebuilding them; it preserves
 joint calibration and control parameters. Do not reuse a saved auxiliary layout
 after physically moving its marker.
 The local viewer includes both six-joint models with independent base poses and encoder streams.
-White joints temporarily reuse the validated follower mapping, labelled `TEMP shared from follower`.
-This fallback is read-only and does not establish white-arm physical accuracy.
-Its independent `arm1_mujoco.json` takes priority when present and valid; neither arm's
-calibration file is overwritten. Only the calibrated follower supports physical task control.
+White joints use their accepted independent `arm1_mujoco.json`; temporary shared
+mapping is disabled in the current scene. Each arm retains its own hardware identity
+and calibration file. Only the calibrated follower supports physical task control.
 For camera observation alongside a controller, use
 `./scripts/lerobot-arm view tabletop --camera-only --fps 5`; this does not open a motor bus.
 Recalibrate after moving the base or primary anchor. After moving the camera, check intrinsics, localization quality, and configured marker search regions.

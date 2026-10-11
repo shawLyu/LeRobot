@@ -7,14 +7,14 @@ The current code still uses these inputs:
 
 | Path | Purpose |
 | --- | --- |
-| `calibration/follower_mujoco.json` | Measured black-arm mapping; currently also the explicitly temporary white-arm simulation mapping source |
+| `calibration/follower_mujoco.json` | Independently measured black-arm mapping |
 | `calibration/follower_mujoco_kinematic.json` | Optional validated height correction, bound to raw calibration and base hashes; previous correction archived after base recalibration |
 | `calibration/follower_rest.json` | Validated resting pose for hardware Reset |
 | `calibration/table_reference.json` | Current accepted ID 1 / ID 0 table layout and independent frame validation |
 | `calibration/follower_table_base.json` | Current fixed black-arm base in the ID 1 frame |
 | `calibration/arm1_table_base.json` | Independently measured right white arm mounting pose |
 | `calibration/two_arm_bases.json` | Both poses, their separation and measurement provenance |
-| `calibration/arm1_mujoco.json` | White-arm angle mapping after its own physical 0/30/60-degree measurements; currently pending |
+| `calibration/arm1_mujoco.json` | Accepted independent white-arm mapping: joints 1–5 at 0/30/60 degrees; trigger at 0/15/30 degrees |
 | `calibration/height_samples.json` | New height measurements for local refitting; previous base-bound samples archived |
 | `trajectories/circle.json` | Circle trajectory input |
 | `tabletop/static_map.json` | Persistent auxiliary marker registration |

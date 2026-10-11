@@ -57,15 +57,16 @@ follower joints update from encoders. Tabletop and T observations remain live.
 The white arm registration does not enable joint control.
 
 Both markers have a 42 mm black border, lie parallel to the table, and are centered laterally.
-Their centers are 69 mm above the table and 19.5 mm forward of the base rear edge.
-CAD rear edge X=-22.365 mm and table-contact Z=-2.400 mm give marker center
-`[-2.865, 0, 66.600]` mm in CAD base coordinates.
+The follower marker center is 70 mm above the table; arm1's configured height is 69 mm.
+Both centers are 19.5 mm forward of the base rear edge.
+CAD rear edge X=-22.365 mm and table-contact Z=-2.400 mm give marker centers
+`[-2.865, 0, 67.600]` mm for the follower and `[-2.865, 0, 66.600]` mm for arm1.
 Decoded corner order accounts for each printed marker's rotation.
 Known corner height and a flat-base constraint solve planar position/yaw while retaining raw joint calibration.
 Old MIP ID 4/5/6 installation geometry has been removed from the active configuration.
 See [Two-arm calibration](two-arm-calibration.md) for measurements and saved poses.
 
-Initial registration requires visible primary ID 1 and 20 valid observations with distinct capture times spanning at least 1 s.
+Initial registration requires visible primary ID 3 and 20 valid observations with distinct capture times spanning at least 1 s.
 Position deviations from the median must be below 2 mm and yaw deviations below 0.025 rad.
 Results are atomically saved remotely as `data/calibration/follower_table_base.json` and
 `data/calibration/arm1_table_base.json`, then copied locally. Each arm requires its own 20 accepted observations.

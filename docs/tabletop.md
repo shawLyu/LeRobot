@@ -15,16 +15,16 @@ Keep markers fully visible with a white margin outside the black border. Run one
 
 ## Localization and fixed dimensions
 
-`configs/tabletop.json` contains the supplied 640x480 camera intrinsics, five distortion coefficients, and geometry.
+`configs/tabletop.json` contains the calibrated 640x360 processing intrinsics, five distortion coefficients, and geometry.
 Both tabletop markers have **150 mm** outer black borders:
 
-- AprilTag 36h10 / ID 1: fixed world anchor (lower right in the current camera view).
-- AprilTag 16h5 / ID 0: auxiliary localization marker (upper left in the current camera view).
+- AprilTag 36h11 / ID 3: fixed world anchor.
+- AprilTag 16h5 / ID 0: auxiliary localization marker.
 
-The world origin is ID 1's center; +X points right in its decoded orientation, +Y upward, and +Z away from the table.
-Seeing both markers learns ID 0 relative to ID 1. Later localization can combine them or use registered ID 0 if ID 1 is occluded,
-while retaining the ID 1 origin. An unregistered ID 0 alone at startup waits for ID 1.
-When fusion error is excessive but ID 1 remains visible, the system falls back to `pose_source=anchor_fallback`.
+The world origin is ID 3's center; +X points right in its decoded orientation, +Y upward, and +Z away from the table.
+Seeing both markers learns ID 0 relative to ID 3. Later localization can combine them or use registered ID 0 if ID 3 is occluded,
+while retaining the ID 3 origin. An unregistered ID 0 alone at startup waits for ID 3.
+When fusion error is excessive but ID 3 remains visible, the system falls back to `pose_source=anchor_fallback`.
 Keep their relative layout fixed; restart and relearn after moving markers.
 
 The confirmed T dimensions are **48 mm width, 60 mm length, 12 mm cap depth, 12 mm stem width**.
@@ -106,8 +106,9 @@ with maximum residual about 1.03 native pixels. Table processing images and smal
 calibrated 640x480 coordinates; original K/distortion are retained. Remeasure after changing camera crop, device, or mode.
 
 The current system independently registers the left black follower (ArUco 4x4 ID 7)
-and right white arm1 (ID 6). Both markers have 42 mm black borders, with centers
-69 mm above the table and 19.5 mm forward of each base rear edge, on its centerline.
+and right white arm1 (ID 6). Both markers have 42 mm black borders. The follower marker center
+is 70 mm above the table; arm1's configured height is 69 mm. Both centers are
+19.5 mm forward of each base rear edge, on its centerline.
 See [Two-arm calibration](two-arm-calibration.md) for the measured poses and separation.
 `base_registrations` carries both mounting poses; `base_distances` carries their measured separation.
 Only the follower has live joint feedback and hardware control.

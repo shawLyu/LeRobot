@@ -17,12 +17,28 @@ Initialize a complete rollout from a fresh observation:
 It freezes the black target T, yellow wood T, fixed-base registration, six joint angles, and session textures/lighting.
 Both Ts require current visible full/partial observations, and camera/joint data younger than 500 ms at selection.
 Static caches, held poses, and lost localization cannot initialize a new rollout.
-The current base reuses one-time ID 6 registration; a fixed base does not expire with visual timestamps,
+The black follower base uses one-time ArUco 4x4 ID 7 registration against tabletop AprilTag 36h11 ID 3;
+the white arm uses its own ID 6 registration. A fixed base does not expire with visual timestamps,
 while camera, Ts, and joints still require fresh data. Old snapshots retain their original base-estimation labels.
 The remote connection closes before the entirely local contact rollout; physical motors do not execute simulated actions.
 Failure to obtain a valid observation stops with a reason rather than reverting to an old snapshot.
 `--capture-timeout` defaults to 90 s, `--host` to lerobot, and `--remote-root` to `/home/xy/Research/lerobot`.
 Without --output, each capture creates a timestamped directory.
+
+If capture waits for robot base registration, its message includes the registration status or rejection reason.
+`markers_lost` requires a clear, fully visible ID 7. `pose_rejected` means the marker was detected but its
+corners do not fit the configured mounting geometry; the message includes the pixel error and limit.
+Measure the black border excluding the white margin (currently 42 mm), and its plane height above the table
+(70 mm). Check the annotated corners against the actual outer black border: a detector can decode ID 7
+while choosing a smaller quad inside that border. `border_seed_native` and `prefer_observed_border` constrain
+the existing edge-line recovery to the observed border and require exact decoding of the original pixels.
+These search regions describe the current 1920x1080 viewpoint and need checking after moving the camera or base.
+Keep the 1.5 px geometry limit; increasing the capture timeout cannot fix rejected geometry.
+
+On 2026-10-11, replaying 210 saved frames with the current border search regions accepted 196 follower
+observations (median error 0.55 px). A read-only remote capture then saved 20-sample fixed follower
+registration with 0.59 px error and 0.36 mm maximum position spread. A second capture restored that
+registration and selected a fresh initialization on frame 4. This verifies capture startup, not task completion.
 
 Each observation is saved under `observations/<timestamp>/` with state.json, initialization.json,
 calibration.json, joint_calibration.json, frame.jpg, native_frame.jpg, annotated.jpg, raw observations, materials, and CAD.

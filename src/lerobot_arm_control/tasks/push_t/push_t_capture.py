@@ -56,7 +56,13 @@ def observation_problem(state, arrival_age, output):
             or not finite_vector(base.get('quaternion'), 4)
             or abs(sum(v*v for v in base['quaternion'])-1) > .01
             or (not fixed and base.get('pose_age_s', math.inf) > 10)):
-        return 'waiting for the robot base registration'
+        reason = base.get('rejection_reason') or base.get('status', 'missing')
+        detail = f'waiting for the robot base registration: {reason}'
+        error, limit = base.get('reprojection_error_px'), base.get('max_reprojection_error_px')
+        if (isinstance(error, (int, float)) and math.isfinite(error)
+                and isinstance(limit, (int, float)) and math.isfinite(limit)):
+            detail += f' (reprojection error {error:.2f} px; limit {limit:.2f} px)'
+        return detail
     if not state.get('appearance', {}).get('version') or not (output/'appearance').is_dir():
         return 'waiting for textures and lighting from this capture session'
     return None

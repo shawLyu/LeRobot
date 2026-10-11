@@ -124,7 +124,26 @@
             0.06759999830167472
           ],
           "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
-        }
+        },
+        "border_seed_native": [
+          [
+            755,
+            865
+          ],
+          [
+            852,
+            866
+          ],
+          [
+            850,
+            968
+          ],
+          [
+            752,
+            967
+          ]
+        ],
+        "prefer_observed_border": true
       }
     ],
     "mounts": [
@@ -335,7 +354,26 @@
               0.06659999830167472
             ],
             "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
-          }
+          },
+          "border_seed_native": [
+            [
+              1450,
+              872
+            ],
+            [
+              1553,
+              875
+            ],
+            [
+              1558,
+              980
+            ],
+            [
+              1455,
+              977
+            ]
+          ],
+          "prefer_observed_border": true
         }
       ],
       "mounts": [

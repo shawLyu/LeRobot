@@ -51,6 +51,24 @@ def test_fresh_partial_contour_can_initialize_known_complete_t(observed):
     assert capture.observation_problem(state, .6, output)
 
 
+def test_rejected_base_reports_geometry_error_and_remains_invalid(observed):
+    state, output = observed
+    state['robot']['registration'].update(
+        status='pose_rejected', calibrated=False,
+        rejection_reason='known marker mount does not fit observed corners',
+        reprojection_error_px=2.652, max_reprojection_error_px=1.5)
+    reason = capture.observation_problem(state, .02, output)
+    assert 'known marker mount does not fit observed corners' in reason
+    assert '2.65 px; limit 1.50 px' in reason
+
+
+@pytest.mark.parametrize('status', ['markers_lost', 'mount_calibration_missing'])
+def test_missing_base_reports_registration_status(observed, status):
+    state, output = observed
+    state['robot']['registration'] = {'status': status}
+    assert status in capture.observation_problem(state, .02, output)
+
+
 def test_saved_fixed_base_initializes_without_visual_age_but_requires_fresh_feedback(observed):
     state, output = observed
     base = state['robot']['registration']

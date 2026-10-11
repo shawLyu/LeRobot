@@ -35,6 +35,14 @@ Capture causes no automatic motion. It requires nine consecutive feedback frames
 selected-joint variation no greater than 4 ticks, every motor torque-off, and no faults.
 About 30 degrees should correspond to 341 ticks; deviations over 10% are rejected.
 A failed 60-degree check does not overwrite valid data.
+The native-resolution guard is a software assumption, not proof that a measured angle is wrong.
+It runs after all three reference points are present, so a 0/30 span error can first appear
+when capturing 60 degrees. The error reports both raw endpoints, the expected range,
+the angle implied by 4096 ticks/turn, and the attempted third-point raw value.
+For example, raw 1973 to 2355 is 382 ticks, above the 375.5-tick upper bound;
+the third-point capture is rejected while the previously saved 0/30 points remain intact.
+If the physical reference alignment is confirmed, check the independent third point and
+encoder scaling before changing the guard; recapturing the same values will repeat the error.
 Crossing the 0/4095 encoder wrap boundary also triggers a span check; rearrange the zero/range first.
 `Angle alignment N/6` shows progress. Accepted joints immediately use fitted angles;
 others retain travel-range estimates until all six are calibrated.

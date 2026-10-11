@@ -84,8 +84,15 @@ class AngleCalibration:
         span = middle - zero
         expected = math.radians(references[1]) * TICKS_PER_RADIAN
         if not 0.9 * expected <= abs(span) <= 1.1 * expected:
-            raise ValueError(f"{joint}: 0/{references[1]} degree span "
-                             "inconsistent with STS3215 encoder")
+            raise ValueError(
+                f"{joint}: 0/{references[1]} span outside native-encoder guard\n"
+                f"raw {zero} -> {middle}: {span:+.1f} ticks; "
+                f"expected magnitude {expected:.1f} +/-10% "
+                f"({0.9 * expected:.1f}..{1.1 * expected:.1f})\n"
+                f"At 4096 ticks/turn this implies {abs(span) * 360 / 4096:.2f} degrees; "
+                f"{references[2]}-degree check raw={check}. "
+                "Verify reference alignment and encoder scaling."
+            )
         scale = math.radians(references[1]) / span
         error = abs((check - zero) * scale - math.radians(references[2]))
         if error > math.radians(2):

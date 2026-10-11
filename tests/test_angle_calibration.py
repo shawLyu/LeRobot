@@ -51,6 +51,23 @@ def test_failed_independent_check_does_not_corrupt_saved_points(tmp_path):
     assert calibration.count() == 0
 
 
+@pytest.mark.parametrize("direction", [1, -1])
+def test_native_span_failure_reports_observed_values_and_preserves_capture(tmp_path, direction):
+    calibration = AngleCalibration(tmp_path / "angles.json", {})
+    calibration.capture("shoulder_pan", 0, samples(1973))
+    calibration.capture("shoulder_pan", 30, samples(1973 + direction * 382))
+    saved = calibration.path.read_bytes()
+    with pytest.raises(ValueError, match="outside native-encoder guard") as error:
+        calibration.capture("shoulder_pan", 60, samples(1973 + direction * 764))
+    message = str(error.value)
+    assert f"{direction * 382:+.1f} ticks" in message
+    assert "341.3 +/-10% (307.2..375.5)" in message
+    assert "33.57 degrees" in message
+    assert f"60-degree check raw={1973 + direction * 764}" in message
+    assert "60" not in calibration.points["shoulder_pan"]
+    assert calibration.path.read_bytes() == saved
+
+
 def test_gripper_verification_starts_clear_of_calibrated_endpoints(tmp_path):
     calibration = AngleCalibration(tmp_path / "angles.json", {})
     for degrees, raw in [(0, 1620), (30, 1994), (60, 2361)]:

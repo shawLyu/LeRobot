@@ -90,10 +90,11 @@ Read-only additional-arm calibration does not enable gripper tests or physical c
 ```
 
 Support the white arm. Press **B**, select joints with **1–6**, and measure each
-joint relative to its parent at **0°, +30°, +60°**, following the on-screen reference.
+of joints 1–5 relative to its parent at **0°, +30°, +60°**. Joint 6 is the acquisition
+trigger and uses **0°, +15°, +30°**, following the on-screen handle reference.
 Press **C** after holding still for at least half a second; **R** advances the reference.
 The current pose is not automatically zero. Nine consecutive stable samples are
-required; the independent 60° check must pass before a joint is accepted.
+required; the third reference must pass its independent check before a joint is accepted.
 See [angle calibration](angle-calibration.md) for directions and the complete procedure.
 
 After **6/6 aligned**, close the calibration window and copy its accepted software mapping:
@@ -118,3 +119,13 @@ their own fingerprints. The source file is not copied into a fake white calibrat
 The fallback never enables physical white-arm control. An existing invalid or incomplete
 white file reports an error rather than hiding it with shared fits. Remove the fallback
 configuration to require independent white calibration before any joint display.
+
+## Leader geometry and follow demo
+
+White arm1 now has the official SO-101 acquisition handle/trigger geometry in
+both calibration and tabletop views. Black follower retains its gripper. Existing
+base and black joint calibration reference hashes are preserved. Model sources,
+temporary mapping and the provisional trigger range are saved with the scene.
+Run `./scripts/lerobot-arm demo follow` for real-leader input to a simulated follower,
+or add `--source synthetic --auto` for an offline demonstration. See
+[follow demo](follow.md) for physical execution prerequisites and controls.

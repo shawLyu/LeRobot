@@ -101,6 +101,20 @@ Repeated runs reuse the default output location. Set a different `--output` to r
 Window controls: `Space` pauses/resumes, `R` restores the measured start, `N` randomizes the start, arrows adjust XY, `Q/E` adjust orientation, and `Esc` exits.
 See [Push-T](docs/push-t.md) for the algorithm, assumptions, and batch experiments.
 
+### Acquisition leader and follower
+
+The white arm1 model uses the official SO-101 acquisition handle/trigger; the
+black follower has a gripper. Preview real leader input or animate both offline:
+
+```sh
+./scripts/lerobot-arm demo follow
+./scripts/lerobot-arm demo follow --source synthetic --auto
+```
+
+`E` resumes and `Space` holds. The default follower is simulated. Physical mode
+`--execute` requires independent white calibration and measured trigger travel;
+the temporary black-arm mapping cannot enable it. See [follow demo](docs/follow.md).
+
 ## 3. Configure and deploy the remote host
 
 The current camera configuration uses the user-selected second checkerboard

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "leader": "arm1",
+  "follower": "follower",
+  "hz": 30,
+  "max_speed_rad_s": 0.6,
+  "max_sample_age_seconds": 0.25,
+  "leader_trigger_degrees": [0, 45],
+  "follower_gripper_degrees": [0, 90],
+  "trigger_range_measured": false,
+  "trigger_range_source": "TheRobotStudio SO101 leader URDF provisional CAD range; measure before hardware execution",
+  "simulation_shared_calibration": true
+}

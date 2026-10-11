@@ -18,6 +18,7 @@ COMMANDS = {
     ("task", "circle"): ("runtime.realtime_client", ("--backend", "mujoco", "--circle")),
     ("task", "push-t"): ("planning.push_t", ()),
     ("task", "pick-t"): ("tasks.pick_t.pick_t_client", ()),
+    ("demo", "follow"): ("runtime.follow_client", ()),
     ("reset",): ("runtime.reset_client", ()),
     ("calibrate", "camera"): ("calibration.camera_intrinsics", ()),
     ("calibrate", "height"): ("calibration.height_client", ()),
@@ -30,6 +31,7 @@ COMMANDS = {
     ("verify", "tracking"): ("diagnostics.circle_tracking", ()),
     ("inspect", "tool-mount"): ("calibration.tool_mount", ()),
     ("serve", "arm"): ("runtime.realtime_server", ()),
+    ("serve", "follow"): ("runtime.follow_server", ()),
     ("serve", "tabletop"): ("runtime.tabletop_server", ()),
     ("serve", "simulation"): ("runtime.simulation_server", ()),
 }

@@ -26,15 +26,18 @@ ROOT = workspace_root()
 class Link:
     def __init__(self, host, remote_root, backend, *, allow_gripper=False, hardware_control=False,
                  circle=False, keep_simulation_alive=False,
-                 simulation_model=None, control_log=None, arm='follower'):
+                 simulation_model=None, control_log=None, arm='follower',
+                 hardware_worker='realtime_server'):
         if backend not in ("mujoco", "hardware"):
             raise ValueError("unknown backend")
         if keep_simulation_alive and backend != "mujoco":
             raise ValueError("independent heartbeat is simulation-only")
         if arm != 'follower' and (hardware_control or allow_gripper):
             raise ValueError('Additional arms support read-only angle calibration only')
+        if hardware_worker not in ('realtime_server', 'follow_server'):
+            raise ValueError('unknown hardware worker')
         worker_args = ["-m", "lerobot_arm_control.runtime.simulation_server" if backend == "mujoco"
-                       else "lerobot_arm_control.runtime.realtime_server"]
+                       else "lerobot_arm_control.runtime."+hardware_worker]
         if allow_gripper:
             worker_args.append("--allow-gripper")
         if hardware_control:
@@ -199,7 +202,11 @@ def calibration_text(count, testing, joint, degrees, mode, notice):
 def run(args):
     import mujoco
 
-    model_path = args.model or resource_path('assets/so101/scene_mujoco.xml')
+    from lerobot_arm_control.core.config import load_arms
+
+    leader = load_arms().get(getattr(args, 'arm', 'follower'))
+    scene = 'scene_leader.xml' if leader and leader.role == 'leader' else 'scene_mujoco.xml'
+    model_path = args.model or resource_path('assets/so101/'+scene)
     model = mujoco.MjModel.from_xml_path(str(model_path))
     data = mujoco.MjData(model)
     if tuple(model.joint(i).name for i in range(model.njnt)) != JOINTS:
@@ -229,7 +236,9 @@ def run(args):
                            "mjcf_sha256": hashlib.sha256(
                                (resource_path('assets/so101/so101.xml')).read_bytes()).hexdigest()}
             try:
-                calibration = AngleCalibration(args.calibration, fingerprint)
+                calibration = AngleCalibration(
+                    args.calibration, fingerprint,
+                    leader_trigger=bool(leader and leader.role == 'leader'))
             except ValueError as exc:
                 calibration_error = str(exc)
         print(json.dumps({"event": "connected", "worker_location": link.worker_location,
@@ -353,6 +362,7 @@ def run(args):
                     circle_startup.cancel()
                 if 49 <= key <= 54:
                     selected = key - 49
+                    reference_degrees = 0
                 elif age < 0.5 and args.hardware_control and key == 69:
                     jogs.clear()
                     link.send("enable_all")
@@ -370,8 +380,10 @@ def run(args):
                     link.send("reset" if key == 82 else "save_rest_pose")
                 elif args.backend == "hardware" and not args.hardware_control and key == 66:
                     calibration_mode = not calibration_mode
-                elif args.backend == "hardware" and calibration_mode and key == 82:
-                    reference_degrees = (reference_degrees + 30) % 90
+                elif args.backend == "hardware" and calibration_mode and key == 82 and calibration:
+                    references = calibration.reference_angles(JOINTS[selected])
+                    reference_degrees = references[(references.index(reference_degrees)
+                                                    + 1) % len(references)]
                 elif args.backend == "hardware" and calibration_mode and key == 67:
                     try:
                         if age >= 0.5 or calibration is None:
@@ -517,8 +529,14 @@ def run(args):
                                     for line in (mode + "\n" + detail).splitlines())
                 overlays = [(mujoco.mjtFontScale.mjFONTSCALE_100, None, display, "")]
                 if reference_renderer:
+                    references = (calibration.reference_angles(JOINTS[selected])
+                                  if calibration else (
+                        (0, 15, 30) if leader and leader.role == 'leader' and selected == 5
+                        else (0, 30, 60)))
+                    angles_text = '/'.join(map(str, references))
                     overlays.append((None, mujoco.mjtGridPos.mjGRID_BOTTOMLEFT,
-                                     "REFERENCE: other joints at zero; measure 0/30/60 deg", ""))
+                                     "REFERENCE: other joints at zero; "
+                                     f"measure {angles_text} deg", ""))
                 viewer.set_texts(overlays)
                 capture_path = getattr(args, 'screenshot', None) if not screenshot_saved else None
                 if capture_path:

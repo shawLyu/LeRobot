@@ -10,6 +10,7 @@ tests/test_angle_calibration.py
 tests/test_camera_runtime_calibration.py
 tests/test_circle_playback.py
 tests/test_control_timing.py
+tests/test_follow.py
 tests/test_manual_control.py
 tests/test_joint_path.py
 tests/test_parking.py
@@ -42,6 +43,7 @@ src/lerobot_arm_control/control/__init__.py
 src/lerobot_arm_control/control/control_defaults.py
 src/lerobot_arm_control/control/joint_path.py
 src/lerobot_arm_control/control/manual_control.py
+src/lerobot_arm_control/control/follow.py
 src/lerobot_arm_control/control/motion.py
 src/lerobot_arm_control/control/parking.py
 src/lerobot_arm_control/control/position_feedback.py
@@ -65,6 +67,7 @@ src/lerobot_arm_control/robot/so101/joints.py
 src/lerobot_arm_control/robot/so101/model_metadata.py
 src/lerobot_arm_control/runtime/__init__.py
 src/lerobot_arm_control/runtime/realtime_server.py
+src/lerobot_arm_control/runtime/follow_server.py
 src/lerobot_arm_control/runtime/tabletop_robot.py
 src/lerobot_arm_control/runtime/tabletop_server.py
 src/lerobot_arm_control/tasks/__init__.py

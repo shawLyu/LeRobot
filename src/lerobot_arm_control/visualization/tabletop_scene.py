@@ -7,6 +7,7 @@ from pathlib import Path
 
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.perception.tabletop_geometry import workspace_bounds
+from lerobot_arm_control.robot.so101.model_metadata import display_model
 
 ROOT = workspace_root()
 
@@ -148,14 +149,21 @@ def scene_xml(state, config, robot_mesh_dir=None):
         robot = ET.parse(resource_path('assets/so101/so101.xml')).getroot()
         root.append(deepcopy(robot.find("default")))
         mesh_dir = Path(robot_mesh_dir or resource_path('assets/so101/assets'))
-        for source in robot.find("asset"):
-            asset = deepcopy(source)
-            if asset.tag == "mesh":
-                # Preserve mesh names (MuJoCo would otherwise infer them from the new path).
-                asset.set("name", asset.get("name", Path(asset.get("file")).stem))
-                asset.set("file", str(mesh_dir / asset.get("file")))
-                assets.append(asset)
+        mesh_names = set()
         for arm in arms:
+            robot = ET.parse(display_model(arm['config'].get(
+                'simulation', {}).get('end_effector', 'gripper'))).getroot()
+            for source in robot.find('asset'):
+                if source.tag != 'mesh':
+                    continue
+                name = source.get('name', Path(source.get('file')).stem)
+                if name in mesh_names:
+                    continue
+                mesh_names.add(name)
+                asset = deepcopy(source)
+                asset.set('name', name)
+                asset.set('file', str(mesh_dir / asset.get('file')))
+                assets.append(asset)
             prefix = arm['prefix']
             materials = {}
             color = arm['config'].get('simulation', {}).get('plastic_rgb',

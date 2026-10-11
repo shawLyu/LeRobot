@@ -279,6 +279,9 @@
         "transform_validated": false,
         "source": "User-specified placement and canonical fixed-jaw CAD; photograph-inferred code axes"
       }
+    },
+    "simulation": {
+      "end_effector": "gripper"
     }
   },
   "capture_size": [
@@ -410,7 +413,9 @@
           0,
           0.6
         ],
-        "joint_pose_source": "unmeasured_preview"
+        "joint_pose_source": "unmeasured_preview",
+        "end_effector": "leader_handle",
+        "role": "leader"
       },
       "joint_calibration": "data/calibration/arm1_mujoco.json",
       "feedback_hz": 20,

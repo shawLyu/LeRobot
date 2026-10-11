@@ -62,6 +62,9 @@ Window rendering restores its own graphics context after every offscreen referen
 
 The default output becomes `data/calibration/arm1_mujoco.json`; this measurement entry
 does not copy or overwrite follower mappings. The same B / 1–6 / R / C procedure applies.
+The white leader window displays its acquisition handle and trigger. Joints 1–5
+retain 0/30/60° references; joint 6 uses measured 0/15/30° references because it
+is a short-travel trigger. The saved file preserves this convention independently.
 Additional arms use this entry for read-only alignment; physical-control and gripper-test
 flags are rejected. After 6/6 valid mappings and transfer to the remote host, the
 tabletop viewer switches from its explicit temporary follower mapping to white-arm

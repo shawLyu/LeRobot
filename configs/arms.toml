@@ -18,8 +18,8 @@ gripper = 6
 
 [arms.arm1]
 port = "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00"
-# The role of this second bus has not been confirmed.
-role = "unassigned"
+# White acquisition handle is the leader; motor 6 drives its trigger.
+role = "leader"
 model = "sts3215"
 baudrate = 1000000
 

@@ -780,6 +780,9 @@
           "transform_validated": false,
           "source": "User-specified placement and canonical fixed-jaw CAD; photograph-inferred code axes"
         }
+      },
+      "simulation": {
+        "end_effector": "gripper"
       }
     },
     "capture_size": [
@@ -911,7 +914,9 @@
             0,
             0.6
           ],
-          "joint_pose_source": "unmeasured_preview"
+          "joint_pose_source": "unmeasured_preview",
+          "end_effector": "leader_handle",
+          "role": "leader"
         },
         "joint_calibration": "data/calibration/arm1_mujoco.json",
         "feedback_hz": 20,
@@ -1309,7 +1314,7 @@
         "model": "so101",
         "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
       },
-      "reference_model": "assets/so101/scene_mujoco.xml",
+      "reference_model": "assets/so101/scene_leader.xml",
       "required_angles_deg": [
         0,
         30,
@@ -1323,13 +1328,19 @@
         "wrist_roll",
         "gripper"
       ],
-      "requires_physical_measurement": true
+      "requires_physical_measurement": true,
+      "trigger_reference_angles_deg": [
+        0,
+        15,
+        30
+      ],
+      "kinematic_reference_model": "assets/so101/so101.xml"
     }
   },
   "configuration_files": {
     "tabletop.json": {
       "file": "configs/tabletop.json",
-      "sha256": "a3849fa6c95d8a75fdd046116f6d32ecc178a89f033607f07083d9c841b73101"
+      "sha256": "67ada8d96c9115798af79f6f94d4126f87db24b3dfa548d2fc59a16f66570c6d"
     },
     "camera_intrinsics.json": {
       "file": "configs/camera_intrinsics.json",
@@ -1341,11 +1352,15 @@
     },
     "arms.toml": {
       "file": "configs/arms.toml",
-      "sha256": "9a9f4fc7685cce2b5892c5562f19411b040a04203db43c814cd3f7312193a095"
+      "sha256": "6ba33d989102a656ceb8b25e0485afc4e74af8f99cbd63f130b373d392ffab10"
     },
     "control.json": {
       "file": "configs/control.json",
       "sha256": "5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591"
+    },
+    "follow.json": {
+      "file": "configs/follow.json",
+      "sha256": "cbd679bf0e1c634f7c8f9ec4506b2bd5047d22bb7831ef57ad2f6a41fbc1aef2"
     }
   },
   "calibration_records": {
@@ -1394,7 +1409,47 @@
         30,
         60
       ],
-      "writes_motor_registers": false
+      "writes_motor_registers": false,
+      "trigger_reference_angles_deg": [
+        0,
+        15,
+        30
+      ]
     }
+  },
+  "model_geometry": {
+    "arm1": {
+      "role": "leader",
+      "end_effector": "acquisition_handle_and_trigger",
+      "model_file": "assets/so101/so101_leader.xml",
+      "sha256": "f03215af1f13da43609581e97674e050a25872e2d526e188fc824f825aeb4229",
+      "upstream_revision": "a758567c3978dfeefe282ede0500085a48fe8f78",
+      "trigger_limits_measured": false
+    },
+    "follower": {
+      "role": "follower",
+      "end_effector": "gripper",
+      "model_file": "assets/so101/so101.xml",
+      "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+    }
+  },
+  "follow_demo": {
+    "version": 1,
+    "leader": "arm1",
+    "follower": "follower",
+    "hz": 30,
+    "max_speed_rad_s": 0.6,
+    "max_sample_age_seconds": 0.25,
+    "leader_trigger_degrees": [
+      0,
+      45
+    ],
+    "follower_gripper_degrees": [
+      0,
+      90
+    ],
+    "trigger_range_measured": false,
+    "trigger_range_source": "TheRobotStudio SO101 leader URDF provisional CAD range; measure before hardware execution",
+    "simulation_shared_calibration": true
   }
 }

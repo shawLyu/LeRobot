@@ -60,6 +60,21 @@ def test_gripper_verification_starts_clear_of_calibrated_endpoints(tmp_path):
     calibration.check_gripper_test({"start_raw": 1800, "target_raw": 1832})
 
 
+def test_leader_trigger_uses_measured_0_15_30_degrees_and_restores_its_convention(tmp_path):
+    path = tmp_path/'leader.json'
+    calibration = AngleCalibration(path, {}, leader_trigger=True)
+    assert calibration.reference_angles('shoulder_pan') == (0, 30, 60)
+    assert calibration.reference_angles('gripper') == (0, 15, 30)
+    for degrees, raw in [(0, 2000), (15, 2171), (30, 2341)]:
+        calibration.capture('gripper', degrees, samples(raw))
+    restored = AngleCalibration(path, {})
+    assert restored.count() == 1
+    assert restored.reference_angles('gripper') == (0, 15, 30)
+    assert restored.fit('gripper')['radians_per_tick'] == pytest.approx(.001531, abs=1e-6)
+    with pytest.raises(ValueError, match='reference angles'):
+        restored.capture('gripper', 60, samples(2683))
+
+
 class ReadOnlyBus:
     values = {"Status": 0, "Present_Position": 2000,
               "Min_Position_Limit": 1000, "Max_Position_Limit": 3000}

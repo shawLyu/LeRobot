@@ -92,6 +92,25 @@ def test_original_calibrated_model_not_modified():
     assert saved["fingerprint"]["mjcf_sha256"] == actual
 
 
+def test_leader_trigger_mesh_uses_the_upstream_fixed_rpy_frame():
+    import math
+    import xml.etree.ElementTree as ET
+
+    leader = ET.parse(ROOT/'assets/so101/so101_leader.xml')
+    source = ET.parse(ROOT/'assets/so101/so101_leader_new_calib.urdf')
+    geom = leader.find(".//geom[@mesh='Trigger_SO101'][@class='visual']")
+    origin = source.find("link[@name='trigger_link']/visual/origin")
+    roll, pitch, yaw = map(float, origin.get('rpy').split())
+    cr, sr, cp, sp, cy, sy = (math.cos(roll), math.sin(roll), math.cos(pitch),
+                              math.sin(pitch), math.cos(yaw), math.sin(yaw))
+    expected = (np.array([[cy, -sy, 0], [sy, cy, 0], [0, 0, 1]]) @
+                np.array([[cp, 0, sp], [0, 1, 0], [-sp, 0, cp]]) @
+                np.array([[1, 0, 0], [0, cr, -sr], [0, sr, cr]]))
+    actual = np.empty(9)
+    mujoco.mju_quat2Mat(actual, np.fromstring(geom.get('quat'), sep=' '))
+    np.testing.assert_allclose(actual.reshape(3, 3), expected, atol=1e-10)
+
+
 def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(tmp_path):
     from lerobot_arm_control.visualization.tabletop_scene import scene_arms
 
@@ -107,7 +126,12 @@ def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(t
     path = tmp_path/'scene.xml'
     path.write_text(scene_xml(state, config))
     model = mujoco.MjModel.from_xml_path(str(path))
-    assert model.nq == 12 and model.nu == 0 and model.nmesh == 18
+    assert model.nq == 12 and model.nu == 0 and model.nmesh == 21
+    head = model.body('arm1__gripper').id
+    meshes = {model.mesh(int(index)).name for index in model.geom_dataid[
+        (model.geom_bodyid == head) & (model.geom_type == mujoco.mjtGeom.mjGEOM_MESH)]}
+    assert {'Handle_SO101', 'Wrist_Roll_SO101'} <= meshes
+    assert 'wrist_roll_follower_so101_v1' not in meshes
     data = mujoco.MjData(model)
     mujoco.mj_resetDataKeyframe(model, data, 0)
     mujoco.mj_forward(model, data)

@@ -60,9 +60,12 @@ def freeze_additional_arms(world, state, config):
     arms = [arm for arm in scene_arms(state, config) if arm['prefix']]
     if not arms:
         return
-    model = mujoco.MjModel.from_xml_path(str(resource_path('assets/so101/so101.xml')))
-    data = mujoco.MjData(model)
     for arm in arms:
+        from lerobot_arm_control.robot.so101.model_metadata import display_model
+
+        model = mujoco.MjModel.from_xml_path(str(display_model(
+            arm['config'].get('simulation', {}).get('end_effector', 'gripper'))))
+        data = mujoco.MjData(model)
         data.qpos[:] = arm['qpos']
         mujoco.mj_forward(model, data)
         root = world.find(f"body[@name='{arm['root']}']")

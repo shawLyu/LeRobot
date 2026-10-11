@@ -45,16 +45,19 @@ def validate_correction(saved, angles_hash, fingerprint):
 
 
 class AngleCalibration:
-    def __init__(self, path: Path, fingerprint: dict, *, use_kinematic=True):
+    def __init__(self, path: Path, fingerprint: dict, *, use_kinematic=True,
+                 leader_trigger=False):
         self.path = path
         self.fingerprint = fingerprint
         self.points = {joint: {} for joint in JOINTS}
         self.correction = None
+        self.leader_trigger = leader_trigger
         if path.exists():
             saved = json.loads(path.read_text())
             if saved.get("version") != 1 or saved.get("fingerprint") != fingerprint:
                 raise ValueError("Calibration identity/EEPROM changed; archive the old file first")
             self.points.update(saved["points"])
+            self.leader_trigger = saved.get('leader_trigger', False)
             correction_path = path.with_name(path.stem+'_kinematic.json')
             if use_kinematic and correction_path.exists():
                 correction = json.loads(correction_path.read_text())
@@ -69,20 +72,25 @@ class AngleCalibration:
                     raise ValueError('Kinematic correction base calibration changed')
                 self.correction = correction
 
+    def reference_angles(self, joint):
+        return (0, 15, 30) if self.leader_trigger and joint == 'gripper' else (0, 30, 60)
+
     def fit(self, joint):
         points = self.points[joint]
-        if any(str(degrees) not in points for degrees in (0, 30, 60)):
+        references = self.reference_angles(joint)
+        if any(str(degrees) not in points for degrees in references):
             return None
-        zero, thirty, sixty = [points[str(degrees)]["raw"] for degrees in (0, 30, 60)]
-        span = thirty - zero
-        expected = math.radians(30) * TICKS_PER_RADIAN
+        zero, middle, check = [points[str(degrees)]["raw"] for degrees in references]
+        span = middle - zero
+        expected = math.radians(references[1]) * TICKS_PER_RADIAN
         if not 0.9 * expected <= abs(span) <= 1.1 * expected:
-            raise ValueError(f"{joint}: 0/30 degree span inconsistent with STS3215 encoder")
-        scale = math.radians(30) / span
-        error = abs((sixty - zero) * scale - math.radians(60))
+            raise ValueError(f"{joint}: 0/{references[1]} degree span "
+                             "inconsistent with STS3215 encoder")
+        scale = math.radians(references[1]) / span
+        error = abs((check - zero) * scale - math.radians(references[2]))
         if error > math.radians(2):
             raise ValueError(
-                f"{joint}: independent 60 degree check error {math.degrees(error):.1f}"
+                f"{joint}: independent {references[2]} degree check error {math.degrees(error):.1f}"
             )
         offset = self.correction['offsets_rad'][joint] if self.correction else 0.
         scale = effective_scale(joint, scale, self.correction)
@@ -92,8 +100,8 @@ class AngleCalibration:
     def capture(self, joint, degrees, states):
         if self.correction:
             raise ValueError('Archive the kinematic correction before redoing manual angles')
-        if joint not in JOINTS or degrees not in (0, 30, 60):
-            raise ValueError("capture only the selected joint at 0, 30, or 60 degrees")
+        if joint not in JOINTS or degrees not in self.reference_angles(joint):
+            raise ValueError("capture only the selected joint at its reference angles")
         if len(states) < 9:
             raise ValueError("wait for nine live feedback samples")
         recent = states[-9:]
@@ -124,6 +132,7 @@ class AngleCalibration:
         temporary = self.path.with_suffix(".tmp")
         temporary.write_text(json.dumps({"version": 1, "model": "so101",
                                          "fingerprint": self.fingerprint,
+                                         "leader_trigger": self.leader_trigger,
                                          "points": self.points}, indent=2) + "\n")
         temporary.replace(self.path)
         return fit

@@ -17,7 +17,8 @@ def load_follow_config(path=None):
     if 'controller_profile' in config or 'hz' in config:
         raise ValueError('controller and frequency are shared in configs/control.json')
     config.update(controller_profile=CONTROL['name'], hz=CONTROL_HZ)
-    for name, low, high in (('hz', 1, 60), ('max_speed_rad_s', 0, 2),
+    for name, low, high in (('hz', 1, 60), ('entry_speed_rad_s', 0, 2),
+                            ('alignment_tolerance_degrees', 0, 2),
                             ('max_sample_age_seconds', 0, .5)):
         value = config[name]
         if type(value) not in (int, float) or not math.isfinite(value) or not low < value <= high:
@@ -85,6 +86,7 @@ class JointFollower:
         self.limits = limits or joint_ranges()
         self.target = self.validate(initial)
         self.holding = False
+        self.tracking = False
 
     @staticmethod
     def validate(qpos):
@@ -95,10 +97,12 @@ class JointFollower:
     def hold(self, measured):
         self.target = self.validate(measured)
         self.holding = True
+        self.tracking = False
 
     def resume(self, measured):
         self.target = self.validate(measured)
         self.holding = False
+        self.tracking = False
 
     def step(self, leader, elapsed, *, sample_age=0, map_trigger=True):
         desired = self.validate(leader)
@@ -114,9 +118,18 @@ class JointFollower:
             fraction = max(0, min(1, (desired[5]-low)/(high-low)))
             closed, opened = map(math.radians, self.config['follower_gripper_degrees'])
             desired[5] = closed+fraction*(opened-closed)
-        maximum = self.config['max_speed_rad_s']*min(elapsed, self.config['max_sample_age_seconds'])
-        for index, bounds in enumerate(self.limits):
-            goal = max(bounds[0], min(bounds[1], desired[index]))
-            previous = self.target[index]
-            self.target[index] = previous+max(-maximum, min(maximum, goal-previous))
+        desired = [max(lo, min(hi, q)) for q, (lo, hi) in zip(desired, self.limits, strict=True)]
+        # Slew only while aligning after startup/resume. Applying this ramp to
+        # every live action queues an ever older pose when the leader moves faster.
+        if map_trigger and all(abs(q-r) <= math.radians(self.config['alignment_tolerance_degrees'])
+                               for q, r in zip(desired, self.target, strict=True)):
+            self.tracking = True
+        if self.tracking and map_trigger:
+            self.target = desired
+        else:
+            maximum = self.config['entry_speed_rad_s']*min(
+                elapsed, self.config['max_sample_age_seconds'])
+            for index, goal in enumerate(desired):
+                previous = self.target[index]
+                self.target[index] = previous+max(-maximum, min(maximum, goal-previous))
         return list(self.target)

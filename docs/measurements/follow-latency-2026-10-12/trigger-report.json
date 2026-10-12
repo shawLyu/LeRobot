@@ -1,0 +1,141 @@
+{
+  "definition": "4 s moving-window delay fit from leader encoder to follower encoder; 100 ms bound includes worst encoder sampling interval",
+  "control_config_sha256": "97dbb83430eddeab1c288864e619f8322b4630d32343f40846b6ce3a0ec1e1bd",
+  "required_joints": [
+    "gripper"
+  ],
+  "joints": {
+    "shoulder_pan": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "shoulder_lift": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "elbow_flex": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "wrist_flex": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "wrist_roll": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "gripper": {
+      "windows": [
+        {
+          "start_seconds": 18.0,
+          "lag_ms": 18.0000000000001,
+          "signed_lag_ms": 18.0000000000001,
+          "gain": 1.0035011388162567,
+          "r_squared": 0.9994138458076869,
+          "valid": true,
+          "sampling_bound_ms": 17.20880693756044,
+          "upper_lag_ms": 35.20880693756054,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.2203382260096605
+        },
+        {
+          "start_seconds": 19.0,
+          "lag_ms": 12.000000000000094,
+          "signed_lag_ms": 12.000000000000094,
+          "gain": 1.009278223557319,
+          "r_squared": 0.998704456571085,
+          "valid": true,
+          "sampling_bound_ms": 17.20880693756044,
+          "upper_lag_ms": 29.20880693756053,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.2203382260096605
+        },
+        {
+          "start_seconds": 21.0,
+          "lag_ms": 10.000000000000092,
+          "signed_lag_ms": 10.000000000000092,
+          "gain": 1.0099455997910722,
+          "r_squared": 0.9992627371130912,
+          "valid": true,
+          "sampling_bound_ms": 17.082353006117046,
+          "upper_lag_ms": 27.08235300611714,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.9977480172951487
+        },
+        {
+          "start_seconds": 22.0,
+          "lag_ms": 12.000000000000094,
+          "signed_lag_ms": 12.000000000000094,
+          "gain": 1.0089573364742421,
+          "r_squared": 0.9992546993790444,
+          "valid": true,
+          "sampling_bound_ms": 17.082353006117046,
+          "upper_lag_ms": 29.08235300611714,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.0674199253348637
+        },
+        {
+          "start_seconds": 23.0,
+          "lag_ms": 14.000000000000096,
+          "signed_lag_ms": 14.000000000000096,
+          "gain": 1.005161985935973,
+          "r_squared": 0.9989810109347231,
+          "valid": true,
+          "sampling_bound_ms": 17.969983047805727,
+          "upper_lag_ms": 31.969983047805822,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.0674199253348637
+        },
+        {
+          "start_seconds": 24.0,
+          "lag_ms": 12.000000000000094,
+          "signed_lag_ms": 12.000000000000094,
+          "gain": 1.0122359025440062,
+          "r_squared": 0.9985223158484511,
+          "valid": true,
+          "sampling_bound_ms": 17.969983047805727,
+          "upper_lag_ms": 29.96998304780582,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.0674199253348637
+        },
+        {
+          "start_seconds": 25.0,
+          "lag_ms": 14.000000000000096,
+          "signed_lag_ms": 14.000000000000096,
+          "gain": 1.005329070218147,
+          "r_squared": 0.9995419489122036,
+          "valid": true,
+          "sampling_bound_ms": 17.969983047805727,
+          "upper_lag_ms": 31.969983047805822,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.9968479986020564
+        }
+      ],
+      "valid_windows": 7,
+      "worst_upper_lag_ms": 35.20880693756054,
+      "passed": true
+    }
+  },
+  "guided": true,
+  "sensor_to_command_ms": {
+    "p95": 5.749755760189146,
+    "max": 6.10629899892956
+  },
+  "passed": true,
+  "session_exit": {
+    "exit_reason": "latency_capture_completed",
+    "error": null,
+    "issues": []
+  }
+}

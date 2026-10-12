@@ -7,6 +7,8 @@ The remote Linux host handles USB cameras, perception, motor execution, and enco
 The default configuration belongs to the existing experimental setup. Offline demos can use the included snapshot. For another robot or camera, configure the devices and perform the relevant calibrations.
 Unless a section explicitly says **remote**, run its commands from the local project root.
 
+Latest: [six-motor physical following-latency verification](docs/measurements/follow-latency-2026-10-12/README.md), with per-motor curves, measured motion limits and reproducible commands.
+
 ## Source structure and entry point
 
 The system runs directly from this checkout. Code lives in the
@@ -485,7 +487,7 @@ The sole active motor control configuration is [configs/control.json](configs/co
 currently **shared-joint-pid-v1**: 60 Hz, bounded position PID with filtered measurement
 derivative and integral antiwindup. Manual control, Reset, circles, finite paths,
 leader/follower, Push-T and pick/place use the same algorithm and settings, including local simulation.
-RAM acceleration 40 and velocity 600 ticks/s are restored on exit; native P/I/D are retained.
+RAM acceleration 254 and velocity 3000 ticks/s are restored on exit; native P/I/D are retained.
 See the [control block diagram and PID design](docs/lerobot-control.md) and
 [six-motor response curves](docs/control-performance.md).
 Run `./scripts/lerobot-arm verify motors --backend hardware --execute` for a finite six-axis

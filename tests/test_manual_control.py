@@ -61,7 +61,7 @@ def step(bus, control, now, elapsed):
 def test_shared_pid_enables_unlocked_servos_without_p_or_eeprom_writes():
     bus, now = Bus(), [0.0]
     for registers in bus.registers.values():
-        registers.update(Lock=0, Acceleration=254)
+        registers.update(Lock=0, Acceleration=40)
     originals = {joint: dict(registers) for joint, registers in bus.registers.items()}
     control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
                             {name: [1000, 3000] for name in JOINTS},
@@ -95,8 +95,8 @@ def test_enable_replaces_stale_goal_before_torque_and_only_selected_joint(setup)
     bus, control, _ = setup
     control.enable("gripper")
     assert bus.writes == [("Goal_Position", "gripper", 2200),
-                          ("Acceleration", "gripper", 40),
-                          ("Goal_Velocity", "gripper", 600), ("Torque_Enable", "gripper", 1)]
+                          ("Acceleration", "gripper", 254),
+                          ("Goal_Velocity", "gripper", 1000), ("Torque_Enable", "gripper", 1)]
     assert control.status()["enabled"] == ["gripper"]
     assert control.status()["error_rad"]["gripper"] == 0
 
@@ -246,8 +246,9 @@ def test_streaming_target_keeps_sub_tick_motion_with_bounded_pid_damping(setup):
         assert control.targets["gripper"] == target
         # At 0.09 rad/s the derivative damps by about 0.0009 rad;
         # quantization is at most another half encoder tick (0.00075 rad).
-        assert abs(control.command_angles["gripper"] - target) < .003
-        assert abs(control.angle("gripper", control.sent["gripper"]) - target) < .003
+        lead = .09*CONTROL["position_feedback"]["joints"]["gripper"]["velocity_feedforward_s"]
+        assert abs(control.command_angles["gripper"] - target) <= lead+.003
+        assert abs(control.angle("gripper", control.sent["gripper"]) - target) <= lead+.003
     assert control.command_angles["gripper"] > .385
 
 

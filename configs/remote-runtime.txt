@@ -86,3 +86,5 @@ src/lerobot_arm_control/core/api.py
 src/lerobot_arm_control/core/files.py
 src/lerobot_arm_control/diagnostics/response_metrics.py
 tests/test_response_metrics.py
+src/lerobot_arm_control/transport/latest_output.py
+tests/test_latest_output.py

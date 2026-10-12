@@ -1,0 +1,146 @@
+{
+  "definition": "4 s moving-window delay fit from leader encoder to follower encoder; 100 ms bound includes worst encoder sampling interval",
+  "control_config_sha256": "97dbb83430eddeab1c288864e619f8322b4630d32343f40846b6ce3a0ec1e1bd",
+  "required_joints": [
+    "wrist_roll"
+  ],
+  "joints": {
+    "shoulder_pan": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "shoulder_lift": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "elbow_flex": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "wrist_flex": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "wrist_roll": {
+      "windows": [
+        {
+          "start_seconds": 13.0,
+          "lag_ms": 40.00000000000012,
+          "signed_lag_ms": 40.00000000000012,
+          "gain": 1.0225297492671204,
+          "r_squared": 0.999631340563461,
+          "valid": true,
+          "sampling_bound_ms": 17.015347024425864,
+          "upper_lag_ms": 57.015347024425985,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.4823187736998364
+        },
+        {
+          "start_seconds": 14.0,
+          "lag_ms": 44.00000000000012,
+          "signed_lag_ms": 44.00000000000012,
+          "gain": 1.0277599599351797,
+          "r_squared": 0.9988987113958586,
+          "valid": true,
+          "sampling_bound_ms": 17.219376051798463,
+          "upper_lag_ms": 61.219376051798584,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.5790158282649527
+        },
+        {
+          "start_seconds": 15.0,
+          "lag_ms": 42.00000000000012,
+          "signed_lag_ms": 42.00000000000012,
+          "gain": 1.037223450874851,
+          "r_squared": 0.9974369804146732,
+          "valid": true,
+          "sampling_bound_ms": 17.219376051798463,
+          "upper_lag_ms": 59.219376051798584,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.5790158282649527
+        },
+        {
+          "start_seconds": 16.0,
+          "lag_ms": 42.00000000000012,
+          "signed_lag_ms": 42.00000000000012,
+          "gain": 1.043532172659156,
+          "r_squared": 0.9970584045231222,
+          "valid": true,
+          "sampling_bound_ms": 17.419392941519618,
+          "upper_lag_ms": 59.41939294151974,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.5790158282649527
+        },
+        {
+          "start_seconds": 17.0,
+          "lag_ms": 38.000000000000114,
+          "signed_lag_ms": 38.000000000000114,
+          "gain": 1.052062272790572,
+          "r_squared": 0.9923547908191986,
+          "valid": true,
+          "sampling_bound_ms": 17.419392941519618,
+          "upper_lag_ms": 55.41939294151973,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.4001670130921586
+        },
+        {
+          "start_seconds": 18.0,
+          "lag_ms": 36.000000000000114,
+          "signed_lag_ms": 36.000000000000114,
+          "gain": 1.0690040820875855,
+          "r_squared": 0.9876739898863701,
+          "valid": true,
+          "sampling_bound_ms": 17.527216929011047,
+          "upper_lag_ms": 53.52721692901116,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.8411572227188606
+        },
+        {
+          "start_seconds": 19.0,
+          "lag_ms": 58.000000000000135,
+          "signed_lag_ms": 58.000000000000135,
+          "gain": 1.0807187446994735,
+          "r_squared": 0.9910145957690291,
+          "valid": true,
+          "sampling_bound_ms": 17.527216929011047,
+          "upper_lag_ms": 75.52721692901119,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 3.3225805191986146
+        }
+      ],
+      "valid_windows": 7,
+      "worst_upper_lag_ms": 75.52721692901119,
+      "passed": true
+    },
+    "gripper": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    }
+  },
+  "guided": true,
+  "sensor_to_command_ms": {
+    "p95": 5.797899444587529,
+    "max": 6.177459028549492
+  },
+  "passed": true,
+  "session_exit": {
+    "exit_reason": "window_closed",
+    "error": "Failed to read 'Status' on id_=6 after 1 tries. [RxPacketError] Input voltage error!",
+    "issues": [
+      {
+        "time_seconds": 32.049376250011846,
+        "error": "Failed to read 'Status' on id_=6 after 1 tries. [RxPacketError] Input voltage error!"
+      }
+    ]
+  }
+}

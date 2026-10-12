@@ -6,6 +6,7 @@ import math
 import queue
 import threading
 import time
+from collections import deque
 from contextlib import ExitStack
 from pathlib import Path
 
@@ -22,8 +23,15 @@ from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.driver import connected
 from lerobot_arm_control.robot.so101.model_metadata import MODEL, joint_ranges
-from lerobot_arm_control.runtime.realtime_server import next_deadline, receive, send
+from lerobot_arm_control.runtime.realtime_server import (
+    defer_cyclic_gc,
+    next_deadline,
+    receive,
+    save_control_trace,
+    send,
+)
 from lerobot_arm_control.runtime.tabletop_robot import calibration_identity
+from lerobot_arm_control.transport.latest_output import LatestOutput
 from lerobot_arm_control.transport.realtime import JOINTS, VERSION, WATCHDOG_SECONDS
 
 
@@ -47,6 +55,16 @@ def angles(raw, fits):
             for joint in JOINTS]
 
 
+
+def read_leader_status(bus):
+    """Confirm bulk flags independently, as on the follower, without motor writes."""
+    status = bus.sync_read('Status', normalize=False)
+    for joint, value in status.items():
+        if value:
+            status[joint] = int(bus.read('Status', joint, normalize=False))
+    return status
+
+
 def serve(args):
     config = load_follow_config(args.config)
     arms = load_arms()
@@ -55,6 +73,13 @@ def serve(args):
         raise ValueError('follow roles must match configs/arms.toml')
     commands, disconnected = queue.Queue(maxsize=16), threading.Event()
     with ExitStack() as stack:
+        trace = deque(maxlen=36000)
+        metadata = {'follow_config': config}
+        trace_path = getattr(args, 'control_log', None)
+        if trace_path:
+            stack.callback(save_control_trace, trace_path, trace, (), metadata)
+        defer_cyclic_gc(stack)
+        publish = stack.enter_context(LatestOutput(send, disconnected))
         leader_bus = stack.enter_context(connected(leader))
         follower_bus = stack.enter_context(connected(follower))
         calibration, follower_metadata = calibrated_mapping(follower, follower_bus)
@@ -70,6 +95,7 @@ def serve(args):
                                'source_arm': follower.name,
                                'source_sha256': follower_metadata['sha256'],
                                'fingerprint': calibration_identity(leader_bus, leader, MODEL)}
+        metadata.update(leader=leader_metadata, follower=follower_metadata)
         if args.hardware_control and config['trigger_range_measured'] is not True:
             raise ValueError('Measure leader trigger travel and set '
                              'trigger_range_measured=true before execution')
@@ -87,11 +113,12 @@ def serve(args):
             if any(low >= high for low, high in limits):
                 raise ValueError('follower has no usable calibrated motion range')
         mapping = JointFollower(config, measured, limits)
+        measurement_joint = None
         active = not args.hardware_control
         initialize_to, initialization_started, command_error = None, 0, None
         if not active:
             mapping.hold(measured)
-        send({'type': 'hello', 'backend': 'hardware', 'joints': JOINTS,
+        publish({'type': 'hello', 'backend': 'hardware', 'joints': JOINTS,
               'hardware_control': args.hardware_control,
               'control_config_sha256': CONTROL_CONFIG_SHA256,
               'config': config, 'leader': leader_metadata, 'follower': follower_metadata})
@@ -113,6 +140,10 @@ def serve(args):
                         heartbeat = max(heartbeat, received)
                         if controller:
                             controller.heartbeat()
+                    elif op == 'mark':
+                        if command.get('joint') not in JOINTS:
+                            raise ValueError('invalid measurement joint')
+                        measurement_joint = command['joint']
                     elif op == 'hold':
                         active = False
                         command_error = None
@@ -127,7 +158,7 @@ def serve(args):
                                 'Present_Position', normalize=False), follower_fits)
                             goal = initialization_target(config, measured, limits,
                                                          controller.limits)
-                            if any(leader_bus.sync_read('Status', normalize=False).values()):
+                            if any(read_leader_status(leader_bus).values()):
                                 raise ValueError('leader motor fault; cannot initialize')
                             controller.enable_all()
                             initialize_to = goal if goal != measured else None
@@ -140,7 +171,7 @@ def serve(args):
                                   if initialize_to else 'Following')
                     else:
                         raise ValueError('unknown follow command')
-                    send({'type': 'ack', 'id': command['id'], 'op': op, 'ok': True})
+                    publish({'type': 'ack', 'id': command['id'], 'op': op, 'ok': True})
                 except (ValueError, RuntimeError) as exc:
                     active = False
                     initialize_to = None
@@ -148,17 +179,20 @@ def serve(args):
                     notice = command_error = str(exc)
                     if controller:
                         controller.stop('follow command failed: hold')
-                    send({'type': 'ack', 'id': command.get('id'), 'ok': False, 'error': str(exc)})
+                    publish({'type': 'ack', 'id': command.get('id'),
+                             'ok': False, 'error': str(exc)})
             sampled = time.monotonic()
             leader_raw = leader_bus.sync_read('Present_Position', normalize=False)
+            leader_sampled = time.monotonic()
             leader_qpos = angles(leader_raw, leader_fits)
-            leader_status = leader_bus.sync_read('Status', normalize=False)
+            leader_status = read_leader_status(leader_bus)
             if controller:
                 telemetry = read_control_feedback(follower_bus)
                 raw = telemetry.pop('Present_Position')
             else:
                 raw = follower_bus.sync_read('Present_Position', normalize=False)
                 telemetry = {}
+            follower_sampled = time.monotonic()
             measured = angles(raw, follower_fits)
             now = time.monotonic()
             stale = (now-sampled > config['max_sample_age_seconds']
@@ -201,11 +235,30 @@ def serve(args):
                     initialize_to = None
                     mapping.hold(measured)
                     notice = command_error or 'Follower held: '+str(controller.stopped)
-            send({'type': 'state', 'seq': sequence, 'time_unix_ns': time.time_ns(),
+            command_sent = time.monotonic()
+            stage = ('initializing' if initialize_to is not None else
+                     'following' if active and mapping.tracking else
+                     'aligning' if active else 'held')
+            if stage == 'aligning':
+                notice = 'Aligning slowly to leader; then live tracking; Space holds'
+            elif stage == 'following':
+                notice = 'Following live leader'
+            if trace_path:
+                trace.append({'seq': sequence, 'leader_time': leader_sampled,
+                              'measurement_joint': measurement_joint,
+                              'follower_time': follower_sampled, 'command_time': command_sent,
+                              'leader': list(leader_qpos), 'actual': list(measured),
+                              'reference': list(target),
+                              'command': [controller.command_angles.get(j, measured[i])
+                                          for i, j in enumerate(JOINTS)] if controller else target,
+                              'stage': stage,
+                              'sample_ms': (now-sampled)*1000,
+                              'sensor_to_command_ms': (command_sent-leader_sampled)*1000})
+            publish({'type': 'state', 'seq': sequence, 'time_unix_ns': time.time_ns(),
                   'raw': raw, 'qpos': measured, 'leader_qpos': leader_qpos,
-                  'target_qpos': target, 'following': active and initialize_to is None,
-                  'stage': ('initializing' if initialize_to is not None else
-                            'following' if active else 'held'), 'notice': notice,
+                  'target_qpos': target,
+                  'following': active and initialize_to is None and mapping.tracking,
+                  'stage': stage, 'notice': notice,
                   'command_error': command_error,
                   'leader_status': leader_status, 'sample_age_ms': (now-sampled)*1000,
                   'heartbeat_age_ms': (now-heartbeat)*1000,
@@ -221,6 +274,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path)
     parser.add_argument('--hardware-control', action='store_true')
+    parser.add_argument('--control-log', type=Path)
     args = parser.parse_args()
     try:
         serve(args)

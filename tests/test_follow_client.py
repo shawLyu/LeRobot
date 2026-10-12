@@ -20,6 +20,7 @@ def test_real_following_is_default_and_simulation_is_explicit(monkeypatch, argum
 
 
 @pytest.mark.parametrize('arguments', [['--execute', '--simulate'], ['--headless'],
+                                     ['--latency-test', '--simulate'],
                                      ['--source', 'synthetic', '--execute']])
 def test_invalid_follow_modes_fail_before_starting_a_worker(monkeypatch, arguments):
     import sys
@@ -126,3 +127,16 @@ def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
         assert result['error']
 
 
+
+
+def test_latency_capture_allocates_remote_trace_and_keeps_real_control(monkeypatch):
+    import sys
+
+    from lerobot_arm_control.runtime import follow_client
+
+    captured = []
+    monkeypatch.setattr(sys, 'argv', ['follow', '--latency-test'])
+    monkeypatch.setattr(follow_client, 'run', captured.append)
+    follow_client.main()
+    assert captured[0].execute
+    assert captured[0].control_log.startswith(captured[0].remote_root+'/logs/follow-latency-')

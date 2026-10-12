@@ -25,6 +25,8 @@ class SimulationControl:
             self.actuators.append(matching[0])
         # Use one explicit approximation of the native inner loop in every
         # scene. This changes compiled dynamics, never the calibrated MJCF file.
+        # kv/kp approximates the measured low-frequency servo lag. An idealized
+        # fast actuator would turn the shared velocity lead into physical overshoot.
         kp, kv = SIMULATION_ACTUATOR['kp'], SIMULATION_ACTUATOR['kv']
         for a in self.actuators:
             model.actuator_gainprm[a, 0] = kp

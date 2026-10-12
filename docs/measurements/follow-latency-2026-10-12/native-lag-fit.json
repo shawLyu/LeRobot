@@ -1,0 +1,90 @@
+{
+  "source": "hardware-step-result.json.gz",
+  "method": "Unweighted least-squares first-order response plus delay, first 0.5 s of each step; q[k]=q[k-1]+(u(t[k-1]-delay)-q[k-1])*(1-exp(-dt/tau)); tau grid 10..150 ms / 2 ms; delay 0..80 ms / 5 ms; no static-gain fit; approximate diagnostic, not a complete actuator identification",
+  "joints": {
+    "shoulder_pan": [
+      {
+        "direction": "out",
+        "tau_ms": 32.0,
+        "delay_ms": 55.0,
+        "rms_deg": 0.14029199358615901
+      },
+      {
+        "direction": "return",
+        "tau_ms": 30.0,
+        "delay_ms": 55.0,
+        "rms_deg": 0.14476036726357808
+      }
+    ],
+    "shoulder_lift": [
+      {
+        "direction": "out",
+        "tau_ms": 16.0,
+        "delay_ms": 50.0,
+        "rms_deg": 0.2603048577628612
+      },
+      {
+        "direction": "return",
+        "tau_ms": 30.0,
+        "delay_ms": 45.0,
+        "rms_deg": 0.27131695587598154
+      }
+    ],
+    "elbow_flex": [
+      {
+        "direction": "out",
+        "tau_ms": 140.0,
+        "delay_ms": 0.0,
+        "rms_deg": 0.6037127921740573
+      },
+      {
+        "direction": "return",
+        "tau_ms": 24.0,
+        "delay_ms": 50.0,
+        "rms_deg": 0.14844435212809695
+      }
+    ],
+    "wrist_flex": [
+      {
+        "direction": "out",
+        "tau_ms": 24.0,
+        "delay_ms": 45.0,
+        "rms_deg": 0.2254188766461075
+      },
+      {
+        "direction": "return",
+        "tau_ms": 38.0,
+        "delay_ms": 50.0,
+        "rms_deg": 0.27562792420517007
+      }
+    ],
+    "wrist_roll": [
+      {
+        "direction": "out",
+        "tau_ms": 48.0,
+        "delay_ms": 50.0,
+        "rms_deg": 0.2849912741688156
+      },
+      {
+        "direction": "return",
+        "tau_ms": 50.0,
+        "delay_ms": 40.0,
+        "rms_deg": 0.10745527790602394
+      }
+    ],
+    "gripper": [
+      {
+        "direction": "out",
+        "tau_ms": 28.0,
+        "delay_ms": 55.0,
+        "rms_deg": 0.11843152401743301
+      },
+      {
+        "direction": "return",
+        "tau_ms": 44.0,
+        "delay_ms": 35.0,
+        "rms_deg": 0.12162038368882637
+      }
+    ]
+  }
+}

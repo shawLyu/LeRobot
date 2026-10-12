@@ -1218,11 +1218,11 @@
     },
     "control.json": {
       "file": "configs/control.json",
-      "sha256": "45030baf423cc4f8069fcfc1c343c2f511f3eea247ab33f6d24044e35e52fc1f"
+      "sha256": "3ab417ffb21a34849e78ad94e8e01360cd643d6ae79d035da773990b8df2c718"
     },
     "follow.json": {
       "file": "configs/follow.json",
-      "sha256": "626a268d0df7bfa4754f006aad399c08861f409580377e877e845dbcd0017ce2"
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81"
     }
   },
   "calibration_records": {
@@ -1323,7 +1323,6 @@
     "version": 1,
     "leader": "arm1",
     "follower": "follower",
-    "max_speed_rad_s": 0.6,
     "max_sample_age_seconds": 0.25,
     "leader_trigger_degrees": [
       0,
@@ -1344,6 +1343,8 @@
       "timeout_seconds": 5,
       "auto_start": true
     },
+    "entry_speed_rad_s": 0.6,
+    "alignment_tolerance_degrees": 2,
     "controller_profile": "shared-joint-pid-v1",
     "hz": 60
   },
@@ -1358,6 +1359,9 @@
       "status": "restored_to_accepted_calibration",
       "evidence": "docs/measurements/pid-2026-10-12/arm1-configuration-restoration.json",
       "leader_torque_enabled": false
-    }
+    },
+    "latency_update": "Slow startup alignment, latest live targets, bounded 80 ms velocity feedforward with 15 ms reference filtering; native acceleration 254 and velocity 3000 ticks/s; display output isolated",
+    "latency_evidence": "docs/measurements/follow-latency-2026-10-12/summary.json",
+    "simulation_inner_loop": "kp=700, kv=56; approximately 80 ms effective lag, shared outer PID unchanged"
   }
 }

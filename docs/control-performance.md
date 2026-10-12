@@ -1,8 +1,20 @@
 # Control performance and verification
 
-## Shared PID: six physical motors (2026-10-12)
+## Current low-latency controller (2026-10-12)
 
-The active profile is `shared-joint-pid-v1`. All normal demos use its 60 Hz software
+The current six-motor encoder-following result is **35.2–75.5 ms**, including the
+maximum sampling interval in each accepted window. This combines three explicit
+joint-by-joint captures with identical hardware settings; high-speed failures and
+one later worker fault are retained in the record. See the [complete report and
+six response curves](measurements/follow-latency-2026-10-12/README.md) for the motion
+range, RMS tracking error, all raw traces, exact configuration and limitations.
+The final hardware and MuJoCo twelve-step response tests both pass. Native RAM
+restoration is verified. Simulation uses the same outer PID and a revised inner
+actuator approximation (kp=700, kv=56); no real servo register uses these model gains.
+
+## Historical initial PID acceptance (earlier on 2026-10-12)
+
+The initial profile was also named `shared-joint-pid-v1`; its configuration hash below identifies this earlier tuning. All normal demos use its 60 Hz software
 position PID around the existing native position loop; simulation uses the same PID.
 See [the control diagram and design](lerobot-control.md).
 
@@ -43,7 +55,7 @@ an engineering tuning comparison, not a controlled identification experiment.
 - [Complete report and all six-channel samples (gzip JSON)](measurements/pid-2026-10-12/hardware-result.json.gz)
 - [Original full-rate remote trace (gzip JSON)](measurements/pid-2026-10-12/hardware-control.json.gz)
 
-## Simulation and regression checks
+## Earlier simulation and regression checks
 
 The same twelve small-step responses pass in MuJoCo. Its inner actuator approximation
 (kp=700, kv=12) is shared across scenes; these are model parameters, not hardware PID registers.

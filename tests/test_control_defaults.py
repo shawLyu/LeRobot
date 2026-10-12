@@ -63,8 +63,8 @@ def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
     assert circle.period == 4
     # The shared enable path restores the previous RAM values.
     manual.enable_all()
-    assert set(bus.sync_read("Acceleration").values()) == {40}
-    assert set(bus.sync_read("Goal_Velocity").values()) == {600}
+    assert set(bus.sync_read("Acceleration").values()) == {254}
+    assert set(bus.sync_read("Goal_Velocity").values()) == {1000}
     assert set(bus.sync_read('P_Coefficient').values()) == {16}
     manual.close()
     assert set(bus.sync_read("Acceleration").values()) == {0}

@@ -5,14 +5,14 @@
 真机由 `ManualControl` 执行，MuJoCo 由 `SimulationControl` 执行。
 场景、路径规划、主从角度映射负责生成目标，不再选择另一套电机控制器。
 
-![统一 PID 控制框图](figures/shared-pid-control.png)
+![PID 反馈核心控制框图](figures/shared-pid-control.png)
 
-可下载 [SVG](figures/shared-pid-control.svg) / [PDF](figures/shared-pid-control.pdf)。
+可下载 [SVG](figures/shared-pid-control.svg) / [PDF](figures/shared-pid-control.pdf)。图示为 PID 反馈核心；当前完整命令还包含下述参考速度前馈分支。
 
 ## 闭环结构
 
 白臂是无主动驱动的输入设备。其独立标定将编码器读数转换为角度，
-主从映射将扳机的 0–118° 映射至黑臂夹爪的 0–90°，目标变化率保持 0.6 rad/s。
+主从映射将扳机的 0–118° 映射至黑臂夹爪的 0–90°，启动/恢复对齐阶段使用 0.6 rad/s；对齐后每周期直接采用最新目标。
 黑臂六个电机各运行一个位置 PID 外环，并由已有舵机内部位置控制执行命令。
 所有内部计算使用标定后的 rad，图表转换为 deg。
 
@@ -23,8 +23,10 @@ e       = deadband(q_ref - q)
 e_f     = lowpass(e, tau_error)
 omega_f = lowpass((q[k] - q[k-1]) / actual_dt, tau_D)
 I_next  = I + Ki * e_f * dt
-u       = Kp * e_f + I - Kd * omega_f
-q_cmd   = q_ref + bounded_correction(u)
+u_pid   = slew(Kp * e_f + I - Kd * omega_f, pid_rate)
+v_ref   = lowpass((q_ref[k] - q_ref[k-1]) / actual_dt, 0.015 s)
+u_ff    = slew(0.08 s * v_ref if continuous_motion else 0, 4 rad/s)
+q_cmd   = clip(q_ref + bounded_correction(u_pid + u_ff), joint_limits)
 ```
 
 `q_ref` 是名义位置前馈。D 对测量微分，目标阶跃不会产生微分冲击。
@@ -32,17 +34,17 @@ q_cmd   = q_ref + bounded_correction(u)
 积分在补偿幅值或物理边界饱和且误差继续推向边界时冻结，反向误差允许积分释放。
 输出补偿另有变化率限制。相邻轨迹的正常驻留保留已学到的负载补偿；
 重新使能、显式保持、故障和复位会清空相关 PID 状态。
-超过 100 ms 的单次控制间隔冻结积分并清除速度估计，补偿积分步长最多 50 ms。
+超过 100 ms 的单次控制间隔冻结积分并清除测量速度估计，补偿积分步长最多 50 ms。
 通信看门狗仍独立工作；恢复通信后需要明确恢复控制。
 
-| 关节 | Kp | Ki (1/s) | Kd (s) | 补偿上限 (rad) | 补偿变化率 (rad/s) |
+| 关节 | Kp | Ki (1/s) | Kd (s) | 总补偿上限 (rad) | PID 反馈变化率 (rad/s) |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| shoulder_pan | 0.20 | 1.50 | 0.02 | 0.12 | 0.24 |
-| shoulder_lift | 0.25 | 1.50 | 0.02 | 0.12 | 0.24 |
-| elbow_flex | 0.25 | 1.50 | 0.02 | 0.12 | 0.24 |
-| wrist_flex | 0.25 | 1.50 | 0.02 | 0.12 | 0.24 |
-| wrist_roll | 0.25 | 1.50 | 0.02 | 0.12 | 0.24 |
-| gripper | 0.50 | 0.80 | 0.01 | 0.05 | 0.04 |
+| shoulder_pan | 0.20 | 1.50 | 0.02 | 0.20 | 0.24 |
+| shoulder_lift | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
+| elbow_flex | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
+| wrist_flex | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
+| wrist_roll | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
+| gripper | 0.50 | 0.80 | 0.01 | 0.12 | 0.04 |
 
 D 滤波时间常数均为 80 ms；误差滤波为前五轴 80 ms、夹爪 120 ms。
 死区为 pan/wrist_flex/wrist_roll 0.0015 rad，lift/elbow/gripper 0.003 rad。
@@ -56,13 +58,13 @@ D 滤波时间常数均为 80 ms；误差滤波为前五轴 80 ms、夹爪 120 m
 原生位置环、驱动和机械负载共同构成外环的被控对象。
 
 使能前写入并核对当前角度的保持目标，再开启力矩。所有正常运动入口使用 RAM
-Acceleration=40、Goal_Velocity=600 ticks/s，并在退出/释放时恢复使能前值。
+Acceleration=254、Goal_Velocity=3000 ticks/s，并在退出/释放时恢复使能前值。
 **原生 P/I/D、EEPROM、工作模式、限位和保护参数不被这套软件 PID 改写。**
 `native_defaults` 中 P=16/I=0/D=32 是上游版本参考值，不能作为现场实际读数。
 本次现场 P 为 32/48/80/48/32/32，测试报告记录实际值。
 
 MuJoCo 使用相同的 PID 算法、频率和配置，但内部位置执行器、摩擦、负载和通信延迟
-并不等价于真机。所有仿真场景的内部位置执行器统一为 kp=700、kv=12，
+并不等价于真机。所有仿真场景的内部位置执行器统一为 kp=700、kv=56，
 由 `simulation_actuator` 配置，力矩上限沿用各场景模型；这些数值不是舵机寄存器值。
 只修改编译后的 MuJoCo 模型，不改动标定绑定的原始 MJCF。
 不能把仿真阶跃结果当作电机实测结果。
@@ -100,3 +102,24 @@ MuJoCo 使用相同的 PID 算法、频率和配置，但内部位置执行器�
 参考：上游 [SO follower](https://github.com/huggingface/lerobot/blob/main/src/lerobot/robots/so_follower/so_follower.py)、
 [Feetech 寄存器表](https://github.com/huggingface/lerobot/blob/main/src/lerobot/motors/feetech/tables.py)、
 [ST3215 文档](https://www.waveshare.com/wiki/ST3215_Servo)。
+
+
+## 2026-10-12 低延迟跟随更新
+
+启动或恢复时先缓慢对齐；名义目标与映射后的主臂角度均相差不超过 2° 后，
+每个周期直接采用最新目标，避免 0.6 rad/s 限速持续积累位置滞后。
+硬件仍受模型/编码器行程和舵机自身速度上限约束。
+
+共享 PID 增加 80 ms 速度前馈：根据连续参考角度的变化估算速度，以 15 ms 一阶滤波降噪。
+只有连续两个同向移动样本才启用；单次位置阶跃不会产生前馈冲击，停止/反向会取消新的预测请求，已有前馈按变化率限制消退。
+PID 反馈修正仍使用原先的缓慢变化率；前馈采用独立的 4 rad/s 变化率，
+与 PID 相加后的修正仍受同一幅度边界及编码器行程限制。暂停/重新使能清除前馈状态。
+
+所有 demo 共用同一配置；修改的是运行期 RAM 加速度和速度，退出恢复原值。
+原生 P/I/D、EEPROM 和实测角度标定未改变。
+
+显示状态通过独立发送线程传输；状态只保留最新帧，确认消息保持顺序。SSH 输出阻塞不会阻塞电机控制周期；客户端心跳及断连保持机制继续有效。
+
+仿真内环的 kv/kp 约为 80 ms，用于近似实测舵机的低频响应，避免将真机前馈应用到过快的理想执行器。
+这只是内环模型近似，不是硬件寄存器或完整系统辨识。抓取和 Push-T 的预测、执行使用相同控制状态与参数。
+六电机最新实测曲线、各次失败记录及参数指纹见[低延迟验收](measurements/follow-latency-2026-10-12/README.md)。

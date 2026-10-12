@@ -1,0 +1,548 @@
+{
+  "verified_at_unix_ns": 1791817276318669936,
+  "files": {
+    "assets/so101/so101.xml": {
+      "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+      "matches": true
+    },
+    "configs/control.json": {
+      "sha256": "3ab417ffb21a34849e78ad94e8e01360cd643d6ae79d035da773990b8df2c718",
+      "matches": true
+    },
+    "configs/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "configs/remote-runtime.txt": {
+      "sha256": "704ea2f46b966fb12625f223d0edf380cd0f04e468d4bf187d4cd9990c38f040",
+      "matches": true
+    },
+    "configs/scenes/tabletop-current.json": {
+      "sha256": "3028dc383fa3cc27360481531a1cac28f04ed1ba40c5c68afc43bf87cce14eda",
+      "matches": true
+    },
+    "data/README.md": {
+      "sha256": "0a443e1d2a6df5bacc335c28f48266d445ceff90325b2fd7ba967dfb69be907e",
+      "matches": true
+    },
+    "data/calibration/arm1_mujoco.json": {
+      "sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "matches": true
+    },
+    "data/calibration/follower_mujoco.json": {
+      "sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "matches": true
+    },
+    "data/tabletop/current-scene/configs/control.json": {
+      "sha256": "3ab417ffb21a34849e78ad94e8e01360cd643d6ae79d035da773990b8df2c718",
+      "matches": true
+    },
+    "data/tabletop/current-scene/configs/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "data/tabletop/current-scene/scene_parameters.json": {
+      "sha256": "3028dc383fa3cc27360481531a1cac28f04ed1ba40c5c68afc43bf87cce14eda",
+      "matches": true
+    },
+    "data/trajectories/circle.json": {
+      "sha256": "eeacded7c954b389e190a925ce28a52680dbade033bf0023a6ad6038d8eaba09",
+      "matches": true
+    },
+    "scripts/activate.sh": {
+      "sha256": "369eb4407916e57ba2e639714ff30e150211f14e4f61729f846f0723b4c3371e",
+      "matches": true
+    },
+    "scripts/bootstrap.sh": {
+      "sha256": "6e872467fd4b73268a0b1ea42a60963d42111f69fb6b0695310649ac491e12b7",
+      "matches": true
+    },
+    "scripts/camera_x11.py": {
+      "sha256": "1c8819262b8e9a458d1a9c3f09673ab82bc79a9269888c39848cf1c3342a3a07",
+      "matches": true
+    },
+    "scripts/install_uv.py": {
+      "sha256": "ad8921a5fd20c3d9332333d152f37a9fe30cdbcf95f847b83edfc3915c75761c",
+      "matches": true
+    },
+    "scripts/lerobot-arm": {
+      "sha256": "42bc9b15c4c39fb128da2b6c9ff838ca60ab459cf9f18e5ba526ccd0278db6e8",
+      "matches": true
+    },
+    "scripts/test_hardware.sh": {
+      "sha256": "f80229a34ec4aaecda35eac03fa00eb6e26f9ea90b9787229f499fd2a93f6db8",
+      "matches": true
+    },
+    "scripts/uv": {
+      "sha256": "25d32c3904e163d0d80ba0069a6b69cf4e7bc03c97b3cf7fb42f7fb042d3e10c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/__init__.py": {
+      "sha256": "c8188af18d26b653f6658cb9ee02246e13ebd571e6e754e72118d42e511d9dc8",
+      "matches": true
+    },
+    "src/lerobot_arm_control/__main__.py": {
+      "sha256": "273813d76d97b4bea65aa6e3bf7e73a74bfa0e9cc0f69c1c2c1b6b867ac52355",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/__init__.py": {
+      "sha256": "0ae12307377d8dad02d1ad4f412f8aec83f450f8db36e799d6fca4538b1dbe0a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/angle_calibration.py": {
+      "sha256": "4b6311649dc312c27061734430ed2e692dcff075949f30df96dee97fe1e13dc1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/height_records.py": {
+      "sha256": "897c16eaa867492a576328c06d62cb750dbc49ac23d61337ff257e2a5d6bdf18",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/height_sampling.py": {
+      "sha256": "56b32c73b1a8b94b66409cdb42ab97ea0cfeaba8128183371ba2a6c28e66b5ce",
+      "matches": true
+    },
+    "src/lerobot_arm_control/cli.py": {
+      "sha256": "2a2fe538546da404cd75e90c4ef642c77b79673d4c8998f6f1458e844e13341d",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/__init__.py": {
+      "sha256": "f2c420efb566c18c3d3b84598e90d0570b03c363a93cbc9334548bfdf8b4534e",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/control_defaults.py": {
+      "sha256": "a5b650255afa3847832543d30dbd567e6ba90f37301262c021c320a9ca4a79ff",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/follow.py": {
+      "sha256": "9662a9bf58f62aec0fd175bc1e33516459281e6391efd7a5c169a627b6825ac1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/joint_path.py": {
+      "sha256": "b410397c58c17bddeab7dcdc1fc7ea018f410d6e92cb62bad89ce4213e6c69a0",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/manual_control.py": {
+      "sha256": "a9801730161cc19d35829e26fd3b386557126f73ddc109c5a0fd84258a59083d",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/motion.py": {
+      "sha256": "db771d0a6dad0e32a91d0191dd769c6e4ad1287eedb5cbc01318026cd1aef4fb",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/parking.py": {
+      "sha256": "560753d31002ee0df32af67c1e31221e4a2a105ef24adf9a94bf329d13ebb178",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/position_feedback.py": {
+      "sha256": "2a6d3547cd34140df58a69848f889f884aac00d1b8f98ea8c81252f4caffe0ea",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/servo_feedback.py": {
+      "sha256": "9948f6ee24cba66a78cdb4cc75d32993a2dd7881a69a31b55db1ed35f156ec3a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/__init__.py": {
+      "sha256": "408b833054668044838d5c9772be62da7f88a7be503d11bdd1198db6a3deb82b",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/api.py": {
+      "sha256": "07788fe8bf4e2ec2b9ea612c8ae92a36eb3f9002bfd2a0eabc7f6b384e673483",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/config.py": {
+      "sha256": "66478bf8d22d2f1d2fce852c3553cba66eda4e5ed1c6aeaa98843eac94ba9a70",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/files.py": {
+      "sha256": "b4bee90ac28ce95fa4357b244f0a8ed751d769e776e376464084fa0a4c274c1c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/paths.py": {
+      "sha256": "12e79a8a1ced3452db3fb6cd45342115e4abf271c7f6a3af5a1360e02d6bf0f5",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/processes.py": {
+      "sha256": "a4ea3bec97e6ad1b479ae1e8fff91c7d4f580718e9b9349aef65400afd282c15",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/__init__.py": {
+      "sha256": "6cdd83f8e0c2211a1de2cef16f732b9685cb05449b706c600f4aa6197724f5a8",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/cli.py": {
+      "sha256": "50883d4ae82606bcf655c61fb710ecf55246dfb982694b56c425a5ec2336a672",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/response_metrics.py": {
+      "sha256": "0770c0e611be8599ce279c9b51ef5923fe823d2e80b718f9e6465ad1512f5cea",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/__init__.py": {
+      "sha256": "e5aea2a4bcc1d0651e3f1f19454bd713119a21872cbf5760456b5bb3406ddbd5",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_geometry.py": {
+      "sha256": "6a7e71197341c16df5602a5f0c3f9ce46d153ee8bc2045e3108e8e4e5dd21cb2",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_perception.py": {
+      "sha256": "a69126422951c93a37db48b913961a02111ce8c9dcbd4732cec829c7de8e9601",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_registration.py": {
+      "sha256": "66a3edebcc80fb89a0a79e6208a69793ba6c9116e390e1363f19a4a32f0731a9",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_tracking.py": {
+      "sha256": "fc9f3bdd6ad10de52c584aa934c6c4d896d5abdb06441e3c311f91d8ead0b25a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tool_marker.py": {
+      "sha256": "4874ea55fd534e193758d4f16b763ae78c747721095c711c7de70161ac2f05b1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/__init__.py": {
+      "sha256": "8ee42b1d010549df9b7f3f819bd951d6abcea0d1cd72a8fc80666144a78afa01",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/__init__.py": {
+      "sha256": "a04131dfd697d8be3094bb2b52fd2953c616f4851bafeac11d745afa97a0b4a2",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/driver.py": {
+      "sha256": "0581c63d37437ae342d2150c97efbc84d4b3d17a82e7fe52e3b04cdadc9dfc73",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/joints.py": {
+      "sha256": "60611286cfaa5ec025ed297fc6202939a04f0258c424d3061b486c456db648c3",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/model_metadata.py": {
+      "sha256": "1ccded00f2fdd4e25296e7bb9ac9d4bd008202e54084bd6e8525f0dc5d15ea8a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/__init__.py": {
+      "sha256": "9f9d6ee762e3924946453ea4852d31966915c9cd60409e25a672eadac27aa361",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/follow_server.py": {
+      "sha256": "145cf31d25888944b102eef7901a799c9565c01aef4ceaa363bcf0092fbbb2e2",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/realtime_server.py": {
+      "sha256": "c47788b80f5913ef36f1f8632a90b1a1db7c6a6b50845b41a0feea75b65d60c9",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/tabletop_robot.py": {
+      "sha256": "51429ffcab21417150901146533c966f7bc1103e27deb35f87d6041925ad0e3c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/tabletop_server.py": {
+      "sha256": "bfdd113a0da382e9e0bab98423cfe4aa3f31d2d8aa3ea244fd7233a0e12b7045",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/__init__.py": {
+      "sha256": "e4b44b992082c4d2e77fc3e69967c1960fb15f01c5d6e397219b5eeb9f945bdb",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/circle/__init__.py": {
+      "sha256": "80d5bab03af940afa4c92528aa3d3d7d06f08736cd565371008af5fc3e0e956a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/circle/circle_trajectory.py": {
+      "sha256": "8fc35bd0d0ee327d4b5529a4eec9fb4791f36aac8c07af05144780c01f6521de",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/__init__.py": {
+      "sha256": "68abda8ad6bbe6e203023a10be447b59002782ec56e950d57a2ad931ef031821",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/push_t_motor.py": {
+      "sha256": "42fc6071595ba05aa15f63ba467457ca96152c02cac8cabfad2d2e63787e26bc",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/push_t_receiver.py": {
+      "sha256": "eea1e6425efe74c71071cd1e6bf671527725aa28b60e014b907fdd2e5dd0f54c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/__init__.py": {
+      "sha256": "5c1e6c1ab6aa3be3313a6c35c576f25fd65ce0e41536ea8624da3a8d1c1d347d",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/latest_output.py": {
+      "sha256": "77a128dc63a8b6a01220325d8590020b9a6dea4cf1c1eac3563f7d42f6052a82",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/pick_t_protocol.py": {
+      "sha256": "53e01774ab48dd708d7f68b22eb9f6abbd479ab0050215dec05dd61f34314a94",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/realtime.py": {
+      "sha256": "549b206392cb87bfd3994aeeec85aeaf30bd2ee73c91185c72fbea66453a032c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/tabletop_stream.py": {
+      "sha256": "ec9b2118d152ce1c0b409df251db4825ef1c2a1524205d73f79b0f9e53796741",
+      "matches": true
+    },
+    "src/lerobot_arm_control/visualization/__init__.py": {
+      "sha256": "890556705b90cf3d57e5990ed9aabefbcdf3de6a15bbf2b0ccb04dfd69226a46",
+      "matches": true
+    },
+    "src/lerobot_arm_control/visualization/ui.py": {
+      "sha256": "fb7e42febcceb2a916928041d75c509e2769d0caf17ad8dd4549d064898a3a97",
+      "matches": true
+    },
+    "tests/test_angle_calibration.py": {
+      "sha256": "45e740aa84aa816079c8405e2ad69c8ab1bac103fc1920779886cca29929b14f",
+      "matches": true
+    },
+    "tests/test_camera_runtime_calibration.py": {
+      "sha256": "906d9490e1c1b40280da48c951c4809b131b70251e50a8a753f45f130ded5cf0",
+      "matches": true
+    },
+    "tests/test_circle_playback.py": {
+      "sha256": "468761dd921efd07bcdb1d7da60f8b46a6e896071dbccadfc38913f919d38df6",
+      "matches": true
+    },
+    "tests/test_control_timing.py": {
+      "sha256": "15ab1418400b2814466e929a712d1d443d5b9c5a3024b1a6b35e223304dbac4a",
+      "matches": true
+    },
+    "tests/test_follow.py": {
+      "sha256": "5f7ed526b5fc346c5b866bd113ea89d28b6c94ea2fd5084ceea133153ae21832",
+      "matches": true
+    },
+    "tests/test_joint_path.py": {
+      "sha256": "f0125b3a7f8c90ce9326b91842e2f42f42638418a351da3ee5d50df700f00dc9",
+      "matches": true
+    },
+    "tests/test_latest_output.py": {
+      "sha256": "b69c95b5ce5f09cd8646aa33a8ed9801a417daadade9cbc5d9f838852cd77a5a",
+      "matches": true
+    },
+    "tests/test_manual_control.py": {
+      "sha256": "ca7da287d60ba5dffb7aa75b7928f0a3fa147f6577c4adbd6be5f1f56a05611f",
+      "matches": true
+    },
+    "tests/test_parking.py": {
+      "sha256": "6fe7bcc91f2af6312dfc1fc5ab2673e31988d8f1dfcbf53d2ce3b7566f1a88fd",
+      "matches": true
+    },
+    "tests/test_pick_t_protocol.py": {
+      "sha256": "54181abadfba35b25c5f8b5c7b500e52d336ac7dbdfdbca55cf32cd8bbef9339",
+      "matches": true
+    },
+    "tests/test_position_feedback.py": {
+      "sha256": "f0abcf5c8336b28f70b442191e6e5fe12935860e09b2293720bdebfeecc4ba8f",
+      "matches": true
+    },
+    "tests/test_push_t_receiver.py": {
+      "sha256": "9d1320f9ce153f183a5b5043c59eb62628036f656b4115ffb6e90be8dc333856",
+      "matches": true
+    },
+    "tests/test_push_t_remote.py": {
+      "sha256": "46ee30e4423fdc4097b60b9d08e6b051aa13b4b7a3abd813a150e77ca66304d5",
+      "matches": true
+    },
+    "tests/test_response_metrics.py": {
+      "sha256": "f83fbc34b07ee52d3dc0d71ef49dc12a4f0e0a0d7d598ba437da91ec81adb8c5",
+      "matches": true
+    },
+    "tests/test_runtime_split.py": {
+      "sha256": "e8cddc8b3eff786227e4d86a1478a2bc915f27242ca5f0f286aa3aee6554ddca",
+      "matches": true
+    },
+    "tests/test_safety.py": {
+      "sha256": "20dcdce4ab2ac9808a7dd7ae1de8b71809d2f9cb3e647e2b586c184323a487e7",
+      "matches": true
+    },
+    "tests/test_servo_feedback.py": {
+      "sha256": "54d5c1423edabb4dab16238f8f5cbc839952c6d804b3951360f57a95e82f24c2",
+      "matches": true
+    },
+    "tests/test_tabletop_perception.py": {
+      "sha256": "ff661e6051964c0743f2bc1ec26be14f2b666fe9d97e56e617461acf90a76a8d",
+      "matches": true
+    },
+    "tests/test_tabletop_reference.py": {
+      "sha256": "117cbaf9f2459b705570fd7b3a3e40e158aa4c9bd5667c9a54e68239e38cdb1c",
+      "matches": true
+    },
+    "tests/test_tabletop_registration.py": {
+      "sha256": "9f1a32a82810a53085fce1ff2d76106b609c4df1a3456439a08a0e4bb638c929",
+      "matches": true
+    },
+    "tests/test_tabletop_robot.py": {
+      "sha256": "60bc2900db0c952e97de6e4a974b944b8ea92ec4584f428c3403315b36a5e1cb",
+      "matches": true
+    },
+    "tests/test_tabletop_tracking.py": {
+      "sha256": "8b50ec725923fb5e4479abb47af1edda24cba4924fcd1d93f784aa5b6dbb4d56",
+      "matches": true
+    },
+    "tests/test_tool_marker.py": {
+      "sha256": "fa532e4588f0e35dab84e8eaa130bc3f2adfcf16b1dec0d42e94a17800313a8e",
+      "matches": true
+    }
+  },
+  "arms": {
+    "follower": {
+      "six_joint_calibration_verified": true,
+      "calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "registers": {
+        "Torque_Enable": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        },
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 53,
+          "shoulder_lift": 52,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 52
+        },
+        "Acceleration": {
+          "shoulder_pan": 254,
+          "shoulder_lift": 254,
+          "elbow_flex": 254,
+          "wrist_flex": 254,
+          "wrist_roll": 254,
+          "gripper": 254
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 48,
+          "elbow_flex": 80,
+          "wrist_flex": 48,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Lock": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    },
+    "arm1": {
+      "six_joint_calibration_verified": true,
+      "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "registers": {
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 53,
+          "gripper": 53
+        },
+        "Acceleration": {
+          "shoulder_pan": 254,
+          "shoulder_lift": 254,
+          "elbow_flex": 254,
+          "wrist_flex": 254,
+          "wrist_roll": 254,
+          "gripper": 254
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 16,
+          "shoulder_lift": 16,
+          "elbow_flex": 16,
+          "wrist_flex": 16,
+          "wrist_roll": 16,
+          "gripper": 16
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Lock": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    }
+  },
+  "passed": true
+}

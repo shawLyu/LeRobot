@@ -133,7 +133,7 @@ def test_finishing_ramp_preserves_integral_for_static_load_compensation():
     controller = feedback()
     joint = 'elbow_flex'
     controller.integral[joint] = .03
-    controller.correction[joint] = .02
+    controller.correction[joint] = controller.feedback_correction[joint] = .02
     controller.reference_velocity[joint] = .1
     controller.finish_reference([joint])
     assert controller.integral[joint] == .03
@@ -155,3 +155,23 @@ def test_smooth_direction_feedforward_stays_bounded_through_reversal():
     assert max(abs(v) for v in commands) <= .032
     assert min(commands) < -.02 < .02 < max(commands)
     assert max(abs(b - a) for a, b in zip(commands, commands[1:])) <= .08 / 60 + 1e-12
+
+
+def test_stream_prediction_does_not_kick_steps_and_clears_on_stop_and_reset():
+    controller = feedback()
+    joint = 'elbow_flex'
+    controller.profile['joints'][joint].update(kp=0, ki=0, velocity_feedforward_s=.06)
+    controller.target(joint, 0, 0, 1/60)
+    assert controller.target(joint, .1, 0, 1/60) == .1
+    assert controller.target(joint, .1, 0, 1/60) == .1
+    for index in range(30):
+        reference = .1+index*.005
+        command = controller.target(joint, reference, reference, 1/60)
+        assert reference <= command <= reference+.12
+    assert command > reference+.01
+    for _ in range(3):
+        command = controller.target(joint, reference, reference, 1/60)
+    assert command == reference
+    controller.reset()
+    assert controller.velocity_feedforward[joint] == 0
+    assert controller.feedback_correction[joint] == 0

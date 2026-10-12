@@ -59,16 +59,17 @@ def run(args):
     started, frames, saved = time.monotonic(), [], False
     issues, failure, exit_reason = [], None, 'window_closed'
     stream_delayed, resume_after_delay = False, False
+    measurement_elapsed, measurement_joint = 0., None
     initial = [0, -.4, .6, .1, 0, math.radians(20)]
     leader_qpos = list(initial)
     follower_qpos = list(initial)
     mapping = JointFollower(config, follower_qpos)
     selected, notice, hello = 0, 'Synthetic leader; motor writes OFF', None
 
-    def send_follow_command(operation):
+    def send_follow_command(operation, **fields):
         nonlocal failure
         try:
-            link.send(operation)
+            link.send(operation, **fields)
             return True
         except (OSError, RuntimeError) as exc:
             failure = f'{type(exc).__name__}: {exc}'
@@ -78,7 +79,8 @@ def run(args):
     try:
         if args.source == 'hardware':
             link = Link(args.host, args.remote_root, 'hardware', hardware_control=args.execute,
-                        hardware_worker='follow_server')
+                        hardware_worker='follow_server',
+                        control_log=getattr(args, 'control_log', None))
             while link.latest is None:
                 if link.error or link.process.poll() is not None:
                     raise RuntimeError(link.error or 'follow worker exited')
@@ -198,6 +200,23 @@ def run(args):
                         manual_command=manual_command):
                     if send_follow_command('resume'):
                         notice = 'Automatic initialization requested; Space holds'
+                guide = ''
+                if getattr(args, 'latency_test', False):
+                    measurement_joints = getattr(args, 'latency_joints', JOINTS)
+                    if stage == 'following':
+                        measurement_elapsed += min(elapsed, .1)
+                    if measurement_elapsed >= 12*len(measurement_joints):
+                        exit_reason = 'latency_capture_completed'
+                        break
+                    joint_index = min(len(measurement_joints)-1, int(measurement_elapsed//12))
+                    joint = measurement_joints[joint_index]
+                    if stage == 'following' and measurement_joint != joint:
+                        measurement_joint = joint
+                        send_follow_command('mark', joint=measurement_joint)
+                    guide = (f'MEASURE motor {JOINTS.index(joint)+1}: {joint} | '
+                             f'{12-measurement_elapsed%12:.0f}s remaining\n'
+                             'Only this joint: +/-10-15 deg; one cycle in ~2 s\n'
+                             'Trigger: gently open/close, one cycle in ~2 s')
                 data.qpos[addresses[config['leader']]] = leader_qpos
                 if simulation:
                     target = list(follower_qpos)
@@ -219,7 +238,7 @@ def run(args):
                         f"Follower: {config['follower']} | gripper",
                         ('REAL FOLLOWER' if args.execute
                          else 'SIMULATED FOLLOWER | motor writes OFF'),
-                        f'State: {stage}', notice,
+                        f'State: {stage}', notice, guide,
                         'E: initialize/resume | Space: hold',
                         'Synthetic: 1-6 select, Up/Down move (without --auto)',
                         f'Selected: {JOINTS[selected]}',
@@ -256,6 +275,25 @@ def run(args):
                                    'config': config, 'hello': hello, 'frames': frames,
                                    'exit_reason': exit_reason, 'error': failure, 'issues': issues})
 
+    if getattr(args, 'latency_test', False):
+        import subprocess
+
+        from lerobot_arm_control.diagnostics.follow_latency import analyze, save_plot
+
+        trace_path = args.log.with_name(args.log.stem+'-trace.json')
+        subprocess.run(['scp', f'{args.host}:{args.control_log}', str(trace_path)],
+                       check=True, timeout=30)
+        trace = json.loads(trace_path.read_text())
+        report = analyze(trace, required_joints=args.latency_joints)
+        report_path = args.log.with_name(args.log.stem+'-latency.json')
+        atomic_json(report_path, report)
+        save_plot(trace, report, args.log.with_suffix('.png'))
+        print(json.dumps({'latency_passed': report['passed'], 'report': str(report_path),
+                          'joints': {j: {k: v for k, v in m.items() if k != 'windows'}
+                                     for j, m in report['joints'].items()}}))
+        if not report['passed']:
+            raise SystemExit(2)
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -275,6 +313,11 @@ def main():
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--duration', type=float)
     parser.add_argument('--screenshot', type=Path)
+    parser.add_argument('--latency-test', action='store_true',
+                        help='Guide a 12-second real-motion capture for each leader joint')
+    parser.add_argument('--latency-joints', nargs='+', choices=JOINTS, default=JOINTS,
+                        help='Explicit joint subset for a repeat latency capture')
+    parser.add_argument('--control-log', help='Remote full-rate trace path for latency analysis')
     parser.add_argument('--log', type=Path, default=workspace_root()/'logs/follow-latest.json')
     args = parser.parse_args()
     if args.execute is None:
@@ -282,6 +325,11 @@ def main():
     if args.execute and (args.source != 'hardware' or args.headless):
         parser.error('real following requires hardware input and the interactive window; '
                      'use --simulate for a read-only preview')
+    if args.latency_test:
+        if not args.execute:
+            parser.error('--latency-test requires the real leader and follower')
+        if args.control_log is None:
+            args.control_log = args.remote_root+f'/logs/follow-latency-{time.time_ns()}.json'
     if args.auto and args.source != 'synthetic':
         parser.error('--auto requires --source synthetic')
     if args.duration is not None and (not math.isfinite(args.duration) or args.duration <= 0):

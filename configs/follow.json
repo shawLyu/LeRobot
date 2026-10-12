@@ -2,7 +2,6 @@
   "version": 1,
   "leader": "arm1",
   "follower": "follower",
-  "max_speed_rad_s": 0.6,
   "max_sample_age_seconds": 0.25,
   "leader_trigger_degrees": [
     0,
@@ -22,5 +21,7 @@
     "target_tolerance_degrees": 0.25,
     "timeout_seconds": 5,
     "auto_start": true
-  }
+  },
+  "entry_speed_rad_s": 0.6,
+  "alignment_tolerance_degrees": 2
 }

@@ -1,7 +1,7 @@
 """Verify bounded joint mirroring and the remote read-only/physical-control boundary."""
 
 import math
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from types import SimpleNamespace
 
 import pytest
@@ -17,12 +17,14 @@ from lerobot_arm_control.transport.realtime import JOINTS
 
 def test_mirror_slew_limit_joint_bounds_and_trigger_normalization():
     config = load_follow_config()
-    config['max_speed_rad_s'] = 2
+    config['entry_speed_rad_s'] = 2
     mapping = JointFollower(config, [0]*6)
     for _ in range(80):
         target = mapping.step([10, 0, 0, 0, 0, math.radians(59)], .05)
     assert target[0] == pytest.approx(mapping.limits[0][1])
     assert target[5] == pytest.approx(math.radians(45))
+    mapping.hold(target)
+    mapping.resume(target)
     previous = list(target)
     target = mapping.step([-10]*6, .01)
     assert max(abs(a-b) for a, b in zip(target, previous, strict=True)) <= .02000001
@@ -85,6 +87,7 @@ def test_invalid_encoder_packets_cannot_produce_follow_targets(raw):
 
 @pytest.fixture
 def remote(monkeypatch, tmp_path):
+    monkeypatch.setattr(follow_server, 'LatestOutput', lambda send, event: nullcontext(send))
     config = load_follow_config()
     config['simulation_shared_calibration'] = True
     config['trigger_range_measured'] = False
@@ -241,7 +244,7 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     assert events[-1] == 'close_hold'
     if initialization in ('inside', 'slow_enable', 'recover', 'recover_lag'):
         assert all(joint in events for joint in JOINTS)
-        assert packets[-1]['following'] is True
+        assert packets[-1]['stage'] in ('following', 'aligning')
         assert packets[-1]['control']['control_hz'] == config['hz']
     else:
         assert packets[-1]['stage'] == 'held'
@@ -292,7 +295,7 @@ def test_closed_physical_gripper_initializes_by_bounded_opening_only(closed_degr
     previous = measured[5]
     for _ in range(10):
         target = mapping.step(goal, 1/60, map_trigger=False)
-        assert 0 <= target[5]-previous <= config['max_speed_rad_s']/60+1e-12
+        assert 0 <= target[5]-previous <= config['entry_speed_rad_s']/60+1e-12
         previous = target[5]
     assert target == pytest.approx(goal)
     for invalid in (-15., 103.):
@@ -343,3 +346,39 @@ def test_auto_start_configuration_rejects_non_boolean(tmp_path):
     path.write_text(json.dumps(config))
     with pytest.raises(ValueError, match='auto_start must be boolean'):
         load_follow_config(path)
+
+
+def test_tracking_uses_latest_pose_after_bounded_alignment_and_rearms_on_resume():
+    config = load_follow_config()
+    mapping = JointFollower(config, [0]*6)
+    target = mapping.step([.4]*5+[0], .01)
+    assert max(target) <= config['entry_speed_rad_s']*.01
+    assert not mapping.tracking
+    for _ in range(100):
+        mapping.step([.4]*5+[0], .01)
+    assert mapping.tracking
+    assert mapping.step([.8]*5+[0], .01) == [.8]*5+[0]
+    mapping.hold([.2]*6)
+    assert not mapping.tracking
+    assert mapping.step([1]*6, .01) == [.2]*6
+    mapping.resume([.2]*6)
+    target = mapping.step([1]*6, .01)
+    assert not mapping.tracking
+    assert max(target) <= .2+config['entry_speed_rad_s']*.01
+
+
+@pytest.mark.parametrize('confirmed', [0, 1])
+def test_leader_fault_is_independently_confirmed_without_writes(confirmed):
+    reads = []
+
+    class Bus:
+        def sync_read(self, register, normalize):
+            return {j: int(j == 'gripper') for j in JOINTS}
+
+        def read(self, register, joint, normalize):
+            reads.append((register, joint))
+            return confirmed
+
+    status = follow_server.read_leader_status(Bus())
+    assert reads == [('Status', 'gripper')]
+    assert status['gripper'] == confirmed

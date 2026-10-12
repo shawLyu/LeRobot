@@ -58,7 +58,9 @@ model-limit violations or positions outside calibrated encoder travel are reject
 before torque is enabled; reposition those manually. The passive white leader is read-only.
 
 `Space` holds. Targets begin at the current follower
-pose and approach the live leader pose at at most 0.6 rad/s. Five arm joints mirror
+pose and align to the live leader at at most 0.6 rad/s. Once nominal targets are within
+2° on every joint, live tracking uses the newest clipped leader pose each cycle, without
+queuing a slow software ramp. Holds/resumes re-enter slow alignment. Five arm joints mirror
 angles in the existing canonical frame; white trigger travel 0–118° maps proportionally
 to black gripper opening 0–90° (59° gives 45°). Calibration references 0/15/30°
 do not define the travel endpoints. Values are clipped to the configured model/encoder limits.
@@ -93,7 +95,8 @@ still at 0, native goal writes and actual multi-joint motion. A subsequent short
 0.02 rad/s run completed held → initializing → following → held with no command
 errors. After exit, black goals matched its measured positions and all six torques
 remained on; the white arm remained torque-off. P=16, acceleration=254, velocity=0,
-storage locks and calibration were unchanged. Production speed remains 0.6 rad/s.
+storage locks and calibration were unchanged. That historical trial used a continuous 0.6 rad/s cap; current operation uses this
+cap only during entry, then sends the latest live target.
 
 1. Complete white `arm1` alignment in `view arm --backend hardware --arm arm1`.
    Joints 1–5 use 0/30/60 degrees; trigger joint 6 uses 0/15/30 degrees.
@@ -112,12 +115,12 @@ storage locks and calibration were unchanged. Production speed remains 0.6 rad/s
 ./scripts/lerobot-arm demo follow
 ```
 
-The window initially holds. Press `E` to initialize and enable the calibrated black follower.
+The window initializes automatically when ready and focused. With `--start-held`, press `E` to initialize and enable the calibrated black follower.
 Fresh current-position goals are confirmed before torque is enabled. The follower uses
 `shared-joint-pid-v1` from `configs/control.json`, exactly as the other task controllers.
 Follow frequency is derived from that file (60 Hz); `follow.json` cannot override it.
-The PID sends bounded compensated position targets. RAM acceleration 40 and velocity
-600 ticks/s are restored on exit; existing native P/I/D remain untouched, including Lock=0.
+The PID sends bounded compensated position targets. The stream temporarily applies RAM acceleration 254 and velocity
+3000 ticks/s (clamped to hardware limits), then restores their original values on exit; existing native P/I/D remain untouched, including Lock=0.
 See [the controller and block diagram](lerobot-control.md) and
 [response measurements](control-performance.md).
 No EEPROM calibration, offsets, modes or travel limits are rewritten.
@@ -147,3 +150,19 @@ The leader's inherited `gripperframe` is a compatibility frame, not a measured
 leader grasp point. Our joint/actuator limits use the user-confirmed 0–118° travel.
 Upstream printed-part inertia remains provisional; see its
 [model README](https://github.com/TheRobotStudio/SO-ARM100/blob/a758567c3978dfeefe282ede0500085a48fe8f78/Simulation/SO101/README.md).
+
+## Measure the real following latency
+
+```sh
+./scripts/lerobot-arm demo follow --start-held --latency-test
+# Repeat only the trigger when needed; other joints remain explicitly unmeasured.
+./scripts/lerobot-arm demo follow --start-held --latency-test --latency-joints gripper
+```
+
+Press E and follow the on-screen joint name for 12 seconds per joint, making gentle
+back-and-forth movements. Timing pauses while held/alignment is active. Space holds.
+The remote process saves every control sample while display packets use a latest-state
+queue, so a slow SSH/display consumer cannot stall motor writes. After exit, the client
+retrieves the trace and writes `*-trace.json`, `*-latency.json` and `.png` next to its
+`--log` path. Static input or insufficient reversals fails acceptance; subset passes
+are recorded explicitly. See [the measurement definition and results](measurements/follow-latency-2026-10-12/README.md).

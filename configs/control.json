@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "name": "measured-v22-responsive",
+  "name": "shared-joint-pid-v1",
   "native_defaults": {
     "source": "installed lerobot 0.6.1 SOFollowerConfig and TeleoperateConfig",
     "control_hz": 60,
@@ -20,53 +20,54 @@
     "version": 1,
     "joints": {
       "shoulder_pan": {
-        "kp": 0.5,
+        "kp": 0.2,
         "ki": 1.5,
         "max_correction_rad": 0.12,
         "correction_rate_rad_s": 0.24,
         "error_filter_seconds": 0.08,
         "error_deadband_rad": 0.0015,
-        "velocity_feedforward_s": 0.1
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08
       },
       "shoulder_lift": {
-        "kp": 2.0,
-        "ki": 3.0,
+        "kp": 0.25,
+        "ki": 1.5,
         "max_correction_rad": 0.12,
         "correction_rate_rad_s": 0.24,
-        "velocity_feedforward_s": 0.14,
         "error_filter_seconds": 0.08,
         "error_deadband_rad": 0.003,
-        "friction_feedforward_rad": 0.018,
-        "friction_velocity_rad_s": 0.04
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08
       },
       "elbow_flex": {
-        "kp": 2.0,
-        "ki": 3.0,
+        "kp": 0.25,
+        "ki": 1.5,
         "max_correction_rad": 0.12,
         "correction_rate_rad_s": 0.24,
-        "velocity_feedforward_s": 0.1,
         "error_filter_seconds": 0.08,
         "error_deadband_rad": 0.003,
-        "friction_feedforward_rad": 0.032,
-        "friction_velocity_rad_s": 0.04
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08
       },
       "wrist_flex": {
-        "kp": 0.5,
+        "kp": 0.25,
         "ki": 1.5,
         "max_correction_rad": 0.12,
         "correction_rate_rad_s": 0.24,
         "error_filter_seconds": 0.08,
         "error_deadband_rad": 0.0015,
-        "velocity_feedforward_s": 0.1
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08
       },
       "wrist_roll": {
-        "kp": 0.5,
+        "kp": 0.25,
         "ki": 1.5,
         "max_correction_rad": 0.12,
         "correction_rate_rad_s": 0.24,
         "error_filter_seconds": 0.08,
         "error_deadband_rad": 0.0015,
-        "velocity_feedforward_s": 0.12
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08
       },
       "gripper": {
         "kp": 0.5,
@@ -74,20 +75,16 @@
         "max_correction_rad": 0.05,
         "correction_rate_rad_s": 0.04,
         "error_filter_seconds": 0.12,
-        "error_deadband_rad": 0.003
+        "error_deadband_rad": 0.003,
+        "kd": 0.01,
+        "derivative_filter_seconds": 0.08
       }
     },
     "native_stream": {
       "acceleration": 40,
-      "velocity_ticks_s": 600,
-      "locked_p_coefficients": {
-        "shoulder_pan": 24,
-        "shoulder_lift": 24,
-        "elbow_flex": 32,
-        "wrist_flex": 24,
-        "wrist_roll": 24
-      }
-    }
+      "velocity_ticks_s": 600
+    },
+    "name": "shared-joint-pid-v1"
   },
   "trajectory": {
     "version": 1,
@@ -97,5 +94,10 @@
     "control_hz": 60,
     "reset_speed_rad_s": 0.5,
     "period_seconds": 4.0
+  },
+  "simulation_actuator": {
+    "kp": 700.0,
+    "kv": 12.0,
+    "scope": "MuJoCo native position-loop approximation; not hardware register values"
   }
 }

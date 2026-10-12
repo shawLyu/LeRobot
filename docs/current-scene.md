@@ -44,10 +44,10 @@ that check does not establish completion of the pushing task.
 Focus remains locked at 68 with autofocus off, native capture is 1920x1080,
 processing is 640x360, and the selected October 8 camera calibration is preserved.
 Marker sizes remain 42 mm; heights remain 70 mm for follower and 69 mm for arm1.
-Precision task control retains the shared V22 response profile at 60 Hz. The real
-leader/follower demo uses native position control at 30 Hz and 0.6 rad/s maximum
-target slew, without temporary P/acceleration/velocity changes. Its parameters are
-preserved in `follow_demo` and the snapshot's `configs/follow.json`.
+All task and follow control now uses `shared-joint-pid-v1` at 60 Hz. Follow target
+slew remains 0.6 rad/s. Original native P/I/D are preserved; RAM acceleration/velocity
+are temporarily 40/600 and restored on exit. Current controller and role/mapping
+parameters, with their hashes, are saved in the scene manifest and snapshot configs.
 
 The accepted table fit uses 51 training and 12 independent validation frames.
 For the stationary camera, training-frame median primary corners determine the shared

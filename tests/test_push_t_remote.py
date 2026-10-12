@@ -188,14 +188,12 @@ def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observ
     tick(instance, bus)
     assert set(bus.sync_read('Acceleration').values()) == {40}
     assert set(bus.sync_read('Goal_Velocity').values()) == {600}
-    for index in range(1, 5):
+    for index in range(1, 61):
         clock[0] = index/60
         instance.observe(observed, clock[0])
         tick(instance, bus)
     assert instance.control.command_angles['elbow_flex'] > instance.control.targets['elbow_flex']
-    assert bus.sync_read('P_Coefficient') == {
-        j: instance.control.position_feedback.profile['native_stream'][
-            'locked_p_coefficients'].get(j, 16) for j in JOINTS}
+    assert set(bus.sync_read('P_Coefficient').values()) == {16}
     assert set(bus.sync_read('Lock').values()) == {1}
     assert not any(register in ('Lock', 'I_Coefficient', 'D_Coefficient',
                                 'Operating_Mode', 'Homing_Offset', 'EEPROM_Lock')
@@ -208,7 +206,7 @@ def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observ
     assert not any(instance.control.position_feedback.correction.values())
 
 
-def test_v14_push_compensation_also_respects_the_cad_joint_envelope():
+def test_push_pid_also_respects_the_cad_joint_envelope():
     from lerobot_arm_control.transport.realtime import JOINTS
 
     instance = PushMotor(FakeBus(JOINTS), Calibration(), [[-.31, .31]]*6,

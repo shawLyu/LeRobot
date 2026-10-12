@@ -17,7 +17,7 @@ from lerobot_arm_control.visualization.ui import motor_fault_text
 
 class ManualControl:
     def __init__(self, bus, calibration, model_ranges, raw_limits, clock=time.monotonic,
-                 rest_path=None, position_feedback_profile=None):
+                 rest_path=None):
         if calibration.count() != 6:
             raise ValueError("real control requires all six calibrated joints")
         self.bus = bus
@@ -54,9 +54,7 @@ class ManualControl:
                     or self.limits[joint][0] >= self.limits[joint][1]):
                 raise ValueError(f"invalid control limits: {joint}")
             self.rest_limits[joint] = self.limits[joint]
-        self.position_feedback = PositionFeedback(
-            POSITION_FEEDBACK if position_feedback_profile is None else position_feedback_profile,
-            self.limits)
+        self.position_feedback = PositionFeedback(POSITION_FEEDBACK, self.limits)
         from lerobot_arm_control.control.parking import Parking
 
         self.parking = Parking(self, rest_path)

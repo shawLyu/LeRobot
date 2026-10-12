@@ -965,7 +965,7 @@
       "table_frame": "ID 1 (DICT_APRILTAG_36h10) center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the stationary auxiliary. Rebuilt from current observations on 2026-10-11."
     }
   },
-  "control_config_sha256": "5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591",
+  "control_config_sha256": "45030baf423cc4f8069fcfc1c343c2f511f3eea247ab33f6d24044e35e52fc1f",
   "joint_calibrations": {
     "arm1": {
       "model": "so101",
@@ -1218,11 +1218,11 @@
     },
     "control.json": {
       "file": "configs/control.json",
-      "sha256": "5c5eb4e26ac58e2ab0c317dc80ef5efebd797b55ad0f52cda28ecfc716319591"
+      "sha256": "45030baf423cc4f8069fcfc1c343c2f511f3eea247ab33f6d24044e35e52fc1f"
     },
     "follow.json": {
       "file": "configs/follow.json",
-      "sha256": "fc72c94b16deaad3e34519ac0818be7126e75934834b5ac55a54803f83d45165"
+      "sha256": "d365f0b3b3526a1d87661c3a7a74a0cc83fc41274ba1a7c73054d85aea50dca2"
     }
   },
   "calibration_records": {
@@ -1315,15 +1315,13 @@
     "hold_key": "Space",
     "initialization": "E: fresh-position hold, bounded model-range recovery, then follow",
     "stream_timeout_behavior": "hold; keep window open; explicit E after fresh feedback",
-    "controller_profile": "native_position"
+    "controller_profile": "shared-joint-pid-v1"
   },
   "pending_calibration": {},
   "follow_demo": {
     "version": 1,
     "leader": "arm1",
     "follower": "follower",
-    "controller_profile": "native_position",
-    "hz": 30,
     "max_speed_rad_s": 0.6,
     "max_sample_age_seconds": 0.25,
     "leader_trigger_degrees": [
@@ -1342,6 +1340,21 @@
       "margin_degrees": 0.5,
       "target_tolerance_degrees": 0.25,
       "timeout_seconds": 5
+    },
+    "controller_profile": "shared-joint-pid-v1",
+    "hz": 60
+  },
+  "controller_update": {
+    "date": "2026-10-12",
+    "source": "configs/control.json",
+    "hz": 60,
+    "profile": "shared-joint-pid-v1",
+    "design": "docs/lerobot-control.md",
+    "white_eeprom_recovery": {
+      "date": "2026-10-12",
+      "status": "restored_to_accepted_calibration",
+      "evidence": "docs/measurements/pid-2026-10-12/arm1-configuration-restoration.json",
+      "leader_torque_enabled": false
     }
   }
 }

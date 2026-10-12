@@ -1,8 +1,86 @@
 # Control performance and verification
 
-The sole current configuration is `configs/control.json`, named `measured-v22-responsive`.
-All hardware entries load it on restart. Local simulation checks and analysis remain local;
-the remote host executes the controller without MuJoCo.
+## Shared PID: six physical motors (2026-10-12)
+
+The active profile is `shared-joint-pid-v1`. All normal demos use its 60 Hz software
+position PID around the existing native position loop; simulation uses the same PID.
+See [the control diagram and design](lerobot-control.md).
+
+The acceptance trial completed all twelve 3° outward/return responses, four seconds each.
+The black follower was tested one joint at a time from its current pose; the white leader
+remained passive. There was no command fault, feedback gap over 100 ms, or cleanup error.
+Native P/I/D and Lock matched the initial readings after exit. Acceleration 254 and
+Goal_Velocity 0 were restored; all six motors were left holding with torque enabled.
+
+![Physical encoder responses](measurements/pid-2026-10-12/hardware-response.png)
+
+| Motor | Worst 10–90% rise (ms) | Worst overshoot (%) | Worst ±0.5° settling (s) | Worst tail absolute error (°) | Result |
+| --- | ---: | ---: | ---: | ---: | --- |
+| shoulder_pan | 89.4 | 22.2 | 0.466 | 0.085 | PASS |
+| shoulder_lift | 83.2 | 25.4 | 0.284 | 0.085 | PASS |
+| elbow_flex | 109.5 | 3.2 | 0.184 | 0.097 | PASS |
+| wrist_flex | 76.3 | 15.2 | 0.168 | 0.143 | PASS |
+| wrist_roll | 91.9 | 12.1 | 0.167 | 0.009 | PASS |
+| gripper | 117.5 | 12.3 | 0.201 | 0.209 | PASS |
+
+Metrics cover both directions; tail = last 0.75 s. Passing requires reaching 90%,
+settling within 3 s and staying within ±0.5°, overshoot ≤35%, and maximum sample gap ≤100 ms.
+Timing is derived from approximately 60 Hz samples, so sub-sample interpolated rise times
+are estimates rather than sub-millisecond measurement accuracy. This is an encoder test
+at one pose and load, not full-workspace robustness or absolute optical tool accuracy.
+
+Config SHA-256: `45030baf423cc4f8069fcfc1c343c2f511f3eea247ab33f6d24044e35e52fc1f`.
+Actual native P was **32 / 48 / 80 / 48 / 32 / 32**, I=0 and D=32.
+The initial high-gain PID trial reached 76.6% overshoot and failed. Reducing Kp and then
+balancing Ki reduced the final worst overshoot to 25.4%.
+Intermediate runs are retained under local `logs/pid-hardware-*`; the original and final
+summaries are included below. Starting poses differ by a few encoder ticks, so this is
+an engineering tuning comparison, not a controlled identification experiment.
+
+- [Hardware summary, per-direction metrics and native settings](measurements/pid-2026-10-12/hardware-summary.json)
+- [Initial high-gain PID summary](measurements/pid-2026-10-12/initial-pid-summary.json)
+- [CSV](measurements/pid-2026-10-12/hardware-response.csv), [SVG](measurements/pid-2026-10-12/hardware-response.svg), [PDF](measurements/pid-2026-10-12/hardware-response.pdf)
+- [Complete report and all six-channel samples (gzip JSON)](measurements/pid-2026-10-12/hardware-result.json.gz)
+- [Original full-rate remote trace (gzip JSON)](measurements/pid-2026-10-12/hardware-control.json.gz)
+
+## Simulation and regression checks
+
+The same twelve small-step responses pass in MuJoCo. Its inner actuator approximation
+(kp=700, kv=12) is shared across scenes; these are model parameters, not hardware PID registers.
+The simulations retain the canonical calibration-bound MJCF file and its fingerprint.
+Simulation response is not substituted for the physical response above.
+
+- [Simulation curves](measurements/pid-2026-10-12/simulation-response.png)
+- [Simulation metrics](measurements/pid-2026-10-12/simulation-summary.json)
+- Local complete suite: **534 passed, 1 skipped** (official LeRobot is installed remotely); includes OpenGL viewer checks.
+- Deployed runtime suite: **293 passed**; remote runtime does not require MuJoCo.
+- Ruff checks pass on all modified local sources and deployed runtime sources.
+- Regression coverage includes PID derivative/filter/reset/load compensation, enable/hold/watchdog/fault handling, calibration and follow mapping, identical prediction/execution, circle contact checks, full Push-T convergence, and pick/carry/release.
+
+Reproduce the finite response trial with:
+
+```sh
+./scripts/lerobot-arm verify motors --backend hardware --execute --output logs/new-hardware-response
+./scripts/lerobot-arm verify motors --backend mujoco --output logs/new-simulation-response
+```
+
+## Dual-arm integration
+
+The live white leader / local simulated follower check completed with both independent
+calibrations, current shared parameters and no stream error. The white EEPROM offsets
+and limits had been changed externally since the accepted calibration; with explicit
+user authorization they were restored and read back. The six measured angle mappings
+were preserved. Torque detected after the restoration sequence was explicitly released;
+all white channels were verified at Torque_Enable=0 before the final read-only check.
+The black arm remains holding. No autonomous physical leader motion was introduced.
+
+- [Dual-arm read-only verification](measurements/pid-2026-10-12/dual-arm-readonly-verification.json)
+- [EEPROM before/after and passive-state verification](measurements/pid-2026-10-12/arm1-configuration-restoration.json)
+
+## Historical five-joint comparison (superseded controller)
+
+The following October 9 records used V14–V22 configurations. They are retained as historical
+measurements; their gains and compensation are not the current PID settings.
 
 ## Five-joint response comparison (2026-10-09)
 

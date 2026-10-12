@@ -55,7 +55,19 @@ class AngleCalibration:
         if path.exists():
             saved = json.loads(path.read_text())
             if saved.get("version") != 1 or saved.get("fingerprint") != fingerprint:
-                raise ValueError("Calibration identity/EEPROM changed; archive the old file first")
+                previous = saved.get('fingerprint') or {}
+                changed = []
+                for field in sorted(set(previous) | set(fingerprint)):
+                    if previous.get(field) != fingerprint.get(field):
+                        before, after = previous.get(field), fingerprint.get(field)
+                        joints = (sorted(j for j in set(before) | set(after)
+                                         if before.get(j) != after.get(j))
+                                  if isinstance(before, dict) and isinstance(after, dict) else [])
+                        changed.append(field + (' ['+', '.join(joints)+']' if joints else ''))
+                detail = '; '.join(changed) or 'unsupported calibration version'
+                raise ValueError(f'Calibration identity/EEPROM changed for {path.name}: {detail}. '
+                                 'Restore the saved device configuration or recalibrate; '
+                                 'do not reuse the old angle mapping with changed offsets.')
             self.points.update(saved["points"])
             self.leader_trigger = saved.get('leader_trigger', False)
             correction_path = path.with_name(path.stem+'_kinematic.json')

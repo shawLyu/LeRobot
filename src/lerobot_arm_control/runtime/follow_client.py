@@ -6,9 +6,12 @@ import math
 import queue
 import tempfile
 import time
+import xml.etree.ElementTree as ET
+from copy import deepcopy
 from pathlib import Path
 
 from lerobot_arm_control.control.follow import JointFollower, load_follow_config
+from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.runtime.realtime_client import Link
@@ -102,12 +105,22 @@ def run(args):
                     dictionary, scene_config['marker_id'], 256))
             xml = xml.replace('file="marker.png"', f'file="{marker}"')
             xml = xml.replace('file="appearance/', f'file="{args.snapshot.resolve()}/appearance/')
+            if not args.execute:
+                scene_root = ET.fromstring(xml)
+                source_root = ET.parse(resource_path('assets/so101/so101.xml')).getroot()
+                scene_root.append(deepcopy(source_root.find('actuator')))
+                xml = ET.tostring(scene_root, encoding='unicode')
             model_path.write_text(xml)
             model = mujoco.MjModel.from_xml_path(str(model_path))
             data = mujoco.MjData(model)
             addresses = {name: [model.joint(arms[name]['prefix']+joint).qposadr[0]
                                 for joint in JOINTS]
                          for name in (config['leader'], config['follower'])}
+            leader_dofs = [model.joint(arms[config['leader']]['prefix']+j).dofadr[0]
+                           for j in JOINTS]
+            data.qpos[addresses[config['leader']]] = leader_qpos
+            data.qpos[addresses[config['follower']]] = follower_qpos
+            simulation = SimulationControl(model, data) if not args.execute else None
             if not args.headless:
                 from lerobot_arm_control.visualization.control_viewer import ControlViewer
 
@@ -117,7 +130,7 @@ def run(args):
                 viewer.cam.lookat[:] = [-.32, .03, .14]
                 viewer.cam.distance = 1.2
                 viewer.cam.azimuth, viewer.cam.elevation = 125, -28
-            previous, last_ping = time.monotonic(), 0
+            previous, last_ping, physics_pending = time.monotonic(), 0, 0.
             while (viewer is None or viewer.is_running()) and (
                     args.duration is None or time.monotonic()-started < args.duration):
                 now = time.monotonic()
@@ -175,7 +188,19 @@ def run(args):
                         else:
                             mapping.resume(follower_qpos)
                 data.qpos[addresses[config['leader']]] = leader_qpos
-                data.qpos[addresses[config['follower']]] = follower_qpos
+                if simulation:
+                    target = list(follower_qpos)
+                    physics_pending += min(elapsed, .1)
+                    while physics_pending >= model.opt.timestep:
+                        data.qpos[addresses[config['leader']]] = leader_qpos
+                        data.qvel[leader_dofs] = 0
+                        simulation.step(target)
+                        physics_pending -= model.opt.timestep
+                    data.qpos[addresses[config['leader']]] = leader_qpos
+                    data.qvel[leader_dofs] = 0
+                    follower_qpos = data.qpos[addresses[config['follower']]].tolist()
+                else:
+                    data.qpos[addresses[config['follower']]] = follower_qpos
                 mujoco.mj_forward(model, data)
                 if viewer:
                     viewer.set_texts([(0, 0, '\n'.join([

@@ -37,16 +37,17 @@ class ShortPushSimulation(PushSimulation):
         return candidates
 
     def play_action(self, action, model, data):
-        segments = joint_segments(data.ctrl, action, self.arm.limits)
+        controller = self.position_controller(model, data)
+        segments = joint_segments(controller.reference, action, self.arm.limits)
         skipped = 0
         if self.fast_free_approach and data is self.roll_data:
             skipped = self.free_approach(action.approach_count, segments, model, data)
         if skipped:
-            self.step(data.ctrl.copy(), .12, model, data)
+            self.step(np.asarray(controller.reference), .12, model, data)
         # Contact prediction and actual simulation retain the real bus interpolation and speed.
         for segment in segments[skipped:]:
             self.step(np.asarray(segment['end']), segment['seconds'], model, data)
-        self.step(data.ctrl.copy(), .12, model, data)
+        self.step(np.asarray(controller.reference), .12, model, data)
 
     def free_approach(self, count, segments, model, data):
         """Skip dynamics only for prediction of a fully collision-checked free transfer."""
@@ -79,6 +80,7 @@ class ShortPushSimulation(PushSimulation):
                     mujoco.mj_copyData(data, model, checkpoint)
                     return 0
         data.ctrl[:] = end
+        self.position_controller(model, data).reset(end)
         data.qvel[self.arm.dadr] = 0
         self.fast_approach_predictions = getattr(self, 'fast_approach_predictions', 0)+1
         return count

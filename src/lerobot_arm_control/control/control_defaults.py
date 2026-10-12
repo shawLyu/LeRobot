@@ -14,5 +14,6 @@ if CONTROL.get("version") != 1:
 DEFAULTS = CONTROL["native_defaults"]
 POSITION_FEEDBACK = CONTROL["position_feedback"]
 TRAJECTORY = CONTROL["trajectory"]
+SIMULATION_ACTUATOR = CONTROL["simulation_actuator"]
 CONTROL_HZ = DEFAULTS["control_hz"]
 READ_RETRIES = DEFAULTS["num_read_retries"]

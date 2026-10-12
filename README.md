@@ -481,15 +481,16 @@ The current base mount fit is rejected, so physical grasp/placement validation i
 ## 8. Configuration, layout, and data
 
 The sole active motor control configuration is [configs/control.json](configs/control.json),
-currently **V22 responsive**: 60 Hz, RAM acceleration 40, velocity 600 ticks/s,
-approach speed 0.8 rad/s, minimum approach 0.35 s, Reset speed 0.5 rad/s, and a 4 s circle period.
-Manual control, Reset, circles, finite joint paths, Push-T, and T pick/place share it.
+currently **shared-joint-pid-v1**: 60 Hz, bounded position PID with filtered measurement
+derivative and integral antiwindup. Manual control, Reset, circles, finite paths,
+leader/follower, Push-T and pick/place use the same algorithm and settings, including local simulation.
+RAM acceleration 40 and velocity 600 ticks/s are restored on exit; native P/I/D are retained.
+See the [control block diagram and PID design](docs/lerobot-control.md) and
+[six-motor response curves](docs/control-performance.md).
+Run `./scripts/lerobot-arm verify motors --backend hardware --execute` for a finite six-axis
+3° response test; omit hardware/execute for local simulation. Reports contain all twelve
+out/return responses, metrics, CSV, PNG/SVG/PDF, calibration hashes and actual native parameters.
 `--fps` sets display/observation stream rate, not motor control frequency.
-Two supervised five-joint response trials shortened motion time by 36% while reducing
-encoder-model tracking RMS from 5.56 mm to 3.92–4.05 mm. Session P settings are 24
-for shoulder pan/lift and wrist pitch/roll, and 32 for elbow; storage stays locked
-and original P values are restored on close/release. I/D and protections are retained.
-See [Control performance](docs/control-performance.md) for measurements and scope.
 Independent 1 mm Cartesian validation is still pending; see [Precision calibration](docs/precision-calibration.md).
 After changing shared settings, stop old processes on both hosts, deploy, and restart. Hardware execution handshakes check the configuration hash.
 

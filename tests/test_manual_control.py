@@ -1,6 +1,6 @@
 import pytest
 
-from lerobot_arm_control.control.follow import native_position_profile
+from lerobot_arm_control.control.control_defaults import CONTROL
 from lerobot_arm_control.control.manual_control import ManualControl
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -58,31 +58,32 @@ def step(bus, control, now, elapsed):
                   for key in ("Status", "Torque_Enable", "Goal_Position")})
 
 
-def test_follow_enables_unlocked_servos_and_sends_nominal_goals_without_tuning():
+def test_shared_pid_enables_unlocked_servos_without_p_or_eeprom_writes():
     bus, now = Bus(), [0.0]
     for registers in bus.registers.values():
         registers.update(Lock=0, Acceleration=254)
     originals = {joint: dict(registers) for joint, registers in bus.registers.items()}
     control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
                             {name: [1000, 3000] for name in JOINTS},
-                            clock=lambda: now[0],
-                            position_feedback_profile=native_position_profile())
+                            clock=lambda: now[0])
     control.enable_all()
     assert control.enabled == set(JOINTS)
     assert not control.stopped
-    assert control.status()['controller_profile'] == 'native_position'
-    assert {register for register, _, _ in bus.writes} == {'Goal_Position', 'Torque_Enable'}
+    assert control.status()['controller_profile'] == CONTROL['name']
+    assert {register for register, _, _ in bus.writes} == {
+        'Goal_Position', 'Torque_Enable', 'Acceleration', 'Goal_Velocity'}
     for index, joint in enumerate(JOINTS):
         control.target(joint, .33 + index * .015)
     bus.writes.clear()
     for _ in range(10):
         control.heartbeat()
         step(bus, control, now, 1 / 30)
-        assert control.sent == {joint: 2220 + index * 10
-                                for index, joint in enumerate(JOINTS)}
+        assert all(control.sent[joint] >= 2220 + index * 10
+                   for index, joint in enumerate(JOINTS))
     assert len(bus.writes) == 60
     control.close()
-    assert {register for register, _, _ in bus.writes} == {'Goal_Position'}
+    assert {register for register, _, _ in bus.writes} == {
+        'Goal_Position', 'Acceleration', 'Goal_Velocity'}
     for joint, registers in bus.registers.items():
         assert registers['Torque_Enable'] == 1
         assert registers['Goal_Position'] == registers['Present_Position']
@@ -125,7 +126,7 @@ def test_settle_clears_only_selected_compensation_without_changing_goals(setup):
     before = list(bus.writes)
     control.settle_target('wrist_flex')
     assert control.targets['wrist_flex'] == .5
-    assert control.position_feedback.integral['wrist_flex'] == 0
+    assert control.position_feedback.integral['wrist_flex'] == .04
     assert control.position_feedback.correction['wrist_flex'] == .03
     assert control.position_feedback.integral['elbow_flex'] == .02
     assert bus.writes == before
@@ -234,7 +235,7 @@ def test_stop_clears_feedback_and_holds_measured_pose(setup):
     assert bus.registers["elbow_flex"]["Goal_Position"] == 2200
     assert bus.registers["elbow_flex"]["Torque_Enable"] == 1
 
-def test_streaming_target_below_speed_limit_is_not_biased_by_tick_budgets(setup):
+def test_streaming_target_keeps_sub_tick_motion_with_bounded_pid_damping(setup):
     bus, control, now = setup
     control.enable("gripper")
     for index in range(100):
@@ -242,8 +243,12 @@ def test_streaming_target_below_speed_limit_is_not_biased_by_tick_budgets(setup)
         target = 0.3 + 0.09 * (index + 1) * 0.01
         control.target("gripper", target)
         step(bus, control, now, 0.01)
-        assert abs(control.command_angles["gripper"] - target) <= 0.00075 + 1e-12
-        assert abs(control.angle("gripper", control.sent["gripper"]) - target) <= 0.00075 + 1e-12
+        assert control.targets["gripper"] == target
+        # At 0.09 rad/s the derivative damps by about 0.0009 rad;
+        # quantization is at most another half encoder tick (0.00075 rad).
+        assert abs(control.command_angles["gripper"] - target) < .003
+        assert abs(control.angle("gripper", control.sent["gripper"]) - target) < .003
+    assert control.command_angles["gripper"] > .385
 
 
 def test_stationary_running_goal_is_refreshed_after_a_lost_packet(setup):
@@ -467,7 +472,7 @@ def test_enable_all_checks_every_motor_before_writing_and_uses_fresh_goals(setup
     control.enable_all()
     assert [register for register, _, _ in bus.writes] == (
         ["Goal_Position"] * 6 + ["Acceleration"] * 6
-        + ["Goal_Velocity"] * 6 + ['P_Coefficient'] * 5 + ["Torque_Enable"] * 6)
+        + ["Goal_Velocity"] * 6 + ["Torque_Enable"] * 6)
     assert all(bus.sync_read("Torque_Enable").values())
     assert bus.sync_read("Goal_Position") == bus.sync_read("Present_Position")
 

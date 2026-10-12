@@ -3,6 +3,7 @@
 import json
 import math
 
+from lerobot_arm_control.control.control_defaults import CONTROL, CONTROL_HZ
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
 from lerobot_arm_control.transport.realtime import JOINTS
@@ -13,8 +14,9 @@ def load_follow_config(path=None):
     config = json.loads(path.read_text())
     if config.get('version') != 1 or config['leader'] == config['follower']:
         raise ValueError('follow requires two different configured arms')
-    if config.get('controller_profile') != 'native_position':
-        raise ValueError('follow requires the native_position controller profile')
+    if 'controller_profile' in config or 'hz' in config:
+        raise ValueError('controller and frequency are shared in configs/control.json')
+    config.update(controller_profile=CONTROL['name'], hz=CONTROL_HZ)
     for name, low, high in (('hz', 1, 60), ('max_speed_rad_s', 0, 2),
                             ('max_sample_age_seconds', 0, .5)):
         value = config[name]
@@ -35,13 +37,6 @@ def load_follow_config(path=None):
     if initialization['target_tolerance_degrees'] >= initialization['margin_degrees']:
         raise ValueError('initialization tolerance must be smaller than its margin')
     return config
-
-
-def native_position_profile():
-    """Send nominal targets through the servo's existing position controller."""
-    return {'name': 'native_position', 'version': 1, 'joints': {
-        joint: {'kp': 0, 'ki': 0, 'max_correction_rad': 0, 'correction_rate_rad_s': 0}
-        for joint in JOINTS}}
 
 
 def initialization_target(config, measured, limits, encoder_limits):

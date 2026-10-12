@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 
 from lerobot_arm_control.control.parking import smooth_fraction
+from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.tasks.circle.circle_trajectory import PLAN, ROOT, Circle, load_profile
@@ -99,6 +100,7 @@ def verify(model, path, report_path, *, simulation=False):
     data = mujoco.MjData(model)
     data.qpos[:] = circle.points[0]
     data.ctrl[:] = data.qpos
+    controller = SimulationControl(model, data)
     circle.start(data.qpos, 0)
     errors = []
     reference = mujoco.MjData(model)
@@ -108,12 +110,8 @@ def verify(model, path, report_path, *, simulation=False):
     penetrating = 0
     duration = circle.entry_seconds + circle.ramp_seconds + 2 * circle.period
     steps = round(duration / model.opt.timestep)
-    next_control = 0.0
     for _ in range(steps):
-        if data.time + 1e-10 >= next_control:
-            data.ctrl[:] = circle.sample(data.time)
-            next_control += 1 / circle.control_hz
-        mujoco.mj_step(model, data)
+        controller.step(circle.sample(data.time))
         if not np.isfinite(data.qpos).all() or not np.isfinite(data.qvel).all():
             raise ValueError("simulation diverged")
         if data.time > circle.entry_seconds + circle.ramp_seconds:

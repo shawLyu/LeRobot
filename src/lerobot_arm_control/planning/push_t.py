@@ -16,6 +16,7 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
+from lerobot_arm_control.control.control_defaults import SIMULATION_ACTUATOR
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_arms, scene_xml
@@ -157,7 +158,8 @@ def build_scene(snapshot, output, *, freeze_bystanders=True):
         limits = f'{max(low, measured[0])} {min(high, measured[1])}'
         element.set('range', limits)
         ET.SubElement(actuator, 'position', name='sim_'+joint, joint=joint,
-                      kp='700', kv='12', ctrlrange=limits, forcerange='-2.94 2.94')
+                      kp=str(SIMULATION_ACTUATOR['kp']), kv=str(SIMULATION_ACTUATOR['kv']),
+                      ctrlrange=limits, forcerange='-2.94 2.94')
     wood_pose = state['objects']['wood_t']
     robot_qpos = (state['robot']['qpos'] if freeze_bystanders else
                   [q for arm in scene_arms(state, config) for q in arm['qpos']])
@@ -321,8 +323,20 @@ class PushSimulation:
         mujoco.mj_forward(self.model, self.data)
         self.pushes, self.trace, self.phase = 0, [], 'ready'
         self.contact_counts = {}
+        self.simulation_controls = {}
+        controller = self.position_controller(self.model, self.data)
         for _ in range(80):
-            mujoco.mj_step(self.model, self.data)
+            controller.step(self.state['robot']['qpos'])
+
+    def position_controller(self, model, data):
+        from lerobot_arm_control.control.simulation_control import SimulationControl
+
+        if not hasattr(self, 'simulation_controls'):
+            self.simulation_controls = {}
+        key = id(data)
+        if key not in self.simulation_controls:
+            self.simulation_controls[key] = SimulationControl(model, data)
+        return self.simulation_controls[key]
 
     def valid_pose(self, value):
         points = self.polygon@rotation(value[2]).T+value[:2]
@@ -415,6 +429,8 @@ class PushSimulation:
     def predict(self, action, current, friction=.4):
         m, d = self.roll_model, self.roll_data
         mujoco.mj_copyData(d, m, self.data)
+        self.position_controller(m, d).copy_state_from(self.position_controller(
+            self.model, self.data))
         m.geom_friction[m.geom('tabletop_workspace').id, 0] = friction
         for name in ('wood_t_cap', 'wood_t_stem'):
             m.geom_friction[m.geom(name).id, 0] = friction
@@ -466,12 +482,12 @@ class PushSimulation:
     def step(self, target, duration, model=None, data=None):
         model = self.model if model is None else model
         data = self.data if data is None else data
-        initial = data.ctrl.copy()
+        controller = self.position_controller(model, data)
+        initial = np.asarray(controller.reference)
         steps = max(1, int(duration/model.opt.timestep))
         for index in range(steps):
             f = (index+1)/steps
-            data.ctrl[:] = initial+(target-initial)*self.interpolate(f)
-            mujoco.mj_step(model, data)
+            controller.step(initial+(target-initial)*self.interpolate(f))
             if data is self.data:
                 wood = model.body('wood_t').id
                 for contact in data.contact:
@@ -486,8 +502,10 @@ class PushSimulation:
                     self.record_callback(self)
 
     def move(self, target, model=None, data=None):
+        model = self.model if model is None else model
         data = self.data if data is None else data
-        duration = max(.15, np.max(np.abs(target-data.ctrl))/.55)
+        duration = max(.15, np.max(np.abs(target-self.position_controller(
+            model, data).reference))/.55)
         self.step(target, duration, model, data)
         self.step(target, .18, model, data)
 
@@ -498,7 +516,7 @@ class PushSimulation:
         for q in pushing:
             self.step(q, action.distance/len(pushing)/.015, model, data)
         # Hold at the pushing height for feedback; chunk boundaries do not retract the jaw.
-        self.step(data.ctrl.copy(), .12, model, data)
+        self.step(np.array(self.position_controller(model, data).reference), .12, model, data)
 
     def execute(self, action):
         self.phase = 'original gripper pushing'
@@ -574,6 +592,7 @@ class PushPlanner:
     """Plan ahead on independent physics; validate against actual state before use."""
     def __init__(self, sim):
         self.sim = copy.copy(sim)
+        self.sim.simulation_controls = {}
         self.sim.model = copy.copy(sim.model)
         self.sim.data = mujoco.MjData(self.sim.model)
         self.sim.arm = Arm(self.sim.model)
@@ -587,6 +606,8 @@ class PushPlanner:
     def capture(self, sim):
         # Called on the UI thread only when the previous planning job has finished.
         mujoco.mj_copyData(self.sim.data, self.sim.model, sim.data)
+        self.sim.position_controller(self.sim.model, self.sim.data).copy_state_from(
+            sim.position_controller(sim.model, sim.data))
 
     def plan(self, after=None):
         sim = self.sim

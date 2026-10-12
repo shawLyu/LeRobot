@@ -230,22 +230,23 @@ class PickPlanner:
 
     def simulate(self, plan):
         """No weld or scripted object movement: lift/transfer must emerge from jaw contact."""
+        from lerobot_arm_control.control.simulation_control import SimulationControl
+
         data = mujoco.MjData(self.model)
         mujoco.mj_resetDataKeyframe(self.model, data, 0)
         data.ctrl[:] = self.initial
+        controller = SimulationControl(self.model, data)
         for _ in range(100):
-            mujoco.mj_step(self.model, data)
+            controller.step(self.initial)
         phases = []
         for stage in plan['stages']:
             for segment in stage['segments']:
                 start, end = map(np.asarray, (segment['start'], segment['end']))
                 count = math.ceil(segment['seconds']/self.model.opt.timestep)
                 for tick in range(count):
-                    data.ctrl[:] = start+smooth_fraction((tick+1)/count)*(end-start)
-                    mujoco.mj_step(self.model, data)
+                    controller.step(start+smooth_fraction((tick+1)/count)*(end-start))
                 for _ in range(300):
-                    data.ctrl[:] = end
-                    mujoco.mj_step(self.model, data)
+                    controller.step(end)
             height = float(data.body('wood_t').xpos[2])
             phases.append({'stage': stage['stage'], 'wood_center_height_m': height,
                            'wood_pose': pose(data).tolist()})

@@ -1,4 +1,3 @@
-import hashlib
 import io
 import json
 from dataclasses import fields
@@ -35,9 +34,9 @@ def test_recorded_defaults_match_installed_official_lerobot():
 
 
 def test_shared_configuration_preserves_latest_measured_values():
-    # V22 passed two repeated response trials; optical alignment remains separate.
-    assert hashlib.sha256(json.dumps(POSITION_FEEDBACK, sort_keys=True).encode()).hexdigest() == (
-        "536351d7530f914a1d36857be638a6336f78dc71343133dcf6e7ff825ef33c63")
+    assert POSITION_FEEDBACK['name'] == 'shared-joint-pid-v1'
+    assert all(gains['kd'] > 0 for gains in POSITION_FEEDBACK['joints'].values())
+    assert 'locked_p_coefficients' not in POSITION_FEEDBACK['native_stream']
     assert TRAJECTORY == {"version": 1, "entry_speed_rad_s": .8, "min_entry_seconds": .35,
                           "ramp_seconds": 1., "control_hz": 60,
                           "reset_speed_rad_s": .5, "period_seconds": 4.}
@@ -66,8 +65,7 @@ def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
     manual.enable_all()
     assert set(bus.sync_read("Acceleration").values()) == {40}
     assert set(bus.sync_read("Goal_Velocity").values()) == {600}
-    assert bus.sync_read('P_Coefficient') == {j: POSITION_FEEDBACK[
-        'native_stream']['locked_p_coefficients'].get(j, 16) for j in JOINTS}
+    assert set(bus.sync_read('P_Coefficient').values()) == {16}
     manual.close()
     assert set(bus.sync_read("Acceleration").values()) == {0}
     assert set(bus.sync_read("Goal_Velocity").values()) == {0}
@@ -83,8 +81,8 @@ def test_controller_instances_do_not_share_mutable_compensation_parameters():
     first = PositionFeedback(POSITION_FEEDBACK, limits)
     second = PositionFeedback(POSITION_FEEDBACK, limits)
     first.profile["joints"]["elbow_flex"]["kp"] = 0
-    assert second.profile["joints"]["elbow_flex"]["kp"] == 2
-    assert POSITION_FEEDBACK["joints"]["elbow_flex"]["kp"] == 2
+    assert second.profile["joints"]["elbow_flex"]["kp"] == .25
+    assert POSITION_FEEDBACK["joints"]["elbow_flex"]["kp"] == .25
 
 
 @pytest.mark.parametrize("matches", [False, True])
@@ -129,6 +127,7 @@ def test_retired_cli_options_fail_before_starting_a_worker(monkeypatch, module_n
 
 @pytest.mark.parametrize("constructor,kwargs", [
     ("ManualControl", {"tracking_profile": None}),
+    ("ManualControl", {"position_feedback_profile": {}}),
     ("PushMotor", {"tracking_profile": None}),
     ("Circle", {"profile_path": "obsolete.json"}),
     ("Circle", {"period": 6}),

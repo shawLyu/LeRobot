@@ -171,10 +171,8 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     monkeypatch.setattr(follow_server, 'joint_ranges', lambda: limits)
 
     class Controller:
-        def __init__(self, bus, calibration, limits, raw_limits, *, position_feedback_profile):
+        def __init__(self, bus, calibration, limits, raw_limits):
             assert bus.arm.name == 'follower'
-            assert position_feedback_profile['name'] == 'native_position'
-            assert 'native_stream' not in position_feedback_profile
             self.limits = {joint: [-1, 1] for joint in JOINTS}
             self.stopped = {}
 
@@ -248,3 +246,18 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
         assert any(p.get('ok') is False and 'too far' in p['error'] for p in packets)
         assert 'too far' in packets[-1]['notice']
         assert packets[-1]['command_error'] in packets[-1]['notice']
+
+
+def test_follow_derives_pid_and_frequency_from_shared_config(tmp_path):
+    import json
+
+    from lerobot_arm_control.control.control_defaults import CONTROL, CONTROL_HZ
+
+    config = load_follow_config()
+    assert config['controller_profile'] == CONTROL['name']
+    assert config['hz'] == CONTROL_HZ == 60
+    config.pop('hz')
+    path = tmp_path/'follow.json'
+    path.write_text(json.dumps(config))
+    with pytest.raises(ValueError, match='control.json'):
+        load_follow_config(path)

@@ -2,10 +2,10 @@
 
 Default settings come from [Shared configuration](code-layout.md): the current shared profile, 60 Hz synchronous targets,
 RAM acceleration 40, velocity 600 ticks/s, and bounded position compensation.
-Native I/D, protections, and measured calibration retain their existing values.
-V22 responsive passed two supervised five-joint response comparisons against V14.
-Locked session P settings of 24 (pan/lift/wrists) and 32 (elbow) restore the previous
-values on close/release. Independent 1 mm Cartesian validation has not passed.
+Native P/I/D, protections, and measured calibration retain their existing values.
+The shared software PID is documented with its [control block diagram](lerobot-control.md).
+[Six-motor response measurements](control-performance.md) report joint-space performance;
+independent 1 mm Cartesian validation has not passed.
 
 ```sh
 ./scripts/lerobot-arm view arm --backend hardware --hardware-control

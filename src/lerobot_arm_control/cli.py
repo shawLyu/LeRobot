@@ -28,6 +28,7 @@ COMMANDS = {
     ("verify", "joints"): ("diagnostics.joint_precision", ()),
     ("verify", "circle"): ("planning.circle_simulation", ()),
     ("verify", "response"): ("diagnostics.response", ()),
+    ("verify", "motors"): ("diagnostics.motor_response", ()),
     ("verify", "tracking"): ("diagnostics.circle_tracking", ()),
     ("inspect", "tool-mount"): ("calibration.tool_mount", ()),
     ("serve", "arm"): ("runtime.realtime_server", ()),

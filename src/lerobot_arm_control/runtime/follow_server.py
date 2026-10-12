@@ -15,7 +15,6 @@ from lerobot_arm_control.control.follow import (
     JointFollower,
     initialization_target,
     load_follow_config,
-    native_position_profile,
 )
 from lerobot_arm_control.control.manual_control import ManualControl
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
@@ -80,8 +79,7 @@ def serve(args):
         limits = joint_ranges()
         if args.hardware_control:
             controller = ManualControl(follower_bus, calibration, limits,
-                                       follower_metadata['fingerprint']['raw_limits'],
-                                       position_feedback_profile=native_position_profile())
+                                       follower_metadata['fingerprint']['raw_limits'])
             stack.callback(controller.close)
             limits = [(max(bounds[0], controller.limits[joint][0]),
                        min(bounds[1], controller.limits[joint][1]))

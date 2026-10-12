@@ -27,8 +27,9 @@ silently fall back to simulation when those measurements are missing. The
 window starts held; press `E` to initialize and begin following. `--execute` remains an explicit
 alias for the hardware mode. Synthetic input selects an offline simulated follower.
 
-The `--simulate` preview is a kinematic visualization of commanded follower joint angles, not
-a physical torque/contact simulation. The hardware preview reads both buses but
+The `--simulate` preview runs local MuJoCo dynamics with the shared 60 Hz joint PID.
+It displays measured simulated motion rather than assigning follower target angles directly.
+The hardware preview reads both buses but
 writes no motor registers. The current white arm uses its own accepted six-joint
 calibration; temporary sharing is disabled. An incomplete or invalid white file is rejected.
 The simulation uses `data/tabletop/current-scene/` when available and falls back
@@ -95,11 +96,13 @@ storage locks and calibration were unchanged. Production speed remains 0.6 rad/s
 ```
 
 The window initially holds. Press `E` to initialize and enable the calibrated black follower.
-Fresh current-position goals are confirmed before torque is enabled; the existing
-servo position loop receives synchronized nominal targets. `controller_profile` in
-`configs/follow.json` is `native_position`: follow does not apply the V22 PI/feedforward
-or temporary P/acceleration/velocity tuning used by precision trajectories.
-Existing servo gains and motion settings remain unchanged, including when Lock=0.
+Fresh current-position goals are confirmed before torque is enabled. The follower uses
+`shared-joint-pid-v1` from `configs/control.json`, exactly as the other task controllers.
+Follow frequency is derived from that file (60 Hz); `follow.json` cannot override it.
+The PID sends bounded compensated position targets. RAM acceleration 40 and velocity
+600 ticks/s are restored on exit; existing native P/I/D remain untouched, including Lock=0.
+See [the controller and block diagram](lerobot-control.md) and
+[response measurements](control-performance.md).
 No EEPROM calibration, offsets, modes or travel limits are rewritten.
 Runtime records go to `logs/follow-latest.json`; choose `--log` to keep another run.
 They include initialization/hold/follow stages, feedback age, command errors,

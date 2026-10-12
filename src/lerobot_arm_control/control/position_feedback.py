@@ -1,4 +1,4 @@
-"""Bounded position correction around the native servo position loop.
+"""Shared bounded position PID around the native servo position loop.
 
 All quantities are model radians. Position correction preserves the nominal
 trajectory. Optional native P adjustments require locked, volatile storage and
@@ -37,9 +37,13 @@ class PositionFeedback:
         self.previous_reference = dict.fromkeys(JOINTS)
         self.reference_velocity = dict.fromkeys(JOINTS, 0.0)
         self.filtered_error = dict.fromkeys(JOINTS, 0.0)
+        self.previous_measurement = dict.fromkeys(JOINTS)
+        self.measured_velocity = dict.fromkeys(JOINTS, 0.0)
+        self.derivative = dict.fromkeys(JOINTS, 0.0)
         for parameters in self.profile["joints"].values():
             required = {"kp", "ki", "max_correction_rad", "correction_rate_rad_s"}
-            optional = {"velocity_feedforward_s", "error_filter_seconds", "error_deadband_rad",
+            optional = {"kd", "derivative_filter_seconds", "velocity_feedforward_s",
+                        "error_filter_seconds", "error_deadband_rad",
                         "friction_feedforward_rad", "friction_velocity_rad_s"}
             if (not required <= set(parameters) <= required | optional
                     or any(type(v) not in (int, float) or not math.isfinite(v) or v < 0
@@ -49,6 +53,9 @@ class PositionFeedback:
                     or parameters.get("velocity_feedforward_s", 0) > 0.5
                     or parameters.get("error_filter_seconds", 0) > 0.5
                     or parameters.get("error_deadband_rad", 0) > 0.02
+                    or parameters.get("kd", 0) > .5
+                    or (parameters.get("kd", 0) > 0 and
+                        not .01 <= parameters.get("derivative_filter_seconds", 0) <= .5)
                     or parameters.get("friction_feedforward_rad", 0) > 0.08
                     or (parameters.get("friction_feedforward_rad", 0) > 0
                         and not .01 <= parameters.get("friction_velocity_rad_s", 0) <= .15)):
@@ -60,13 +67,14 @@ class PositionFeedback:
             self.previous_reference[joint] = None
             self.reference_velocity[joint] = 0.0
             self.filtered_error[joint] = 0.0
+            self.previous_measurement[joint] = None
+            self.measured_velocity[joint] = self.derivative[joint] = 0.0
 
     def finish_reference(self, joints):
-        """Clear ramp memory while allowing the existing correction to unwind gradually."""
+        """End trajectory feedforward while retaining learned static load compensation."""
         for joint in joints:
-            correction = self.correction[joint]
-            self.reset([joint])
-            self.correction[joint] = correction
+            self.previous_reference[joint] = None
+            self.reference_velocity[joint] = 0.0
 
     def target(self, joint, reference, measured, elapsed):
         if not all(math.isfinite(v) for v in (reference, measured, elapsed)) or elapsed < 0:
@@ -75,6 +83,18 @@ class PositionFeedback:
         # still handles connection failure; this is anti-windup, not an error abort.
         dt = min(elapsed, 0.05)
         p = self.profile["joints"][joint]
+        previous_measurement = self.previous_measurement[joint]
+        self.previous_measurement[joint] = measured
+        # Derivative on measurement avoids a kick on target steps. Estimate in
+        # model radians, so reversed encoder calibrations have the correct sign.
+        if elapsed > .1:
+            self.measured_velocity[joint] = 0.0
+        elif previous_measurement is not None and elapsed > 0:
+            velocity = (measured-previous_measurement)/elapsed
+            tau = p.get('derivative_filter_seconds', .05)
+            alpha = -math.expm1(-dt/tau) if tau else 1.
+            self.measured_velocity[joint] += alpha*(velocity-self.measured_velocity[joint])
+        self.derivative[joint] = -p.get('kd', 0)*self.measured_velocity[joint]
         low, high = self.limits[joint]
         reference = max(low, min(high, reference))
         previous = self.previous_reference[joint]
@@ -101,13 +121,14 @@ class PositionFeedback:
             alpha = -math.expm1(-dt / filter_seconds)
             self.filtered_error[joint] += alpha * (error - self.filtered_error[joint])
             error = self.filtered_error[joint]
-        proposed = self.integral[joint] + p["ki"] * error * dt
-        demanded = p["kp"] * error + proposed + feedforward
+        proposed = self.integral[joint] + p["ki"] * error * (dt if elapsed <= .1 else 0)
+        demanded = p["kp"] * error + proposed + self.derivative[joint] + feedforward
         # Freeze accumulation when it would push farther into magnitude/native
         # saturation. Allow unwinding when the error changes direction.
         if not ((demanded > upper and error > 0) or (demanded < lower and error < 0)):
             self.integral[joint] = max(-bound, min(bound, proposed))
-        demanded = max(lower, min(upper, p["kp"] * error + self.integral[joint] + feedforward))
+        demanded = max(lower, min(upper, p["kp"] * error + self.integral[joint]
+                                  + self.derivative[joint] + feedforward))
         step = p["correction_rate_rad_s"] * dt
         current = self.correction[joint]
         current += max(-step, min(step, demanded - current))
@@ -116,4 +137,5 @@ class PositionFeedback:
 
     def status(self):
         return {"profile": self.profile, "correction_rad": dict(self.correction),
-                "integral_rad": dict(self.integral)}
+                "integral_rad": dict(self.integral), "derivative_rad": dict(self.derivative),
+                "measured_velocity_rad_s": dict(self.measured_velocity)}

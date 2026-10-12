@@ -8,7 +8,8 @@ from pathlib import Path
 
 import mujoco
 
-from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
+from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, CONTROL_HZ
+from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.runtime.realtime_server import next_deadline, receive, send
 from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
@@ -36,11 +37,13 @@ def serve(args):
         data.ctrl[:] = data.qpos
         mujoco.mj_forward(model, data)
     commands, disconnected = queue.Queue(maxsize=16), threading.Event()
+    controller = SimulationControl(model, data)
+    reference = data.ctrl.copy()
     send({"type": "hello", "backend": "mujoco", "joints": JOINTS,
           "control_config_sha256": CONTROL_CONFIG_SHA256, "units": "radians",
           "ranges": ranges, "raw_limits": None, "fingerprint": None,
           "hardware_motion_enabled": False, "hardware_control": False,
-          "hz": args.hz, "control_hz": circle.control_hz if circle else None,
+          "hz": args.hz, "control_hz": CONTROL_HZ,
           "circle_available": circle is not None})
     threading.Thread(target=receive, args=(commands, disconnected), daemon=True).start()
     sequence = cycles = 0
@@ -65,9 +68,10 @@ def serve(args):
                 elif operation == "ping":
                     result = "pong"
                 elif operation == "target":
-                    data.ctrl[:] = validate_target(command.get("qpos"), data.ctrl, ranges)
+                    reference[:] = validate_target(command.get("qpos"), reference, ranges)
                 elif operation == "hold":
-                    data.ctrl[:] = data.qpos
+                    reference[:] = data.qpos
+                    controller.reset(reference)
                 else:
                     raise ValueError("operation unavailable for simulation")
                 last_command, watchdog = time.monotonic(), False
@@ -76,25 +80,27 @@ def serve(args):
             except (ValueError, RuntimeError) as exc:
                 send({"type": "ack", "id": command_id, "ok": False, "error": str(exc)})
         if now - last_command > WATCHDOG_SECONDS and not watchdog:
-            data.ctrl[:] = data.qpos
+            reference[:] = data.qpos
+            controller.reset(reference)
             if circle:
                 circle.cancel("heartbeat timeout")
             watchdog = True
         steps = min(20, int((now - last_physics) / model.opt.timestep))
         for _ in range(steps):
             if circle and circle.active and last_physics + model.opt.timestep >= next_control:
-                data.ctrl[:] = circle.sample(last_physics + model.opt.timestep)
+                reference[:] = circle.sample(last_physics + model.opt.timestep)
                 cycles += 1
                 next_control = next_deadline(next_control, last_physics + model.opt.timestep,
                                              1 / circle.control_hz)
-            mujoco.mj_step(model, data)
+            controller.step(reference)
             last_physics += model.opt.timestep
         if steps and now - last_physics > .1:
             last_physics = now
         if now >= next_state:
             send({"type": "state", "seq": sequence, "time_unix_ns": time.time_ns(),
                   "qpos": data.qpos.tolist(), "qvel": data.qvel.tolist(),
-                  "target": data.ctrl.tolist(), "sim_time": data.time,
+                  "target": reference.tolist(), "command": data.ctrl.tolist(),
+                  "controller_profile": controller.feedback.profile['name'], "sim_time": data.time,
                   "watchdog_hold": watchdog, "control_cycles": cycles,
                   "circle": circle.status(time.monotonic()) if circle else None})
             sequence += 1

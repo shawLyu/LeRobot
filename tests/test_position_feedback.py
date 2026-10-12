@@ -46,6 +46,36 @@ def test_nonfinite_input_rejected_and_long_tick_does_not_accumulate_unboundedly(
     assert controller.correction["elbow_flex"] <= 0.08 * 0.05
 
 
+def test_derivative_damps_measurement_but_has_no_reference_step_kick():
+    controller = feedback()
+    controller.profile['joints']['elbow_flex'].update(kp=0, ki=0, kd=.05,
+                                                   derivative_filter_seconds=.08)
+    controller.target('elbow_flex', 0, 0, 1/60)
+    assert controller.target('elbow_flex', .5, 0, 1/60) == .5
+    command = controller.target('elbow_flex', .5, .01, 1/60)
+    assert command < .5
+    assert 0 < controller.measured_velocity['elbow_flex'] < .6
+    integral = controller.integral['elbow_flex']
+    controller.target('elbow_flex', .5, .02, 2.)
+    assert controller.derivative['elbow_flex'] == 0
+    assert controller.integral['elbow_flex'] == integral
+    controller.reset()
+    assert controller.previous_measurement['elbow_flex'] is None
+
+
+def test_pid_converges_against_loaded_inner_loop_with_quantized_feedback():
+    from lerobot_arm_control.control.control_defaults import POSITION_FEEDBACK
+
+    controller = PositionFeedback(POSITION_FEEDBACK, {j: [-1., 1.] for j in JOINTS})
+    q = 0.
+    for _ in range(1800):
+        measured = round(q/.0015)*.0015
+        command = controller.target('elbow_flex', .3, measured, 1/60)
+        q += (command-q-.04)/.15/60
+    assert abs(q-.3) < .004
+    assert abs(controller.integral['elbow_flex']-.04) < .004
+
+
 def test_velocity_feedforward_reduces_lag_without_encoder_derivative():
     import numpy as np
 
@@ -99,14 +129,14 @@ def test_encoder_deadband_does_not_integrate_small_stationary_errors():
     assert controller.integral["elbow_flex"] == 0
 
 
-def test_finishing_ramp_unwinds_correction_within_existing_rate_limit():
+def test_finishing_ramp_preserves_integral_for_static_load_compensation():
     controller = feedback()
     joint = 'elbow_flex'
     controller.integral[joint] = .03
     controller.correction[joint] = .02
     controller.reference_velocity[joint] = .1
     controller.finish_reference([joint])
-    assert controller.integral[joint] == 0
+    assert controller.integral[joint] == .03
     assert controller.reference_velocity[joint] == 0
     assert controller.correction[joint] == .02
     command = controller.target(joint, 0, 0, 1/60)

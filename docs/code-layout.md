@@ -5,23 +5,22 @@ Remote runtime root: `lerobot:/home/xy/Research/lerobot`.
 Shared control source, remote tests, and settings are deployed from the local copy.
 Simulation, planning, and display source remain local.
 
-The shared precision-control configuration is `configs/control.json`, using V22 responsive after
-two successful five-joint speed/error comparisons against V14:
+The sole control configuration is `configs/control.json`, profile `shared-joint-pid-v1`.
 
 | Section | Contents |
 | --- | --- |
-| `native_defaults` | Native LeRobot 0.6.1 settings, 60 Hz, two read retries |
-| `position_feedback` | Per-joint PI and velocity/friction compensation; first-five error filter 80 ms and correction rate 0.24 rad/s; RAM acceleration 40, velocity 600 ticks/s; locked session P 24/32 restored on exit |
-| `trajectory` | Approach peak 0.8 rad/s, minimum approach 0.35 s; Reset 0.5 rad/s; circle ramp 1 s, period 4 s |
+| `native_defaults` | Upstream reference settings; 60 Hz and two feedback retries |
+| `position_feedback` | Six independent bounded PID channels; filtered measurement derivative, conditional integral antiwindup; RAM acceleration 40 and velocity 600 restored on exit |
+| `trajectory` | Approach 0.8 rad/s, minimum 0.35 s; Reset 0.5 rad/s; circle ramp 1 s and period 4 s |
 
-`ManualControl`, `PushMotor`, headless Reset, window control, Push-T, and T pick/place load this file by default.
-The follow worker selects `native_position` from `configs/follow.json`: zero software
-compensation and no temporary servo tuning. It uses the same calibrated controller,
-fresh-goal enabling, fault handling and watchdog, with its own 30 Hz bounded mirroring.
-`joint_path.py` evaluates locally checked finite five-joint paths on the remote
-control clock. `./scripts/lerobot-arm verify response` performs local collision checks and
-records speed/tracking comparisons; this script and its MuJoCo analysis stay local.
-Local MuJoCo circle playback shares nominal trajectory timing with remote hardware; simulation does not apply hardware feedback compensation.
+`ManualControl` owns hardware feedback, enabling, faults, hold and native RAM restoration.
+`PositionFeedback` implements the shared PID. `SimulationControl` runs that same algorithm
+at 60 Hz on MuJoCo joint actuators. Predictive simulation copies its controller state.
+Manual, Reset, circle, finite paths, follow, Push-T and pick/place all use these adapters.
+`follow.json` specifies role/mapping/initialization only; independent controller and frequency overrides are rejected.
+`diagnostics/motor_response.py` tests all six motors through the normal controller;
+`response_metrics.py` validates the response windows. Plotting and MuJoCo stay local.
+See [the detailed design](lerobot-control.md).
 Task contact speed, vision thresholds, and display frame rate remain task parameters, distinct from motor frequency.
 
 Controllers reject separate feedback/trajectory parameter files, period overrides, and native-baseline overrides.

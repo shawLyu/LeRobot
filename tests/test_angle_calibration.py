@@ -112,3 +112,21 @@ def test_unified_window_preview_uses_actual_feedback_without_writes():
     assert result["executed"] is False
     with pytest.raises(ValueError):
         preview_joint_target(ReadOnlyBus(), "shoulder_pan", 40)
+
+
+def test_identity_mismatch_names_arm_fields_and_joints_without_rewriting(tmp_path):
+    import json
+
+    path = tmp_path/'arm1_mujoco.json'
+    saved = {'version': 1, 'fingerprint': {'homing_offsets': {'gripper': 1844},
+                                         'raw_limits': {'gripper': [1512, 2759]}},
+             'points': {}}
+    original = json.dumps(saved)
+    path.write_text(original)
+    changed = {'homing_offsets': {'gripper': -1770}, 'raw_limits': {'gripper': [1353, 2652]}}
+    with pytest.raises(ValueError) as caught:
+        AngleCalibration(path, changed)
+    message = str(caught.value)
+    assert all(word in message for word in ['arm1_mujoco.json', 'homing_offsets',
+                                            'raw_limits', 'gripper', 'recalibrate'])
+    assert path.read_text() == original

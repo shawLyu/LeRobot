@@ -1,0 +1,214 @@
+{
+  "version": 1,
+  "source": "hardware",
+  "execute": false,
+  "config": {
+    "version": 1,
+    "leader": "arm1",
+    "follower": "follower",
+    "max_speed_rad_s": 0.6,
+    "max_sample_age_seconds": 0.25,
+    "leader_trigger_degrees": [
+      0,
+      118
+    ],
+    "follower_gripper_degrees": [
+      0,
+      90
+    ],
+    "trigger_range_measured": true,
+    "trigger_range_source": "User corrected white arm1 maximum travel to 118 degrees on 2026-10-11; zero endpoint retained at 0 degrees; 0/15/30 are calibration reference points",
+    "simulation_shared_calibration": false,
+    "initialization": {
+      "max_correction_degrees": 2,
+      "margin_degrees": 0.5,
+      "target_tolerance_degrees": 0.25,
+      "timeout_seconds": 5
+    },
+    "controller_profile": "shared-joint-pid-v1",
+    "hz": 60
+  },
+  "hello": {
+    "version": 1,
+    "type": "hello",
+    "backend": "hardware",
+    "joints": [
+      "shoulder_pan",
+      "shoulder_lift",
+      "elbow_flex",
+      "wrist_flex",
+      "wrist_roll",
+      "gripper"
+    ],
+    "hardware_control": false,
+    "control_config_sha256": "45030baf423cc4f8069fcfc1c343c2f511f3eea247ab33f6d24044e35e52fc1f",
+    "config": {
+      "version": 1,
+      "leader": "arm1",
+      "follower": "follower",
+      "max_speed_rad_s": 0.6,
+      "max_sample_age_seconds": 0.25,
+      "leader_trigger_degrees": [
+        0,
+        118
+      ],
+      "follower_gripper_degrees": [
+        0,
+        90
+      ],
+      "trigger_range_measured": true,
+      "trigger_range_source": "User corrected white arm1 maximum travel to 118 degrees on 2026-10-11; zero endpoint retained at 0 degrees; 0/15/30 are calibration reference points",
+      "simulation_shared_calibration": false,
+      "initialization": {
+        "max_correction_degrees": 2,
+        "margin_degrees": 0.5,
+        "target_tolerance_degrees": 0.25,
+        "timeout_seconds": 5
+      },
+      "controller_profile": "shared-joint-pid-v1",
+      "hz": 60
+    },
+    "leader": {
+      "arm": "arm1",
+      "fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            699,
+            3416
+          ],
+          "shoulder_lift": [
+            795,
+            3280
+          ],
+          "elbow_flex": [
+            807,
+            3094
+          ],
+          "wrist_flex": [
+            794,
+            3200
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            1512,
+            2759
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -2030,
+          "shoulder_lift": 1084,
+          "elbow_flex": 924,
+          "wrist_flex": -1986,
+          "wrist_roll": 1818,
+          "gripper": 1844
+        },
+        "phase": {
+          "shoulder_pan": 76,
+          "shoulder_lift": 12,
+          "elbow_flex": 76,
+          "wrist_flex": 76,
+          "wrist_roll": 76,
+          "gripper": 76
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "path": "/home/xy/Research/lerobot/data/calibration/arm1_mujoco.json",
+      "sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "mode": "independent"
+    },
+    "follower": {
+      "arm": "follower",
+      "fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            844,
+            3440
+          ],
+          "shoulder_lift": [
+            809,
+            3238
+          ],
+          "elbow_flex": [
+            773,
+            3126
+          ],
+          "wrist_flex": [
+            862,
+            3192
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            1441,
+            2982
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -1214,
+          "shoulder_lift": 1932,
+          "elbow_flex": 1070,
+          "wrist_flex": -1980,
+          "wrist_roll": -1910,
+          "gripper": -1632
+        },
+        "phase": {
+          "shoulder_pan": 12,
+          "shoulder_lift": 12,
+          "elbow_flex": 12,
+          "wrist_flex": 12,
+          "wrist_roll": 12,
+          "gripper": 12
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "path": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
+      "sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "mode": "independent"
+    }
+  },
+  "exit_reason": "duration_completed",
+  "error": null,
+  "issues": [],
+  "frame_count": 110
+}

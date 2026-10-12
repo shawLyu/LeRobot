@@ -50,10 +50,12 @@ def receive(commands, disconnected):
         disconnected.set()
 
 
-def save_control_trace(path, frames, gc_pauses=()):
+def save_control_trace(path, frames, gc_pauses=(), metadata=None):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({"version": 1, "control_hz": CONTROL_HZ,
-                                "frames": list(frames), "gc_pauses": list(gc_pauses)},
+                                "frames": list(frames), "gc_pauses": list(gc_pauses),
+                                "control_config_sha256": CONTROL_CONFIG_SHA256,
+                                "metadata": metadata or {}},
                                separators=(",", ":")) + "\n")
 
 
@@ -87,6 +89,7 @@ def serve(args):
         control_events = deque(maxlen=256)
         stack.callback(save_control_events, control_events)
         trace_path = getattr(args, "control_log", None)
+        trace_metadata = {}
         if trace_path:
             import gc
 
@@ -104,7 +107,7 @@ def serve(args):
 
             gc.callbacks.append(gc_timing)
             stack.callback(gc.callbacks.remove, gc_timing)
-            stack.callback(save_control_trace, trace_path, trace, gc_pauses)
+            stack.callback(save_control_trace, trace_path, trace, gc_pauses, trace_metadata)
         controller = None
         circle = None
         joint_path = None
@@ -115,6 +118,18 @@ def serve(args):
 
         arm = load_arms()[args.arm]
         bus = stack.enter_context(connected(arm))
+        if trace_path:
+            def capture_final_parameters():
+                try:
+                    trace_metadata['final_native_parameters'] = {
+                        r: bus.sync_read(r, normalize=False) for r in (
+                            'P_Coefficient', 'I_Coefficient', 'D_Coefficient', 'Lock',
+                            'Acceleration', 'Goal_Velocity', 'Torque_Enable')}
+                except Exception as exc:
+                    trace_metadata['final_parameters_error'] = str(exc)
+            # Registered before controller.close: capture after RAM restoration,
+            # while the bus is still connected, then persist after disconnect.
+            stack.callback(capture_final_parameters)
         low = bus.sync_read("Min_Position_Limit", normalize=False)
         high = bus.sync_read("Max_Position_Limit", normalize=False)
         limits = {name: [int(low[name]), int(high[name])] for name in JOINTS}
@@ -150,6 +165,10 @@ def serve(args):
                     'follower_mujoco.json').read_bytes()).hexdigest() if controller else None),
               'joint_angle_mapping': ({joint: calibration.fit(joint) for joint in JOINTS}
                                       if controller else None),
+              'native_parameters': ({register: bus.sync_read(register, normalize=False)
+                                     for register in ('P_Coefficient', 'I_Coefficient',
+                                                      'D_Coefficient', 'Lock', 'Acceleration',
+                                                      'Goal_Velocity')} if controller else None),
               "hardware_control": controller is not None,
               "voltage_limits": ({register: bus.sync_read(register, normalize=False)
                                   for register in ("Min_Voltage_Limit", "Max_Voltage_Limit")}
@@ -329,6 +348,7 @@ def serve(args):
                 write_finished = time.monotonic()
                 if trace_path:
                     trace.append({"time_monotonic": controller.last_tick,
+                                  "command_id": last_control_id,
                                   "raw": dict(raw), "goal_raw": dict(controller.sent),
                                   "nominal_qpos": dict(controller.targets),
                                   "telemetry": {k: dict(v) for k, v in telemetry.items()},

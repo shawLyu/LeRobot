@@ -2,12 +2,16 @@
   "version": 1,
   "leader": "arm1",
   "follower": "follower",
-  "controller_profile": "native_position",
-  "hz": 30,
   "max_speed_rad_s": 0.6,
   "max_sample_age_seconds": 0.25,
-  "leader_trigger_degrees": [0, 118],
-  "follower_gripper_degrees": [0, 90],
+  "leader_trigger_degrees": [
+    0,
+    118
+  ],
+  "follower_gripper_degrees": [
+    0,
+    90
+  ],
   "trigger_range_measured": true,
   "trigger_range_source": "User corrected white arm1 maximum travel to 118 degrees on 2026-10-11; zero endpoint retained at 0 degrees; 0/15/30 are calibration reference points",
   "simulation_shared_calibration": false,

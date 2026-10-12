@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-12",
+  "command": "./scripts/lerobot-arm demo follow --duration 6",
+  "config_sha256": "626a268d0df7bfa4754f006aad399c08861f409580377e877e845dbcd0017ce2",
+  "exit_reason": "duration_completed",
+  "error": null,
+  "issues": [],
+  "frames": 136,
+  "transitions": [
+    {
+      "time_seconds": 1.805572209006641,
+      "stage": "held",
+      "notice": "Follower held: {'shoulder_pan': 'pre-existing torque: press E to resume', 'shoulder_lift': 'pre-existing torque: press E to resume', 'elbow_flex': 'pre-existing torque: press E to resume', 'wrist_flex': 'pre-existing torque: press E to resume', 'wrist_roll': 'pre-existing torque: press E to resume', 'gripper': 'pre-existing torque: press E to resume'}"
+    },
+    {
+      "time_seconds": 2.388327874999959,
+      "stage": "following",
+      "notice": "Initialized; following"
+    },
+    {
+      "time_seconds": 4.390848750015721,
+      "stage": "held",
+      "notice": "Follower held: {'gripper': 'follow paused: hold', 'shoulder_lift': 'follow paused: hold', 'wrist_roll': 'follow paused: hold', 'wrist_flex': 'follow paused: hold', 'shoulder_pan': 'follow paused: hold', 'elbow_flex': 'follow paused: hold'}"
+    }
+  ],
+  "first_pose_degrees": [
+    -3.887323943661972,
+    -100.34188034188034,
+    86.01769911504424,
+    38.95238095238095,
+    -8.791540785498489,
+    -12.032085561497325
+  ],
+  "last_pose_degrees": [
+    -2.3661971830985915,
+    -99.82905982905983,
+    86.54867256637166,
+    55.142857142857146,
+    -12.235649546827794,
+    24.144385026737968
+  ],
+  "postcheck": {
+    "follower": {
+      "angles_degrees": [
+        -2.37,
+        -99.83,
+        86.55,
+        55.14,
+        -12.24,
+        24.14
+      ],
+      "torque": {
+        "shoulder_pan": 1,
+        "shoulder_lift": 1,
+        "elbow_flex": 1,
+        "wrist_flex": 1,
+        "wrist_roll": 1,
+        "gripper": 1
+      },
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7"
+    },
+    "arm1": {
+      "angles_degrees": [
+        -2.55,
+        -107.48,
+        89.83,
+        54.92,
+        -12.09,
+        30.38
+      ],
+      "torque": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963"
+    }
+  }
+}

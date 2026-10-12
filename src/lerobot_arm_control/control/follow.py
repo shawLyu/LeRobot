@@ -28,7 +28,10 @@ def load_follow_config(path=None):
                                   for v in values) or values[0] >= values[1]):
             raise ValueError(f'invalid follow range: {name}')
     initialization = config['initialization']
-    for name, maximum in (('max_correction_degrees', 2), ('margin_degrees', 1),
+    if type(initialization['auto_start']) is not bool:
+        raise ValueError('initialization auto_start must be boolean')
+    for name, maximum in (('max_correction_degrees', 2),
+                          ('max_closed_gripper_recovery_degrees', 5), ('margin_degrees', 1),
                           ('target_tolerance_degrees', .5), ('timeout_seconds', 10)):
         value = initialization[name]
         if (type(value) not in (int, float) or not math.isfinite(value)
@@ -42,7 +45,6 @@ def load_follow_config(path=None):
 def initialization_target(config, measured, limits, encoder_limits):
     """Recover only small model-limit violations, always within physical travel."""
     target = JointFollower.validate(measured)
-    maximum = math.radians(config['initialization']['max_correction_degrees'])
     margin = math.radians(config['initialization']['margin_degrees'])
     for index, joint in enumerate(JOINTS):
         value = target[index]
@@ -50,10 +52,31 @@ def initialization_target(config, measured, limits, encoder_limits):
             raise ValueError(f'{joint}: outside calibrated encoder travel; reposition manually')
         low, high = limits[index]
         if value < low or value > high:
+            # The physical jaw closes beyond the CAD lower stop. Permit only
+            # a small opening recovery; arm joints and upper-stop recovery
+            # retain the original two-degree bound.
+            bound = ('max_closed_gripper_recovery_degrees'
+                     if joint == 'gripper' and value < low else 'max_correction_degrees')
+            maximum = math.radians(config['initialization'][bound])
             if max(low-value, value-high)+margin > maximum or high-low <= 2*margin:
                 raise ValueError(f'{joint}: too far outside model range; reposition manually')
             target[index] = low+margin if value < low else high-margin
     return target
+
+
+class StartupFollow:
+    """Consume startup permission once; pauses and faults cancel it permanently."""
+
+    def __init__(self, enabled):
+        self.pending = enabled
+
+    def update(self, *, ready, inhibited=False, manual_command=False):
+        if inhibited or manual_command:
+            self.pending = False
+        if self.pending and ready:
+            self.pending = False
+            return True
+        return False
 
 
 class JointFollower:

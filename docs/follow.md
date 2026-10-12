@@ -8,8 +8,11 @@ Run these commands on the local MuJoCo workstation. Close the tabletop viewer an
 arm-calibration window first: each USB bus has one exclusive owner.
 
 ```sh
-# Real white leader -> real black follower; E initializes/starts, Space holds.
+# Real white leader -> real black follower; automatically initializes/starts; Space holds.
 ./scripts/lerobot-arm demo follow
+
+# Start held instead; press E when ready.
+./scripts/lerobot-arm demo follow --start-held
 
 # Read-only real leader input -> simulated black follower.
 ./scripts/lerobot-arm demo follow --simulate
@@ -24,7 +27,9 @@ arm-calibration window first: each USB bus has one exclusive owner.
 The default command selects the physical follower and requires independent
 six-joint calibration of both arms and measured trigger travel. It does not
 silently fall back to simulation when those measurements are missing. The
-window starts held; press `E` to initialize and begin following. `--execute` remains an explicit
+client automatically initializes and begins following once its window is ready and focused
+and fresh feedback is available. This happens once per launch. Set `--start-held`
+or `initialization.auto_start: false` to require `E` at startup. `--execute` remains an explicit
 alias for the hardware mode. Synthetic input selects an offline simulated follower.
 
 The `--simulate` preview runs local MuJoCo dynamics with the shared 60 Hz joint PID.
@@ -35,10 +40,13 @@ calibration; temporary sharing is disabled. An incomplete or invalid white file 
 The simulation uses `data/tabletop/current-scene/` when available and falls back
 to the versioned `configs/scenes/tabletop-current.json` for a fresh checkout.
 
-Connection initializes the displayed poses from live encoder feedback. `E` starts/resumes
+Connection initializes the displayed poses from live encoder feedback. Automatic startup or `E` starts/resumes
 the follower from a fresh current-position hold. Small model-limit violations are
 corrected at the normal speed limit to 0.5 degrees inside the usable range; the
-entire correction must be at most 2 degrees.
+entire correction must be at most 2 degrees for arm joints and upper-limit recovery.
+The calibrated physical gripper can close below the CAD lower stop (about −12.43°
+versus −10°). Only this lower-stop case allows up to 5° of opening recovery,
+at the same bounded speed and within calibrated encoder travel. It uses the same automatic startup or explicit `E` initialization.
 Initialization does not move the other joints or remap the follower gripper. Once all
 commanded targets are inside their limits and within 0.25 degrees of the initialization
 target, following begins from that command, preserving the speed bound. This is a
@@ -62,6 +70,15 @@ feedback restores the display while motion remains held until another `E`.
 If the remote worker exits, the window displays the cause and remains open;
 close it and relaunch after resolving the connection or motor fault.
 
+Automatic startup was verified on both real buses on 2026-10-12: the client entered
+following without an E keypress, then held when the window lost focus. The six-second
+session completed without command errors or stream-delay events. Post-checks confirmed
+all six black motors held with torque on, all six white motors remained torque off,
+no motor faults, and unchanged calibration hashes. The compact record is
+[`automatic-initialization.json`](measurements/pid-2026-10-12/automatic-initialization.json).
+Queued heartbeat timestamps cannot rewind the completed initialization timestamp;
+command expiry is checked at processing time, including after motor preflight.
+
 ## Enable the physical follower after independent measurements
 
 White-arm independent alignment is complete (6/6). The user corrected the released/fully
@@ -69,7 +86,7 @@ pressed trigger endpoints to 0/118 degrees on 2026-10-11, and the current
 follow configuration uses this range. Both arms require their own valid mapping.
 The latest read-only capture recorded follower `shoulder_lift` at -100.85 degrees,
 just below its -100-degree model limit. This small violation is eligible for the
-default bounded initialization after `E`.
+default bounded initialization at startup.
 
 On 2026-10-11, real-bus validation confirmed enabling with all six storage locks
 still at 0, native goal writes and actual multi-joint motion. A subsequent short

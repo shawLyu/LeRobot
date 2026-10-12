@@ -33,7 +33,8 @@ def test_invalid_follow_modes_fail_before_starting_a_worker(monkeypatch, argumen
     assert error.value.code == 2
 
 
-@pytest.mark.parametrize('problem', ['delay', 'worker_exit', 'send_failure'])
+@pytest.mark.parametrize('problem', ['delay', 'worker_exit', 'send_failure',
+                                     'auto_start', 'start_held', 'space', 'unfocused'])
 def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
         monkeypatch, tmp_path, problem):
     import json
@@ -62,7 +63,8 @@ def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
             assert kwargs['hardware_control'] is True
 
         def snapshot(self):
-            age = (.4 if viewers and viewers[0].frames < 2 else 0)
+            age = (.4 if problem in ('delay', 'send_failure')
+                   and viewers and viewers[0].frames < 2 else 0)
             return ({'config': config, 'leader': {'mode': 'independent'}},
                     packet, time.monotonic()-age, 1, None)
 
@@ -83,12 +85,17 @@ def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
         def is_running(self):
             return self.frames < 3
 
+        def is_focused(self):
+            return problem != 'unfocused'
+
         def set_texts(self, texts):
             self.text = texts[0][2]
 
         def sync(self, path):
-            if self.frames == 0:
+            if self.frames == 0 and problem in ('delay', 'worker_exit', 'send_failure'):
                 self.callback(69)  # E while feedback is delayed must not start motors.
+            if self.frames == 0 and problem == 'space':
+                self.callback(32)
             self.frames += 1
 
         def close(self):
@@ -99,13 +106,17 @@ def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
     args = SimpleNamespace(log=tmp_path/'follow.json', source='hardware', execute=True,
                            snapshot=workspace_root()/'data/tabletop/current-scene',
                            host='unused', remote_root='unused', headless=False,
-                           duration=None, screenshot=None, auto=False)
+                           duration=None, screenshot=None, auto=False,
+                           start_held=problem == 'start_held')
     follow_client.run(args)
     result = json.loads(args.log.read_text())
     assert len(result['frames']) == 3
     assert result['exit_reason'] == 'window_closed'
-    assert 'resume' not in commands
+    assert commands.count('resume') == (1 if problem == 'auto_start' else 0)
     assert closed == [True]
+    if problem in ('auto_start', 'start_held', 'space', 'unfocused'):
+        assert result['error'] is None
+        return
     if problem == 'delay':
         assert commands.count('hold') == 1
         assert 'Feedback recovered; held' in result['frames'][-1]['notice']

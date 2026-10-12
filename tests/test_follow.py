@@ -157,14 +157,20 @@ def test_real_execution_rejects_unmeasured_trigger_before_any_controller_writes(
 
 
 @pytest.mark.parametrize('initialization',
-                         ['inside', 'recover', 'recover_lag', 'timeout', 'too_far'])
+                         ['inside', 'slow_enable', 'recover', 'recover_lag', 'timeout', 'too_far'])
 def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
         remote, monkeypatch, initialization):
     config, _, packets = remote
     config['trigger_range_measured'] = True
     events = []
     limits = [(-1, 1)]*6
-    if initialization != 'inside':
+    clock, command_queues = [100.], []
+    if initialization == 'slow_enable':
+        import time
+
+        monkeypatch.setattr(follow_server, 'time', SimpleNamespace(
+            monotonic=lambda: clock[0], time_ns=time.time_ns, sleep=lambda _: None))
+    if initialization not in ('inside', 'slow_enable'):
         limits[1] = (.35 if initialization == 'too_far' else .315, 1)
     if initialization == 'timeout':
         config['initialization']['timeout_seconds'] = 1e-9
@@ -178,6 +184,12 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
 
         def enable_all(self):
             events.append('enable_follower')
+            if initialization == 'slow_enable':
+                clock[0] += .8
+                command_queues[0].put((clock[0]-.4, {'version': 1, 'op': 'ping', 'id': 2}))
+
+        def heartbeat(self):
+            pass
 
         def target(self, joint, angle):
             assert events[0] == 'enable_follower'
@@ -199,11 +211,11 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     class Thread:
         def __init__(self, target, args, daemon):
             self.commands, self.disconnected = args
+            command_queues.append(self.commands)
 
         def start(self):
-            import time
-
-            self.commands.put((time.monotonic(), {'version': 1, 'op': 'resume', 'id': 1}))
+            self.commands.put((follow_server.time.monotonic(),
+                               {'version': 1, 'op': 'resume', 'id': 1}))
 
     # A single complete cycle ends with client disconnect, including cleanup.
     def send(packet):
@@ -227,7 +239,7 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     with pytest.raises(StopIteration, match='disconnected'):
         follow_server.serve(SimpleNamespace(config=None, hardware_control=True))
     assert events[-1] == 'close_hold'
-    if initialization in ('inside', 'recover', 'recover_lag'):
+    if initialization in ('inside', 'slow_enable', 'recover', 'recover_lag'):
         assert all(joint in events for joint in JOINTS)
         assert packets[-1]['following'] is True
         assert packets[-1]['control']['control_hz'] == config['hz']
@@ -260,4 +272,74 @@ def test_follow_derives_pid_and_frequency_from_shared_config(tmp_path):
     path = tmp_path/'follow.json'
     path.write_text(json.dumps(config))
     with pytest.raises(ValueError, match='control.json'):
+        load_follow_config(path)
+
+
+@pytest.mark.parametrize('closed_degrees', [-12.43, -14.])
+def test_closed_physical_gripper_initializes_by_bounded_opening_only(closed_degrees):
+    from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
+
+    config = load_follow_config()
+    measured = [0.]*5+[math.radians(closed_degrees)]
+    limits = joint_ranges()
+    encoders = {j: (-3., 3.) for j in JOINTS}
+    encoders['gripper'] = tuple(map(math.radians, (-14.5, 100)))
+    goal = initialization_target(config, measured, limits, encoders)
+    assert goal[:5] == measured[:5]
+    assert goal[5] == pytest.approx(limits[5][0]+math.radians(.5))
+    assert 0 < goal[5]-measured[5] <= math.radians(5)
+    mapping = JointFollower(config, measured, limits)
+    previous = measured[5]
+    for _ in range(10):
+        target = mapping.step(goal, 1/60, map_trigger=False)
+        assert 0 <= target[5]-previous <= config['max_speed_rad_s']/60+1e-12
+        previous = target[5]
+    assert target == pytest.approx(goal)
+    for invalid in (-15., 103.):
+        with pytest.raises(ValueError):
+            initialization_target(config, [0.]*5+[math.radians(invalid)], limits, encoders)
+    with pytest.raises(ValueError, match='too far'):
+        initialization_target(config, [math.radians(-114), 0, 0, 0, 0, .3], limits, encoders)
+
+
+def test_closed_gripper_exception_does_not_relax_upper_model_stop():
+    config = load_follow_config()
+    with pytest.raises(ValueError, match='too far'):
+        initialization_target(config, [0.]*5+[math.radians(103)],
+                              [(-3., 3.)]*5+[tuple(map(math.radians, (-10, 100)))],
+                              {j: (-3., 3.) for j in JOINTS})
+
+
+def test_auto_initialization_waits_for_ready_and_never_retries():
+    from lerobot_arm_control.control.follow import StartupFollow
+
+    startup = StartupFollow(True)
+    assert not startup.update(ready=False)
+    assert startup.update(ready=True)
+    assert not startup.update(ready=True)
+    assert not startup.update(ready=True, inhibited=True)
+    assert not startup.update(ready=True)
+
+
+@pytest.mark.parametrize('cancellation', ['inhibited', 'manual_command'])
+def test_pause_fault_or_manual_start_cancels_pending_auto_initialization(cancellation):
+    from lerobot_arm_control.control.follow import StartupFollow
+
+    startup = StartupFollow(True)
+    assert not startup.update(ready=True, **{cancellation: True})
+    assert not startup.update(ready=True)
+    held = StartupFollow(False)
+    assert not held.update(ready=True)
+
+
+def test_auto_start_configuration_rejects_non_boolean(tmp_path):
+    import json
+
+    config = load_follow_config()
+    for key in ('hz', 'controller_profile'):
+        config.pop(key)
+    config['initialization']['auto_start'] = 'false'
+    path = tmp_path/'follow.json'
+    path.write_text(json.dumps(config))
+    with pytest.raises(ValueError, match='auto_start must be boolean'):
         load_follow_config(path)

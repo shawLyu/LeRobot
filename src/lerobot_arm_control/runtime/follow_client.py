@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 from copy import deepcopy
 from pathlib import Path
 
-from lerobot_arm_control.control.follow import JointFollower, load_follow_config
+from lerobot_arm_control.control.follow import JointFollower, StartupFollow, load_follow_config
 from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.core.paths import resource_path, workspace_root
@@ -50,6 +50,8 @@ def run(args):
     import mujoco
 
     config = load_follow_config()
+    startup = StartupFollow(args.execute and config['initialization']['auto_start']
+                            and not args.start_held)
     args.log.parent.mkdir(parents=True, exist_ok=True)
     state, scene_config, arms = demo_scene(args.snapshot, config)
     keys = queue.Queue()
@@ -171,6 +173,7 @@ def run(args):
                         leader_qpos = [initial[i]+(.22 if i < 5 else .15)*math.sin(
                             (now-started)*.7+i*.5) for i in range(6)]
                     follower_qpos = mapping.step(leader_qpos, elapsed)
+                manual_command = False
                 while not keys.empty():
                     key = keys.get_nowait()
                     if 49 <= key <= 54:
@@ -178,6 +181,7 @@ def run(args):
                     elif key in (265, 264) and not link and not args.auto:
                         leader_qpos[selected] += math.radians(2)*(1 if key == 265 else -1)
                     elif key in (32, 69):
+                        manual_command = True
                         if link:
                             if not failure and (key == 32 or not stream_delayed):
                                 sent = send_follow_command('hold' if key == 32 else 'resume')
@@ -187,6 +191,13 @@ def run(args):
                             mapping.hold(follower_qpos)
                         else:
                             mapping.resume(follower_qpos)
+                if startup.update(
+                        ready=bool(link and viewer and saved and viewer.is_focused()),
+                        inhibited=bool(failure or stream_delayed or resume_after_delay
+                                       or (link and packet.get('command_error'))),
+                        manual_command=manual_command):
+                    if send_follow_command('resume'):
+                        notice = 'Automatic initialization requested; Space holds'
                 data.qpos[addresses[config['leader']]] = leader_qpos
                 if simulation:
                     target = list(follower_qpos)
@@ -209,7 +220,7 @@ def run(args):
                         ('REAL FOLLOWER' if args.execute
                          else 'SIMULATED FOLLOWER | motor writes OFF'),
                         f'State: {stage}', notice,
-                        'E: initialize/start/resume | Space: hold',
+                        'E: initialize/resume | Space: hold',
                         'Synthetic: 1-6 select, Up/Down move (without --auto)',
                         f'Selected: {JOINTS[selected]}',
                         'Leader deg: '+str([round(math.degrees(q), 1) for q in leader_qpos]),
@@ -222,6 +233,9 @@ def run(args):
                                'notice': notice, 'stream_age_seconds': age,
                                'command_error': packet.get('command_error') if link else None,
                                'control': packet.get('control') if link else None,
+                               'sample_age_ms': packet.get('sample_age_ms') if link else None,
+                               'heartbeat_age_ms': packet.get('heartbeat_age_ms') if link else None,
+                               'leader_status': packet.get('leader_status') if link else None,
                                'target_qpos': packet.get('target_qpos') if link else None})
                 if len(frames) > 10000:
                     del frames[:1000]
@@ -248,7 +262,7 @@ def main():
     parser.add_argument('--source', choices=('hardware', 'synthetic'), default='hardware')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--execute', action='store_true', default=None,
-                      help='Use the real follower (default with hardware input); E starts it')
+                      help='Real follower (default with hardware input); starts automatically')
     mode.add_argument('--simulate', dest='execute', action='store_false',
                       help='Explicitly preview a simulated follower; no motor writes')
     parser.add_argument('--host', default='lerobot')
@@ -256,6 +270,8 @@ def main():
     parser.add_argument('--snapshot', type=Path,
                         default=workspace_root()/'data/tabletop/current-scene')
     parser.add_argument('--auto', action='store_true', help='Animate synthetic leader')
+    parser.add_argument('--start-held', action='store_true',
+                        help='Disable automatic hardware initialization; E starts/resumes')
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--duration', type=float)
     parser.add_argument('--screenshot', type=Path)

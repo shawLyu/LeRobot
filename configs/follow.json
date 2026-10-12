@@ -17,8 +17,10 @@
   "simulation_shared_calibration": false,
   "initialization": {
     "max_correction_degrees": 2,
+    "max_closed_gripper_recovery_degrees": 5,
     "margin_degrees": 0.5,
     "target_tolerance_degrees": 0.25,
-    "timeout_seconds": 5
+    "timeout_seconds": 5,
+    "auto_start": true
   }
 }

@@ -98,18 +98,19 @@ def serve(args):
         threading.Thread(target=receive, args=(commands, disconnected), daemon=True).start()
         sequence, previous, deadline = 0, time.monotonic(), time.monotonic()
         heartbeat = previous
-        notice = ('Connected; E initializes then follows; Space holds' if controller
+        notice = ('Connected; waiting for client initialization; E resumes; Space holds'
+                  if controller
                   else 'Read-only hardware -> simulated follower')
         while not disconnected.is_set():
-            started = time.monotonic()
             while not commands.empty():
                 received, command = commands.get_nowait()
                 try:
-                    if command.get('version') != VERSION or started-received > WATCHDOG_SECONDS:
+                    if (command.get('version') != VERSION
+                            or time.monotonic()-received > WATCHDOG_SECONDS):
                         raise ValueError('invalid or stale follow command')
                     op = command.get('op')
                     if op == 'ping':
-                        heartbeat = started
+                        heartbeat = max(heartbeat, received)
                         if controller:
                             controller.heartbeat()
                     elif op == 'hold':
@@ -166,7 +167,9 @@ def serve(args):
                 active = False
                 initialize_to = None
                 mapping.hold(measured if controller else mapping.target)
-                notice = 'Stale/faulted leader or client: held; E required to resume'
+                notice = ('Stale/faulted leader or client: held; E required to resume; '
+                          f'sample_age={now-sampled:.3f}s, heartbeat_age={now-heartbeat:.3f}s, '
+                          f'leader_faults={dict((j, v) for j, v in leader_status.items() if v)}')
                 if controller:
                     controller.stop(notice)
             if initialize_to is not None:
@@ -205,6 +208,7 @@ def serve(args):
                             'following' if active else 'held'), 'notice': notice,
                   'command_error': command_error,
                   'leader_status': leader_status, 'sample_age_ms': (now-sampled)*1000,
+                  'heartbeat_age_ms': (now-heartbeat)*1000,
                   'control': (controller.status() | {'control_hz': config['hz']}
                               if controller else None)})
             sequence += 1

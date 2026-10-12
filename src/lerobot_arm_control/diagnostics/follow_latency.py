@@ -94,6 +94,8 @@ def analyze(trace, required_joints=JOINTS):
         'p95': float(np.percentile([f['sensor_to_command_ms'] for f in frames], 95)),
         'max': max(f['sensor_to_command_ms'] for f in frames)}
     result['passed'] = all(result['joints'][j]['passed'] for j in required_joints)
+    if trace['metadata'].get('measurement_completed') is False:
+        result.update(passed=False, capture_completed=False)
     return result
 
 

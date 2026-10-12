@@ -88,3 +88,7 @@ src/lerobot_arm_control/diagnostics/response_metrics.py
 tests/test_response_metrics.py
 src/lerobot_arm_control/transport/latest_output.py
 tests/test_latest_output.py
+
+src/lerobot_arm_control/transport/follow_observer.py
+src/lerobot_arm_control/runtime/follow_observer.py
+tests/test_follow_observer.py

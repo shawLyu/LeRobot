@@ -2,12 +2,12 @@
 
 This project provides a live SO-101 mirror, joint angle calibration, tabletop perception, circle trajectories, Push-T, and T pick/place policies.
 **Maintain the complete codebase locally. All MuJoCo simulation, collision checks, inverse kinematics, and planning run locally.**
-The remote Linux host handles USB cameras, perception, motor execution, and encoder feedback. It receives locally generated trajectories or results and does not need MuJoCo.
+The remote Linux host handles USB cameras, perception, motor execution, and encoder feedback. It receives locally generated task trajectories or results and does not need MuJoCo. Leader/follower operation runs entirely on the remote computer; the simulator only observes it.
 
 The default configuration belongs to the existing experimental setup. Offline demos can use the included snapshot. For another robot or camera, configure the devices and perform the relevant calibrations.
 Unless a section explicitly says **remote**, run its commands from the local project root.
 
-Latest: [six-motor physical following-latency verification](docs/measurements/follow-latency-2026-10-12/README.md), with per-motor curves, measured motion limits and reproducible commands.
+Latest: [remote-only following and overshoot tuning](docs/measurements/remote-follow-2026-10-12/README.md), with response curves, test results and outstanding physical validation.
 
 ## Source structure and entry point
 
@@ -105,21 +105,23 @@ See [Push-T](docs/push-t.md) for the algorithm, assumptions, and batch experimen
 
 ### Acquisition leader and follower
 
-The white arm1 model uses the official SO-101 acquisition handle/trigger; the
-black follower has a gripper. Real following is the default; simulation is explicit:
+White arm1 is the acquisition handle/trigger; black follower has a gripper.
+The controller runs entirely on the remote computer, with no simulator dependency:
 
 ```sh
 ./scripts/lerobot-arm demo follow
-./scripts/lerobot-arm demo follow --simulate
-./scripts/lerobot-arm demo follow --source synthetic --auto
+# Optional read-only simulator in another terminal:
+./scripts/lerobot-arm view follow
+# Fully offline virtual demonstration:
+./scripts/lerobot-arm view follow --source synthetic --auto
 ```
 
-Startup automatically initializes and follows once the window is ready and focused.
-`Space` holds, `E` resumes; `--start-held` requires `E` at startup. Feedback delay pauses motion while
-keeping the window open; recovery requires another `E`. The default follower is physical and
-requires independent white calibration and measured trigger travel;
-the current scene now has accepted white 6/6 calibration and user-confirmed
-0–118° trigger travel. See [follow demo](docs/follow.md).
+Startup initializes and aligns automatically. In the controlling terminal, type
+`h` + Enter to hold, `e` + Enter to resume, or `q` + Enter to hold and quit.
+`--start-held` requires manual start. Closing the optional viewer has no effect on
+motion; a servo fault requires explicit resume after recovery. Both independent
+six-joint calibrations and the measured white trigger range 0–118° are saved.
+See [follow operation and measurement](docs/follow.md).
 
 ## 3. Configure and deploy the remote host
 
@@ -131,8 +133,7 @@ the right AprilTag 36h10 / ID 1 marker, with left AprilTag 16h5 / ID 0 as its au
 both have 150 mm black edges. The [accepted table registration](data/calibration/table_reference.json)
 passed independent frame validation on October 11. Both bases have current fixed registration.
 The [saved current scene](configs/scenes/tabletop-current.json) includes camera, table, objects,
-both bases and joint measurement sources. Both arms have read-only live feedback; the white arm
-temporarily uses the black arm's angle mapping while awaiting independent six-joint alignment.
+both bases and joint measurement sources. Both arms have read-only live feedback; both use their independently measured six-joint angle mappings.
 See [current scene](docs/current-scene.md).
 Physical 1 mm accuracy and completed physical Push-T have not been validated.
 

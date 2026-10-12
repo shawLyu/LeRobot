@@ -3,7 +3,7 @@
 import pytest
 
 
-@pytest.mark.parametrize('arguments, execute', [([], True), (['--execute'], True),
+@pytest.mark.parametrize('arguments, execute', [([], True),
     (['--simulate'], False), (['--source', 'synthetic'], False),
     (['--source', 'synthetic', '--auto', '--headless'], False),
     (['--simulate', '--headless'], False)])
@@ -19,7 +19,7 @@ def test_real_following_is_default_and_simulation_is_explicit(monkeypatch, argum
     assert captured[0].execute is execute
 
 
-@pytest.mark.parametrize('arguments', [['--execute', '--simulate'], ['--headless'],
+@pytest.mark.parametrize('arguments', [['--execute'], ['--start-held'],
                                      ['--latency-test', '--simulate'],
                                      ['--source', 'synthetic', '--execute']])
 def test_invalid_follow_modes_fail_before_starting_a_worker(monkeypatch, arguments):
@@ -34,9 +34,8 @@ def test_invalid_follow_modes_fail_before_starting_a_worker(monkeypatch, argumen
     assert error.value.code == 2
 
 
-@pytest.mark.parametrize('problem', ['delay', 'worker_exit', 'send_failure',
-                                     'auto_start', 'start_held', 'space', 'unfocused'])
-def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
+@pytest.mark.parametrize('problem', ['delay', 'worker_exit', 'space', 'unfocused'])
+def test_observer_never_controls_motors_even_on_keys_delay_focus_loss_or_exit(
         monkeypatch, tmp_path, problem):
     import json
     import time
@@ -61,7 +60,8 @@ def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
             return 'serial read failed' if problem == 'worker_exit' and viewers else None
 
         def __init__(self, *args, **kwargs):
-            assert kwargs['hardware_control'] is True
+            assert kwargs['hardware_control'] is False
+            assert kwargs['hardware_worker'] == 'follow_observer'
 
         def snapshot(self):
             age = (.4 if problem in ('delay', 'send_failure')
@@ -113,14 +113,13 @@ def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
     result = json.loads(args.log.read_text())
     assert len(result['frames']) == 3
     assert result['exit_reason'] == 'window_closed'
-    assert commands.count('resume') == (1 if problem == 'auto_start' else 0)
+    assert commands == []
     assert closed == [True]
     if problem in ('auto_start', 'start_held', 'space', 'unfocused'):
         assert result['error'] is None
         return
     if problem == 'delay':
-        assert commands.count('hold') == 1
-        assert 'Feedback recovered; held' in result['frames'][-1]['notice']
+        assert result['frames'][0]['stage'] == 'stale display'
         assert result['error'] is None
     else:
         assert result['frames'][-1]['stage'] == 'disconnected'
@@ -129,14 +128,22 @@ def test_interrupted_feedback_keeps_window_open_and_never_automatically_resumes(
 
 
 
-def test_latency_capture_allocates_remote_trace_and_keeps_real_control(monkeypatch):
+def test_remote_follow_launcher_does_not_load_simulation(monkeypatch):
     import sys
+    from types import SimpleNamespace
 
-    from lerobot_arm_control.runtime import follow_client
+    from lerobot_arm_control.runtime import follow_remote
 
-    captured = []
-    monkeypatch.setattr(sys, 'argv', ['follow', '--latency-test'])
-    monkeypatch.setattr(follow_client, 'run', captured.append)
-    follow_client.main()
-    assert captured[0].execute
-    assert captured[0].control_log.startswith(captured[0].remote_root+'/logs/follow-latency-')
+    calls = []
+    monkeypatch.setattr(sys, 'argv', ['follow', '--duration', '5',
+                                    '--control-log', 'logs/run.json'])
+    monkeypatch.setattr(follow_remote.subprocess, 'run',
+                        lambda args: calls.append(args) or SimpleNamespace(returncode=0))
+    with pytest.raises(SystemExit) as result:
+        follow_remote.main()
+    assert result.value.code == 0
+    command = calls[0][-1]
+    assert 'follow_server' in command and '--standalone' in command
+    assert '--hardware-control' in command
+    assert '--control-log /home/xy/Research/lerobot/logs/run.json' in command
+    assert 'mujoco' not in command and 'follow_client' not in command

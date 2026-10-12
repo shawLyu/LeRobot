@@ -1,0 +1,1 @@
+{"observations": [{"seq": 281, "stage": "following", "remote_autonomous": true}, {"seq": 461, "stage": "following", "remote_autonomous": true}, {"seq": 641, "stage": "following", "remote_autonomous": true}], "observer_disconnected_between_samples": true, "passed": true}

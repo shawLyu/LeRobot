@@ -382,3 +382,47 @@ def test_leader_fault_is_independently_confirmed_without_writes(confirmed):
     status = follow_server.read_leader_status(Bus())
     assert reads == [('Status', 'gripper')]
     assert status['gripper'] == confirmed
+
+
+def test_remote_standalone_does_not_need_observer_or_client_heartbeats(remote, monkeypatch):
+    config, _, packets = remote
+    config['trigger_range_measured'] = True
+    heartbeats, closed = [], []
+    monkeypatch.setattr(follow_server, 'FollowBroadcast',
+                        lambda path: nullcontext(follow_server.send))
+    monkeypatch.setattr(follow_server.signal, 'signal', lambda *args: None)
+
+    class Controller:
+        def __init__(self, *args):
+            self.limits = {j: [-1, 1] for j in JOINTS}
+            self.stopped = {}
+        def enable_all(self):
+            pass
+        def heartbeat(self):
+            heartbeats.append(True)
+        def target(self, *args):
+            pass
+        def step(self, *args):
+            pass
+        def status(self):
+            return {}
+        def close(self):
+            closed.append(True)
+
+    monkeypatch.setattr(follow_server, 'ManualControl', Controller)
+    monkeypatch.setattr(follow_server, 'read_control_feedback',
+                        lambda bus: {'Present_Position': {j: 2200 for j in JOINTS}})
+    follow_server.serve(SimpleNamespace(config=None, hardware_control=True, standalone=True))
+    assert heartbeats
+    assert closed == [True]
+    assert packets[0]['remote_autonomous'] is True
+    assert packets[-1]['stage'] in ('aligning', 'following')
+
+
+def test_device_error_during_leader_status_confirmation_remains_a_fault():
+    class Bus:
+        def sync_read(self, *args, **kwargs):
+            return {joint: int(joint == 'gripper') for joint in JOINTS}
+        def read(self, *args, **kwargs):
+            raise RuntimeError('[RxPacketError] Input voltage error!')
+    assert follow_server.read_leader_status(Bus())['gripper'] == 1

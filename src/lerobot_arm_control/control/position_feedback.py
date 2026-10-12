@@ -126,6 +126,8 @@ class PositionFeedback:
         # position step. Stop/reversal cancels prediction instead of kicking past it.
         velocity_feedforward = (p.get("velocity_feedforward_s", 0)*self.reference_velocity[joint]
                                 if self.moving_samples[joint] >= 2 else 0.)
+        if velocity_feedforward*direction < 0:
+            velocity_feedforward = 0.
         feedforward = 0.
 
         if p.get("friction_feedforward_rad", 0):
@@ -157,7 +159,14 @@ class PositionFeedback:
         self.feedback_correction[joint] = max(lower, min(upper, current))
         ff_step = p.get('feedforward_rate_rad_s', 4.)*dt
         ff = self.velocity_feedforward[joint]
-        ff += max(-ff_step, min(ff_step, velocity_feedforward-ff))
+        # Do not rate-limit braking: stale lead for another 2–3 cycles pushes
+        # beyond a stationary/reversing leader. Only increasing lead is slewed.
+        if velocity_feedforward == 0 or ff*velocity_feedforward < 0:
+            ff = 0.
+        elif abs(velocity_feedforward) < abs(ff):
+            ff = velocity_feedforward
+        else:
+            ff += max(-ff_step, min(ff_step, velocity_feedforward-ff))
         self.velocity_feedforward[joint] = max(-bound, min(bound, ff))
         self.correction[joint] = max(lower, min(upper, current+self.velocity_feedforward[joint]))
         return reference + self.correction[joint]

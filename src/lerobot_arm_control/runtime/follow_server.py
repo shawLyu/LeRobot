@@ -4,6 +4,8 @@ import argparse
 import hashlib
 import math
 import queue
+import signal
+import sys
 import threading
 import time
 from collections import deque
@@ -14,6 +16,7 @@ from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.follow import (
     JointFollower,
+    StartupFollow,
     initialization_target,
     load_follow_config,
 )
@@ -31,6 +34,7 @@ from lerobot_arm_control.runtime.realtime_server import (
     send,
 )
 from lerobot_arm_control.runtime.tabletop_robot import calibration_identity
+from lerobot_arm_control.transport.follow_observer import FollowBroadcast
 from lerobot_arm_control.transport.latest_output import LatestOutput
 from lerobot_arm_control.transport.realtime import JOINTS, VERSION, WATCHDOG_SECONDS
 
@@ -61,11 +65,32 @@ def read_leader_status(bus):
     status = bus.sync_read('Status', normalize=False)
     for joint, value in status.items():
         if value:
-            status[joint] = int(bus.read('Status', joint, normalize=False))
+            try:
+                status[joint] = int(bus.read('Status', joint, normalize=False))
+            except RuntimeError:
+                # The SDK raises on a device-error bit in the reply header.
+                # Retain the fault flag so motion holds; do not turn a hardware
+                # alarm into a clean sample or kill the monitoring process.
+                status[joint] = int(value)
     return status
 
 
+def receive_console(commands, disconnected):
+    """Only the owning remote terminal can change motion state."""
+    try:
+        for sequence, line in enumerate(sys.stdin):
+            op = {'e': 'resume', 'h': 'hold', ' ': 'hold', 'q': 'quit'}.get(line.rstrip('\r\n'))
+            if op == 'quit':
+                break
+            if op:
+                commands.put_nowait((time.monotonic(), {
+                    'version': VERSION, 'id': sequence, 'op': op}))
+    finally:
+        disconnected.set()
+
+
 def serve(args):
+    standalone = getattr(args, 'standalone', False)
     config = load_follow_config(args.config)
     arms = load_arms()
     leader, follower = arms[config['leader']], arms[config['follower']]
@@ -75,11 +100,20 @@ def serve(args):
     with ExitStack() as stack:
         trace = deque(maxlen=36000)
         metadata = {'follow_config': config}
+        if getattr(args, 'latency_test', False):
+            metadata.update(measurement_completed=False,
+                            measurement_joints=list(args.latency_joints))
         trace_path = getattr(args, 'control_log', None)
         if trace_path:
             stack.callback(save_control_trace, trace_path, trace, (), metadata)
         defer_cyclic_gc(stack)
-        publish = stack.enter_context(LatestOutput(send, disconnected))
+        if standalone:
+            publish = stack.enter_context(FollowBroadcast(workspace_root()/'logs/follow.sock'))
+            for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+                previous_handler = signal.signal(signum, lambda *_: disconnected.set())
+                stack.callback(signal.signal, signum, previous_handler)
+        else:
+            publish = stack.enter_context(LatestOutput(send, disconnected))
         leader_bus = stack.enter_context(connected(leader))
         follower_bus = stack.enter_context(connected(follower))
         calibration, follower_metadata = calibrated_mapping(follower, follower_bus)
@@ -114,21 +148,32 @@ def serve(args):
                 raise ValueError('follower has no usable calibrated motion range')
         mapping = JointFollower(config, measured, limits)
         measurement_joint = None
+        measurement_elapsed = 0.
         active = not args.hardware_control
         initialize_to, initialization_started, command_error = None, 0, None
         if not active:
             mapping.hold(measured)
         publish({'type': 'hello', 'backend': 'hardware', 'joints': JOINTS,
+              'remote_autonomous': standalone,
               'hardware_control': args.hardware_control,
               'control_config_sha256': CONTROL_CONFIG_SHA256,
               'config': config, 'leader': leader_metadata, 'follower': follower_metadata})
-        threading.Thread(target=receive, args=(commands, disconnected), daemon=True).start()
+        threading.Thread(target=receive_console if standalone else receive,
+                         args=(commands, disconnected), daemon=True).start()
+        startup = StartupFollow(standalone and config['initialization']['auto_start']
+                                and not getattr(args, 'start_held', False))
+        if startup.update(ready=True):
+            commands.put_nowait((time.monotonic(), {'version': VERSION, 'id': -1, 'op': 'resume'}))
         sequence, previous, deadline = 0, time.monotonic(), time.monotonic()
+        started, last_notice = previous, None
         heartbeat = previous
         notice = ('Connected; waiting for client initialization; E resumes; Space holds'
                   if controller
                   else 'Read-only hardware -> simulated follower')
         while not disconnected.is_set():
+            if (getattr(args, 'duration', None) is not None
+                    and time.monotonic()-started >= args.duration):
+                break
             while not commands.empty():
                 received, command = commands.get_nowait()
                 try:
@@ -163,6 +208,8 @@ def serve(args):
                             controller.enable_all()
                             initialize_to = goal if goal != measured else None
                             initialization_started = time.monotonic()
+                            if standalone:
+                                previous = initialization_started
                         mapping.resume(measured if controller else mapping.target)
                         active = True
                         heartbeat = time.monotonic()
@@ -196,7 +243,12 @@ def serve(args):
             measured = angles(raw, follower_fits)
             now = time.monotonic()
             stale = (now-sampled > config['max_sample_age_seconds']
-                     or now-heartbeat > WATCHDOG_SECONDS)
+                     or (now-previous > config['max_sample_age_seconds'] if standalone
+                         else now-heartbeat > WATCHDOG_SECONDS))
+            if standalone and controller and not stale:
+                # Liveness comes from this remote acquisition loop, never a viewer.
+                controller.heartbeat()
+                heartbeat = now
             if active and (stale or any(leader_status.values())):
                 active = False
                 initialize_to = None
@@ -243,6 +295,20 @@ def serve(args):
                 notice = 'Aligning slowly to leader; then live tracking; Space holds'
             elif stage == 'following':
                 notice = 'Following live leader'
+            if getattr(args, 'latency_test', False) and stage == 'following':
+                measurement_elapsed += min(now-previous, .1)
+                if measurement_elapsed >= 12*len(args.latency_joints):
+                    metadata['measurement_completed'] = True
+                    break
+                measurement_joint = args.latency_joints[int(measurement_elapsed//12)]
+                notice += f' | MEASURE {measurement_joint}: {12-measurement_elapsed%12:.0f}s'
+            if standalone:
+                notice = notice.replace('Space holds', 'remote h + Enter holds')
+                notice = notice.replace('E required', 'remote e + Enter required')
+            if standalone and notice != last_notice:
+                print(notice+' | remote terminal: h + Enter holds, e + Enter resumes, q quits',
+                      file=sys.stderr, flush=True)
+                last_notice = notice
             if trace_path:
                 trace.append({'seq': sequence, 'leader_time': leader_sampled,
                               'measurement_joint': measurement_joint,
@@ -252,6 +318,8 @@ def serve(args):
                               'command': [controller.command_angles.get(j, measured[i])
                                           for i, j in enumerate(JOINTS)] if controller else target,
                               'stage': stage,
+                              'leader_status': dict(leader_status),
+                              'notice': notice,
                               'sample_ms': (now-sampled)*1000,
                               'sensor_to_command_ms': (command_sent-leader_sampled)*1000})
             publish({'type': 'state', 'seq': sequence, 'time_unix_ns': time.time_ns(),
@@ -275,7 +343,19 @@ def main():
     parser.add_argument('--config', type=Path)
     parser.add_argument('--hardware-control', action='store_true')
     parser.add_argument('--control-log', type=Path)
+    parser.add_argument('--standalone', action='store_true',
+                        help='Own control on this host; viewers are read-only subscribers')
+    parser.add_argument('--start-held', action='store_true')
+    parser.add_argument('--duration', type=float)
+    parser.add_argument('--latency-test', action='store_true')
+    parser.add_argument('--latency-joints', nargs='+', choices=JOINTS, default=JOINTS)
     args = parser.parse_args()
+    if args.standalone and not args.hardware_control:
+        parser.error('--standalone requires --hardware-control')
+    if args.latency_test and (not args.standalone or not args.control_log):
+        parser.error('--latency-test requires --standalone and --control-log')
+    if args.duration is not None and (not math.isfinite(args.duration) or args.duration <= 0):
+        parser.error('--duration must be finite and positive')
     try:
         serve(args)
     except Exception as exc:

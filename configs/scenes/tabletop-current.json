@@ -1218,7 +1218,7 @@
     },
     "control.json": {
       "file": "configs/control.json",
-      "sha256": "3ab417ffb21a34849e78ad94e8e01360cd643d6ae79d035da773990b8df2c718"
+      "sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae"
     },
     "follow.json": {
       "file": "configs/follow.json",
@@ -1309,12 +1309,16 @@
   "follow_demo_interface": {
     "default_command": "./scripts/lerobot-arm demo follow",
     "default_follower": "hardware",
-    "simulation_option": "--simulate",
-    "synthetic_input": "--source synthetic",
-    "start_or_resume_key": "E",
-    "hold_key": "Space",
-    "initialization": "Automatic once window is ready and focused: fresh-position hold, bounded model-range recovery, then follow",
-    "stream_timeout_behavior": "hold; keep window open; explicit E after fresh feedback",
+    "controller_location": "remote",
+    "remote_command": "./scripts/lerobot-arm serve follow --hardware-control --standalone",
+    "observer_command": "./scripts/lerobot-arm view follow",
+    "observer_read_only": true,
+    "synthetic_command": "./scripts/lerobot-arm view follow --source synthetic --auto",
+    "start_or_resume_key": "e + Enter in owning terminal",
+    "hold_key": "h + Enter in owning terminal",
+    "quit_key": "q + Enter in owning terminal",
+    "initialization": "Automatic remote fresh-position hold, bounded range recovery, then slow leader alignment",
+    "stream_timeout_behavior": "remote acquisition timeout holds; observer disconnect does not affect control",
     "controller_profile": "shared-joint-pid-v1",
     "manual_start_option": "--start-held"
   },
@@ -1360,8 +1364,10 @@
       "evidence": "docs/measurements/pid-2026-10-12/arm1-configuration-restoration.json",
       "leader_torque_enabled": false
     },
-    "latency_update": "Slow startup alignment, latest live targets, bounded 80 ms velocity feedforward with 15 ms reference filtering; native acceleration 254 and velocity 3000 ticks/s; display output isolated",
-    "latency_evidence": "docs/measurements/follow-latency-2026-10-12/summary.json",
-    "simulation_inner_loop": "kp=700, kv=56; approximately 80 ms effective lag, shared outer PID unchanged"
+    "latency_update": "Remote-only 60 Hz acquisition, mapping and PID; motor 3 velocity lead 60 ms, others 80 ms; immediate lead cancellation at stops/reversals; independent read-only telemetry",
+    "latency_evidence": "docs/measurements/remote-follow-2026-10-12/dynamic-report.json",
+    "simulation_inner_loop": "kp=700, kv=56; approximately 80 ms effective lag, shared outer PID unchanged",
+    "overshoot_evidence": "docs/measurements/remote-follow-2026-10-12/README.md",
+    "control_config_sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae"
   }
 }

@@ -1,4 +1,4 @@
-"""White acquisition leader -> black follower demo using the saved measured desktop."""
+"""Read-only remote follow observer, or an explicitly synthetic local demonstration."""
 
 import argparse
 import json
@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 from copy import deepcopy
 from pathlib import Path
 
-from lerobot_arm_control.control.follow import JointFollower, StartupFollow, load_follow_config
+from lerobot_arm_control.control.follow import JointFollower, load_follow_config
 from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.core.paths import resource_path, workspace_root
@@ -50,37 +50,22 @@ def run(args):
     import mujoco
 
     config = load_follow_config()
-    startup = StartupFollow(args.execute and config['initialization']['auto_start']
-                            and not args.start_held)
     args.log.parent.mkdir(parents=True, exist_ok=True)
     state, scene_config, arms = demo_scene(args.snapshot, config)
     keys = queue.Queue()
     link, viewer = None, None
     started, frames, saved = time.monotonic(), [], False
     issues, failure, exit_reason = [], None, 'window_closed'
-    stream_delayed, resume_after_delay = False, False
-    measurement_elapsed, measurement_joint = 0., None
     initial = [0, -.4, .6, .1, 0, math.radians(20)]
     leader_qpos = list(initial)
     follower_qpos = list(initial)
     mapping = JointFollower(config, follower_qpos)
     selected, notice, hello = 0, 'Synthetic leader; motor writes OFF', None
 
-    def send_follow_command(operation, **fields):
-        nonlocal failure
-        try:
-            link.send(operation, **fields)
-            return True
-        except (OSError, RuntimeError) as exc:
-            failure = f'{type(exc).__name__}: {exc}'
-            issues.append({'time_seconds': time.monotonic()-started, 'error': failure})
-            return False
-
     try:
         if args.source == 'hardware':
-            link = Link(args.host, args.remote_root, 'hardware', hardware_control=args.execute,
-                        hardware_worker='follow_server',
-                        control_log=getattr(args, 'control_log', None))
+            link = Link(args.host, args.remote_root, 'hardware', hardware_control=False,
+                        hardware_worker='follow_observer')
             while link.latest is None:
                 if link.error or link.process.poll() is not None:
                     raise RuntimeError(link.error or 'follow worker exited')
@@ -130,11 +115,11 @@ def run(args):
 
                 viewer = ControlViewer(model, data, keys.put,
                                        'SO101 leader handle -> follower demo',
-                                       hold_on_focus_loss=args.execute)
+                                       hold_on_focus_loss=False)
                 viewer.cam.lookat[:] = [-.32, .03, .14]
                 viewer.cam.distance = 1.2
                 viewer.cam.azimuth, viewer.cam.elevation = 125, -28
-            previous, last_ping, physics_pending = time.monotonic(), 0, 0.
+            previous, physics_pending = time.monotonic(), 0.
             while (viewer is None or viewer.is_running()) and (
                     args.duration is None or time.monotonic()-started < args.duration):
                 now = time.monotonic()
@@ -152,22 +137,14 @@ def run(args):
                         if failure != worker_error:
                             issues.append({'time_seconds': now-started, 'error': worker_error})
                         failure = worker_error
-                        stage, notice = 'disconnected', 'Worker stopped; follower held\n'+failure
+                        stage = 'disconnected'
+                        notice = 'Observer disconnected; check remote terminal\n'+failure
                     elif age > config['max_sample_age_seconds']:
-                        if not stream_delayed:
-                            send_follow_command('hold')
-                            issues.append({'time_seconds': now-started,
-                                           'error': 'delayed feedback', 'age_seconds': age})
-                        stream_delayed, resume_after_delay = True, True
-                        stage, notice = 'held', 'Feedback delayed; HOLD; waiting for fresh data'
+                        stage = 'stale display'
+                        notice = 'Display stale; remote controller owns motion'
                     else:
-                        stream_delayed = False
-                        stage = packet.get('stage', 'following' if packet['following'] else 'held')
-                        notice = ('Feedback recovered; held; E initializes/resumes'
-                                  if resume_after_delay else packet['notice'])
-                        if now-last_ping > .2:
-                            send_follow_command('ping')
-                            last_ping = now
+                        stage = packet.get('stage', 'held')
+                        notice = packet['notice']
                     if hello['leader']['mode'] != 'independent':
                         notice += '\nTEMP shared calibration: white angles unverified'
                 else:
@@ -175,48 +152,17 @@ def run(args):
                         leader_qpos = [initial[i]+(.22 if i < 5 else .15)*math.sin(
                             (now-started)*.7+i*.5) for i in range(6)]
                     follower_qpos = mapping.step(leader_qpos, elapsed)
-                manual_command = False
                 while not keys.empty():
                     key = keys.get_nowait()
                     if 49 <= key <= 54:
                         selected = key-49
                     elif key in (265, 264) and not link and not args.auto:
                         leader_qpos[selected] += math.radians(2)*(1 if key == 265 else -1)
-                    elif key in (32, 69):
-                        manual_command = True
-                        if link:
-                            if not failure and (key == 32 or not stream_delayed):
-                                sent = send_follow_command('hold' if key == 32 else 'resume')
-                                if key == 69 and sent:
-                                    resume_after_delay = False
-                        elif key == 32:
+                    elif key in (32, 69) and not link:
+                        if key == 32:
                             mapping.hold(follower_qpos)
                         else:
                             mapping.resume(follower_qpos)
-                if startup.update(
-                        ready=bool(link and viewer and saved and viewer.is_focused()),
-                        inhibited=bool(failure or stream_delayed or resume_after_delay
-                                       or (link and packet.get('command_error'))),
-                        manual_command=manual_command):
-                    if send_follow_command('resume'):
-                        notice = 'Automatic initialization requested; Space holds'
-                guide = ''
-                if getattr(args, 'latency_test', False):
-                    measurement_joints = getattr(args, 'latency_joints', JOINTS)
-                    if stage == 'following':
-                        measurement_elapsed += min(elapsed, .1)
-                    if measurement_elapsed >= 12*len(measurement_joints):
-                        exit_reason = 'latency_capture_completed'
-                        break
-                    joint_index = min(len(measurement_joints)-1, int(measurement_elapsed//12))
-                    joint = measurement_joints[joint_index]
-                    if stage == 'following' and measurement_joint != joint:
-                        measurement_joint = joint
-                        send_follow_command('mark', joint=measurement_joint)
-                    guide = (f'MEASURE motor {JOINTS.index(joint)+1}: {joint} | '
-                             f'{12-measurement_elapsed%12:.0f}s remaining\n'
-                             'Only this joint: +/-10-15 deg; one cycle in ~2 s\n'
-                             'Trigger: gently open/close, one cycle in ~2 s')
                 data.qpos[addresses[config['leader']]] = leader_qpos
                 if simulation:
                     target = list(follower_qpos)
@@ -238,8 +184,9 @@ def run(args):
                         f"Follower: {config['follower']} | gripper",
                         ('REAL FOLLOWER' if args.execute
                          else 'SIMULATED FOLLOWER | motor writes OFF'),
-                        f'State: {stage}', notice, guide,
-                        'E: initialize/resume | Space: hold',
+                        f'State: {stage}', notice,
+                        ('READ ONLY | remote terminal owns start/hold/stop' if link
+                         else 'Synthetic: E resumes | Space holds'),
                         'Synthetic: 1-6 select, Up/Down move (without --auto)',
                         f'Selected: {JOINTS[selected]}',
                         'Leader deg: '+str([round(math.degrees(q), 1) for q in leader_qpos]),
@@ -275,61 +222,24 @@ def run(args):
                                    'config': config, 'hello': hello, 'frames': frames,
                                    'exit_reason': exit_reason, 'error': failure, 'issues': issues})
 
-    if getattr(args, 'latency_test', False):
-        import subprocess
-
-        from lerobot_arm_control.diagnostics.follow_latency import analyze, save_plot
-
-        trace_path = args.log.with_name(args.log.stem+'-trace.json')
-        subprocess.run(['scp', f'{args.host}:{args.control_log}', str(trace_path)],
-                       check=True, timeout=30)
-        trace = json.loads(trace_path.read_text())
-        report = analyze(trace, required_joints=args.latency_joints)
-        report_path = args.log.with_name(args.log.stem+'-latency.json')
-        atomic_json(report_path, report)
-        save_plot(trace, report, args.log.with_suffix('.png'))
-        print(json.dumps({'latency_passed': report['passed'], 'report': str(report_path),
-                          'joints': {j: {k: v for k, v in m.items() if k != 'windows'}
-                                     for j, m in report['joints'].items()}}))
-        if not report['passed']:
-            raise SystemExit(2)
-
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', choices=('hardware', 'synthetic'), default='hardware')
-    mode = parser.add_mutually_exclusive_group()
-    mode.add_argument('--execute', action='store_true', default=None,
-                      help='Real follower (default with hardware input); starts automatically')
-    mode.add_argument('--simulate', dest='execute', action='store_false',
-                      help='Explicitly preview a simulated follower; no motor writes')
+    parser.add_argument('--simulate', dest='execute', action='store_false',
+                        help='Render simulated response to remote targets; no motor writes')
     parser.add_argument('--host', default='lerobot')
     parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
     parser.add_argument('--snapshot', type=Path,
                         default=workspace_root()/'data/tabletop/current-scene')
     parser.add_argument('--auto', action='store_true', help='Animate synthetic leader')
-    parser.add_argument('--start-held', action='store_true',
-                        help='Disable automatic hardware initialization; E starts/resumes')
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--duration', type=float)
     parser.add_argument('--screenshot', type=Path)
-    parser.add_argument('--latency-test', action='store_true',
-                        help='Guide a 12-second real-motion capture for each leader joint')
-    parser.add_argument('--latency-joints', nargs='+', choices=JOINTS, default=JOINTS,
-                        help='Explicit joint subset for a repeat latency capture')
-    parser.add_argument('--control-log', help='Remote full-rate trace path for latency analysis')
     parser.add_argument('--log', type=Path, default=workspace_root()/'logs/follow-latest.json')
     args = parser.parse_args()
-    if args.execute is None:
-        args.execute = args.source == 'hardware'
-    if args.execute and (args.source != 'hardware' or args.headless):
-        parser.error('real following requires hardware input and the interactive window; '
-                     'use --simulate for a read-only preview')
-    if args.latency_test:
-        if not args.execute:
-            parser.error('--latency-test requires the real leader and follower')
-        if args.control_log is None:
-            args.control_log = args.remote_root+f'/logs/follow-latency-{time.time_ns()}.json'
+    if args.source == 'synthetic':
+        args.execute = False
     if args.auto and args.source != 'synthetic':
         parser.error('--auto requires --source synthetic')
     if args.duration is not None and (not math.isfinite(args.duration) or args.duration <= 0):

@@ -436,7 +436,8 @@ class PushSimulation:
             m.geom_friction[m.geom(name).id, 0] = friction
         self.play_action(action, m, d)
         result = pose(d)
-        if not self.valid_pose(result) or abs(d.body('wood_t').xmat[8]-1) > .02:
+        if (not self.valid_pose(result) or abs(d.body('wood_t').xmat[8]-1) > .02
+                or abs(d.site('push_contact').xpos[2]-CONTACT_HEIGHT) >= .001):
             return math.inf
         return objective(result, self.target)
 
@@ -516,7 +517,16 @@ class PushSimulation:
         for q in pushing:
             self.step(q, action.distance/len(pushing)/.015, model, data)
         # Hold at the pushing height for feedback; chunk boundaries do not retract the jaw.
-        self.step(np.array(self.position_controller(model, data).reference), .12, model, data)
+        target = np.array(self.position_controller(model, data).reference)
+        self.step(target, .12, model, data)
+        # A retuned controller may still be settling at the old fixed 120 ms boundary.
+        # Observe the settled contact pose before planning the next push, with a bound
+        # so an obstructed jaw cannot stall either execution or a candidate rollout.
+        for _ in range(12):
+            if (abs(data.site('push_contact').xpos[2]-CONTACT_HEIGHT) < .00075
+                    and np.max(np.abs(data.qvel[self.arm.dadr])) < .02):
+                break
+            self.step(target, .04, model, data)
 
     def execute(self, action):
         self.phase = 'original gripper pushing'

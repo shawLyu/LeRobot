@@ -131,13 +131,14 @@ both calibration and tabletop views. Black follower retains its gripper. Existin
 base and black joint calibration reference hashes are preserved. Model sources,
 independent mappings and the user-confirmed 0–118-degree trigger travel are saved
 with the scene. The leader joint and actuator limits use the same measured range.
-Run `./scripts/lerobot-arm demo follow` for physical white-leader/black-follower control.
-Use `--simulate` for a read-only real-leader preview, or `--source synthetic --auto`
-for an offline demonstration. Missing independent calibration blocks the default
-hardware mode rather than silently selecting simulation. See
-[follow demo](follow.md) for physical execution prerequisites and controls.
-The default start key `E` now includes a fresh-position hold and bounded follower
-initialization before following. The stored -100.85-degree shoulder pose is eligible
-for a correction to -99.5 degrees. Initialization corrections are at most 2 degrees;
-larger corrections or violations of encoder travel require manual repositioning.
-Feedback delays request hold while leaving the window open, and recovery requires `E`.
+Run `./scripts/lerobot-arm demo follow` for remote-only physical following.
+An optional `./scripts/lerobot-arm view follow` reads both encoder poses and the
+saved tabletop scene. The viewer never participates in control; its closure or
+focus changes do not hold the motors. For offline input use
+`./scripts/lerobot-arm view follow --source synthetic --auto`.
+
+Initialization starts automatically on the remote controller. `--start-held`
+requires `e` + Enter in the owning terminal; `h` + Enter holds and `q` + Enter
+holds/exits. Range recovery and startup alignment remain bounded. Freshness is
+checked in the remote acquisition loop; faults hold and require explicit resume.
+See [follow operation](follow.md) and [current tuning evidence](measurements/remote-follow-2026-10-12/README.md).

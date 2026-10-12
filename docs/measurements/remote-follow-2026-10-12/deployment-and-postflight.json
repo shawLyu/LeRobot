@@ -1,0 +1,834 @@
+{
+  "verified_at_unix_ns": 1791820616491275396,
+  "files": {
+    "assets/so101/so101.xml": {
+      "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+      "matches": true
+    },
+    "configs/control.json": {
+      "sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae",
+      "matches": true
+    },
+    "configs/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "configs/remote-runtime.txt": {
+      "sha256": "62d4995652f412fbdc9b1f28ed6df1b533fda5cc3b268daa4761c266e42d3c9f",
+      "matches": true
+    },
+    "configs/scenes/tabletop-current.json": {
+      "sha256": "9cf207f54f1af73b72042a3a7b76d4632c7a1e2118dd0d8dee673e8abaeb384f",
+      "matches": true
+    },
+    "data/README.md": {
+      "sha256": "0a443e1d2a6df5bacc335c28f48266d445ceff90325b2fd7ba967dfb69be907e",
+      "matches": true
+    },
+    "data/calibration/arm1_mujoco.json": {
+      "sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "matches": true
+    },
+    "data/calibration/follower_mujoco.json": {
+      "sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "matches": true
+    },
+    "data/tabletop/current-scene/configs/control.json": {
+      "sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae",
+      "matches": true
+    },
+    "data/tabletop/current-scene/configs/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "data/tabletop/current-scene/scene_parameters.json": {
+      "sha256": "9cf207f54f1af73b72042a3a7b76d4632c7a1e2118dd0d8dee673e8abaeb384f",
+      "matches": true
+    },
+    "data/trajectories/circle.json": {
+      "sha256": "eeacded7c954b389e190a925ce28a52680dbade033bf0023a6ad6038d8eaba09",
+      "matches": true
+    },
+    "docs/angle-calibration.md": {
+      "sha256": "f1c681914b3bcd970eb88ce2b197674be1495250d133782627a09c03d8fb1375",
+      "matches": true
+    },
+    "docs/camera.md": {
+      "sha256": "2abcd88043e9d8a8cbc226055cf96f30711227f700a0ee76e903a0f49a586f2a",
+      "matches": true
+    },
+    "docs/circle-trajectory.md": {
+      "sha256": "b0e663610f8dc18e4b2cc7d4c960291d681e977914c364a2b08a1df5d2b7864a",
+      "matches": true
+    },
+    "docs/code-layout.md": {
+      "sha256": "a6113ed3f697d888d94ca3b2b892652cd6369c077600203cb618b6102b51d29f",
+      "matches": true
+    },
+    "docs/control-performance.md": {
+      "sha256": "c6f8080623ddfa34aed33ea720a5369a344fcab4b6999940edb4b7f1558162bd",
+      "matches": true
+    },
+    "docs/current-scene.md": {
+      "sha256": "e44e47e105e73c56d9c9c300e2db21fbf1da805718ccff9a5c411e70dc1560ef",
+      "matches": true
+    },
+    "docs/figures/shared-pid-control.pdf": {
+      "sha256": "ec69a40eb28c588788f6d76c04c6f403136dce8ab35f7d0bb59955feeacbd48a",
+      "matches": true
+    },
+    "docs/figures/shared-pid-control.png": {
+      "sha256": "32739ee9bdc5de78bfbdc621fc3dc4ac1e25c3cfc44c8761376092f6f762e1ef",
+      "matches": true
+    },
+    "docs/figures/shared-pid-control.svg": {
+      "sha256": "e5de0c5bf8cc83b7020bbf268f78c21440a405836472a75083d0f66ddeb7581e",
+      "matches": true
+    },
+    "docs/follow.md": {
+      "sha256": "8d3e2cea77f276c8ad4a96473c34f3ee7b914a2d3ecaf652bf8941fd8d9c04b7",
+      "matches": true
+    },
+    "docs/gripper-verification.md": {
+      "sha256": "194e565d18da4cb35e278808d679124ddbb29ecc9e98c3858953195446c9f773",
+      "matches": true
+    },
+    "docs/height-calibration.md": {
+      "sha256": "f92608bfed67e75a0d4d715b2605af3bb112015c4134cf79e9162a07caa56928",
+      "matches": true
+    },
+    "docs/history/height-calibration-initial.md": {
+      "sha256": "de8d7963d058627dedb485afb6247a5a33e0261be66f3b315176ee670e72a828",
+      "matches": true
+    },
+    "docs/history/setup-initial.md": {
+      "sha256": "bc63736cb87bc9a192429334fede7be81b7357b57c80636ffe5ec19c4462b4e0",
+      "matches": true
+    },
+    "docs/lerobot-control.md": {
+      "sha256": "08171e027e94f1b297279ae402f369ad34856df7a6fd58fa634a1b3ee225609b",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/README.md": {
+      "sha256": "87520cea76e558e315d12b541d2da840612e7a27c6343099393c69c4af41ec73",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/baseline-report.json": {
+      "sha256": "f12e8fc0c0220865c679848dfb14bd8c2c79292f3539b80df5924c85c94d824f",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/baseline-trace.json.gz": {
+      "sha256": "bd1c4fd3dcabc69917d1894cb4468852e8cd77f244982d9ddd86c18645cc0447",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/deployed-control.json": {
+      "sha256": "3ab417ffb21a34849e78ad94e8e01360cd643d6ae79d035da773990b8df2c718",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/fast2-report.json": {
+      "sha256": "edcb061fe5ce383f56acd3f1c32ea5570fcd0b633d258a4c71805d50fcf74672",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/fast2-trace.json.gz": {
+      "sha256": "cae7b931c7d4ead90b9a8806f8a430f6856ed6d11b6d293633349068d8757282",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-control.json.gz": {
+      "sha256": "6608cda24af59365b60b19695b59bf49c0822bc1f9ffe12e51ba3e6fdc32b662",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.csv": {
+      "sha256": "4c6efc11a96d5c987617f46c225d4a79c47527d296e23aa4cf0da6e7914d06d2",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.pdf": {
+      "sha256": "c421a7cbedf0d5cde6fb5ce240f8c61ab709cc9e3b821612be02ab092c1270d6",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.png": {
+      "sha256": "41e54b2937efc9b3fa7e0ba6e446d65c71053c9071f1f6685b44bf70d038fa0a",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.svg": {
+      "sha256": "e96b7cdc29f655f099c32ea2b8114bfacd93f48025308ee9dd3476270b8a892c",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-result.json.gz": {
+      "sha256": "18fa7aadcfea1b602ccc930b199f81cf9dfa970ad72a6c2651d300bf75574a7d",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-summary.json": {
+      "sha256": "d373ef76cd92d61ad628a46bdb95ca1c3f748527900bc2039cc0476100c6d998",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/main-report.json": {
+      "sha256": "659c12fb3a122c91b2a8daf1a43f835aa32684135c550d321a21160413168227",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/main-trace.json.gz": {
+      "sha256": "534eaab2c58120c9d247256c944fee745c96beee57af83d8c1ca03bd99511441",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/measured-control.json": {
+      "sha256": "97dbb83430eddeab1c288864e619f8322b4630d32343f40846b6ce3a0ec1e1bd",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/native-lag-fit.json": {
+      "sha256": "9a5f89561067ff3b0ab74b0cdd7b2c2788d494e61d1ad948ea2dadaebae4b040",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.csv": {
+      "sha256": "9c66a0a82fea64883709b057d1298fce4751c40060e23987499b462570a9ae8d",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.pdf": {
+      "sha256": "f4c341ce956db7b9b6bdfe93b6e982d7580e44408e1ce6465978b564a37c9629",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.png": {
+      "sha256": "27603c7aff6ebad2347562e7729d418a01c04e2994cc66a211f8a635e5bd19cf",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.svg": {
+      "sha256": "b6aff626f4db38138618176d984ec3ab595dd815e0169e6d2ef8ba64425f15f1",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-result.json.gz": {
+      "sha256": "a5894142fcd9565614b181fb6da9527314658b46c44afb717253e6de72fafe71",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-summary.json": {
+      "sha256": "8cfd2eec194518462bf81f9176069628653dcc4bbddfea1a60cc473e9608eb08",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/six-motor-follow.pdf": {
+      "sha256": "1cac5a174cdf9421a2ec3a89b24c1e8e37967ab5cb299751d5061058c43bdea1",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/six-motor-follow.png": {
+      "sha256": "06b7670f0d194c2b6520bbbcc52881a4734deaa385b904bc472c4246b5e51cc5",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/six-motor-follow.svg": {
+      "sha256": "4369cf441a6be6bb65c83e7b6a52db7e99e8f8cc53987f6d7ebb0e6bf6f15aa1",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/summary.json": {
+      "sha256": "a9ee145fc900ffb8fd792ce61fa4547653f4c8a0725c16c028d93cb293bc86e7",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/trigger-report.json": {
+      "sha256": "3d0d7fb3c51302c3e7e07634e5dac5674e157163bb7d86f950e9dce10e0bd648",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/trigger-trace.json.gz": {
+      "sha256": "ab04ed84739e68418f426c3f776fe12085922d5417dbb7d8dd8618e45a4f86a2",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/wrist-report.json": {
+      "sha256": "7b3bc0b822f4c64b49c4627d2c5271610ec20afda7760a0922c653fefa473e5d",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/wrist-trace.json.gz": {
+      "sha256": "4b2ba3906a5983540077144b2d38f860c33dbdb93a160663a16c091404421c25",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/arm1-configuration-restoration.json": {
+      "sha256": "b0d15676a447fc168963f111bb8284238d94a96a9673c5b621230d0e99a19632",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/automatic-initialization.json": {
+      "sha256": "b950de1acd164adec24b43e8a4d361c267a62b1b6fd176858a0b1adbc331af5e",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/checksums.json": {
+      "sha256": "2f9bcf984c2959e363f8d90203d5e89a3131aa0e51c5bde76d8d54806eece45b",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/dual-arm-readonly-verification.json": {
+      "sha256": "7649c754900620b5260df1447f2213784f2b5513c77ad9fe1ef419f59d569e28",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-control.json.gz": {
+      "sha256": "04825ce90fed3b936a4a256d642a1d386ef84013478d3d4a80185ed2e6574399",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.csv": {
+      "sha256": "2d648f63ca5ce2e2ef0a55fc62a471c8e7af1ae3dc1449c4d4bebbca3e960bbd",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.pdf": {
+      "sha256": "44c248b1be3261dff31b14c01c2e3259e94de9f79f404ad86553a6df37945953",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.png": {
+      "sha256": "dabaa5a554463956752a0df2aa5d9c12c2114baf79ca7e0b6a528efc6795dbe5",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.svg": {
+      "sha256": "2dc552438209ae19bcc754fb33e1e8bc238096268b2709c6218de477498d582e",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-result.json.gz": {
+      "sha256": "0fd0ead9ccaf67ddd3b7fa1f29d08709f15463ed1545c04261c0630a779c2b73",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-summary.json": {
+      "sha256": "9ede6acf92ae52b37406c2a2f1a1eabf7ba0ee20a03eb8ee7393e0d2c272e6ee",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/initial-pid-summary.json": {
+      "sha256": "ae4d45e5e54957e40a19aac69d228203975e78a7fab47899d40a48bc22f6622c",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.csv": {
+      "sha256": "df48f2402d6ae8e660ee7db00cfdaf8ece5dd7d8a317b33e15019fab0cf34146",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.pdf": {
+      "sha256": "255883eecf7ea176ac5405478042ee7fb2af2795f590e00202a8aae4d76c3204",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.png": {
+      "sha256": "c6c50f10ff07562c865ecf401cf11b4717260872195c73a4c43bdaff931d976b",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.svg": {
+      "sha256": "f01de8b202872201a4e1689dec9404b5074c7218d21f9a38a392df8c5efe03b0",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-result.json.gz": {
+      "sha256": "4965719ab608c4479da175b67145bc39df636638c079299a13903a6aba44745f",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-summary.json": {
+      "sha256": "6e9067568420c9ee0db68cfd0693bce79e3bf4d7c02f1d5163bc7a640328fc98",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/README.md": {
+      "sha256": "014bb98232828bcfbeb8b60af31ceb6292852c747695a15a935519b1e50669bf",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/control.json": {
+      "sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/dynamic-report.json": {
+      "sha256": "1832f60824d72a0cce48d1c2d40583fe190faa17921007169c0851329c21c844",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/dynamic-response.png": {
+      "sha256": "9e868fb5e37b1fc94d99370a15979c42c0bf660ae94c4986317bc2e67864dac6",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/dynamic-trace.json.gz": {
+      "sha256": "588c52555c37aff95e384455d5b2218dca806d9e83accf14dd787df8fbe90040",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.csv": {
+      "sha256": "80da2bd55d987bf13f0595a567171a960d171695d0696f4a00a7d67f2f341e66",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.pdf": {
+      "sha256": "ea269f29b559da4e6cd20c60b71dc2a02d9a2892d384dbfd053511e45bae1b24",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.png": {
+      "sha256": "48a432768a7894a6911c402cb203c85865dca31a49ebc70083f7db406dfaba3a",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.svg": {
+      "sha256": "142eadb8a9745d5476eee79f0d158c0be01a3d90856f8a0539cd76b65a900b57",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-step-control.json.gz": {
+      "sha256": "b2d586ac47bebc06a522a69a7e3110c6d9be715d8a59f553c9b19f911fcb83f0",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-step-result.json.gz": {
+      "sha256": "660e7a29eb5e3b3b227ff107df0282e23b26fec75cc348ff4307cdecfd2f1cc1",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-step-summary.json": {
+      "sha256": "45753e84e67c1ec6962fa0e17cc19f17e54921c13375ebfd380f962f51bbc5aa",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/independence-trace.json.gz": {
+      "sha256": "03f8ea4e5342837f17bfade574dcd338cca8a50f0f5c2438a508cf7d54912110",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/independence.json": {
+      "sha256": "c470120e9641403a86911268780dff146ad5648ab03b69d62abd4f7fa1b90c45",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/intermediate-step-result.json.gz": {
+      "sha256": "04786fca85491c0ae9b520f12ed6a505ec6ef8f6d7c1029700a219dc30f03ed4",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/local-tests.txt": {
+      "sha256": "1aea1905cd526d1a7c97380435a4a2bca24ccc6a24afae8fd2b3782a1bbff538",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/remote-tests.txt": {
+      "sha256": "bba59ece01c48812838c33194e1dcff756f4de99466f67e1cb00b02243819680",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/reversal-report.json": {
+      "sha256": "215ffdde80c9b26bd0509f767b68b6ed2d49b85ed97abe2e00932abf0bb90d8d",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/ruff.txt": {
+      "sha256": "3d7287d499c703fda3b378dece3de5563d7d3ae162ee047b80e995cb66e84308",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.csv": {
+      "sha256": "be4f53b7cbb6069400b591af0e73985294ff684455ec0d69c5fd33263e4b12d5",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.pdf": {
+      "sha256": "bfcfccd729a6751ed65c6d58228412f7bccaf2f6291c465a95cb303e368d9f27",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.png": {
+      "sha256": "7c7477d730a9fdbebb4cec87c2f454a3cb641b476a85d0cacdee5364281d7860",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.svg": {
+      "sha256": "2683d6cf3a19c8c6e0ab535a5b99e20d7676cc301bb719ca024226ae90c0784c",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-step-result.json.gz": {
+      "sha256": "73c76a09eea2a9a9a2fe46c86d18f777eade0fa9601ffbbd5c295250af6fdb88",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-step-summary.json": {
+      "sha256": "edc8e6e4eb98c7dc90b5af2e99a45074b32fef2a9f5b47c34bd2e7e3749dfede",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/step-anchor-preparation.json.gz": {
+      "sha256": "28dfa46e3dfd05845ff2b8fc84542536f0b5cb62c6057e60a2ca91ea45d17f6e",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/step-boundary-rejection.json.gz": {
+      "sha256": "58d9107840b23372118dabf7de98ff90f0c9744bed5ae1753e800b490dc5988c",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/step-collision-rejection.json.gz": {
+      "sha256": "6bdac96b2dc1db883d13571259869042ca97ede3bcce305f38ca83ea0e900e45",
+      "matches": true
+    },
+    "docs/pick-t.md": {
+      "sha256": "63904e46906bdfa9e3e4f77244243d6c619b92e6df2844f1152a25cdd7fb5056",
+      "matches": true
+    },
+    "docs/precision-calibration.md": {
+      "sha256": "cfb4652159dcf5918a8a4fcb2cdb5cc1b14e33b71b2a9e5fa962c0f518c368ee",
+      "matches": true
+    },
+    "docs/push-t-remote.md": {
+      "sha256": "5b78a1a84959b0425f07328b9b8e9473e9cc51f5f4027f79004e45a73fc09a93",
+      "matches": true
+    },
+    "docs/push-t.md": {
+      "sha256": "437f27d2f52a8b06a33fe1d5b229a84ad92486f3e0c3fb662f58af428ef3b772",
+      "matches": true
+    },
+    "docs/real-control.md": {
+      "sha256": "87d59d8116565390d2f13db8b0989040241ddda92a3733bbcb64d6eced122f1e",
+      "matches": true
+    },
+    "docs/realtime.md": {
+      "sha256": "4443f5321fd4e281ce3b79f7a5af62a37bc4b4255d28e318db222f490808f11f",
+      "matches": true
+    },
+    "docs/setup.md": {
+      "sha256": "71e746fc11df22da7b8f0bb214b5390d3d2403b30744f80cc0e567036735662c",
+      "matches": true
+    },
+    "docs/system.md": {
+      "sha256": "5a4315d033ba6b7306bd816b3348fe35330de6a526cb2048e20a5efa27e5ef88",
+      "matches": true
+    },
+    "docs/tabletop.md": {
+      "sha256": "4e99acc48bc8f27b2f68c295b83eddc9664be41dd69c762ce7ee5ba92cbc40ed",
+      "matches": true
+    },
+    "docs/two-arm-calibration.md": {
+      "sha256": "4633c8917f261a60be3254d74185dfaa9fa5215521fa76cbb9118afa17429330",
+      "matches": true
+    },
+    "docs/verification.md": {
+      "sha256": "6197e23694759c547c380b3377bd8cf291e7608bae7e37ef063375a8e730202d",
+      "matches": true
+    },
+    "scripts/activate.sh": {
+      "sha256": "369eb4407916e57ba2e639714ff30e150211f14e4f61729f846f0723b4c3371e",
+      "matches": true
+    },
+    "scripts/bootstrap.sh": {
+      "sha256": "6e872467fd4b73268a0b1ea42a60963d42111f69fb6b0695310649ac491e12b7",
+      "matches": true
+    },
+    "scripts/camera_x11.py": {
+      "sha256": "1c8819262b8e9a458d1a9c3f09673ab82bc79a9269888c39848cf1c3342a3a07",
+      "matches": true
+    },
+    "scripts/install_uv.py": {
+      "sha256": "ad8921a5fd20c3d9332333d152f37a9fe30cdbcf95f847b83edfc3915c75761c",
+      "matches": true
+    },
+    "scripts/lerobot-arm": {
+      "sha256": "42bc9b15c4c39fb128da2b6c9ff838ca60ab459cf9f18e5ba526ccd0278db6e8",
+      "matches": true
+    },
+    "scripts/test_hardware.sh": {
+      "sha256": "f80229a34ec4aaecda35eac03fa00eb6e26f9ea90b9787229f499fd2a93f6db8",
+      "matches": true
+    },
+    "scripts/uv": {
+      "sha256": "25d32c3904e163d0d80ba0069a6b69cf4e7bc03c97b3cf7fb42f7fb042d3e10c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/__init__.py": {
+      "sha256": "c8188af18d26b653f6658cb9ee02246e13ebd571e6e754e72118d42e511d9dc8",
+      "matches": true
+    },
+    "src/lerobot_arm_control/__main__.py": {
+      "sha256": "273813d76d97b4bea65aa6e3bf7e73a74bfa0e9cc0f69c1c2c1b6b867ac52355",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/__init__.py": {
+      "sha256": "0ae12307377d8dad02d1ad4f412f8aec83f450f8db36e799d6fca4538b1dbe0a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/angle_calibration.py": {
+      "sha256": "4b6311649dc312c27061734430ed2e692dcff075949f30df96dee97fe1e13dc1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/height_records.py": {
+      "sha256": "897c16eaa867492a576328c06d62cb750dbc49ac23d61337ff257e2a5d6bdf18",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/height_sampling.py": {
+      "sha256": "56b32c73b1a8b94b66409cdb42ab97ea0cfeaba8128183371ba2a6c28e66b5ce",
+      "matches": true
+    },
+    "src/lerobot_arm_control/cli.py": {
+      "sha256": "e8568c724e1da4afe10ee6ba2341208d3e3be2014dce82a25ab6a891fd146ad1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/__init__.py": {
+      "sha256": "f2c420efb566c18c3d3b84598e90d0570b03c363a93cbc9334548bfdf8b4534e",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/control_defaults.py": {
+      "sha256": "a5b650255afa3847832543d30dbd567e6ba90f37301262c021c320a9ca4a79ff",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/follow.py": {
+      "sha256": "9662a9bf58f62aec0fd175bc1e33516459281e6391efd7a5c169a627b6825ac1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/joint_path.py": {
+      "sha256": "b410397c58c17bddeab7dcdc1fc7ea018f410d6e92cb62bad89ce4213e6c69a0",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/manual_control.py": {
+      "sha256": "a9801730161cc19d35829e26fd3b386557126f73ddc109c5a0fd84258a59083d",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/motion.py": {
+      "sha256": "db771d0a6dad0e32a91d0191dd769c6e4ad1287eedb5cbc01318026cd1aef4fb",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/parking.py": {
+      "sha256": "560753d31002ee0df32af67c1e31221e4a2a105ef24adf9a94bf329d13ebb178",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/position_feedback.py": {
+      "sha256": "a871c2a61909d2387acefdbc663bb9962d179deb7d089b5bf80f0e13bde57e25",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/servo_feedback.py": {
+      "sha256": "9948f6ee24cba66a78cdb4cc75d32993a2dd7881a69a31b55db1ed35f156ec3a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/__init__.py": {
+      "sha256": "408b833054668044838d5c9772be62da7f88a7be503d11bdd1198db6a3deb82b",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/api.py": {
+      "sha256": "07788fe8bf4e2ec2b9ea612c8ae92a36eb3f9002bfd2a0eabc7f6b384e673483",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/config.py": {
+      "sha256": "66478bf8d22d2f1d2fce852c3553cba66eda4e5ed1c6aeaa98843eac94ba9a70",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/files.py": {
+      "sha256": "b4bee90ac28ce95fa4357b244f0a8ed751d769e776e376464084fa0a4c274c1c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/paths.py": {
+      "sha256": "12e79a8a1ced3452db3fb6cd45342115e4abf271c7f6a3af5a1360e02d6bf0f5",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/processes.py": {
+      "sha256": "a4ea3bec97e6ad1b479ae1e8fff91c7d4f580718e9b9349aef65400afd282c15",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/__init__.py": {
+      "sha256": "6cdd83f8e0c2211a1de2cef16f732b9685cb05449b706c600f4aa6197724f5a8",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/cli.py": {
+      "sha256": "50883d4ae82606bcf655c61fb710ecf55246dfb982694b56c425a5ec2336a672",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/response_metrics.py": {
+      "sha256": "0770c0e611be8599ce279c9b51ef5923fe823d2e80b718f9e6465ad1512f5cea",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/__init__.py": {
+      "sha256": "e5aea2a4bcc1d0651e3f1f19454bd713119a21872cbf5760456b5bb3406ddbd5",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_geometry.py": {
+      "sha256": "6a7e71197341c16df5602a5f0c3f9ce46d153ee8bc2045e3108e8e4e5dd21cb2",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_perception.py": {
+      "sha256": "a69126422951c93a37db48b913961a02111ce8c9dcbd4732cec829c7de8e9601",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_registration.py": {
+      "sha256": "66a3edebcc80fb89a0a79e6208a69793ba6c9116e390e1363f19a4a32f0731a9",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_tracking.py": {
+      "sha256": "fc9f3bdd6ad10de52c584aa934c6c4d896d5abdb06441e3c311f91d8ead0b25a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tool_marker.py": {
+      "sha256": "4874ea55fd534e193758d4f16b763ae78c747721095c711c7de70161ac2f05b1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/__init__.py": {
+      "sha256": "8ee42b1d010549df9b7f3f819bd951d6abcea0d1cd72a8fc80666144a78afa01",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/__init__.py": {
+      "sha256": "a04131dfd697d8be3094bb2b52fd2953c616f4851bafeac11d745afa97a0b4a2",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/driver.py": {
+      "sha256": "0581c63d37437ae342d2150c97efbc84d4b3d17a82e7fe52e3b04cdadc9dfc73",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/joints.py": {
+      "sha256": "60611286cfaa5ec025ed297fc6202939a04f0258c424d3061b486c456db648c3",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/model_metadata.py": {
+      "sha256": "1ccded00f2fdd4e25296e7bb9ac9d4bd008202e54084bd6e8525f0dc5d15ea8a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/__init__.py": {
+      "sha256": "9f9d6ee762e3924946453ea4852d31966915c9cd60409e25a672eadac27aa361",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/follow_observer.py": {
+      "sha256": "0d9424eb9f5bffe4b7cdf964501a738996f9dee433c2c107ac6c661307b30dcc",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/follow_server.py": {
+      "sha256": "c317f76fffa903d06812006212ec93f0d51e83536535d7c645c8bf60d832521b",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/realtime_server.py": {
+      "sha256": "c47788b80f5913ef36f1f8632a90b1a1db7c6a6b50845b41a0feea75b65d60c9",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/tabletop_robot.py": {
+      "sha256": "51429ffcab21417150901146533c966f7bc1103e27deb35f87d6041925ad0e3c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/tabletop_server.py": {
+      "sha256": "bfdd113a0da382e9e0bab98423cfe4aa3f31d2d8aa3ea244fd7233a0e12b7045",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/__init__.py": {
+      "sha256": "e4b44b992082c4d2e77fc3e69967c1960fb15f01c5d6e397219b5eeb9f945bdb",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/circle/__init__.py": {
+      "sha256": "80d5bab03af940afa4c92528aa3d3d7d06f08736cd565371008af5fc3e0e956a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/circle/circle_trajectory.py": {
+      "sha256": "8fc35bd0d0ee327d4b5529a4eec9fb4791f36aac8c07af05144780c01f6521de",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/__init__.py": {
+      "sha256": "68abda8ad6bbe6e203023a10be447b59002782ec56e950d57a2ad931ef031821",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/push_t_motor.py": {
+      "sha256": "42fc6071595ba05aa15f63ba467457ca96152c02cac8cabfad2d2e63787e26bc",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/push_t_receiver.py": {
+      "sha256": "eea1e6425efe74c71071cd1e6bf671527725aa28b60e014b907fdd2e5dd0f54c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/__init__.py": {
+      "sha256": "5c1e6c1ab6aa3be3313a6c35c576f25fd65ce0e41536ea8624da3a8d1c1d347d",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/follow_observer.py": {
+      "sha256": "8aa31d840ad6f4c891a83289b1be38030267d68ff8b31ceefe0ee2c5b8d7004c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/latest_output.py": {
+      "sha256": "77a128dc63a8b6a01220325d8590020b9a6dea4cf1c1eac3563f7d42f6052a82",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/pick_t_protocol.py": {
+      "sha256": "53e01774ab48dd708d7f68b22eb9f6abbd479ab0050215dec05dd61f34314a94",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/realtime.py": {
+      "sha256": "549b206392cb87bfd3994aeeec85aeaf30bd2ee73c91185c72fbea66453a032c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/tabletop_stream.py": {
+      "sha256": "ec9b2118d152ce1c0b409df251db4825ef1c2a1524205d73f79b0f9e53796741",
+      "matches": true
+    },
+    "src/lerobot_arm_control/visualization/__init__.py": {
+      "sha256": "890556705b90cf3d57e5990ed9aabefbcdf3de6a15bbf2b0ccb04dfd69226a46",
+      "matches": true
+    },
+    "src/lerobot_arm_control/visualization/ui.py": {
+      "sha256": "fb7e42febcceb2a916928041d75c509e2769d0caf17ad8dd4549d064898a3a97",
+      "matches": true
+    },
+    "tests/test_angle_calibration.py": {
+      "sha256": "45e740aa84aa816079c8405e2ad69c8ab1bac103fc1920779886cca29929b14f",
+      "matches": true
+    },
+    "tests/test_camera_runtime_calibration.py": {
+      "sha256": "906d9490e1c1b40280da48c951c4809b131b70251e50a8a753f45f130ded5cf0",
+      "matches": true
+    },
+    "tests/test_circle_playback.py": {
+      "sha256": "468761dd921efd07bcdb1d7da60f8b46a6e896071dbccadfc38913f919d38df6",
+      "matches": true
+    },
+    "tests/test_control_timing.py": {
+      "sha256": "15ab1418400b2814466e929a712d1d443d5b9c5a3024b1a6b35e223304dbac4a",
+      "matches": true
+    },
+    "tests/test_follow.py": {
+      "sha256": "225d97728fd127a89214a134d042f7c3df2314e81b0c5206a63608030856fb1f",
+      "matches": true
+    },
+    "tests/test_follow_observer.py": {
+      "sha256": "f99d5ac3a897b48554caed584d811a1c34d3672d35f41bef9c1369d35922d4e3",
+      "matches": true
+    },
+    "tests/test_joint_path.py": {
+      "sha256": "f0125b3a7f8c90ce9326b91842e2f42f42638418a351da3ee5d50df700f00dc9",
+      "matches": true
+    },
+    "tests/test_latest_output.py": {
+      "sha256": "b69c95b5ce5f09cd8646aa33a8ed9801a417daadade9cbc5d9f838852cd77a5a",
+      "matches": true
+    },
+    "tests/test_manual_control.py": {
+      "sha256": "ca7da287d60ba5dffb7aa75b7928f0a3fa147f6577c4adbd6be5f1f56a05611f",
+      "matches": true
+    },
+    "tests/test_parking.py": {
+      "sha256": "6fe7bcc91f2af6312dfc1fc5ab2673e31988d8f1dfcbf53d2ce3b7566f1a88fd",
+      "matches": true
+    },
+    "tests/test_pick_t_protocol.py": {
+      "sha256": "54181abadfba35b25c5f8b5c7b500e52d336ac7dbdfdbca55cf32cd8bbef9339",
+      "matches": true
+    },
+    "tests/test_position_feedback.py": {
+      "sha256": "2b04e6933784e7987578f1f28f7b75f1292260c35e0656cf30e74c55fa8870bd",
+      "matches": true
+    },
+    "tests/test_push_t_receiver.py": {
+      "sha256": "9d1320f9ce153f183a5b5043c59eb62628036f656b4115ffb6e90be8dc333856",
+      "matches": true
+    },
+    "tests/test_push_t_remote.py": {
+      "sha256": "46ee30e4423fdc4097b60b9d08e6b051aa13b4b7a3abd813a150e77ca66304d5",
+      "matches": true
+    },
+    "tests/test_response_metrics.py": {
+      "sha256": "f83fbc34b07ee52d3dc0d71ef49dc12a4f0e0a0d7d598ba437da91ec81adb8c5",
+      "matches": true
+    },
+    "tests/test_runtime_split.py": {
+      "sha256": "e8cddc8b3eff786227e4d86a1478a2bc915f27242ca5f0f286aa3aee6554ddca",
+      "matches": true
+    },
+    "tests/test_safety.py": {
+      "sha256": "20dcdce4ab2ac9808a7dd7ae1de8b71809d2f9cb3e647e2b586c184323a487e7",
+      "matches": true
+    },
+    "tests/test_servo_feedback.py": {
+      "sha256": "54d5c1423edabb4dab16238f8f5cbc839952c6d804b3951360f57a95e82f24c2",
+      "matches": true
+    },
+    "tests/test_tabletop_perception.py": {
+      "sha256": "ff661e6051964c0743f2bc1ec26be14f2b666fe9d97e56e617461acf90a76a8d",
+      "matches": true
+    },
+    "tests/test_tabletop_reference.py": {
+      "sha256": "117cbaf9f2459b705570fd7b3a3e40e158aa4c9bd5667c9a54e68239e38cdb1c",
+      "matches": true
+    },
+    "tests/test_tabletop_registration.py": {
+      "sha256": "9f1a32a82810a53085fce1ff2d76106b609c4df1a3456439a08a0e4bb638c929",
+      "matches": true
+    },
+    "tests/test_tabletop_robot.py": {
+      "sha256": "60bc2900db0c952e97de6e4a974b944b8ea92ec4584f428c3403315b36a5e1cb",
+      "matches": true
+    },
+    "tests/test_tabletop_tracking.py": {
+      "sha256": "8b50ec725923fb5e4479abb47af1edda24cba4924fcd1d93f784aa5b6dbb4d56",
+      "matches": true
+    },
+    "tests/test_tool_marker.py": {
+      "sha256": "fa532e4588f0e35dab84e8eaa130bc3f2adfcf16b1dec0d42e94a17800313a8e",
+      "matches": true
+    }
+  },
+  "arms": {
+    "follower": {
+      "error": "[TxRxResult] There is no status packet!",
+      "six_joint_calibration_verified": false
+    },
+    "arm1": {
+      "error": "[TxRxResult] There is no status packet!",
+      "six_joint_calibration_verified": false
+    }
+  },
+  "files_match": true,
+  "passed": false,
+  "files_verified_at_unix_ns": 1791820695438497457
+}

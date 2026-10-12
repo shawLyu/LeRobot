@@ -1,168 +1,117 @@
-# SO-101 leader/follower demo
+# SO-101 remote leader/follower control
 
-The current white `arm1` is the acquisition leader, with a fixed handle and moving
-trigger. The black `follower` retains its gripper. Both use motor names 1–6;
-channel `gripper` on the leader means **trigger**, not a physical jaw.
+White `arm1` is the passive acquisition handle/trigger; black `follower` carries the gripper.
+Both independent six-joint calibrations are required. The measured white trigger range
+0–118° maps to black gripper 0–90°; the 0/15/30° reference marks are calibration points.
 
-Run these commands on the local MuJoCo workstation. Close the tabletop viewer and
-arm-calibration window first: each USB bus has one exclusive owner.
+## Start real following
+
+From the local checkout:
 
 ```sh
-# Real white leader -> real black follower; automatically initializes/starts; Space holds.
 ./scripts/lerobot-arm demo follow
-
-# Start held instead; press E when ready.
+# Optional manual start, then type e and Enter in the controlling terminal:
 ./scripts/lerobot-arm demo follow --start-held
-
-# Read-only real leader input -> simulated black follower.
-./scripts/lerobot-arm demo follow --simulate
-
-# Entirely offline, using the preserved desktop bases and dimensions.
-./scripts/lerobot-arm demo follow --source synthetic --auto
-
-# Offline manual leader: 1–6 selects a joint; Up/Down changes its angle.
-./scripts/lerobot-arm demo follow --source synthetic
 ```
 
-The default command selects the physical follower and requires independent
-six-joint calibration of both arms and measured trigger travel. It does not
-silently fall back to simulation when those measurements are missing. The
-client automatically initializes and begins following once its window is ready and focused
-and fresh feedback is available. This happens once per launch. Set `--start-held`
-or `initialization.auto_start: false` to require `E` at startup. `--execute` remains an explicit
-alias for the hardware mode. Synthetic input selects an offline simulated follower.
-
-The `--simulate` preview runs local MuJoCo dynamics with the shared 60 Hz joint PID.
-It displays measured simulated motion rather than assigning follower target angles directly.
-The hardware preview reads both buses but
-writes no motor registers. The current white arm uses its own accepted six-joint
-calibration; temporary sharing is disabled. An incomplete or invalid white file is rejected.
-The simulation uses `data/tabletop/current-scene/` when available and falls back
-to the versioned `configs/scenes/tabletop-current.json` for a fresh checkout.
-
-Connection initializes the displayed poses from live encoder feedback. Automatic startup or `E` starts/resumes
-the follower from a fresh current-position hold. Small model-limit violations are
-corrected at the normal speed limit to 0.5 degrees inside the usable range; the
-entire correction must be at most 2 degrees for arm joints and upper-limit recovery.
-The calibrated physical gripper can close below the CAD lower stop (about −12.43°
-versus −10°). Only this lower-stop case allows up to 5° of opening recovery,
-at the same bounded speed and within calibrated encoder travel. It uses the same automatic startup or explicit `E` initialization.
-Initialization does not move the other joints or remap the follower gripper. Once all
-commanded targets are inside their limits and within 0.25 degrees of the initialization
-target, following begins from that command, preserving the speed bound. This is a
-command-ramp initialization, not precision settling: native encoder tracking error
-is displayed and recorded without blocking teleoperation. Physical encoder travel,
-mode, voltage, fault and torque checks still apply.
-An initialization lasting over 5 seconds holds and requires `E` to retry. Larger
-model-limit violations or positions outside calibrated encoder travel are rejected
-before torque is enabled; reposition those manually. The passive white leader is read-only.
-
-`Space` holds. Targets begin at the current follower
-pose and align to the live leader at at most 0.6 rad/s. Once nominal targets are within
-2° on every joint, live tracking uses the newest clipped leader pose each cycle, without
-queuing a slow software ramp. Holds/resumes re-enter slow alignment. Five arm joints mirror
-angles in the existing canonical frame; white trigger travel 0–118° maps proportionally
-to black gripper opening 0–90° (59° gives 45°). Calibration references 0/15/30°
-do not define the travel endpoints. Values are clipped to the configured model/encoder limits.
-Stale samples, motor faults, client heartbeat loss and connection close hold the
-physical follower. Holding preserves support on gravity-loaded joints. Resume
-requires `E`; it does not restart automatically. The leader bus remains read-only.
-Feedback delays above 0.25 seconds request hold and leave the window open. Fresh
-feedback restores the display while motion remains held until another `E`.
-If the remote worker exits, the window displays the cause and remains open;
-close it and relaunch after resolving the connection or motor fault.
-
-Automatic startup was verified on both real buses on 2026-10-12: the client entered
-following without an E keypress, then held when the window lost focus. The six-second
-session completed without command errors or stream-delay events. Post-checks confirmed
-all six black motors held with torque on, all six white motors remained torque off,
-no motor faults, and unchanged calibration hashes. The compact record is
-[`automatic-initialization.json`](measurements/pid-2026-10-12/automatic-initialization.json).
-Queued heartbeat timestamps cannot rewind the completed initialization timestamp;
-command expiry is checked at processing time, including after motor preflight.
-
-## Enable the physical follower after independent measurements
-
-White-arm independent alignment is complete (6/6). The user corrected the released/fully
-pressed trigger endpoints to 0/118 degrees on 2026-10-11, and the current
-follow configuration uses this range. Both arms require their own valid mapping.
-The latest read-only capture recorded follower `shoulder_lift` at -100.85 degrees,
-just below its -100-degree model limit. This small violation is eligible for the
-default bounded initialization at startup.
-
-On 2026-10-11, real-bus validation confirmed enabling with all six storage locks
-still at 0, native goal writes and actual multi-joint motion. A subsequent short
-0.02 rad/s run completed held → initializing → following → held with no command
-errors. After exit, black goals matched its measured positions and all six torques
-remained on; the white arm remained torque-off. P=16, acceleration=254, velocity=0,
-storage locks and calibration were unchanged. That historical trial used a continuous 0.6 rad/s cap; current operation uses this
-cap only during entry, then sends the latest live target.
-
-1. Complete white `arm1` alignment in `view arm --backend hardware --arm arm1`.
-   Joints 1–5 use 0/30/60 degrees; trigger joint 6 uses 0/15/30 degrees.
-   Copy the accepted `data/calibration/arm1_mujoco.json` to the remote calibration directory.
-2. Measure the leader trigger's closed/open angles in that reference frame. Set
-   `leader_trigger_degrees` and `trigger_range_measured: true` in `configs/follow.json`.
-   This installation now uses the confirmed 0–118° endpoints; repeat measurement
-   after replacing or rebuilding the leader handle.
-   Check the configured follower gripper opening `[0, 90]` degrees against the actual jaw.
-3. Deploy the same follow parameters and code to the remote host:
-   `./scripts/deploy_code.sh --config`. The already configured white leader role is
-   in `configs/arms.toml`; ordinary deployment preserves that hardware-specific file.
-4. With the workspace clear and the leader supported, launch:
+This opens an SSH terminal running the controller on the robot computer. No simulator
+is started or used. Encoder acquisition, angle calibration, trigger mapping, startup
+alignment, shared 60 Hz PID, motor writes and fault handling all run on that computer.
+For operation directly on the robot computer, use:
 
 ```sh
-./scripts/lerobot-arm demo follow
+./scripts/lerobot-arm serve follow --hardware-control --standalone
 ```
 
-The window initializes automatically when ready and focused. With `--start-held`, press `E` to initialize and enable the calibrated black follower.
-Fresh current-position goals are confirmed before torque is enabled. The follower uses
-`shared-joint-pid-v1` from `configs/control.json`, exactly as the other task controllers.
-Follow frequency is derived from that file (60 Hz); `follow.json` cannot override it.
-The PID sends bounded compensated position targets. The stream temporarily applies RAM acceleration 254 and velocity
-3000 ticks/s (clamped to hardware limits), then restores their original values on exit; existing native P/I/D remain untouched, including Lock=0.
-See [the controller and block diagram](lerobot-control.md) and
-[response measurements](control-performance.md).
-No EEPROM calibration, offsets, modes or travel limits are rewritten.
-Runtime records go to `logs/follow-latest.json`; choose `--log` to keep another run.
-They include initialization/hold/follow stages, feedback age, command errors,
-controller status, target angles and the exit reason. A rejected `E` retains its
-specific error in subsequent held-state packets instead of replacing it with a
-generic pause message.
+The owning terminal accepts **h + Enter** to hold, **e + Enter** to initialize/resume,
+and **q + Enter** to hold and exit. Ctrl-C, terminal EOF and SSH session termination
+also close the controller through its hold/cleanup path. To keep ownership on the
+remote computer independently of a local SSH session, run that command in its own
+remote terminal. An optional `--duration SECONDS` bounds a run.
 
-## Open-source references and model provenance
+Startup checks both calibration fingerprints and servo faults, confirms a fresh
+current-position goal, enables the follower and performs bounded model-range recovery.
+Normal boundary recovery is limited to 2°; a closed jaw may recover up to 5°, with a
+0.5° interior margin. It then aligns at 0.6 rad/s. Once nominal targets are within
+2° of the mapped leader, each cycle follows the latest input without an accumulating
+startup speed limit. The white arm remains passive.
 
-The joint-space flow follows upstream LeRobot's
-[SO leader `get_action`](https://github.com/huggingface/lerobot/blob/main/src/lerobot/teleoperators/so_leader/so_leader.py)
-and [teleoperation loop](https://github.com/huggingface/lerobot/blob/main/src/lerobot/scripts/lerobot_teleoperate.py),
-with synchronized `Goal_Position` writes as in the
-[SO follower `send_action`](https://github.com/huggingface/lerobot/blob/main/src/lerobot/robots/so_follower/so_follower.py).
-This implementation reuses our measured-radian controller and exclusive low-level
-bus connections. Upstream high-level connections also configure/calibrate motors;
-they are not used to alter this installation's EEPROM.
+The remote acquisition loop checks its own freshness; it does not require simulator
+heartbeats. Stale acquisition or a motor fault holds motion. Recovery requires an
+explicit **e + Enter** after the fault clears. A confirmed white status error is retained
+when the SDK raises while rereading it; the monitoring process remains available.
+No automatic fault restart or protection-register changes are introduced.
 
-The handle, wrist and trigger are from
-[The Robot Studio's official leader description](https://github.com/TheRobotStudio/SO-ARM100/blob/a758567c3978dfeefe282ede0500085a48fe8f78/Simulation/SO101/so101_leader_new_calib.urdf),
-pinned at `a758567c3978dfeefe282ede0500085a48fe8f78`, under Apache-2.0.
-`so101_leader.xml` converts that head subtree into our canonical arm frame. The
-canonical black follower XML is unchanged, preserving accepted encoder/base hashes.
-The leader's inherited `gripperframe` is a compatibility frame, not a measured
-leader grasp point. Our joint/actuator limits use the user-confirmed 0–118° travel.
-Upstream printed-part inertia remains provisional; see its
-[model README](https://github.com/TheRobotStudio/SO-ARM100/blob/a758567c3978dfeefe282ede0500085a48fe8f78/Simulation/SO101/README.md).
+## Optional read-only simulator
 
-## Measure the real following latency
+Start this in a second local terminal while the remote controller is running:
+
+```sh
+./scripts/lerobot-arm view follow
+# Finite observation without a window:
+./scripts/lerobot-arm view follow --headless --duration 10 --log logs/follow-observation.json
+```
+
+The simulator subscribes to the remote `logs/follow.sock` telemetry channel via a
+read-only relay. It shows the saved tabletop, calibrated bases, white handle and black
+encoder pose. It sends no motor targets, hold/resume commands or heartbeat. Closing,
+minimizing, pausing or losing focus in this window does not stop remote following.
+A stale display is labelled as such; it cannot establish the current physical state.
+Use the owning remote terminal to control motion. Concurrent motor tools remain excluded
+by the serial ownership lock; multiple telemetry viewers are allowed.
+
+```sh
+# Optional virtual response to targets from the already-running remote controller:
+./scripts/lerobot-arm view follow --simulate
+# Fully offline input and virtual follower, without SSH or hardware:
+./scripts/lerobot-arm view follow --source synthetic --auto
+```
+
+`--simulate` affects only the display; an already-running real controller continues
+operating. For an offline demonstration use `--source synthetic`. Synthetic keyboard
+input uses 1–6 and Up/Down; E resumes and Space holds only that local virtual demo.
+
+## Shared controller and deployment
+
+Every normal motion demo uses `configs/control.json`; `configs/follow.json` holds
+roles, mapping and initialization only. Independent PID/frequency overrides are rejected.
+See [controller design](lerobot-control.md) and [current response evidence](measurements/remote-follow-2026-10-12/README.md).
+
+```sh
+./scripts/deploy_code.sh
+```
+
+Restart the controller after deployment. The viewer checks the remote control hash,
+follow parameters; calibration identity is validated by the remote controller. Its connection is observational; a mismatch
+rejects the viewer without stopping the controller. Hardware configuration and saved
+calibrations are preserved by deployment.
+
+## Record and measure
 
 ```sh
 ./scripts/lerobot-arm demo follow --start-held --latency-test
-# Repeat only the trigger when needed; other joints remain explicitly unmeasured.
-./scripts/lerobot-arm demo follow --start-held --latency-test --latency-joints gripper
+# Or a labelled subset; this cannot pass unmeasured axes:
+./scripts/lerobot-arm demo follow --start-held --latency-test --latency-joints elbow_flex
 ```
 
-Press E and follow the on-screen joint name for 12 seconds per joint, making gentle
-back-and-forth movements. Timing pauses while held/alignment is active. Space holds.
-The remote process saves every control sample while display packets use a latest-state
-queue, so a slow SSH/display consumer cannot stall motor writes. After exit, the client
-retrieves the trace and writes `*-trace.json`, `*-latency.json` and `.png` next to its
-`--log` path. Static input or insufficient reversals fails acceptance; subset passes
-are recorded explicitly. See [the measurement definition and results](measurements/follow-latency-2026-10-12/README.md).
+Type **e + Enter** and follow the joint name/countdown in the controlling terminal.
+Move only that joint gently back and forth for its 12-second stage. All sampling and
+stage timing occur remotely. Holds pause stage progress; an interrupted capture is not
+reported as a completed pass. On normal exit the launcher retrieves the remote trace,
+writes `logs/follow-remote-trace.json`, `.metrics.json` and `.png`, and exits with code 2
+if acceptance fails. Use `--log` to choose a different local destination.
+
+`--control-log /absolute/remote/path.json` records a normal run without guided motion.
+The finite buffer retains up to 36,000 frames (about ten minutes at 60 Hz).
+The [latency measurement definition](measurements/follow-latency-2026-10-12/README.md#measurement-definition)
+requires reversals and sufficient movement; read-to-command timing alone is not motor
+response. The current profile does not yet have an uninterrupted six-axis <100 ms pass.
+
+## Upstream model and mapping
+
+Joint-space leader input follows upstream LeRobot's
+[teleoperator](https://github.com/huggingface/lerobot/blob/main/src/lerobot/teleoperators/so_leader/so_leader.py)
+and [SO follower](https://github.com/huggingface/lerobot/blob/main/src/lerobot/robots/so_follower/so_follower.py)
+interfaces, with this setup's measured encoder-to-angle mappings. White display geometry
+comes from the official SO-101 acquisition handle; the calibration-bound black model
+and both measured angle mappings are preserved.

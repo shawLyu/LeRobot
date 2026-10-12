@@ -1,4 +1,6 @@
-# Follow latency acceptance — 2026-10-12
+# Historical follow latency acceptance — 2026-10-12
+
+This profile predates the [remote-only controller and overshoot tuning](../remote-follow-2026-10-12/README.md). Its six-axis result does not certify the newer gains.
 
 The six joints passed encoder-to-encoder tracking-lag acceptance on the recorded bidirectional motions. This is a **three-capture, joint-by-joint result**, not one uninterrupted six-axis pass. All three used identical hardware PID, feedforward, native RAM and follow settings. It does not guarantee arbitrary speed, pose, payload or simultaneous multi-axis motion.
 
@@ -47,12 +49,12 @@ All twelve final 3° outward/return hardware steps passed the existing response 
 
 ```sh
 ./scripts/lerobot-arm demo follow --start-held --latency-test
-# Press E, then move only the indicated joint. Space holds.
+# With the current launcher: type e + Enter in the remote terminal; h + Enter holds.
 ./scripts/lerobot-arm demo follow --start-held --latency-test --latency-joints gripper
 ./scripts/lerobot-arm verify follow-latency docs/measurements/follow-latency-2026-10-12/trigger-trace.json.gz --joints gripper --output /tmp/trigger-report.json --plot /tmp/trigger.png
 ```
 
-Acquisition saves client state, full-rate remote trace, JSON metrics and six-panel curves next to `--log`. Explicit subset acceptance is recorded in `required_joints`; it does not pass unmeasured axes. Analysis exits with code 2 if acceptance fails. The default requires all six joints.
+The current launcher saves the full-rate remote trace, JSON metrics and six-panel curves at `--log`; see [current operation](../../follow.md). Explicit subset acceptance is recorded in `required_joints`; it does not pass unmeasured axes. Analysis exits with code 2 if acceptance fails. The default requires all six joints.
 
 ## Final regression and deployment verification
 

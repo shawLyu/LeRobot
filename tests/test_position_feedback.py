@@ -175,3 +175,14 @@ def test_stream_prediction_does_not_kick_steps_and_clears_on_stop_and_reset():
     controller.reset()
     assert controller.velocity_feedforward[joint] == 0
     assert controller.feedback_correction[joint] == 0
+
+
+def test_reference_reversal_cancels_old_velocity_lead_in_one_tick():
+    controller = feedback()
+    joint = 'elbow_flex'
+    controller.profile['joints'][joint].update(kp=0, ki=0, velocity_feedforward_s=.08)
+    for n in range(20):
+        controller.target(joint, n*.02, n*.02, 1/60)
+    assert controller.velocity_feedforward[joint] > .05
+    controller.target(joint, .37, .38, 1/60)
+    assert controller.velocity_feedforward[joint] == 0

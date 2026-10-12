@@ -34,8 +34,11 @@ class Link:
             raise ValueError("independent heartbeat is simulation-only")
         if arm != 'follower' and (hardware_control or allow_gripper):
             raise ValueError('Additional arms support read-only angle calibration only')
-        if hardware_worker not in ('realtime_server', 'follow_server'):
+        if hardware_worker not in ('realtime_server', 'follow_server', 'follow_observer'):
             raise ValueError('unknown hardware worker')
+        self.observer_only = hardware_worker == 'follow_observer'
+        if self.observer_only and (hardware_control or control_log):
+            raise ValueError('follow observer cannot control or log motors')
         worker_args = ["-m", "lerobot_arm_control.runtime.simulation_server" if backend == "mujoco"
                        else "lerobot_arm_control.runtime."+hardware_worker]
         if allow_gripper:
@@ -97,7 +100,8 @@ class Link:
                     if kind == "hello":
                         if tuple(message["joints"]) != JOINTS:
                             raise ValueError("joint map mismatch")
-                        if (self.hardware_control and message.get("control_config_sha256")
+                        if ((self.hardware_control or self.observer_only)
+                                and message.get("control_config_sha256")
                                 != CONTROL_CONFIG_SHA256):
                             raise ValueError(
                                 "Local/remote control configuration differs; deploy code")
@@ -130,6 +134,8 @@ class Link:
                 self.error = str(exc)
 
     def send(self, operation, **payload):
+        if self.observer_only:
+            raise RuntimeError('follow observer is read-only')
         if operation == "circle_start" and self.backend == "hardware":
             from lerobot_arm_control.planning.circle_simulation import validate_hardware_entry
             from lerobot_arm_control.tasks.circle.circle_trajectory import Circle

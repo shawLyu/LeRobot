@@ -1,0 +1,396 @@
+{
+  "definition": "4 s moving-window delay fit from leader encoder to follower encoder; 100 ms bound includes worst encoder sampling interval",
+  "control_config_sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae",
+  "required_joints": [
+    "shoulder_pan",
+    "shoulder_lift",
+    "elbow_flex",
+    "wrist_flex",
+    "wrist_roll",
+    "gripper"
+  ],
+  "joints": {
+    "shoulder_pan": {
+      "windows": [
+        {
+          "start_seconds": 39.0,
+          "lag_ms": 34.000000000000114,
+          "signed_lag_ms": 34.000000000000114,
+          "gain": 1.1240909883463568,
+          "r_squared": 0.9958389832888871,
+          "valid": true,
+          "sampling_bound_ms": 16.952870995737612,
+          "upper_lag_ms": 50.952870995737726,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.6924385182381247
+        },
+        {
+          "start_seconds": 40.0,
+          "lag_ms": 38.000000000000114,
+          "signed_lag_ms": 38.000000000000114,
+          "gain": 1.1573178511248807,
+          "r_squared": 0.9950609892664771,
+          "valid": true,
+          "sampling_bound_ms": 17.61637593153864,
+          "upper_lag_ms": 55.616375931538755,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.147252487809614
+        },
+        {
+          "start_seconds": 41.0,
+          "lag_ms": 38.000000000000114,
+          "signed_lag_ms": 38.000000000000114,
+          "gain": 1.170819354154284,
+          "r_squared": 0.9960763484681652,
+          "valid": true,
+          "sampling_bound_ms": 17.61637593153864,
+          "upper_lag_ms": 55.616375931538755,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.319645007766081
+        },
+        {
+          "start_seconds": 42.0,
+          "lag_ms": 38.000000000000114,
+          "signed_lag_ms": 38.000000000000114,
+          "gain": 1.1800936215763,
+          "r_squared": 0.996232711608304,
+          "valid": true,
+          "sampling_bound_ms": 17.61637593153864,
+          "upper_lag_ms": 55.616375931538755,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.334300649240228
+        },
+        {
+          "start_seconds": 43.0,
+          "lag_ms": 36.000000000000114,
+          "signed_lag_ms": 36.000000000000114,
+          "gain": 1.1583179617438055,
+          "r_squared": 0.9952824161497894,
+          "valid": true,
+          "sampling_bound_ms": 17.61637593153864,
+          "upper_lag_ms": 53.616375931538755,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.334300649240228
+        },
+        {
+          "start_seconds": 44.0,
+          "lag_ms": 34.000000000000114,
+          "signed_lag_ms": 34.000000000000114,
+          "gain": 1.141090465226569,
+          "r_squared": 0.9957147967248886,
+          "valid": true,
+          "sampling_bound_ms": 17.1549660153687,
+          "upper_lag_ms": 51.154966015368814,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 2.3188889472720127
+        },
+        {
+          "start_seconds": 45.0,
+          "lag_ms": 32.000000000000114,
+          "signed_lag_ms": 32.000000000000114,
+          "gain": 1.1129350855031763,
+          "r_squared": 0.9982347824629965,
+          "valid": true,
+          "sampling_bound_ms": 17.1549660153687,
+          "upper_lag_ms": 49.154966015368814,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.9941583798124383
+        }
+      ],
+      "valid_windows": 7,
+      "worst_upper_lag_ms": 55.616375931538755,
+      "passed": true
+    },
+    "shoulder_lift": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    },
+    "elbow_flex": {
+      "windows": [
+        {
+          "start_seconds": 27.0,
+          "lag_ms": 38.000000000000114,
+          "signed_lag_ms": 38.000000000000114,
+          "gain": 0.9492748443982746,
+          "r_squared": 0.9969909014777787,
+          "valid": true,
+          "sampling_bound_ms": 17.04512001015246,
+          "upper_lag_ms": 55.04512001015257,
+          "mapping_lag_ms": 16.000000000000096,
+          "speed_p95_rad_s": 1.1037309371473873
+        },
+        {
+          "start_seconds": 28.0,
+          "lag_ms": 16.000000000000096,
+          "signed_lag_ms": 16.000000000000096,
+          "gain": 1.0274936153799725,
+          "r_squared": 0.9958623115638497,
+          "valid": true,
+          "sampling_bound_ms": 16.97467197664082,
+          "upper_lag_ms": 32.97467197664092,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.3742288803489744
+        },
+        {
+          "start_seconds": 29.0,
+          "lag_ms": 16.000000000000096,
+          "signed_lag_ms": 16.000000000000096,
+          "gain": 1.0533806490177897,
+          "r_squared": 0.9947037949396245,
+          "valid": true,
+          "sampling_bound_ms": 17.09738199133426,
+          "upper_lag_ms": 33.09738199133436,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.3776325235204858
+        },
+        {
+          "start_seconds": 30.0,
+          "lag_ms": 16.000000000000096,
+          "signed_lag_ms": 16.000000000000096,
+          "gain": 1.0531555290464634,
+          "r_squared": 0.9947994915504876,
+          "valid": true,
+          "sampling_bound_ms": 17.09738199133426,
+          "upper_lag_ms": 33.09738199133436,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.3776325235204858
+        },
+        {
+          "start_seconds": 31.0,
+          "lag_ms": 14.000000000000096,
+          "signed_lag_ms": 14.000000000000096,
+          "gain": 1.044874412085517,
+          "r_squared": 0.9957946877614999,
+          "valid": true,
+          "sampling_bound_ms": 17.09738199133426,
+          "upper_lag_ms": 31.097381991334355,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.3704665466375663
+        },
+        {
+          "start_seconds": 32.0,
+          "lag_ms": 16.000000000000096,
+          "signed_lag_ms": 16.000000000000096,
+          "gain": 1.0446206714791098,
+          "r_squared": 0.9962465492526262,
+          "valid": true,
+          "sampling_bound_ms": 17.09738199133426,
+          "upper_lag_ms": 33.09738199133436,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.3767208171671426
+        },
+        {
+          "start_seconds": 33.0,
+          "lag_ms": 18.0000000000001,
+          "signed_lag_ms": 18.0000000000001,
+          "gain": 1.0446872348712155,
+          "r_squared": 0.9958296255380216,
+          "valid": true,
+          "sampling_bound_ms": 17.61350396554917,
+          "upper_lag_ms": 35.61350396554927,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 1.4701208246463724
+        }
+      ],
+      "valid_windows": 7,
+      "worst_upper_lag_ms": 55.04512001015257,
+      "passed": true
+    },
+    "wrist_flex": {
+      "windows": [
+        {
+          "start_seconds": 115.0,
+          "lag_ms": 12.000000000000094,
+          "signed_lag_ms": 12.000000000000094,
+          "gain": 1.023544935346382,
+          "r_squared": 0.9957934704336688,
+          "valid": true,
+          "sampling_bound_ms": 17.6834799349308,
+          "upper_lag_ms": 29.683479934930894,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.8994643552353537
+        },
+        {
+          "start_seconds": 116.0,
+          "lag_ms": 14.000000000000096,
+          "signed_lag_ms": 14.000000000000096,
+          "gain": 1.032746254293521,
+          "r_squared": 0.9940403619981445,
+          "valid": true,
+          "sampling_bound_ms": 17.457637935876846,
+          "upper_lag_ms": 31.457637935876942,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.997392693532135
+        },
+        {
+          "start_seconds": 117.0,
+          "lag_ms": 16.000000000000096,
+          "signed_lag_ms": 16.000000000000096,
+          "gain": 1.0521593081125098,
+          "r_squared": 0.9920517859012705,
+          "valid": true,
+          "sampling_bound_ms": 17.457637935876846,
+          "upper_lag_ms": 33.457637935876946,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.997392693532135
+        },
+        {
+          "start_seconds": 118.0,
+          "lag_ms": 18.0000000000001,
+          "signed_lag_ms": 18.0000000000001,
+          "gain": 1.0471104369611763,
+          "r_squared": 0.9895713377232601,
+          "valid": true,
+          "sampling_bound_ms": 17.457637935876846,
+          "upper_lag_ms": 35.457637935876946,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.997392693532135
+        },
+        {
+          "start_seconds": 119.0,
+          "lag_ms": 20.0000000000001,
+          "signed_lag_ms": 20.0000000000001,
+          "gain": 1.0429184129212457,
+          "r_squared": 0.9879376271886636,
+          "valid": true,
+          "sampling_bound_ms": 16.934828949160874,
+          "upper_lag_ms": 36.93482894916097,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.903442875679451
+        },
+        {
+          "start_seconds": 120.0,
+          "lag_ms": 18.0000000000001,
+          "signed_lag_ms": 18.0000000000001,
+          "gain": 1.0281042145637593,
+          "r_squared": 0.9920153568068824,
+          "valid": true,
+          "sampling_bound_ms": 16.938572051003575,
+          "upper_lag_ms": 34.938572051003675,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 0.7019185550880076
+        }
+      ],
+      "valid_windows": 6,
+      "worst_upper_lag_ms": 36.93482894916097,
+      "passed": true
+    },
+    "wrist_roll": {
+      "windows": [
+        {
+          "start_seconds": 127.0,
+          "lag_ms": 162.00000000000023,
+          "signed_lag_ms": 162.00000000000023,
+          "gain": 0.9235670515224602,
+          "r_squared": 0.8535140187790813,
+          "valid": true,
+          "sampling_bound_ms": 17.751328996382654,
+          "upper_lag_ms": 179.75132899638288,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.214857829179592
+        },
+        {
+          "start_seconds": 128.0,
+          "lag_ms": 170.00000000000023,
+          "signed_lag_ms": 170.00000000000023,
+          "gain": 0.9430031286623163,
+          "r_squared": 0.8858632209935433,
+          "valid": true,
+          "sampling_bound_ms": 17.751328996382654,
+          "upper_lag_ms": 187.75132899638288,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.312785236541953
+        },
+        {
+          "start_seconds": 129.0,
+          "lag_ms": 192.00000000000026,
+          "signed_lag_ms": 192.00000000000026,
+          "gain": 0.8889895238203653,
+          "r_squared": 0.903354092457342,
+          "valid": true,
+          "sampling_bound_ms": 17.751328996382654,
+          "upper_lag_ms": 209.7513289963829,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.453227000428645
+        },
+        {
+          "start_seconds": 130.0,
+          "lag_ms": 210.00000000000026,
+          "signed_lag_ms": 210.00000000000026,
+          "gain": 0.8824566767812309,
+          "r_squared": 0.9653629773367441,
+          "valid": true,
+          "sampling_bound_ms": 17.29245495516807,
+          "upper_lag_ms": 227.29245495516832,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.511674982304101
+        },
+        {
+          "start_seconds": 131.0,
+          "lag_ms": 212.00000000000028,
+          "signed_lag_ms": 212.00000000000028,
+          "gain": 0.8717796308567509,
+          "r_squared": 0.9795785253512831,
+          "valid": true,
+          "sampling_bound_ms": 17.29245495516807,
+          "upper_lag_ms": 229.29245495516835,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.487308161030276
+        },
+        {
+          "start_seconds": 132.0,
+          "lag_ms": 202.00000000000026,
+          "signed_lag_ms": 202.00000000000026,
+          "gain": 0.8954103323397281,
+          "r_squared": 0.9815050841693732,
+          "valid": true,
+          "sampling_bound_ms": 17.29245495516807,
+          "upper_lag_ms": 219.29245495516832,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.3397028847739625
+        },
+        {
+          "start_seconds": 133.0,
+          "lag_ms": 192.00000000000026,
+          "signed_lag_ms": 192.00000000000026,
+          "gain": 0.9272072983328196,
+          "r_squared": 0.9794014150993161,
+          "valid": true,
+          "sampling_bound_ms": 17.29245495516807,
+          "upper_lag_ms": 209.29245495516832,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.164094152894424
+        },
+        {
+          "start_seconds": 134.0,
+          "lag_ms": 190.00000000000026,
+          "signed_lag_ms": 190.00000000000026,
+          "gain": 0.9393429402474311,
+          "r_squared": 0.9765503377257948,
+          "valid": true,
+          "sampling_bound_ms": 16.971017001196742,
+          "upper_lag_ms": 206.971017001197,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "speed_p95_rad_s": 5.064924621825532
+        }
+      ],
+      "valid_windows": 8,
+      "worst_upper_lag_ms": 229.29245495516835,
+      "passed": false
+    },
+    "gripper": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "passed": false
+    }
+  },
+  "guided": true,
+  "sensor_to_command_ms": {
+    "p95": 5.805780267110094,
+    "max": 13.350307010114193
+  },
+  "passed": false
+}

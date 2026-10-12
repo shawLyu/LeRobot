@@ -25,7 +25,8 @@ omega_f = lowpass((q[k] - q[k-1]) / actual_dt, tau_D)
 I_next  = I + Ki * e_f * dt
 u_pid   = slew(Kp * e_f + I - Kd * omega_f, pid_rate)
 v_ref   = lowpass((q_ref[k] - q_ref[k-1]) / actual_dt, 0.015 s)
-u_ff    = slew(0.08 s * v_ref if continuous_motion else 0, 4 rad/s)
+u_ff    = bounded_velocity_lead(T_ff * v_ref, increase_rate=4 rad/s)
+          # stop/reversal: clear immediately; decreasing lead: apply immediately
 q_cmd   = clip(q_ref + bounded_correction(u_pid + u_ff), joint_limits)
 ```
 
@@ -39,14 +40,14 @@ q_cmd   = clip(q_ref + bounded_correction(u_pid + u_ff), joint_limits)
 
 | 关节 | Kp | Ki (1/s) | Kd (s) | 总补偿上限 (rad) | PID 反馈变化率 (rad/s) |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| shoulder_pan | 0.20 | 1.50 | 0.02 | 0.20 | 0.24 |
-| shoulder_lift | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
+| shoulder_pan | 0.12 | 1.20 | 0.02 | 0.20 | 0.24 |
+| shoulder_lift | 0.10 | 0.80 | 0.03 | 0.16 | 0.24 |
 | elbow_flex | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
-| wrist_flex | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
+| wrist_flex | 0.10 | 0.80 | 0.02 | 0.16 | 0.24 |
 | wrist_roll | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
-| gripper | 0.50 | 0.80 | 0.01 | 0.12 | 0.04 |
+| gripper | 0.35 | 0.80 | 0.01 | 0.12 | 0.04 |
 
-D 滤波时间常数均为 80 ms；误差滤波为前五轴 80 ms、夹爪 120 ms。
+D 滤波时间常数为 shoulder_lift 40 ms、其他关节 80 ms；误差滤波为前五轴 80 ms、夹爪 120 ms。
 死区为 pan/wrist_flex/wrist_roll 0.0015 rad，lift/elbow/gripper 0.003 rad。
 物理编码器边界始终约束最终命令，Push-T 另取 CAD 边界交集。
 
@@ -110,16 +111,44 @@ MuJoCo 使用相同的 PID 算法、频率和配置，但内部位置执行器�
 每个周期直接采用最新目标，避免 0.6 rad/s 限速持续积累位置滞后。
 硬件仍受模型/编码器行程和舵机自身速度上限约束。
 
-共享 PID 增加 80 ms 速度前馈：根据连续参考角度的变化估算速度，以 15 ms 一阶滤波降噪。
-只有连续两个同向移动样本才启用；单次位置阶跃不会产生前馈冲击，停止/反向会取消新的预测请求，已有前馈按变化率限制消退。
+共享 PID 使用 3 号 elbow_flex 60 ms、其他关节 80 ms 速度前馈：根据连续参考角度的变化估算速度，以 15 ms 一阶滤波降噪。
+只有连续两个同向移动样本才启用；单次位置阶跃不会产生前馈冲击，停止/反向在一个控制周期内清除旧方向前馈，减速时立即减小前馈；只有前馈增大时才按变化率限制。
 PID 反馈修正仍使用原先的缓慢变化率；前馈采用独立的 4 rad/s 变化率，
 与 PID 相加后的修正仍受同一幅度边界及编码器行程限制。暂停/重新使能清除前馈状态。
 
 所有 demo 共用同一配置；修改的是运行期 RAM 加速度和速度，退出恢复原值。
 原生 P/I/D、EEPROM 和实测角度标定未改变。
 
-显示状态通过独立发送线程传输；状态只保留最新帧，确认消息保持顺序。SSH 输出阻塞不会阻塞电机控制周期；客户端心跳及断连保持机制继续有效。
+跟随由远端 standalone 进程独立拥有双臂串口，启动和保持只接受其控制终端输入。
+采集、标定、映射、PID 和写电机全部在远端完成；看门狗检查远端采集与循环间隔。
+只读 Unix socket 通过独立线程向观察端发送最新帧，不读取命令。观察端堵塞、断开或失焦不影响跟随。
+控制终端退出仍保持黑臂；硬件报警仍保持并要求显式恢复。
 
 仿真内环的 kv/kp 约为 80 ms，用于近似实测舵机的低频响应，避免将真机前馈应用到过快的理想执行器。
 这只是内环模型近似，不是硬件寄存器或完整系统辨识。抓取和 Push-T 的预测、执行使用相同控制状态与参数。
-六电机最新实测曲线、各次失败记录及参数指纹见[低延迟验收](measurements/follow-latency-2026-10-12/README.md)。
+最新实测曲线、超调对比及未完成验收见[远端控制测试](measurements/remote-follow-2026-10-12/README.md)。
+Push-T 候选预测同时检查闭环执行后的接触高度，并在块末尾允许最多 0.6 s 的有限稳定时间；
+不再只根据理想 IK 姿态接受接触动作，预测与执行保持一致。
+
+
+## 远端跟随中的控制框图
+
+```mermaid
+flowchart LR
+  subgraph R[远端计算机：60 Hz]
+    L[白臂编码器] --> M[独立标定与扳机映射]
+    M --> A[启动对齐 / 最新目标 q_ref]
+    A --> S((＋ / −))
+    S --> PID[位置 PID：误差滤波、积分防饱和、测量微分]
+    A --> FF[位置与速度前馈：停止 / 反向清除速度项]
+    PID --> SUM((＋))
+    FF --> SUM
+    SUM --> LIMIT[修正限幅 / 关节限位]
+    LIMIT --> N[舵机原生位置环 + 电机负载]
+    N --> Q[黑臂编码器 q]
+    Q -->|负反馈| S
+    Q --> T[最新状态只读发布]
+    L --> T
+  end
+  T --> V[本地 simulator：仅显示]
+```

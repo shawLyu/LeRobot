@@ -59,6 +59,17 @@ def test_guided_capture_requires_the_labelled_joint_and_explicit_subset():
     assert not analyze(trace)['passed']
 
 
+def test_interrupted_guided_capture_cannot_pass_on_partial_good_windows():
+    trace = synthetic_trace(.04)
+    trace['metadata']['measurement_completed'] = False
+    report = analyze(trace)
+    assert all(joint['passed'] for joint in report['joints'].values())
+    assert report['capture_completed'] is False
+    assert not report['passed']
+    trace['metadata']['measurement_completed'] = True
+    assert analyze(trace)['passed']
+
+
 def test_cli_reads_archived_trace_and_exits_nonzero_for_failed_acceptance(tmp_path, monkeypatch):
     import gzip
     import json

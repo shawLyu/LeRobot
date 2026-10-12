@@ -25,6 +25,9 @@ src/lerobot_arm_control/
 Local simulation and planners never run on the motor host. The selected remote
 source is listed in `configs/remote-runtime.txt`; import closure and execution in
 a separate deployment directory are covered by tests.
+Leader/follower acquisition, mapping, PID and motor writes all run in the remote
+`follow_server --standalone` process. `demo follow` opens its controlling terminal;
+`view follow` subscribes to telemetry without sending commands or heartbeats.
 
 ## Environments and commands
 

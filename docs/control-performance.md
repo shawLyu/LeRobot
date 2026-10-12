@@ -1,16 +1,20 @@
 # Control performance and verification
 
-## Current low-latency controller (2026-10-12)
+## Current remote-only controller and overshoot tuning (2026-10-12)
 
-The current six-motor encoder-following result is **35.2–75.5 ms**, including the
-maximum sampling interval in each accepted window. This combines three explicit
-joint-by-joint captures with identical hardware settings; high-speed failures and
-one later worker fault are retained in the record. See the [complete report and
-six response curves](measurements/follow-latency-2026-10-12/README.md) for the motion
-range, RMS tracking error, all raw traces, exact configuration and limitations.
-The final hardware and MuJoCo twelve-step response tests both pass. Native RAM
-restoration is verified. Simulation uses the same outer PID and a revised inner
-actuator approximation (kp=700, kv=56); no real servo register uses these model gains.
+Following now runs independently on the robot computer. The simulator is an optional
+read-only subscriber. See the [current report and six-channel response curves](measurements/remote-follow-2026-10-12/README.md)
+for the reduced velocity lead on motor 3, immediate stop/reversal cancellation,
+per-joint PID changes and physical test limitations. All twelve final physical 3°
+responses pass. Worst motor-3 sampled step overshoot is 0%; this is a finite
+small-step result, not a guarantee for arbitrary following motions.
+
+The newer profile's dynamic trial passed labelled portions for motors 1, 3 and 4;
+fast motor-5 motion exceeded 100 ms, while white-trigger faults interrupted motors
+2 and 6. It does not establish an uninterrupted six-axis <100 ms result.
+The [previous profile](measurements/follow-latency-2026-10-12/README.md) achieved
+35.2–75.5 ms across three accepted captures. Those are historical measurements with
+different gains, not a substitute for testing the current profile.
 
 ## Historical initial PID acceptance (earlier on 2026-10-12)
 

@@ -111,7 +111,9 @@ def test_hardware_keeps_ssh_routing_and_control_flags(monkeypatch):
 
 
 @pytest.mark.parametrize("matches", [False, True])
-def test_hardware_control_rejects_configuration_drift_before_commands(monkeypatch, matches):
+@pytest.mark.parametrize("observer", [False, True])
+def test_hardware_control_rejects_configuration_drift_before_commands(monkeypatch, matches,
+                                                                    observer):
     from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 
     hello = {"version": 1, "type": "hello", "joints": list(JOINTS),
@@ -119,7 +121,8 @@ def test_hardware_control_rejects_configuration_drift_before_commands(monkeypatc
     process = Mock(stdin=io.StringIO(), stdout=io.StringIO(json.dumps(hello) + "\n"))
     monkeypatch.setattr("lerobot_arm_control.runtime.realtime_client.subprocess.Popen",
         Mock(return_value=process))
-    link = Link("robot-host", "/remote/robot", "hardware", hardware_control=True)
+    link = Link("robot-host", "/remote/robot", "hardware", hardware_control=not observer,
+                hardware_worker='follow_observer' if observer else 'realtime_server')
     link.reader.join(timeout=1)
     if matches:
         assert link.error is None

@@ -44,9 +44,9 @@ def load_follow_config(path=None):
 
 
 def hardware_follow_limits(model_ranges, encoder_limits):
-    """Use verified physical jaw opening travel; keep CAD bounds on arm joints."""
-    limits = [(max(bounds[0], encoder_limits[joint][0]),
-               encoder_limits[joint][1] if joint == 'gripper' else
+    """Use verified physical jaw travel; keep CAD bounds on arm joints."""
+    limits = [tuple(encoder_limits[joint]) if joint == 'gripper' else
+              (max(bounds[0], encoder_limits[joint][0]),
                min(bounds[1], encoder_limits[joint][1]))
               for joint, bounds in zip(JOINTS, model_ranges, strict=True)]
     if any(low >= high for low, high in limits):

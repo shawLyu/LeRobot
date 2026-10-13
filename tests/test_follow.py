@@ -40,7 +40,8 @@ def test_trigger_maps_measured_full_travel_and_clamps_only_at_endpoints(fraction
     leader_degrees = low+fraction*(high-low)
     for _ in range(120):
         target = mapping.step([0]*5+[math.radians(leader_degrees)], .05)
-    expected = config['follower_gripper_degrees'][1]*max(0, min(1, fraction))
+    closed, opened = config['follower_gripper_degrees']
+    expected = closed+(opened-closed)*max(0, min(1, fraction))
     assert math.degrees(target[5]) == pytest.approx(expected)
 
 
@@ -79,6 +80,7 @@ def test_hardware_trigger_maximum_reaches_the_verified_raw_upper_limit():
     limits = hardware_follow_limits(cad, encoder)
     assert limits[:5] == cad[:5]
     assert limits[5][1] == encoder['gripper'][1] > cad[5][1]
+    assert limits[5][0] == encoder['gripper'][0] < cad[5][0]
     config = load_follow_config()
     mapping = JointFollower(config, [0]*6, limits)
     maximum = math.radians(config['leader_trigger_degrees'][1])
@@ -87,6 +89,36 @@ def test_hardware_trigger_maximum_reaches_the_verified_raw_upper_limit():
         assert limits[5][0] <= target[5] <= limits[5][1]
     assert round(target[5]/fit['radians_per_tick']+fit['zero_raw']) == 2982
     assert mapping.step([0]*5+[maximum+1], .05)[5] <= encoder['gripper'][1]
+
+
+def test_recorded_minimum_and_midpoint_align_both_encoders_without_cad_clipping():
+    import json
+    from pathlib import Path
+
+    from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+
+    root = Path(__file__).resolve().parents[1]
+    evidence = json.loads((root/'docs/measurements/trigger-range-2026-10-13.json').read_text())
+    path = root/'data/calibration/follower_mujoco.json'
+    saved = json.loads(path.read_text())
+    fit = AngleCalibration(path, saved['fingerprint']).fit('gripper')
+    encoder = {j: (-3, 3) for j in JOINTS}
+    encoder['gripper'] = tuple((v-fit['zero_raw'])*fit['radians_per_tick']
+                              for v in saved['fingerprint']['raw_limits']['gripper'])
+    limits = hardware_follow_limits([(-1, 1)]*5+[(-.17453, 1.74533)], encoder)
+    config = load_follow_config()
+    mapping = JointFollower(config, [0]*6, limits)
+    white = evidence['minimum_capture']['arms']['arm1']['samples'][0]
+    black = evidence['minimum_capture']['arms']['follower']['samples'][0]
+    for _ in range(120):
+        target = mapping.step([0]*5+[math.radians(white['calibrated_degrees'])], .05)
+    assert round(target[5]/fit['radians_per_tick']+fit['zero_raw']) == black['raw'] == 1479
+    # Values below the measured white minimum remain at the intended closed position.
+    assert mapping.step([0]*5+[0], .05)[5] == pytest.approx(target[5])
+    midpoint = math.radians(sum(config['leader_trigger_degrees'])/2)
+    for _ in range(120):
+        target = mapping.step([0]*5+[midpoint], .05)
+    assert target[5]/fit['radians_per_tick']+fit['zero_raw'] == pytest.approx((1479+2982)/2)
 
 
 def test_stale_samples_latch_hold_until_explicit_resume():
@@ -403,7 +435,8 @@ def test_tracking_uses_latest_pose_after_bounded_alignment_and_rearms_on_resume(
     for _ in range(100):
         mapping.step([.4]*5+[0], .01)
     assert mapping.tracking
-    assert mapping.step([.8]*5+[0], .01) == [.8]*5+[0]
+    aligned_trigger = mapping.target[5]
+    assert mapping.step([.8]*5+[0], .01) == [.8]*5+[aligned_trigger]
     mapping.hold([.2]*6)
     assert not mapping.tracking
     assert mapping.step([1]*6, .01) == [.2]*6

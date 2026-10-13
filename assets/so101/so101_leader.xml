@@ -119,7 +119,7 @@
                 <geom type="mesh" pos="0 0 0" mesh="Handle_SO101" material="Handle_SO101_material" class="visual" quat="-1.0341155355510722e-13 1.0 0.0 -0.0" />
                 <geom type="mesh" pos="0 0 0" mesh="Handle_SO101" class="collision" quat="-1.0341155355510722e-13 1.0 0.0 -0.0" />
                 <body name="moving_jaw_so101_v1" pos=".0202 .0188 -.0234" quat="1 1 0 0">
-                  <joint name="gripper" axis="0 0 1" type="hinge" range="0 2.45291018759585" class="sts3215" />
+                  <joint name="gripper" axis="0 0 1" type="hinge" range="0.682012417897147 2.45291018759585" class="sts3215" />
                   <inertial pos="-0.005619805153 -0.02459451886 0.009867440284" mass="0.006482134179" fullinertia="2.350989358e-06 1.421821883e-06 2.203508731e-06 -3.4844179e-07 1.776125872e-07 8.591511074e-07" />
                   <geom type="mesh" pos="0 0 0" mesh="Trigger_SO101" material="Trigger_SO101_material" class="visual" quat="-3.536883436854799e-14 0.34202014332663716 0.9396926207855559 -9.717507377970458e-14" />
                   <geom type="mesh" pos="0 0 0" mesh="Trigger_SO101" class="collision" quat="-3.536883436854799e-14 0.34202014332663716 0.9396926207855559 -9.717507377970458e-14" />
@@ -137,6 +137,6 @@
     <position class="sts3215" name="elbow_flex" joint="elbow_flex" ctrlrange="-1.69 1.69" />
     <position class="sts3215" name="wrist_flex" joint="wrist_flex" ctrlrange="-1.65806 1.65806" />
     <position class="sts3215" name="wrist_roll" joint="wrist_roll" ctrlrange="-2.74385 2.84121" />
-    <position class="sts3215" name="gripper" joint="gripper" ctrlrange="0 2.45291018759585" />
+    <position class="sts3215" name="gripper" joint="gripper" ctrlrange="0.682012417897147 2.45291018759585" />
   </actuator>
 </mujoco>

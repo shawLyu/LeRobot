@@ -8,17 +8,17 @@
     118
   ],
   "leader_range_degrees": [
-    0,
+    39.07643312101911,
     140.54140127388533
   ],
   "follower_range_degrees": [
-    0,
+    -11.310160427807487,
     109.2513368983957
   ],
   "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
   "calibration_unchanged": true,
   "physical_motion_commanded": false,
-  "lower_endpoint": "Retained at previously confirmed 0 degrees; not remeasured in this capture",
+  "lower_endpoint": "User-defined minimum positions resampled after reporting minimum misalignment; white raw=1940 maps to black raw=1479",
   "samples": [
     {
       "sampled_unix_ns": 1791875227481735410,
@@ -105,18 +105,356 @@
       "torque": 0
     }
   ],
-  "follow_config_sha256": "8cf57c086aa6ede8eb9214894e83525bb0cdcd3110b9bdbe869e83c3e5b18884",
+  "follow_config_sha256": "e7e0ba422b643efdaaa4639cabcdadfe073dd799222dd1b23ab960be6fb9626a",
   "follower_maximum_raw": 2982,
   "follower_maximum_source": "Verified native upper encoder limit under current calibration; not a new physical motion test",
   "follower_calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+  "minimum_capture": {
+    "recorded_ns": 1791878555573533252,
+    "operator_assertion": "White motor 6 at desired minimum, user confirmed ready",
+    "arms": {
+      "arm1": {
+        "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+        "raw_limits": [
+          1512,
+          2759
+        ],
+        "samples": [
+          {
+            "time_ns": 1791878556686077376,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556706970586,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556727998766,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556748995972,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556769920119,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556790915741,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556812000473,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556833465923,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556854833746,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556876314283,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556897688303,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556919262356,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556940685048,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556962115960,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878556983591555,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557005134406,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557026635299,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557048233543,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557069679421,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557091059079,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557112425573,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557133853524,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557154945271,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557176261863,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557197597109,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557219058394,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557240437252,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557261783180,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557283135791,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          },
+          {
+            "time_ns": 1791878557304527162,
+            "raw": 1940,
+            "calibrated_degrees": 39.07643312101911
+          }
+        ],
+        "status": 0,
+        "torque": 0
+      },
+      "follower": {
+        "calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+        "raw_limits": [
+          1441,
+          2982
+        ],
+        "samples": [
+          {
+            "time_ns": 1791878556686383126,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556707380884,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556728416353,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556749325278,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556770277204,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556791297039,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556812569650,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556834009964,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556855423982,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556876882402,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556898296595,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556919809978,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556941294468,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556962710952,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878556984210707,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557005724656,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557027309363,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557048820746,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557070245847,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557091568684,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557113115926,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557134317327,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557155367934,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557176811820,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557198232448,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557219649873,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557241002053,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557262279192,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557283710195,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          },
+          {
+            "time_ns": 1791878557305106071,
+            "raw": 1479,
+            "calibrated_degrees": -11.310160427807487
+          }
+        ],
+        "status": 0,
+        "torque": 0
+      }
+    }
+  },
   "verification": {
-    "local_related_tests": "120 passed in 2.74s",
-    "remote_runtime_tests": "323 passed",
+    "local_related_tests": "135 passed in 2.80s",
+    "remote_runtime_tests": "324 passed",
+    "minimum_mapping_raw": {
+      "white": 1940,
+      "black": 1479
+    },
+    "maximum_mapping_raw": {
+      "white": 3002,
+      "black": 2982
+    },
+    "midpoint_raw": {
+      "white": 2471,
+      "black": 2230.5
+    },
     "saved_scene_loaded": true,
-    "follower_raw_limits": [
-      1441,
-      2982
-    ],
+    "synthetic_follow_duration_s": 2,
+    "synthetic_follow_completed": true,
     "physical_end_to_end_motion_tested": false
   }
 }

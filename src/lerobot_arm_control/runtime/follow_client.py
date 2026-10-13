@@ -56,9 +56,11 @@ def run(args):
     link, viewer = None, None
     started, frames, saved = time.monotonic(), [], False
     issues, failure, exit_reason = [], None, 'window_closed'
-    initial = [0, -.4, .6, .1, 0, math.radians(20)]
+    initial = [0, -.4, .6, .1, 0,
+               math.radians(sum(config['leader_trigger_degrees'])/2)]
     leader_qpos = list(initial)
     follower_qpos = list(initial)
+    follower_qpos[5] = math.radians(sum(config['follower_gripper_degrees'])/2)
     mapping = JointFollower(config, follower_qpos)
     selected, notice, hello = 0, 'Synthetic leader; motor writes OFF', None
 

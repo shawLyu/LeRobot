@@ -17,6 +17,7 @@ from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.follow import (
     JointFollower,
     StartupFollow,
+    hardware_follow_limits,
     initialization_target,
     load_follow_config,
 )
@@ -160,11 +161,7 @@ def serve(args):
             controller = ManualControl(follower_bus, calibration, limits,
                                        follower_metadata['fingerprint']['raw_limits'])
             stack.callback(controller.close)
-            limits = [(max(bounds[0], controller.limits[joint][0]),
-                       min(bounds[1], controller.limits[joint][1]))
-                      for joint, bounds in zip(JOINTS, limits, strict=True)]
-            if any(low >= high for low, high in limits):
-                raise ValueError('follower has no usable calibrated motion range')
+            limits = hardware_follow_limits(limits, controller.limits)
         mapping = JointFollower(config, measured, limits)
         measurement_joint = None
         measurement_elapsed = 0.

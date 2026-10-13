@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-13",
+  "leader": "arm1",
+  "joint": "gripper",
+  "operator_assertion": "White motor 6 is currently at maximum",
+  "previous_leader_range_degrees": [
+    0,
+    118
+  ],
+  "leader_range_degrees": [
+    0,
+    140.54140127388533
+  ],
+  "follower_range_degrees": [
+    0,
+    109.2513368983957
+  ],
+  "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+  "calibration_unchanged": true,
+  "physical_motion_commanded": false,
+  "lower_endpoint": "Retained at previously confirmed 0 degrees; not remeasured in this capture",
+  "samples": [
+    {
+      "sampled_unix_ns": 1791875227481735410,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875227679952242,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875227880115995,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875228081001292,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875228081001292,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875228286750454,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875228528993572,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875228729006085,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875228729006085,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875228929125404,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875229130428712,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    },
+    {
+      "sampled_unix_ns": 1791875229329360744,
+      "raw": 3002,
+      "calibrated_degrees": 140.54140127388533,
+      "status": 0,
+      "torque": 0
+    }
+  ],
+  "follow_config_sha256": "8cf57c086aa6ede8eb9214894e83525bb0cdcd3110b9bdbe869e83c3e5b18884",
+  "follower_maximum_raw": 2982,
+  "follower_maximum_source": "Verified native upper encoder limit under current calibration; not a new physical motion test",
+  "follower_calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+  "verification": {
+    "local_related_tests": "120 passed in 2.74s",
+    "remote_runtime_tests": "323 passed",
+    "saved_scene_loaded": true,
+    "follower_raw_limits": [
+      1441,
+      2982
+    ],
+    "physical_end_to_end_motion_tested": false
+  }
+}

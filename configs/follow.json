@@ -5,14 +5,14 @@
   "max_sample_age_seconds": 0.25,
   "leader_trigger_degrees": [
     0,
-    118
+    140.54140127388533
   ],
   "follower_gripper_degrees": [
     0,
-    90
+    109.2513368983957
   ],
   "trigger_range_measured": true,
-  "trigger_range_source": "User corrected white arm1 maximum travel to 118 degrees on 2026-10-11; zero endpoint retained at 0 degrees; 0/15/30 are calibration reference points",
+  "trigger_range_source": "User held white arm1 motor 6 at maximum on 2026-10-13; 12 live samples raw=3002, converted by unchanged independent calibration to 140.54140127388533 degrees; lower endpoint retained at previously confirmed 0 degrees",
   "simulation_shared_calibration": false,
   "initialization": {
     "max_correction_degrees": 2,
@@ -23,5 +23,6 @@
     "auto_start": true
   },
   "entry_speed_rad_s": 0.6,
-  "alignment_tolerance_degrees": 2
+  "alignment_tolerance_degrees": 2,
+  "follower_gripper_range_source": "Black follower calibrated upper encoder limit raw=2982, converted by unchanged independent calibration to 109.2513368983957 degrees; closed endpoint retained at 0 degrees"
 }

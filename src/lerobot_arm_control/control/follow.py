@@ -43,6 +43,17 @@ def load_follow_config(path=None):
     return config
 
 
+def hardware_follow_limits(model_ranges, encoder_limits):
+    """Use verified physical jaw opening travel; keep CAD bounds on arm joints."""
+    limits = [(max(bounds[0], encoder_limits[joint][0]),
+               encoder_limits[joint][1] if joint == 'gripper' else
+               min(bounds[1], encoder_limits[joint][1]))
+              for joint, bounds in zip(JOINTS, model_ranges, strict=True)]
+    if any(low >= high for low, high in limits):
+        raise ValueError('follower has no usable calibrated motion range')
+    return limits
+
+
 def initialization_target(config, measured, limits, encoder_limits):
     """Recover only small model-limit violations, always within physical travel."""
     target = JointFollower.validate(measured)

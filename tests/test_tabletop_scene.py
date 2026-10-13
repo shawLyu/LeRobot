@@ -138,7 +138,8 @@ def test_two_arms_share_meshes_but_have_independent_joints_bases_and_materials(t
     path.write_text(scene_xml(state, config))
     model = mujoco.MjModel.from_xml_path(str(path))
     assert model.nq == 12 and model.nu == 0 and model.nmesh == 21
-    assert model.joint('arm1__gripper').range[1] == pytest.approx(np.deg2rad(118))
+    assert model.joint('arm1__gripper').range[1] == pytest.approx(np.deg2rad(
+        json.loads((ROOT/'configs/follow.json').read_text())['leader_trigger_degrees'][1]))
     head = model.body('arm1__gripper').id
     meshes = {model.mesh(int(index)).name for index in model.geom_dataid[
         (model.geom_bodyid == head) & (model.geom_type == mujoco.mjtGeom.mjGEOM_MESH)]}

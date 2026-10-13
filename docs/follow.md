@@ -2,7 +2,15 @@
 
 White `arm1` is the passive acquisition handle/trigger; black `follower` carries the gripper.
 Both independent six-joint calibrations are required. The measured white trigger range
-0–118° maps to black gripper 0–90°; the 0/15/30° reference marks are calibration points.
+0–140.54° maps to black gripper 0–109.25°; the 0/15/30° reference marks are calibration points. The upper endpoint was sampled at raw=3002
+on 2026-10-13 while the user held the white trigger at maximum; 140.54° is the
+existing encoder-calibration conversion, not a new independent mechanical angle measurement.
+
+The black maximum is its calibrated encoder upper limit raw=2982 (109.25°),
+not the former fixed 90° target. Physical following uses that verified upper
+limit for the jaw; arm joints retain their existing CAD/encoder limit intersection.
+The canonical CAD model is unchanged; its synthetic actuator range still ends at
+100°. [Endpoint capture and calibration identities](measurements/trigger-range-2026-10-13.json).
 
 ## Start real following
 

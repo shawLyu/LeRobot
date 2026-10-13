@@ -1222,7 +1222,7 @@
     },
     "follow.json": {
       "file": "configs/follow.json",
-      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81"
+      "sha256": "8cf57c086aa6ede8eb9214894e83525bb0cdcd3110b9bdbe869e83c3e5b18884"
     }
   },
   "calibration_records": {
@@ -1291,12 +1291,12 @@
       "role": "leader",
       "end_effector": "acquisition_handle_and_trigger",
       "model_file": "assets/so101/so101_leader.xml",
-      "sha256": "182031e5ca5f329c8dd2edf57af6e0e7a6ab1572ecd79ba816e0b5cba7329c79",
+      "sha256": "3d61b650568542599699ed865d4fa3f0b3abdd59e6a7fd8eee55b2e21115fcda",
       "upstream_revision": "a758567c3978dfeefe282ede0500085a48fe8f78",
       "trigger_limits_measured": true,
       "trigger_limits_degrees": [
         0,
-        118
+        140.54140127388533
       ]
     },
     "follower": {
@@ -1330,14 +1330,14 @@
     "max_sample_age_seconds": 0.25,
     "leader_trigger_degrees": [
       0,
-      118
+      140.54140127388533
     ],
     "follower_gripper_degrees": [
       0,
-      90
+      109.2513368983957
     ],
     "trigger_range_measured": true,
-    "trigger_range_source": "User corrected white arm1 maximum travel to 118 degrees on 2026-10-11; zero endpoint retained at 0 degrees; 0/15/30 are calibration reference points",
+    "trigger_range_source": "User held white arm1 motor 6 at maximum on 2026-10-13; 12 live samples raw=3002, converted by unchanged independent calibration to 140.54140127388533 degrees; lower endpoint retained at previously confirmed 0 degrees",
     "simulation_shared_calibration": false,
     "initialization": {
       "max_correction_degrees": 2,
@@ -1350,7 +1350,8 @@
     "entry_speed_rad_s": 0.6,
     "alignment_tolerance_degrees": 2,
     "controller_profile": "shared-joint-pid-v1",
-    "hz": 60
+    "hz": 60,
+    "follower_gripper_range_source": "Black follower calibrated upper encoder limit raw=2982, converted by unchanged independent calibration to 109.2513368983957 degrees; closed endpoint retained at 0 degrees"
   },
   "controller_update": {
     "date": "2026-10-13",

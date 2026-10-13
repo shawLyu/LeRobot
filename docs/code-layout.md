@@ -1,123 +1,98 @@
-# Code layout and shared control parameters
+# 代码分类与配置归属
 
-Existing local source root: `/Users/shawn/Research/RobotSimulator/LeRobot`.
-Remote runtime root: `lerobot:/home/xy/Research/lerobot`.
-Shared control source, remote tests, and settings are deployed from the local copy.
-Simulation, planning, and display source remain local.
+本项目直接从源码运行，统一入口是 `./scripts/lerobot-arm`，无需打包安装。
+本地 checkout 是代码来源；远端只部署 `configs/remote-runtime.txt` 列出的运行模块。
 
-The sole control configuration is `configs/control.json`, profile `shared-joint-pid-v1`.
+```text
+LeRobot/
+├── src/lerobot_arm_control/
+│   ├── core/             配置、路径、文件、进程命令与延迟加载 API
+│   ├── robot/so101/      LeRobot 总线适配、设备身份与模型元数据
+│   ├── control/          共享 PID、限位、保持、接触/受阻检测、轨迹执行
+│   ├── calibration/      独立关节标定及相机、标记、桌面标定
+│   ├── perception/       桌面注册、双臂基座定位、物体检测与跟踪
+│   ├── planning/         本地 MuJoCo 规划、IK 与碰撞验证
+│   ├── tasks/
+│   │   ├── circle/       圆轨迹生成与执行
+│   │   ├── push_t/       推 T 任务、快照与本地/远端执行适配
+│   │   └── pick_t/       抓放任务与阶段编排
+│   ├── transport/        协议、连接、最新状态发布与只读订阅
+│   ├── runtime/          本地客户端、远端 worker、仿真 worker
+│   │   └── common.py     worker 共用定时、stdio 通信与延后日志写入
+│   ├── visualization/    本地窗口、场景重建与外观
+│   ├── diagnostics/      响应曲线、跟踪指标和精度验收
+│   ├── cli.py            命令路由
+│   └── __main__.py       python -m lerobot_arm_control
+├── configs/              运行配置、场景参数与远端部署清单
+├── scripts/              启动、安装、部署、硬件检查与 X11 相机入口
+├── tests/                离线回归测试；其中一部分随远端运行代码部署
+├── assets/               机器人模型、网格、许可证及场景资源
+├── data/                 标定、轨迹、桌面注册和实验数据
+├── docs/                 使用说明、控制设计与测量报告
+└── logs/                 运行日志与控制响应记录（默认忽略）
+```
 
-| Section | Contents |
-| --- | --- |
-| `native_defaults` | Upstream reference settings; 60 Hz and two feedback retries |
-| `position_feedback` | Six independent bounded PID channels; filtered measurement derivative, conditional integral antiwindup; RAM acceleration 40 and velocity 600 restored on exit |
-| `trajectory` | Approach 0.8 rad/s, minimum 0.35 s; Reset 0.5 rad/s; circle ramp 1 s and period 4 s |
+## 模块边界
 
-`ManualControl` owns hardware feedback, enabling, faults, hold and native RAM restoration.
-`PositionFeedback` implements the shared PID. `SimulationControl` runs that same algorithm
-at 60 Hz on MuJoCo joint actuators. Predictive simulation copies its controller state.
-Manual, Reset, circle, finite paths, follow, Push-T and pick/place all use these adapters.
-`follow.json` specifies role/mapping/initialization only; independent controller and frequency overrides are rejected.
-`diagnostics/motor_response.py` tests all six motors through the normal controller;
-`response_metrics.py` validates the response windows. Plotting and MuJoCo stay local.
-See [the detailed design](lerobot-control.md).
-Task contact speed, vision thresholds, and display frame rate remain task parameters, distinct from motor frequency.
+`control/position_feedback.py` 实现六通道共享 PID；`ManualControl` 管理真机反馈、
+启用、运行范围、故障锁存、保持和原生 RAM 参数恢复。仿真控制器运行同一 PID 算法。
+手动、复位、circle、有限轨迹、follow、Push-T 和 pick/place 使用这些控制适配器。
+任务模块负责目标和阶段，不维护另一套电机 PID。
 
-Controllers reject separate feedback/trajectory parameter files, period overrides, and native-baseline overrides.
-Edit `configs/control.json`, deploy, then restart both hosts. Historical configurations were moved to
-`.cleanup/20261007-before-interface-removal/historical-configs/`; active code never reads this directory.
-Hardware windows and Push-T compare the shared SHA-256 during connection. Mismatch prevents normal control.
-Configuration loads at startup; no hot reload occurs during motion.
+白臂采样、独立标定、映射、PID 和黑臂写入全部在远端
+`runtime/follow_server.py --standalone` 中完成。本地 simulator 通过只读状态流显示。
+`runtime/common.py` 提供公共 worker 工具；具体 worker 不再从另一个 worker 导入它们。
+规划、MuJoCo 和图形窗口留在本地；远端导入闭包由测试校验。
+
+## 参数放在哪里
+
+| 文件/目录 | 负责的参数 | 修改方式 |
+| --- | --- | --- |
+| `configs/runtime.json` | 默认 SSH 主机、远端项目目录、本地备用 Python 环境 | 编辑配置；SSH 可由 CLI 或环境变量覆盖 |
+| `configs/arms.toml` | 两臂角色、USB 设备、波特率、电机 ID | 每台设备单独配置；部署保留已有文件 |
+| `configs/control.json` | 唯一电机控制频率、PID、参考整形、轨迹速度、接触/受阻阈值及绑定设备的指令范围 | 修改后部署并重启；控制连接核对 SHA256 |
+| `configs/follow.json` | 主从映射、扳机端点、初始化策略及验收速度范围 | 实测确认后保存；不重复定义 PID |
+| `configs/camera.toml`、`camera_intrinsics.json` | 摄像头选择、采集设置、内参 | 设备配置与内参标定分别维护 |
+| `configs/tabletop.json` | 标记尺寸、高度、桌面与视觉处理参数 | 按实测值更新；常规部署保留远端已有文件 |
+| `configs/scenes/tabletop-current.json` | 当前场景参数及配置/标定来源哈希 | 场景更新时保存 |
+| `data/calibration/` | 两臂独立角度、静止姿态、基座与桌面参考标定 | 标定流程生成；保留原始测量和身份绑定 |
+| `configs/remote-runtime.txt` | 远端所需源文件、脚本、资源与测试 | 模块依赖变化后更新并校验闭包 |
+
+连接设置优先级为 **显式参数 → 环境变量 → runtime.json**。
+本地/远端客户端统一接受 `--host` 和 `--remote-root`；部署和 X11 脚本使用
+`LEROBOT_HOST`、`LEROBOT_REMOTE_ROOT`。本地启动器优先使用 `LEROBOT_MUJOCO_ENV`，
+其次是项目 `.venv`，Mac 最后读取 `local.fallback_environment`。
+需要切换资源目录时使用 `--workspace` 或 `LEROBOT_ARM_WORKSPACE`；选中的 workspace
+必须提供完整配置，缺失时直接报错，不借用另一台机器人的参数。
+
+当前共享控制频率为 60 Hz；原生 RAM 加速度 254、目标速度 3000 ticks/s 在退出时恢复；
+圆轨迹默认周期为 16 秒。详细 PID 和保护策略见 [控制设计](lerobot-control.md)。
+这些数值以配置文件为准，不在 demo 中重复写死。
+
+## 本轮清理（2026-10-13）
+
+- 合并各 CLI 和验收工具重复的 SSH 默认值；删除 Python/脚本里的固定主机与项目路径。
+- 将 worker 定时、通信、日志和 GC 调度工具迁入 `runtime/common.py`，保持协议和时序一致。
+- 删除无动作的 `MotorLink.observe()` 及其本地调用、未使用的 `ControlViewer.is_focused()`，
+  删除恒定返回空值的 `ManualControl.motion_speed()`；状态字段仍保留。
+- 删除未使用的配置常量、`validate_target()` 中未使用的当前角度参数。
+- Push-T 快照直接引用 `core` 的路径/文件工具，减少经由其他客户端的间接依赖。
+
+实测标定、运行限位、寄存器/协议常量及历史测量证据保留。独立 demo 与脚本仍各有
+职责，不因名称类似而删除。新增保护逻辑的真实夹持验证仍待完成；离线测试不能替代它。
+
+## 部署与数据
 
 ```sh
 ./scripts/deploy_code.sh --dry-run
 ./scripts/deploy_code.sh
 ```
 
-`configs/remote-runtime.txt` lists motor/camera services, pure trajectory execution, read-only sampling, and their tests.
-Deployment sends only listed source, scripts, tests, XML metadata, and circle input, plus docs, shared settings, and locks.
-Simulation clients, MuJoCo meshes/materials, and planning modules are not sent.
-Remote dependencies exclude MuJoCo; local installation uses `requirements-local.txt` or an existing environment.
-Install the Linux x86_64 lock and Mac local environment separately; see [README](../README.md).
+部署先将旧远端代码归档到 `.cleanup/`，再传输清单和公共配置、文档；保留设备配置、
+标定、环境和日志。增量同步不会删除清单之外的远端文件。
+现有旧接口的定向退休由部署脚本处理。
 
-Incremental sync preserves remote-only files. Verified retired simulation source, tests, resources, and the MuJoCo installation
-were archived remotely under `.cleanup/20261007-local-simulation/`.
-Existing `arms.toml`, `camera.toml`, `tabletop.json`, calibration, and tabletop registration are preserved.
-Experiment-output cleanup is separate. Every actual deployment snapshots existing remote code under `.cleanup/`.
-First deployment creates directories and seeds missing device configuration; only explicit `--config` replaces an existing `tabletop.json`.
-Use `LEROBOT_HOST` and `LEROBOT_REMOTE_ROOT` to override the deployment host and project path.
-
-| Path | Purpose |
-| --- | --- |
-| `src/lerobot_arm_control/` | System modules grouped by hardware, control, calibration, perception, planning and runtime |
-| `scripts/` | User entries, deployment, verification |
-| `configs/control.json` | Sole active motor configuration |
-| `assets/so101/` | Model/meshes with original license |
-| `assets/tabletop/` | Generated reconstructed scene/appearance and mesh copies; only the marker test input is tracked |
-| `data/calibration/` | Joint, resting-pose, base, and related measurements |
-| `data/push_t/measured/` | Independent local offline/test observation |
-| `data/tabletop/static_map.json` | Persistent auxiliary marker registration |
-| `data/push_t/`, `data/tabletop/`, `logs/` | Generated experiments and evidence, ignored by default |
-| `.cleanup/20261007-before/` | Pre-cleanup source/configuration snapshot |
-
-The complete codebase is versioned at `git@github.com:shawLyu/LeRobot.git`.
-The local checkout is the source of changes; commit code, shared control settings,
-accepted calibration, tests, documentation and canonical models here. The remote
-host receives the selected runtime through `scripts/deploy_code.sh`; it does not
-need a full simulation checkout. Do not run `git clean -fdx`: ignored calibration
-measurements, experiment data and recovery snapshots may still be needed locally.
-
-```sh
-git clone git@github.com:shawLyu/LeRobot.git
-cd LeRobot
-# Edit and validate locally, then record the change.
-git add src scripts tests docs configs README.md
-git commit -m "Describe the control or simulation change"
-git push origin main
-./scripts/deploy_code.sh
-```
-
-Generated scenes, copied meshes, logs, datasets, caches, local secrets and backup
-snapshots are ignored. The offline Push-T sample retains its state, calibration
-and textures; its mesh copies are generated from `assets/so101/assets/` when absent.
-Caches and macOS `._*` metadata are reproducible and excluded from deployment.
-On 2026-10-07, old per-frame images, traces, and duplicate session models were removed on both hosts.
-Small JSON summaries and deletion manifests remain in each host's `logs/data-cleanup-20261007/`.
-Required calibration, circle input, registration, and the local independent snapshot were retained.
-See [Data retention](../data/README.md).
-
-Camera intrinsics are versioned in `configs/camera_intrinsics.json`; the shared
-vision configuration validates their hash and the exact processing-view mapping.
-`table_reference_calibration.py` and `./scripts/lerobot-arm calibrate table` run
-locally to fit the stationary two-marker layout from camera-only observations.
-Only the accepted record and runtime map are synchronized; this fitter is not
-included in the remote runtime manifest. Saved maps bind to the native intrinsics
-hash, and fixed bases also bind to the table reference and runtime camera geometry.
-
-`pick_t.py` performs local grasp IK, collision checks, and free-payload contact
-simulation. `pick_t_client.py` sequences live stages and verifies placement from
-fresh camera observations. `pick_t_protocol.py` is shared with the remote bounded
-executor and has no physics dependency. See [T pick and place](pick-t.md).
-
-## Source execution
-
-Canonical implementations live in `src/lerobot_arm_control/`. The unified entry
-is `./scripts/lerobot-arm`, or `PYTHONPATH=src python -m lerobot_arm_control`.
-Domain imports load requested implementations on demand; basic configuration,
-protocols and hardware help do not require a physics engine or open a serial port.
-
-`core/paths.py` resolves the checkout and an optional explicit robot workspace.
-Every resource is read from that workspace, with no fallback to another robot's
-configuration. Settings load at startup; changing the workspace or control file
-requires restarting the processes.
-
-`pyproject.toml` manages the Linux dependency environment with
-`[tool.uv] package = false`. Bootstrap selects the `hardware` dependencies;
-local dependencies are in `requirements-local.txt`. No project installation or
-build step is required. Local subprocesses receive an absolute source path.
-SSH workers explicitly use the remote `src` and remote workspace.
-
-Deployment archives existing remote code, synchronizes the selected canonical
-runtime, and retires obsolete interface files after all transfers succeed.
-Existing machine configuration and calibration are preserved.
-See [System structure and operation](system.md).
+版本控制包含源码、测试、配置、接受的标定、文档和必要模型。
+生成的场景、网格副本、日志、数据集、缓存与恢复快照通常被忽略。
+不要通过 `git clean -fdx` 清理实验资料；保留规则见 [数据说明](../data/README.md)。
+环境和操作入口见 [系统结构与运行](system.md)，跟随操作见 [Follow](follow.md)。

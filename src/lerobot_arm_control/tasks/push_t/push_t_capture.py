@@ -11,9 +11,14 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from lerobot_arm_control.calibration.angle_calibration import effective_scale, validate_correction
+from lerobot_arm_control.core.files import atomic_json
+from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.core.runtime_config import remote_runtime
 from lerobot_arm_control.robot.so101.joints import JOINTS
-from lerobot_arm_control.runtime.tabletop_client import ROOT, TableLink, atomic_json
+from lerobot_arm_control.runtime.tabletop_client import TableLink
 from lerobot_arm_control.visualization.tabletop_scene import scene_xml
+
+ROOT = workspace_root()
 
 
 def session_name():
@@ -98,12 +103,13 @@ def calibration_bytes(hello, path):
     return raw
 
 
-def capture_snapshot(output, *, host='lerobot', remote_root='/home/xy/Research/lerobot',
+def capture_snapshot(output, *, host=None, remote_root=None,
                      timeout=90, calibration=ROOT/'data/calibration/follower_mujoco.json'):
     if not math.isfinite(timeout) or timeout <= 0:
         raise ValueError('Capture timeout must be positive and finite')
     output = Path(output).resolve()
-    link = TableLink(host, remote_root, output)
+    remote = remote_runtime(host, remote_root)
+    link = TableLink(remote.host, remote.root, output)
     started, last_report = time.monotonic(), -math.inf
     selected = hello = None
     reason = 'waiting for the new remote camera session'

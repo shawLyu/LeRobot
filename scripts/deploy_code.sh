@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-HOST=${LEROBOT_HOST:-lerobot}
-REMOTE_ROOT=${LEROBOT_REMOTE_ROOT:-/home/xy/Research/lerobot}
+HOST=${LEROBOT_HOST:-$(PYTHONPATH="$ROOT/src" python3 -m lerobot_arm_control.core.runtime_config remote.host)}
+REMOTE_ROOT=${LEROBOT_REMOTE_ROOT:-$(PYTHONPATH="$ROOT/src" python3 -m lerobot_arm_control.core.runtime_config remote.root)}
 DRY_RUN=
 WITH_CONFIG=false
 for argument in "$@"; do

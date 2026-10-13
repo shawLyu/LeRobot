@@ -6,13 +6,13 @@ import time
 from pathlib import Path, PurePosixPath
 
 from lerobot_arm_control.core.processes import remote_python
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.transport.realtime import JOINTS
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--host', default='lerobot')
-    parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
+    add_remote_arguments(parser)
     parser.add_argument('--start-held', action='store_true')
     parser.add_argument('--duration', type=float)
     parser.add_argument('--control-log')

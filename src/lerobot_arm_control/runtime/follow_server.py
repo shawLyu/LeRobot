@@ -27,7 +27,7 @@ from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.driver import connected
 from lerobot_arm_control.robot.so101.model_metadata import MODEL, joint_ranges
-from lerobot_arm_control.runtime.realtime_server import (
+from lerobot_arm_control.runtime.common import (
     defer_cyclic_gc,
     next_deadline,
     receive,
@@ -69,6 +69,8 @@ def read_leader_status(bus, diagnostics=None):
             try:
                 status[joint] = int(bus.read('Status', joint, normalize=False))
             except RuntimeError as exc:
+                if '[RxPacketError]' not in str(exc):
+                    raise
                 # The SDK raises on a device-error bit in the reply header.
                 # Retain the fault flag so motion holds; do not turn a hardware
                 # alarm into a clean sample or kill the monitoring process.
@@ -118,12 +120,17 @@ def serve(args):
         trace = deque(maxlen=36000)
         metadata = {'follow_config': config}
         metadata['leader_fault_events'] = []
+        metadata['follower_fault_events'] = []
+        previous_follower_fault = None
         previous_leader_faults = {}
         latched_leader_faults = {}
         if getattr(args, 'latency_test', False):
             metadata.update(measurement_completed=False,
                             measurement_joints=list(args.latency_joints))
         trace_path = getattr(args, 'control_log', None)
+        if standalone and trace_path is None:
+            trace_path = workspace_root()/'logs'/f'follow-{time.time_ns()}.json'
+            print(f'Control trace: {trace_path}', file=sys.stderr, flush=True)
         if trace_path:
             stack.callback(save_control_trace, trace_path, trace, (), metadata)
         defer_cyclic_gc(stack)
@@ -134,8 +141,8 @@ def serve(args):
                 stack.callback(signal.signal, signum, previous_handler)
         else:
             publish = stack.enter_context(LatestOutput(send, disconnected))
-        leader_bus = stack.enter_context(connected(leader))
-        follower_bus = stack.enter_context(connected(follower))
+        leader_bus = stack.enter_context(connected(leader, allow_alarm=True))
+        follower_bus = stack.enter_context(connected(follower, allow_alarm=True))
         calibration, follower_metadata = calibrated_mapping(follower, follower_bus)
         follower_fits = {joint: calibration.fit(joint) for joint in JOINTS}
         leader_path = workspace_root()/'data/calibration'/f'{leader.name}_mujoco.json'
@@ -161,6 +168,8 @@ def serve(args):
             controller = ManualControl(follower_bus, calibration, limits,
                                        follower_metadata['fingerprint']['raw_limits'])
             stack.callback(controller.close)
+            controller.set_command_limits(
+                'gripper', tuple(map(math.radians, config['follower_gripper_degrees'])))
             limits = hardware_follow_limits(limits, controller.limits)
         mapping = JointFollower(config, measured, limits)
         measurement_joint = None
@@ -218,7 +227,7 @@ def serve(args):
                             measured = angles(follower_bus.sync_read(
                                 'Present_Position', normalize=False), follower_fits)
                             goal = initialization_target(config, measured, limits,
-                                                         controller.limits)
+                                                         controller.rest_limits)
                             if any(read_leader_status(leader_bus).values()):
                                 raise ValueError('leader motor fault; cannot initialize')
                             controller.enable_all()
@@ -317,6 +326,12 @@ def serve(args):
                     print(f'Leader fault evidence (after hold): {evidence}',
                           file=sys.stderr, flush=True)
             previous_leader_faults = leader_faults
+            follower_fault = controller.last_fault if controller else None
+            if follower_fault is not None and follower_fault is not previous_follower_fault:
+                metadata['follower_fault_events'].append(
+                    {'time_unix_ns': time.time_ns(), **follower_fault})
+                metadata['follower_fault_events'] = metadata['follower_fault_events'][-256:]
+                previous_follower_fault = follower_fault
             stage = ('initializing' if initialize_to is not None else
                      'following' if active and mapping.tracking else
                      'aligning' if active else 'held')
@@ -325,6 +340,11 @@ def serve(args):
             elif stage == 'following':
                 notice = 'Following live leader'
             warning = None
+            control_status = controller.status() if controller else None
+            contact = control_status.get('gripper_contact', {}) if control_status else {}
+            if contact.get('active') and stage == 'following':
+                notice = ('Following; gripper contact hold; '
+                          'open trigger past held position to release')
             if latched_leader_faults:
                 warning = {'severity': 'warning', 'source': 'leader',
                            'status': dict(latched_leader_faults),
@@ -335,6 +355,16 @@ def serve(args):
                 notice = (f'WARNING: leader {kind} alarm {condition}; process online; '
                           f'follower held; joints={list(latched_leader_faults)}; '
                           + ('waiting for healthy readings' if leader_faults else 'E resumes'))
+            if controller and controller.stopped and follower_fault is not None:
+                follower_status = telemetry.get('Status', {})
+                warning = {'severity': 'warning', 'source': 'follower',
+                           'status': dict(follower_status),
+                           'active': any(follower_status.values()), 'requires_resume': True,
+                           'fault': follower_fault}
+                notice = ('WARNING: follower '+follower_fault['reason']
+                          + '; motion latched; monitoring online; E resumes after healthy readings')
+                if follower_fault.get('hold_error'):
+                    notice += '; '+follower_fault['hold_error']
             if getattr(args, 'latency_test', False) and stage == 'following':
                 measurement_elapsed += min(now-previous, .1)
                 if measurement_elapsed >= 12*len(args.latency_joints):
@@ -360,6 +390,8 @@ def serve(args):
                                           for i, j in enumerate(JOINTS)] if controller else target,
                               'stage': stage,
                               'leader_status': dict(leader_status),
+                              'follower_status': dict(telemetry.get('Status', {})),
+                              'gripper_contact': contact,
                               'warning': warning,
                               'notice': notice,
                               'sample_ms': (now-sampled)*1000,
@@ -372,8 +404,9 @@ def serve(args):
                   'warning': warning,
                   'command_error': command_error,
                   'leader_status': leader_status, 'sample_age_ms': (now-sampled)*1000,
+                  'follower_status': dict(telemetry.get('Status', {})),
                   'heartbeat_age_ms': (now-heartbeat)*1000,
-                  'control': (controller.status() | {'control_hz': config['hz']}
+                  'control': (control_status | {'control_hz': config['hz']}
                               if controller else None)})
             sequence += 1
             previous = now

@@ -4,6 +4,7 @@ import argparse
 import json
 import time
 
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.runtime.realtime_client import Link
 
 
@@ -50,8 +51,7 @@ def run_reset(link, timeout=120, *, clock=time.monotonic, sleep=time.sleep):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", default="lerobot")
-    parser.add_argument("--remote-root", default="/home/xy/Research/lerobot")
+    add_remote_arguments(parser)
     parser.add_argument("--timeout", type=float, default=120)
     args = parser.parse_args()
     if not 1 <= args.timeout <= 300:

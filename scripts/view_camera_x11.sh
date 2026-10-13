@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Run on the local Mac. The camera remains attached to the remote SSH host.
 set -euo pipefail
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 if [ ! -x /opt/X11/bin/xauth ]; then
     echo "Install XQuartz first: https://www.xquartz.org/" >&2
     exit 1
@@ -8,8 +9,9 @@ fi
 open -a XQuartz
 camera_display="${DISPLAY:-$(launchctl getenv DISPLAY)}"
 export DISPLAY="${camera_display:-:0}"
-camera_host=${LEROBOT_HOST:-lerobot}
-printf -v camera_remote_root '%q' "${LEROBOT_REMOTE_ROOT:-/home/xy/Research/lerobot}"
+camera_host=${LEROBOT_HOST:-$(PYTHONPATH="$ROOT/src" python3 -m lerobot_arm_control.core.runtime_config remote.host)}
+camera_root=${LEROBOT_REMOTE_ROOT:-$(PYTHONPATH="$ROOT/src" python3 -m lerobot_arm_control.core.runtime_config remote.root)}
+printf -v camera_remote_root '%q' "$camera_root"
 camera_command="cd $camera_remote_root && exec .venv/bin/python scripts/camera_x11.py"
 for camera_argument in "$@"; do
     printf -v camera_quoted_argument '%q' "$camera_argument"

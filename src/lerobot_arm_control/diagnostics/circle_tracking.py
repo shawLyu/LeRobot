@@ -15,6 +15,7 @@ import numpy as np
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
 from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.core.runtime_config import add_remote_arguments, remote_runtime
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 from lerobot_arm_control.transport.realtime import JOINTS, checked_command
@@ -62,13 +63,14 @@ def measure(proof):
             "endpoint_source": "encoder feedback plus calibrated model; not optical measurement"}
 
 
-def trial(laps):
+def trial(laps, *, host=None, remote_root=None):
+    remote = remote_runtime(host, remote_root)
     stamp = time.time_ns()
     proof = {"completed": False, "samples": [], "acks": [], "laps": laps,
              "profile": POSITION_FEEDBACK, "control_config_sha256": CONTROL_CONFIG_SHA256}
     trace_name = f"tracking-trace-{stamp}.json"
-    remote_trace = f"/home/xy/Research/lerobot/logs/{trace_name}"
-    link = Link("lerobot", "/home/xy/Research/lerobot", "hardware", hardware_control=True,
+    remote_trace = f"{remote.root}/logs/{trace_name}"
+    link = Link(remote.host, remote.root, "hardware", hardware_control=True,
                 circle=True, control_log=remote_trace)
     last_seq = None
     last_ping = 0
@@ -154,7 +156,8 @@ def trial(laps):
         finally:
             link.close()
             try:
-                subprocess.run(["scp", f"lerobot:{remote_trace}", str(ROOT / "logs" / trace_name)],
+                subprocess.run(["scp", f"{remote.host}:{remote_trace}",
+                                str(ROOT / "logs" / trace_name)],
                                check=True, timeout=20)
                 proof["control_trace"] = str(ROOT / "logs" / trace_name)
             except Exception as exc:
@@ -169,12 +172,13 @@ def trial(laps):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    add_remote_arguments(parser)
     parser.add_argument("--laps", type=int, default=1)
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
     if not args.execute or not 1 <= args.laps <= 5:
         parser.error("requires --execute and 1..5 laps with an observed, clear arm")
-    raise SystemExit(0 if trial(args.laps) else 1)
+    raise SystemExit(0 if trial(args.laps, host=args.host, remote_root=args.remote_root) else 1)
 
 
 if __name__ == "__main__":

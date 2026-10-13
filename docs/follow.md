@@ -122,6 +122,7 @@ writes `logs/follow-remote-trace.json`, `.metrics.json` and `.png`, and exits wi
 if acceptance fails. Use `--log` to choose a different local destination.
 
 `--control-log /absolute/remote/path.json` records a normal run without guided motion.
+Standalone control defaults to `logs/follow-<timestamp>.json` when no path is supplied.
 The finite buffer retains up to 36,000 frames (about ten minutes at 60 Hz).
 The [latency measurement definition](measurements/follow-latency-2026-10-12/README.md#measurement-definition)
 requires reversals and sufficient movement; read-to-command timing alone is not motor
@@ -137,13 +138,26 @@ To separate the agreed normal operation envelope from overspeed stress tests:
 ```
 
 Limits are peak **mapped leader** radians/second in motor order, including 0.5 s
-of preceding motion. The gripper limit applies after the 118° → 90° mapping.
+of preceding motion. The gripper limit applies after the current measured endpoint mapping.
 Every candidate window is retained; overspeed failures stay in the report. At least
 two valid normal windows per requested joint are required. Any recorded leader
 alarm or unfinished guided capture rejects the overall capture. These limits
 classify measurements; they do not add an input rate limiter to the controller.
 
 ## Online warnings and recovery
+
+A loaded, stalled **closing** gripper now enters a contact position hold without
+stopping the other five joints. Move the mapped opening target above the held
+position to release it. This uses raw load and encoder motion as a contact heuristic,
+not a calibrated force loop; initial thresholds require physical-object validation.
+The shared parameters and detection conditions are in [controller documentation](lerobot-control.md).
+
+Follower overload also latches the whole motion stream while keeping established
+monitoring online. Faulted devices receive no new tracking goals. For overload
+alone, one verified hold goal may replace the stale goal using feedback no older
+than 50 ms, only if torque is already enabled; it never enables torque. Healthy joints hold,
+and a clear alarm still requires explicit resume. Original packet errors and
+telemetry are retained in `metadata.follower_fault_events`. Protection remains enabled.
 
 A confirmed leader motor alarm displays `WARNING`, holds the follower, and keeps
 the process, readings and read-only observer online. It records the original

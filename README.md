@@ -120,7 +120,9 @@ Startup initializes and aligns automatically. In the controlling terminal, type
 `h` + Enter to hold, `e` + Enter to resume, or `q` + Enter to hold and quit.
 `--start-held` requires manual start. Closing the optional viewer has no effect on
 motion; a servo fault requires explicit resume after recovery. Both independent
-six-joint calibrations and the measured white trigger range 0–118° are saved.
+six-joint calibrations and the measured white trigger range 39.08–140.54° are saved.
+Loaded, stalled closure enters a gripper position hold; opening past the held position
+releases this latch. Native overload protection remains active.
 See [follow operation and measurement](docs/follow.md).
 
 ## 3. Configure and deploy the remote host

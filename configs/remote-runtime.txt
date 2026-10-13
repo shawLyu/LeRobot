@@ -19,6 +19,7 @@ tests/test_position_feedback.py
 tests/test_push_t_receiver.py
 tests/test_push_t_remote.py
 tests/test_runtime_split.py
+tests/test_runtime_config.py
 tests/test_safety.py
 tests/test_servo_feedback.py
 tests/test_tabletop_perception.py
@@ -43,6 +44,8 @@ src/lerobot_arm_control/control/__init__.py
 src/lerobot_arm_control/control/control_defaults.py
 src/lerobot_arm_control/control/joint_path.py
 src/lerobot_arm_control/control/manual_control.py
+src/lerobot_arm_control/control/gripper_contact.py
+src/lerobot_arm_control/control/motion_stall.py
 src/lerobot_arm_control/control/follow.py
 src/lerobot_arm_control/control/motion.py
 src/lerobot_arm_control/control/parking.py
@@ -50,6 +53,7 @@ src/lerobot_arm_control/control/position_feedback.py
 src/lerobot_arm_control/control/servo_feedback.py
 src/lerobot_arm_control/core/__init__.py
 src/lerobot_arm_control/core/config.py
+src/lerobot_arm_control/core/runtime_config.py
 src/lerobot_arm_control/core/paths.py
 src/lerobot_arm_control/core/processes.py
 src/lerobot_arm_control/diagnostics/__init__.py
@@ -66,6 +70,7 @@ src/lerobot_arm_control/robot/so101/driver.py
 src/lerobot_arm_control/robot/so101/joints.py
 src/lerobot_arm_control/robot/so101/model_metadata.py
 src/lerobot_arm_control/runtime/__init__.py
+src/lerobot_arm_control/runtime/common.py
 src/lerobot_arm_control/runtime/realtime_server.py
 src/lerobot_arm_control/runtime/follow_server.py
 src/lerobot_arm_control/runtime/tabletop_robot.py
@@ -93,3 +98,5 @@ src/lerobot_arm_control/transport/follow_observer.py
 src/lerobot_arm_control/runtime/follow_observer.py
 tests/test_follow_observer.py
 tests/test_follow_fault_diagnostics.py
+tests/test_gripper_contact.py
+tests/test_motion_stall.py

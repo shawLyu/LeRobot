@@ -965,7 +965,7 @@
       "table_frame": "ID 1 (DICT_APRILTAG_36h10) center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the stationary auxiliary. Rebuilt from current observations on 2026-10-11."
     }
   },
-  "control_config_sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439",
+  "control_config_sha256": "9da2a922c0697f6dded7675c5bc8c2df59669953fb9c8ffe8b1294bba9362179",
   "joint_calibrations": {
     "arm1": {
       "model": "so101",
@@ -1218,7 +1218,7 @@
     },
     "control.json": {
       "file": "configs/control.json",
-      "sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439"
+      "sha256": "9da2a922c0697f6dded7675c5bc8c2df59669953fb9c8ffe8b1294bba9362179"
     },
     "follow.json": {
       "file": "configs/follow.json",
@@ -1369,7 +1369,7 @@
     "latency_evidence": "docs/measurements/follow-smoothing-2026-10-13/README.md",
     "simulation_inner_loop": "kp=700, kv=56; approximately 80 ms effective lag, shared outer PID unchanged",
     "overshoot_evidence": "docs/measurements/follow-smoothing-2026-10-13/README.md",
-    "control_config_sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439",
+    "control_config_sha256": "9da2a922c0697f6dded7675c5bc8c2df59669953fb9c8ffe8b1294bba9362179",
     "normal_operation_peak_speed_rad_s": {
       "shoulder_pan": 2,
       "shoulder_lift": 2,
@@ -1380,6 +1380,42 @@
     },
     "leader_alarm_behavior": "Warning and online monitoring; follower held until healthy readings and explicit remote resume; device voltage limits unchanged",
     "integral_velocity_scale_rad_s": 0.25,
-    "circle_period_seconds": 16
+    "circle_period_seconds": 16,
+    "gripper_contact": {
+      "minimum_load_raw": 100,
+      "stall_seconds": 0.15,
+      "tracking_error_rad": 0.03,
+      "motion_tolerance_rad": 0.0042,
+      "release_margin_rad": 0.02
+    },
+    "follower_alarm_behavior": "Overload retains motion latch and online monitoring; no new tracking targets; one fresh verified hold goal only for pure overload with torque already enabled; explicit healthy resume required",
+    "follower_gripper_command_raw_limits": [
+      1479,
+      2982
+    ],
+    "motion_stall": {
+      "minimum_load_raw": 150,
+      "stall_seconds": 0.25,
+      "command_error_rad": 0.06,
+      "reference_error_rad": 0.015,
+      "motion_tolerance_rad": 0.0042
+    },
+    "hardware_command_envelopes": [
+      {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+        "calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+        "raw_limits": {
+          "wrist_flex": [
+            862,
+            2920
+          ],
+          "gripper": [
+            1479,
+            2982
+          ]
+        },
+        "source": "2026-10-13 user confirmed wrist_flex mechanical stop at raw 2951-2953; upper command 2920 retains >=31 ticks clearance. Gripper uses confirmed mapped endpoints. EEPROM unchanged."
+      }
+    ]
   }
 }

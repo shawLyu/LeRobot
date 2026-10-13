@@ -14,6 +14,7 @@ from lerobot_arm_control.control.follow import JointFollower, load_follow_config
 from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.core.paths import resource_path, workspace_root
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.transport.realtime import JOINTS
 from lerobot_arm_control.visualization.tabletop_scene import scene_arms, scene_xml
@@ -230,8 +231,7 @@ def main():
     parser.add_argument('--source', choices=('hardware', 'synthetic'), default='hardware')
     parser.add_argument('--simulate', dest='execute', action='store_false',
                         help='Render simulated response to remote targets; no motor writes')
-    parser.add_argument('--host', default='lerobot')
-    parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
+    add_remote_arguments(parser)
     parser.add_argument('--snapshot', type=Path,
                         default=workspace_root()/'data/tabletop/current-scene')
     parser.add_argument('--auto', action='store_true', help='Animate synthetic leader')

@@ -6,9 +6,6 @@ from pathlib import Path
 
 from lerobot_arm_control.core.paths import workspace_root
 
-PROJECT_ROOT = workspace_root()
-DEFAULT_CONFIG = PROJECT_ROOT / "configs/arms.toml"
-
 
 @dataclass(frozen=True)
 class ArmConfig:

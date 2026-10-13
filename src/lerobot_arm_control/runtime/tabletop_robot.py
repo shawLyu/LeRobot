@@ -17,7 +17,7 @@ from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.robot.so101.driver import connected
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
-from lerobot_arm_control.runtime.realtime_server import defer_cyclic_gc, next_deadline
+from lerobot_arm_control.runtime.common import defer_cyclic_gc, next_deadline
 from lerobot_arm_control.transport.realtime import JOINTS
 
 ROOT = workspace_root()

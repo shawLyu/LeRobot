@@ -14,6 +14,7 @@ from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.runtime.tabletop_client import TableLink
@@ -252,8 +253,7 @@ def main():
                         help='Record relative motion without a base; no absolute validation')
     parser.add_argument('--dwell-seconds', type=int, choices=(8, 15), default=8,
                         help='Observation dwell; changes neither gains nor trajectory speed')
-    parser.add_argument('--host', default='lerobot')
-    parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
+    add_remote_arguments(parser)
     args = parser.parse_args()
     if not args.execute:
         parser.error('physical pose acquisition requires --execute')

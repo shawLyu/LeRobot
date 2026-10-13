@@ -9,6 +9,7 @@ from lerobot_arm_control.calibration.height_records import ANGLES, BASE, CANDIDA
 from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import source_environment
 from lerobot_arm_control.core.processes import remote_python
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 
 
 def remote(host, root, arguments):
@@ -23,8 +24,7 @@ def main():
     parser.add_argument("--poses", type=int, nargs="+")
     parser.add_argument("--native-pitch-scale", action="store_true")
     parser.add_argument("--apply", action="store_true")
-    parser.add_argument("--host", default="lerobot")
-    parser.add_argument("--remote-root", default="/home/xy/Research/lerobot")
+    add_remote_arguments(parser)
     args = parser.parse_args()
     if args.action == "resample" and not args.poses:
         parser.error("resample requires --poses")

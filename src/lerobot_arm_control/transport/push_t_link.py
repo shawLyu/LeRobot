@@ -11,10 +11,6 @@ class MotorLink:
         self.job_id = None
         self.progress = {"phase": "idle", "writes_enabled": False}
 
-    def observe(self, state, received):
-        # The remote perception worker provides its own fresh observations to the motor.
-        pass
-
     def submit(self, state, segments, *, recovery=False):
         reference = {key: copy.deepcopy(state[key]) for key in
                      ("captured_unix_ns", "robot", "objects")}

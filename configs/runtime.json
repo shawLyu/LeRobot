@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "remote": {
+    "host": "lerobot",
+    "root": "/home/xy/Research/lerobot"
+  },
+  "local": {
+    "fallback_environment": "../Materials/UWLab/.venv"
+  }
+}

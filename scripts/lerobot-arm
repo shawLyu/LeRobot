@@ -6,8 +6,8 @@ if [ -n "${LEROBOT_MUJOCO_ENV:-}" ]; then
 elif [ -x "$ROOT/.venv/bin/python" ]; then
   LOCAL_ENV="$ROOT/.venv"
 elif [ "$(uname -s)" = Darwin ]; then
-  # Compatibility with the existing workstation installation.
-  LOCAL_ENV="$ROOT/../Materials/UWLab/.venv"
+  LOCAL_ENV=$(PYTHONPATH="$ROOT/src" python3 -m lerobot_arm_control.core.runtime_config local.fallback_environment)
+  LOCAL_ENV=${LOCAL_ENV:-$ROOT/.venv}
 else
   LOCAL_ENV="$ROOT/.venv"
 fi

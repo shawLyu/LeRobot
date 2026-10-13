@@ -16,6 +16,7 @@ from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL, CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.diagnostics.response import motor_observation
 from lerobot_arm_control.diagnostics.response_metrics import step_metrics
 from lerobot_arm_control.runtime.realtime_client import Link
@@ -262,8 +263,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--backend', choices=('hardware', 'mujoco'), default='mujoco')
     parser.add_argument('--execute', action='store_true', help='Authorize finite real motor steps')
-    parser.add_argument('--host', default='lerobot')
-    parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
+    add_remote_arguments(parser)
     parser.add_argument('--amplitude', type=float, default=3., help='Step size in degrees, 1..5')
     parser.add_argument('--dwell', type=float, default=4.,
                         help='Each step observation, 3..10 seconds')

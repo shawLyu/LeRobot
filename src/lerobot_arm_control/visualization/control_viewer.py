@@ -119,9 +119,6 @@ class ControlViewer:
         # GLFW/MuJoCo rendering runs exclusively on the Python main thread.
         return nullcontext()
 
-    def is_focused(self):
-        return bool(glfw.get_window_attrib(self.window, glfw.FOCUSED))
-
     def is_running(self):
         return not glfw.window_should_close(self.window)
 

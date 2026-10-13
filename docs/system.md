@@ -7,7 +7,7 @@ this repository contains the control, calibration, perception and task logic.
 
 ```text
 src/lerobot_arm_control/
-├── core/             device configuration, paths, process commands
+├── core/             device/runtime configuration, paths, process commands
 ├── robot/so101/      bus adapter and canonical model metadata
 ├── control/          manual control, feedback, joint paths and parking
 ├── calibration/      joint, camera, height, marker and table calibration
@@ -16,6 +16,7 @@ src/lerobot_arm_control/
 ├── tasks/            circle, Push-T and pick/place orchestration
 ├── transport/        shared protocols, acknowledgements and display stream
 ├── runtime/          local clients and remote workers
+│   └── common.py     shared worker timing, stdio and deferred log persistence
 ├── visualization/    views, reconstructed scenes and appearance
 ├── diagnostics/      motor diagnostics and precision checks
 ├── cli.py            unified command routing
@@ -35,6 +36,9 @@ Install the local Python environment with `requirements-local.txt`, as described
 in the [README](../README.md). The local launcher selects
 `LEROBOT_MUJOCO_ENV`, then the checkout's `.venv`, then the existing Mac
 workstation environment. It sets an absolute `PYTHONPATH` for this source tree.
+That fallback environment is configured in `configs/runtime.json`, rather than
+embedded in the launcher. Module ownership and all configuration locations are
+listed in [Code layout](code-layout.md).
 
 ```bash
 ./scripts/lerobot-arm --help
@@ -105,6 +109,12 @@ Controllers load configuration at startup; restart processes after selecting a
 different workspace or changing control settings. Local subprocesses explicitly
 receive the current source tree. SSH commands quote project paths and arguments,
 set `PYTHONPATH=src`, and select the remote checkout as their own workspace.
+
+SSH clients and diagnostics share the defaults in `configs/runtime.json`.
+`--host` / `--remote-root` override `LEROBOT_HOST` / `LEROBOT_REMOTE_ROOT`, which
+override the file. Deployment and X11 scripts use the same file and environment
+variables. Hardware identity, calibration and controller tuning remain in their
+own configuration files; a connection change never rewrites them.
 
 ## Source APIs
 

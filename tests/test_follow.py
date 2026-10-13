@@ -189,7 +189,7 @@ def remote(monkeypatch, tmp_path):
         sync_write = write
 
     @contextmanager
-    def connect(arm):
+    def connect(arm, *, allow_alarm=False):
         buses[arm.name] = Bus(arm)
         yield buses[arm.name]
 
@@ -261,7 +261,14 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
         def __init__(self, bus, calibration, limits, raw_limits):
             assert bus.arm.name == 'follower'
             self.limits = {joint: [-1, 1] for joint in JOINTS}
+            self.rest_limits = dict(self.limits)
             self.stopped = {}
+            self.last_fault = None
+
+        def set_command_limits(self, joint, bounds):
+            assert joint == 'gripper'
+            assert bounds == tuple(map(math.radians, config['follower_gripper_degrees']))
+            self.limits[joint] = bounds
 
         def enable_all(self):
             events.append('enable_follower')
@@ -474,7 +481,12 @@ def test_remote_standalone_does_not_need_observer_or_client_heartbeats(remote, m
     class Controller:
         def __init__(self, *args):
             self.limits = {j: [-1, 1] for j in JOINTS}
+            self.rest_limits = dict(self.limits)
             self.stopped = {}
+            self.last_fault = None
+            self.command_angles = {}
+        def set_command_limits(self, joint, bounds):
+            self.limits[joint] = bounds
         def enable_all(self):
             pass
         def heartbeat(self):
@@ -498,6 +510,59 @@ def test_remote_standalone_does_not_need_observer_or_client_heartbeats(remote, m
     assert packets[-1]['stage'] in ('aligning', 'following')
 
 
+def test_follower_overload_is_published_and_stays_latched_after_alarm_clears(remote, monkeypatch):
+    config, _, packets = remote
+    config['trigger_range_measured'] = True
+    writes = []
+    fault = {'reason': 'gripper: overload (Status=32): hold',
+             'packet_error': '[RxPacketError] Overload error!'}
+    monkeypatch.setattr(follow_server, 'FollowBroadcast',
+                        lambda path: nullcontext(follow_server.send))
+    monkeypatch.setattr(follow_server.signal, 'signal', lambda *args: None)
+
+    class Controller:
+        def __init__(self, *args):
+            self.limits = {j: (-1, 1) for j in JOINTS}
+            self.rest_limits = dict(self.limits)
+            self.stopped, self.command_angles = {}, {}
+            self.last_fault = None
+        def set_command_limits(self, joint, bounds):
+            self.limits[joint] = bounds
+        def enable_all(self):
+            pass
+        def heartbeat(self):
+            pass
+        def target(self, joint, angle):
+            writes.append((joint, angle))
+        def step(self, raw, telemetry):
+            if telemetry['Status']['gripper']:
+                self.last_fault = fault
+                self.stopped = {'gripper': fault['reason']}
+        def status(self):
+            return {'last_fault': self.last_fault}
+        def close(self):
+            pass
+
+    statuses = iter([32, 0, 0])
+    monkeypatch.setattr(follow_server, 'ManualControl', Controller)
+    monkeypatch.setattr(follow_server, 'read_control_feedback', lambda bus: {
+        'Present_Position': {j: 2200 for j in JOINTS}, 'Status': {'gripper': next(statuses)}})
+    def send(packet):
+        packets.append(packet)
+        if packet['type'] == 'state' and packet['seq'] == 2:
+            raise StopIteration('monitor stayed online')
+    monkeypatch.setattr(follow_server, 'send', send)
+    with pytest.raises(StopIteration, match='stayed online'):
+        follow_server.serve(SimpleNamespace(config=None, hardware_control=True, standalone=True))
+    states = [p for p in packets if p['type'] == 'state']
+    assert len(states) == 3
+    assert all(p['stage'] == 'held' and not p['following'] for p in states)
+    assert [p['warning']['active'] for p in states] == [True, False, False]
+    assert all(p['warning']['source'] == 'follower' and p['warning']['requires_resume']
+               for p in states)
+    assert len(writes) == 6  # No commands on the following two healthy-but-latched samples.
+
+
 def test_device_error_during_leader_status_confirmation_remains_a_fault():
     class Bus:
         def sync_read(self, *args, **kwargs):
@@ -518,7 +583,12 @@ def test_voltage_warning_keeps_process_online_and_holds_until_explicit_resume(re
     class Controller:
         def __init__(self, *args):
             self.limits = {j: [-1, 1] for j in JOINTS}
+            self.rest_limits = dict(self.limits)
             self.stopped = {}
+            self.last_fault = None
+            self.command_angles = {}
+        def set_command_limits(self, joint, bounds):
+            self.limits[joint] = bounds
         def enable_all(self):
             pass
         def heartbeat(self):

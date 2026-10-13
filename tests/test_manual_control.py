@@ -547,6 +547,109 @@ def test_transient_status_that_clears_on_independent_read_is_logged_without_hold
     assert control.status_warning["confirmed_status"] == 0
 
 
+@pytest.mark.parametrize('endpoint,actual', [(1479, 1510), (2982, 2950)])
+def test_measured_jaw_endpoints_bound_pid_and_encoder_commands(setup, endpoint, actual):
+    bus, control, now = setup
+    control.set_command_limits('gripper', tuple(control.angle('gripper', raw)
+                                              for raw in (1479, 2982)))
+    assert control.rest_limits['gripper'] == (-1.5, 1.5)
+    control.enable('gripper')
+    control.target('gripper', control.angle('gripper', endpoint))
+    bus.registers['gripper']['Present_Position'] = actual  # Persistent endpoint tracking error.
+    for _ in range(300):
+        control.heartbeat()
+        step(bus, control, now, 1/60)
+        assert 1479 <= control.sent['gripper'] <= 2982
+    assert control.sent['gripper'] == endpoint
+    control.stop()
+    assert control.sent['gripper'] == actual
+
+
+def test_narrowed_command_range_does_not_move_an_outside_held_pose(setup):
+    bus, control, now = setup
+    control.set_command_limits('gripper', (-.15, .6))
+    bus.registers['gripper'].update(Present_Position=1800, Torque_Enable=1)
+    step(bus, control, now, 1/60)
+    assert bus.registers['gripper']['Goal_Position'] == 1800
+    assert control.stopped['gripper'].startswith('pre-existing')
+    control.close()
+    assert bus.registers['gripper']['Goal_Position'] == 1800
+
+
+@pytest.mark.parametrize('already_enabled', [False, True])
+def test_sdk_overload_latches_motion_and_keeps_monitoring_and_cleanup_alive(setup, already_enabled):
+    bus, control, now = setup
+    if already_enabled:
+        control.enable_all()
+    else:
+        for registers in bus.registers.values():
+            registers['Torque_Enable'] = 1
+    bus.registers['gripper']['Status'] = 32
+    original = bus.read
+
+    def fault_read(register, joint, **kwargs):
+        if joint == 'gripper':
+            raise RuntimeError('[RxPacketError] Overload error!')
+        return original(register, joint, **kwargs)
+
+    bus.read = fault_read
+    bus.writes.clear()
+    step(bus, control, now, 1/60)
+    assert control.faulted_joints == {'gripper'}
+    assert set(control.stopped) == set(JOINTS)
+    assert 'Overload error' in control.last_fault['packet_error']
+    assert 'Status=32' in control.last_fault['reason']
+    assert [(register, raw) for register, joint, raw in bus.writes if joint == 'gripper'] == [
+        ('Goal_Position', 2200)]
+    assert control.last_fault['overload_hold_raw'] == {'gripper': 2200}
+    writes = list(bus.writes)
+    for _ in range(3):
+        step(bus, control, now, 1/60)
+    assert bus.writes == writes
+    # A clear status alone cannot resume; explicit enable is required.
+    bus.registers['gripper']['Status'] = 0
+    step(bus, control, now, 1/60)
+    assert bus.writes == writes
+    control.close()  # Faulted devices are not written during stream restoration either.
+    assert [(register, raw) for register, joint, raw in bus.writes if joint == 'gripper'] == [
+        ('Goal_Position', 2200)]
+
+
+def test_overload_rearm_preflight_refuses_before_writing(setup):
+    bus, control, _ = setup
+    bus.registers['gripper']['Status'] = 32
+    original = bus.read
+
+    def fault_read(register, joint, **kwargs):
+        if joint == 'gripper':
+            raise RuntimeError('[RxPacketError] Overload error!')
+        return original(register, joint, **kwargs)
+
+    bus.read = fault_read
+    with pytest.raises(ValueError, match='overload.*Status=32'):
+        control.enable_all()
+    assert bus.writes == []
+    assert control.faulted_joints == {'gripper'}
+
+
+@pytest.mark.parametrize('status,torque,age', [(32, 0, 0), (32, 1, .1),
+                                            (8, 1, 0), (40, 1, 0)])
+def test_fault_hold_cannot_enable_torque_or_use_stale_or_sensor_fault_feedback(
+        setup, status, torque, age):
+    bus, control, now = setup
+    control.enable_all()
+    control.faulted_joints.add('gripper')
+    control.last_fault = {}
+    control.last_tick = now[0]-age
+    bus.registers['gripper'].update(Status=status, Torque_Enable=torque)
+    telemetry = {key: {joint: values[key] for joint, values in bus.registers.items()}
+                 for key in ('Status', 'Torque_Enable', 'Goal_Position')}
+    bus.writes.clear()
+    control.stop('fault', fault_telemetry=telemetry)
+    assert not any(joint == 'gripper' for _, joint, _ in bus.writes)
+    assert bus.registers['gripper']['Torque_Enable'] == torque
+
+
 def test_native_stream_is_ram_only_verified_and_restored_before_release(setup):
     from lerobot_arm_control.control.position_feedback import PositionFeedback
 

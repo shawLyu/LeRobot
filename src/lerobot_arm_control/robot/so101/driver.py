@@ -39,7 +39,7 @@ def make_bus(arm: ArmConfig):
 
 
 @contextmanager
-def connected(arm: ArmConfig):
+def connected(arm: ArmConfig, *, allow_alarm=False):
     with serial_owner(arm.port):
         bus = make_bus(arm)
         try:
@@ -47,7 +47,20 @@ def connected(arm: ArmConfig):
             bus.connect(handshake=False)
             bus.port_handler.ser.exclusive = True
             for name in arm.motors:
-                model = bus.ping(name, raise_on_error=True)
+                try:
+                    model = bus.ping(name, raise_on_error=True)
+                except RuntimeError as exc:
+                    if not allow_alarm or '[RxPacketError]' not in str(exc):
+                        raise
+                    # Verify identity even when the SDK's ping wrapper refuses
+                    # an alarm-bearing reply. The subsequent monitor retains the
+                    # device Status; no configuration or torque write occurs here.
+                    model, comm, error = bus.packet_handler.ping(
+                        bus.port_handler, bus.motors[name].id)
+                    if not bus._is_comm_success(comm):
+                        raise ConnectionError(bus.packet_handler.getTxRxResult(comm)) from exc
+                    if not error:
+                        raise RuntimeError('inconsistent alarm ping; retry connection') from exc
                 if model != 777:
                     raise RuntimeError(f"{arm.name}/{name}: expected STS3215 (777), got {model}")
             yield bus

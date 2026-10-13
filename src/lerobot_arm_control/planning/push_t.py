@@ -18,6 +18,7 @@ import numpy as np
 
 from lerobot_arm_control.control.control_defaults import SIMULATION_ACTUATOR
 from lerobot_arm_control.core.paths import resource_path
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_arms, scene_xml
 
@@ -854,8 +855,7 @@ def main():
     parser.add_argument('--capture', action='store_true',
                         help='Capture a fresh remote observation, disconnect, then simulate')
     parser.add_argument('--capture-timeout', type=float, default=90)
-    parser.add_argument('--host', default='lerobot')
-    parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
+    add_remote_arguments(parser)
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--limit', type=int, default=100)
     parser.add_argument('--benchmark', type=int, default=0)

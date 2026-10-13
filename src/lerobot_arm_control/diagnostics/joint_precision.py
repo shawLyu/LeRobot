@@ -18,6 +18,7 @@ from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, TRAJECTORY
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.core.paths import resource_path, workspace_root
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.transport.realtime import checked_command
@@ -268,8 +269,7 @@ def trial(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--host', default='lerobot')
-    parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
+    add_remote_arguments(parser)
     parser.add_argument('--execute', action='store_true')
     parser.add_argument('--joint', choices=['gripper', 'shoulder_pan'], default='gripper')
     parser.add_argument('--observe-marker', action='store_true',

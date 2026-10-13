@@ -129,8 +129,6 @@ class LocalPush:
                 self.appearance_state = frozen
             if observation_issue(frozen, received, received, initialized=True) is None:
                 self.last_visible = (frozen, received)
-        if self.robot.motor:
-            self.robot.motor.observe(frozen, received)
         self.changed.set()
 
     def command(self, op):

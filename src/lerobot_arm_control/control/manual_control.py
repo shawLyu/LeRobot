@@ -1,15 +1,19 @@
 """LeRobot-style synchronized position control with explicit hold and release."""
 
+import hashlib
 import math
 import time
 from collections import deque
 
 from lerobot_arm_control.control.control_defaults import (
+    CONTROL,
     CONTROL_HZ,
     DEFAULTS,
     POSITION_FEEDBACK,
     READ_RETRIES,
 )
+from lerobot_arm_control.control.gripper_contact import GripperContact
+from lerobot_arm_control.control.motion_stall import MotionStall
 from lerobot_arm_control.control.position_feedback import PositionFeedback
 from lerobot_arm_control.transport.realtime import JOINTS, WATCHDOG_SECONDS
 from lerobot_arm_control.visualization.ui import motor_fault_text
@@ -39,6 +43,8 @@ class ManualControl:
         self.periods = deque(maxlen=200)
         self.last_fault = None
         self.status_warning = None
+        self.faulted_joints = set()
+        self.fault_hold_attempted = set()
         self.initialized = False
         self.last_tick = clock()
         self.last_heartbeat = clock()
@@ -55,6 +61,17 @@ class ManualControl:
                 raise ValueError(f"invalid control limits: {joint}")
             self.rest_limits[joint] = self.limits[joint]
         self.position_feedback = PositionFeedback(POSITION_FEEDBACK, self.limits)
+        self.gripper_contact = GripperContact(CONTROL['gripper_contact'])
+        self.motion_stall = MotionStall(CONTROL['motion_stall'])
+        for envelope in CONTROL['hardware_command_envelopes']:
+            if envelope['port'] != getattr(calibration, 'fingerprint', {}).get('port'):
+                continue
+            digest = hashlib.sha256(calibration.path.read_bytes()).hexdigest()
+            if digest != envelope['calibration_sha256']:
+                raise ValueError('hardware command envelope calibration changed; review limits')
+            for joint, bounds in envelope['raw_limits'].items():
+                self.set_command_limits(joint, tuple(sorted(self.angle(joint, raw)
+                                                           for raw in bounds)))
         from lerobot_arm_control.control.parking import Parking
 
         self.parking = Parking(self, rest_path)
@@ -148,22 +165,51 @@ class ManualControl:
                 self.original_acceleration.pop(joint)
                 self.native_acceleration.pop(joint, None)
 
-    def motion_speed(self):
-        return None  # Official max_relative_target=None; no software slew cap.
-
     def bounded_raw(self, joint, raw):
         """Nearest integer encoder target inside the ordinary motion bounds."""
         low, high = self.raw_limits[joint]
         return max(low, min(high, int(raw)))
 
+    def set_command_limits(self, joint, bounds):
+        """Bound the compensated command without changing calibration or held poses."""
+        if self.enabled:
+            raise ValueError('command limits must be configured before enabling')
+        low, high = bounds
+        native_low, native_high = self.rest_limits[joint]
+        if (not all(math.isfinite(v) for v in bounds) or low >= high
+                or low < native_low-1e-9 or high > native_high+1e-9):
+            raise ValueError(f'{joint}: command range outside calibrated travel')
+        fit = self.calibration.fit(joint)
+        ticks = sorted(v/fit['radians_per_tick']+fit['zero_raw'] for v in bounds)
+        # Round inward; allow only floating-point noise at an exact encoder endpoint.
+        raw_bounds = (math.ceil(ticks[0]-1e-9), math.floor(ticks[1]+1e-9))
+        existing = self.raw_limits[joint]
+        if (raw_bounds[0] >= raw_bounds[1] or raw_bounds[0] < existing[0]
+                or raw_bounds[1] > existing[1]):
+            raise ValueError(f'{joint}: command range has no usable encoder travel')
+        self.raw_limits[joint] = raw_bounds
+        self.limits[joint] = tuple(sorted(self.angle(joint, raw) for raw in raw_bounds))
+        self.position_feedback.reset([joint])
+        self.motion_stall.reset()
+        if joint == 'gripper':
+            self.gripper_contact.reset()
+
     def preflight(self, joint, *, limits=None):
         if joint not in JOINTS:
             raise ValueError("unknown joint")
+        try:
+            status = int(self.bus.read("Status", joint, normalize=False))
+        except RuntimeError as exc:
+            if '[RxPacketError]' not in str(exc):
+                raise
+            status = int(self.bus.sync_read('Status', normalize=False)[joint])
+            if not status:
+                raise
+        if status:
+            self.faulted_joints.add(joint)
+            raise ValueError(f"{joint}: {motor_fault_text(status)} (Status={status})")
         if int(self.bus.read("Operating_Mode", joint, normalize=False)) != 0:
             raise ValueError("joint must already be in position mode")
-        status = int(self.bus.read("Status", joint, normalize=False))
-        if status:
-            raise ValueError(f"{joint}: {motor_fault_text(status)} (Status={status})")
         voltage = int(self.bus.read("Present_Voltage", joint, normalize=False))
         minimum = int(self.bus.read("Min_Voltage_Limit", joint, normalize=False))
         maximum = int(self.bus.read("Max_Voltage_Limit", joint, normalize=False))
@@ -182,6 +228,9 @@ class ManualControl:
             raise ValueError("Reset is running; Space cancels it")
         raw = self.preflight(joint, limits=limits)
         self.position_feedback.reset([joint])
+        self.motion_stall.reset()
+        if joint == 'gripper':
+            self.gripper_contact.reset()
         angle = self.angle(joint, raw)
         # Goal writes can auto-enable torque. Never activate a stored, stale goal.
         self.enabled.add(joint)
@@ -202,6 +251,10 @@ class ManualControl:
             self.stop("enable failed: hold")
             raise
         self.stopped.pop(joint, None)
+        self.faulted_joints.discard(joint)
+        self.fault_hold_attempted.discard(joint)
+        if not self.faulted_joints:
+            self.last_fault = None
         self.heartbeat()
 
     def enable_all(self):
@@ -215,6 +268,8 @@ class ManualControl:
             if not 0 <= positions[joint] <= 4095:
                 raise ValueError(f"{joint}: invalid single-turn encoder feedback")
         self.position_feedback.reset()
+        self.gripper_contact.reset()
+        self.motion_stall.reset()
         for joint, raw in positions.items():
             self.enabled.add(joint)
             self.measured[joint] = raw
@@ -235,6 +290,9 @@ class ManualControl:
             self.stop("enable all failed: hold")
             raise
         self.stopped.clear()
+        self.faulted_joints.clear()
+        self.fault_hold_attempted.clear()
+        self.last_fault = None
         self.heartbeat()
 
     def target(self, joint, angle):
@@ -255,8 +313,10 @@ class ManualControl:
         self.position_feedback.finish_reference([joint])
         self.heartbeat()
 
-    def stop(self, reason="manual hold"):
+    def stop(self, reason="manual hold", *, fault_telemetry=None):
         self.position_feedback.reset()
+        self.gripper_contact.reset()
+        self.motion_stall.reset()
         if self.trajectory:
             self.trajectory.cancel(reason)
         self.parking.cancel(reason)
@@ -265,6 +325,27 @@ class ManualControl:
         self.command_angles.clear()
         errors = []
         for joint in sorted(self.enabled):
+            if joint in self.faulted_joints:
+                # For overload only, replace the stale squeezing goal once with
+                # fresh feedback, preserving torque state and native protection.
+                # Sensor/other alarms cannot authorize a position hold write.
+                raw = self.measured.get(joint)
+                if (fault_telemetry is not None and joint not in self.fault_hold_attempted
+                        and fault_telemetry['Status'][joint] == 32
+                        and fault_telemetry['Torque_Enable'][joint] == 1
+                        and 0 <= self.clock()-self.last_tick <= .05
+                        and type(raw) is int and 0 <= raw <= 4095):
+                    self.fault_hold_attempted.add(joint)
+                    try:
+                        self.bus.sync_write('Goal_Position', {joint: raw}, normalize=False)
+                        if self.bus.sync_read('Goal_Position', normalize=False)[joint] != raw:
+                            raise RuntimeError('overload hold goal not confirmed')
+                        self.targets[joint] = self.angle(joint, raw)
+                        self.sent[joint] = raw
+                        self.last_fault.setdefault('overload_hold_raw', {})[joint] = raw
+                    except Exception as exc:
+                        errors.append(f'{joint}: overload hold failed: {exc}')
+                continue
             try:
                 if int(self.bus.read("Torque_Enable", joint, normalize=False)) != 1:
                     # Goal writes must never reactivate an externally disabled joint.
@@ -295,15 +376,23 @@ class ManualControl:
         self.sent.pop(joint, None)
         self.command_angles.pop(joint, None)
         self.position_feedback.reset([joint])
+        if joint == 'gripper':
+            self.gripper_contact.reset()
         self.bus.write("Torque_Enable", joint, 0, normalize=False)
         if int(self.bus.read("Torque_Enable", joint, normalize=False)) != 0:
             raise RuntimeError("joint torque did not release")
 
     def trip(self, reason, telemetry):
+        self.stopped.update({joint: reason for joint in self.faulted_joints})
         self.last_fault = {"reason": reason, "raw": dict(self.measured),
                            "sent_raw": dict(self.sent),
                            "telemetry": {key: dict(values) for key, values in telemetry.items()}}
-        self.stop(reason)
+        try:
+            self.stop(reason, fault_telemetry=telemetry)
+        except RuntimeError as exc:
+            # A faulted device may reject a hold read too. Keep the latch and
+            # monitoring alive, while making failed holds visible to the operator.
+            self.last_fault['hold_error'] = str(exc)
 
     def confirm_status(self, telemetry, joints):
         """Recheck bulk status flags, including joints held while Reset settles."""
@@ -311,12 +400,22 @@ class ManualControl:
             reported = int(telemetry["Status"][joint])
             if not reported:
                 continue
-            status = int(self.bus.read("Status", joint, normalize=False,
-                                       num_retry=READ_RETRIES))
+            packet_error = None
+            try:
+                status = int(self.bus.read("Status", joint, normalize=False,
+                                           num_retry=READ_RETRIES))
+            except RuntimeError as exc:
+                if '[RxPacketError]' not in str(exc):
+                    raise
+                status = reported
+                packet_error = str(exc)
             telemetry["Status"][joint] = status
             if status:
+                self.faulted_joints.update(j for j, value in telemetry['Status'].items() if value)
                 self.trip(f"{joint}: {motor_fault_text(status)} (Status={status}): hold",
                           telemetry)
+                if packet_error:
+                    self.last_fault['packet_error'] = packet_error
                 return False
             self.status_warning = {"joint": joint, "reported_status": reported,
                                    "confirmed_status": status, "time_unix_ns": time.time_ns()}
@@ -341,6 +440,10 @@ class ManualControl:
                     self.targets[joint] = self.angle(joint, positions[joint])
                     self.command_angles[joint] = self.targets[joint]
                     self.stopped[joint] = "pre-existing torque: press E to resume"
+            if not self.confirm_status(telemetry, JOINTS):
+                return
+            for joint in sorted(self.enabled):
+                if self.stopped.get(joint, '').startswith('pre-existing torque'):
                     self.bus.write("Goal_Position", joint, self.sent[joint], normalize=False)
         if not self.enabled:
             self.parking.advance(positions, telemetry)
@@ -367,6 +470,25 @@ class ManualControl:
             target = self.targets[joint]
             target = self.position_feedback.target(
                 joint, target, self.angle(joint, positions[joint]), elapsed)
+            if joint == 'gripper':
+                was_contact = self.gripper_contact.hold_angle is not None
+                held = self.gripper_contact.update(
+                    self.targets[joint], self.angle(joint, positions[joint]), target,
+                    telemetry.get('Present_Load', {}).get(joint), now)
+                if held is not None:
+                    # Freeze both nominal closure and compensation at contact;
+                    # the native position loop holds without additional squeeze.
+                    self.position_feedback.reset([joint])
+                    target = held
+                elif was_contact:
+                    self.position_feedback.reset([joint])
+                    target = self.position_feedback.target(
+                        joint, self.targets[joint], self.angle(joint, positions[joint]), elapsed)
+            elif self.motion_stall.update(
+                    joint, self.targets[joint], self.angle(joint, positions[joint]), target,
+                    telemetry.get('Present_Load', {}).get(joint), now):
+                self.trip(f'{joint}: loaded motion stall: hold', telemetry)
+                return
             raw = self.bounded_raw(joint, self.raw(joint, target))
             self.command_angles[joint] = self.angle(joint, raw)
             updates[joint] = raw
@@ -381,13 +503,18 @@ class ManualControl:
                     joint, self.angle(joint, self.measured[joint])) for joint in self.measured},
                 "error_rad": {joint: self.targets[joint] - self.angle(
                     joint, self.measured[joint]) for joint in self.enabled},
-                "limits": self.limits, "max_speed_rad_s": self.motion_speed(),
+                "limits": self.limits, "max_speed_rad_s": None,
                 "controller_profile": self.position_feedback.profile.get('name', 'measured'),
                 "control_hz": CONTROL_HZ,
                 "max_relative_target": DEFAULTS["max_relative_target"],
                 "tracking_error_stop_rad": None,
                 "position_feedback": self.position_feedback.status(),
+                "gripper_contact": self.gripper_contact.status(),
                 "status_warning": self.status_warning,
+                "faulted_joints": sorted(self.faulted_joints),
+                "pending_native_restore": sorted(self.faulted_joints & (
+                    self.original_acceleration.keys() | self.original_velocity.keys()
+                    | self.original_p.keys())),
                 "command_qpos": dict(self.command_angles),
                 "sent_qpos": {joint: self.angle(joint, raw) for joint, raw in self.sent.items()},
                 "native_acceleration": dict(self.native_acceleration),
@@ -403,4 +530,5 @@ class ManualControl:
         if self.enabled:
             # Preserve support for gravity-loaded joints; explicit X releases torque.
             self.stop("connection closed: hold")
-        self.restore_position_stream(list(self.original_acceleration))
+        self.restore_position_stream([joint for joint in self.original_acceleration
+                                      if joint not in self.faulted_joints])

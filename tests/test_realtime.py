@@ -19,15 +19,15 @@ from lerobot_arm_control.transport.realtime import JOINTS, raw_to_angles, valida
 ])
 def test_remote_target_rejects_invalid_data(invalid):
     with pytest.raises(ValueError):
-        validate_target(invalid, [0] * 6, [[-1, 1]] * 6)
+        validate_target(invalid, [[-1, 1]] * 6)
 
 
 def test_remote_target_honors_model_limits_even_with_small_delta():
-    assert validate_target([1.01] * 6, [0.99] * 6, [[-1, 1]] * 6) == [1] * 6
+    assert validate_target([1.01] * 6, [[-1, 1]] * 6) == [1] * 6
 
 
 def test_bounded_target_is_accepted():
-    assert validate_target([0.03] * 6, [0] * 6, [[-1, 1]] * 6) == [0.03] * 6
+    assert validate_target([0.03] * 6, [[-1, 1]] * 6) == [0.03] * 6
 
 
 def test_estimated_encoder_mapping_has_explicit_endpoints():
@@ -169,7 +169,7 @@ def test_simulation_runs_local_physics_with_no_remote_host():
 
 
 def test_simulation_accepts_position_steps_without_relative_action_cap():
-    assert validate_target([0.9] * 6, [0] * 6, [[-1, 1]] * 6) == [0.9] * 6
+    assert validate_target([0.9] * 6, [[-1, 1]] * 6) == [0.9] * 6
 
 
 @pytest.mark.parametrize("acknowledgement", [

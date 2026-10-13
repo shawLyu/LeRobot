@@ -9,6 +9,7 @@ import shutil
 import time
 from pathlib import Path
 
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.planning.pick_t import PickPlanner
 from lerobot_arm_control.robot.so101.model_metadata import MODEL, joint_ranges
 from lerobot_arm_control.runtime.tabletop_client import ROOT, TableLink, atomic_json
@@ -191,8 +192,7 @@ def main():
     parser.add_argument('--execute', action='store_true', help='Permit finite physical pick/place')
     parser.add_argument('--snapshot', type=Path, help='Offline scene; never opens hardware')
     parser.add_argument('--output', type=Path, default=ROOT/f'logs/pick-t-{time.time_ns()}')
-    parser.add_argument('--host', default='lerobot')
-    parser.add_argument('--remote-root', default='/home/xy/Research/lerobot')
+    add_remote_arguments(parser)
     parser.add_argument('--timeout', type=float, default=20)
     args = parser.parse_args()
     if args.snapshot and args.execute:

@@ -200,3 +200,52 @@ def test_read_session_never_disables_torque(arm, monkeypatch, model):
             with driver.connected(arm):
                 pass
     assert events == [("disconnect", False)]
+
+
+@pytest.mark.parametrize('allow_alarm,model,comm,error,expected', [
+    (False, 777, 0, 32, RuntimeError),
+    (True, 777, 0, 32, None),
+    (True, 999, 0, 32, RuntimeError),
+    (True, 777, -1, 32, ConnectionError),
+    (True, 777, 0, 0, RuntimeError),
+])
+def test_alarm_monitor_still_checks_identity_and_transport_without_writes(
+        arm, monkeypatch, allow_alarm, model, comm, error, expected):
+    events = []
+
+    class AlarmBus:
+        is_connected = False
+        port_handler = SimpleNamespace(ser=SimpleNamespace(exclusive=False))
+        motors = {'gripper': SimpleNamespace(id=6)}
+
+        def __init__(self):
+            def ping(port, motor_id):
+                assert port is self.port_handler and motor_id == 6
+                events.append('packet ping')
+                return model, comm, error
+            self.packet_handler = SimpleNamespace(
+                ping=ping, getTxRxResult=lambda _: 'bad transport')
+
+        def connect(self, handshake):
+            assert handshake is False
+            self.is_connected = True
+
+        def ping(self, name, raise_on_error):
+            raise RuntimeError('[RxPacketError] Overload error!')
+
+        def _is_comm_success(self, result):
+            return result == 0
+
+        def disconnect(self, disable_torque):
+            assert disable_torque is False
+            events.append('disconnect')
+
+    monkeypatch.setattr(driver, 'make_bus', lambda _: AlarmBus())
+    if expected:
+        with pytest.raises(expected):
+            with driver.connected(arm, allow_alarm=allow_alarm):
+                pytest.fail('Invalid hardware session accepted')
+    else:
+        with driver.connected(arm, allow_alarm=True):
+            pass
+    assert events == (['packet ping', 'disconnect'] if allow_alarm else ['disconnect'])

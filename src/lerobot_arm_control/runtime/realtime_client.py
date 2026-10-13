@@ -17,6 +17,7 @@ from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.control_input import JogCommands, ResetThenCircle
 from lerobot_arm_control.core.paths import resource_path, source_environment, workspace_root
 from lerobot_arm_control.core.processes import remote_python
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.transport.realtime import JOINTS, VERSION, raw_to_angles
 from lerobot_arm_control.visualization.ui import motor_fault_text
 
@@ -593,9 +594,7 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", default="lerobot", help="Hardware worker SSH host")
-    parser.add_argument("--remote-root", default="/home/xy/Research/lerobot",
-                        help="Hardware worker project directory; unused in simulation")
+    add_remote_arguments(parser)
     parser.add_argument("--backend", choices=("hardware", "mujoco"), default="hardware")
     parser.add_argument('--arm', default='follower', help='Configured physical arm identity')
     parser.add_argument("--model", type=Path)

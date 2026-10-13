@@ -18,6 +18,7 @@ from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.core.processes import remote_python
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.visualization.tabletop_scene import (
     scene_arms,
     scene_xml,
@@ -544,8 +545,7 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", default="lerobot")
-    parser.add_argument("--remote-root", default="/home/xy/Research/lerobot")
+    add_remote_arguments(parser)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--duration", type=float)

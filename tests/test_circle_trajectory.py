@@ -240,4 +240,4 @@ def test_valid_hardware_entry_and_laps_follow_without_local_angle_commands(laps)
     control.stop()
     assert not circle.active
     assert all(bus.sync_read("Torque_Enable").values())
-    assert control.motion_speed() is None
+    assert control.status()['max_speed_rad_s'] is None

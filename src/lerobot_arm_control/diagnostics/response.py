@@ -14,6 +14,7 @@ from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.joint_path import ACTIVE, plan_digest
 from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.runtime.tabletop_client import TableLink
@@ -121,11 +122,11 @@ def trial(args):
              'config': json.loads((ROOT/'configs/control.json').read_text()),
              'samples': [], 'acks': [], 'max_camera_age_s': 0.,
              'measurement_scope': 'encoder response benchmark; camera is recorded separately'}
-    remote_trace = '/home/xy/Research/lerobot/logs/'+args.output.name+'-control.json'
-    camera = TableLink('lerobot', '/home/xy/Research/lerobot', args.output/'camera',
+    remote_trace = args.remote_root+'/logs/'+args.output.name+'-control.json'
+    camera = TableLink(args.host, args.remote_root, args.output/'camera',
                        server_args=['--camera-only', '--marker-only', '--omit-native-images',
                                     '--stream-fps', '10'])
-    link = Link('lerobot', '/home/xy/Research/lerobot', 'hardware', hardware_control=True,
+    link = Link(args.host, args.remote_root, 'hardware', hardware_control=True,
                 control_log=remote_trace)
     last_seq, last_ping = None, 0.
 
@@ -214,7 +215,7 @@ def trial(args):
             link.close()
         finally:
             camera.close()
-        subprocess.run(['scp', 'lerobot:'+remote_trace, str(args.output/'control.json')],
+        subprocess.run(['scp', args.host+':'+remote_trace, str(args.output/'control.json')],
                        check=True, timeout=20)
         if proof['completed'] and not proof.get('cleanup_error'):
             proof['metrics'] = metrics(
@@ -227,6 +228,7 @@ def trial(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    add_remote_arguments(parser)
     parser.add_argument('--execute', action='store_true')
     parser.add_argument('--anchor', type=Path,
                         help='Saved six-joint raw pose for A/B trials; default is live pose')

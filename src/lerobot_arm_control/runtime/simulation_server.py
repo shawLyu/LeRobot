@@ -11,7 +11,7 @@ import mujoco
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, CONTROL_HZ
 from lerobot_arm_control.control.simulation_control import SimulationControl
 from lerobot_arm_control.core.paths import resource_path, workspace_root
-from lerobot_arm_control.runtime.realtime_server import next_deadline, receive, send
+from lerobot_arm_control.runtime.common import next_deadline, receive, send
 from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 from lerobot_arm_control.transport.realtime import (
     JOINTS,
@@ -68,7 +68,7 @@ def serve(args):
                 elif operation == "ping":
                     result = "pong"
                 elif operation == "target":
-                    reference[:] = validate_target(command.get("qpos"), reference, ranges)
+                    reference[:] = validate_target(command.get("qpos"), ranges)
                 elif operation == "hold":
                     reference[:] = data.qpos
                     controller.reset(reference)

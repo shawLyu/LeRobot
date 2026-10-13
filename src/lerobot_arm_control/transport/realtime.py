@@ -34,10 +34,10 @@ def preview_joint_target(bus, joint, delta):
             "delta_raw": delta, "executed": False}
 
 
-def validate_target(values, current, ranges):
+def validate_target(values, ranges):
     if not isinstance(values, list) or len(values) != len(JOINTS):
         raise ValueError("target must contain six joint angles in radians")
-    for value, bounds in zip(values, ranges, strict=True):
+    for value in values:
         if type(value) not in (int, float) or not math.isfinite(value):
             raise ValueError("target contains a non-finite angle")
     return [max(low, min(high, value)) for value, (low, high) in zip(values, ranges, strict=True)]

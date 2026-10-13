@@ -86,6 +86,16 @@ follow parameters; calibration identity is validated by the remote controller. I
 rejects the viewer without stopping the controller. Hardware configuration and saved
 calibrations are preserved by deployment.
 
+## Smoothness-first default (2026-10-13)
+
+All six axes now use the shared two-pole 25 ms reference shaper, zero predictive
+velocity lead, and motion-weighted integral learning. Expect approximately 50 ms
+of low-frequency reference delay plus the servo response. Smoothness takes
+priority over the former <100 ms target; actual latency must still be measured.
+The latency tool retains its strict <100 ms threshold and can report failure
+for an otherwise usable smooth capture. See the [design](lerobot-control.md) and
+[current evidence](measurements/follow-smoothing-2026-10-13/README.md).
+
 ## Record and measure
 
 ```sh

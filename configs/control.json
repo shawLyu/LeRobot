@@ -28,9 +28,11 @@
         "error_deadband_rad": 0.0015,
         "kd": 0.02,
         "derivative_filter_seconds": 0.08,
-        "velocity_feedforward_s": 0.08,
+        "velocity_feedforward_s": 0.0,
         "feedforward_rate_rad_s": 4.0,
-        "reference_filter_seconds": 0.015
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
       },
       "shoulder_lift": {
         "kp": 0.1,
@@ -41,9 +43,11 @@
         "error_deadband_rad": 0.003,
         "kd": 0.03,
         "derivative_filter_seconds": 0.04,
-        "velocity_feedforward_s": 0.08,
+        "velocity_feedforward_s": 0.0,
         "feedforward_rate_rad_s": 4.0,
-        "reference_filter_seconds": 0.015
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
       },
       "elbow_flex": {
         "kp": 0.25,
@@ -54,9 +58,11 @@
         "error_deadband_rad": 0.003,
         "kd": 0.02,
         "derivative_filter_seconds": 0.08,
-        "velocity_feedforward_s": 0.06,
+        "velocity_feedforward_s": 0.0,
         "feedforward_rate_rad_s": 4.0,
-        "reference_filter_seconds": 0.015
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
       },
       "wrist_flex": {
         "kp": 0.1,
@@ -67,9 +73,11 @@
         "error_deadband_rad": 0.0015,
         "kd": 0.02,
         "derivative_filter_seconds": 0.08,
-        "velocity_feedforward_s": 0.08,
+        "velocity_feedforward_s": 0.0,
         "feedforward_rate_rad_s": 4.0,
-        "reference_filter_seconds": 0.015
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
       },
       "wrist_roll": {
         "kp": 0.2,
@@ -80,9 +88,11 @@
         "error_deadband_rad": 0.0015,
         "kd": 0.015,
         "derivative_filter_seconds": 0.04,
-        "velocity_feedforward_s": 0.1,
+        "velocity_feedforward_s": 0.0,
         "feedforward_rate_rad_s": 6.0,
-        "reference_filter_seconds": 0.01
+        "reference_filter_seconds": 0.01,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
       },
       "gripper": {
         "kp": 0.35,
@@ -93,9 +103,11 @@
         "error_deadband_rad": 0.003,
         "kd": 0.01,
         "derivative_filter_seconds": 0.08,
-        "velocity_feedforward_s": 0.08,
+        "velocity_feedforward_s": 0.0,
         "feedforward_rate_rad_s": 4.0,
-        "reference_filter_seconds": 0.015
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
       }
     },
     "native_stream": {
@@ -111,7 +123,7 @@
     "ramp_seconds": 1.0,
     "control_hz": 60,
     "reset_speed_rad_s": 0.5,
-    "period_seconds": 4.0
+    "period_seconds": 16.0
   },
   "simulation_actuator": {
     "kp": 700.0,

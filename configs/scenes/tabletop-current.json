@@ -965,7 +965,7 @@
       "table_frame": "ID 1 (DICT_APRILTAG_36h10) center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the stationary auxiliary. Rebuilt from current observations on 2026-10-11."
     }
   },
-  "control_config_sha256": "45030baf423cc4f8069fcfc1c343c2f511f3eea247ab33f6d24044e35e52fc1f",
+  "control_config_sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439",
   "joint_calibrations": {
     "arm1": {
       "model": "so101",
@@ -1218,7 +1218,7 @@
     },
     "control.json": {
       "file": "configs/control.json",
-      "sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779"
+      "sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439"
     },
     "follow.json": {
       "file": "configs/follow.json",
@@ -1364,11 +1364,11 @@
       "evidence": "docs/measurements/pid-2026-10-12/arm1-configuration-restoration.json",
       "leader_torque_enabled": false
     },
-    "latency_update": "Remote-only 60 Hz shared PID; wrist-roll lead 100 ms, reference filter 10 ms, correction bound 0.20 rad; immediate stop/reversal cancellation retained",
-    "latency_evidence": "docs/measurements/follow-retune-2026-10-13/normal-acceptance.json",
+    "latency_update": "Smoothness priority; 25 ms two-pole reference filter (~50 ms low-frequency lag), velocity prediction disabled, motion-weighted integral",
+    "latency_evidence": "docs/measurements/follow-smoothing-2026-10-13/README.md",
     "simulation_inner_loop": "kp=700, kv=56; approximately 80 ms effective lag, shared outer PID unchanged",
-    "overshoot_evidence": "docs/measurements/follow-retune-2026-10-13/README.md",
-    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "overshoot_evidence": "docs/measurements/follow-smoothing-2026-10-13/README.md",
+    "control_config_sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439",
     "normal_operation_peak_speed_rad_s": {
       "shoulder_pan": 2,
       "shoulder_lift": 2,
@@ -1377,6 +1377,8 @@
       "wrist_roll": 2,
       "gripper": 1.2
     },
-    "leader_alarm_behavior": "Warning and online monitoring; follower held until healthy readings and explicit remote resume; device voltage limits unchanged"
+    "leader_alarm_behavior": "Warning and online monitoring; follower held until healthy readings and explicit remote resume; device voltage limits unchanged",
+    "integral_velocity_scale_rad_s": 0.25,
+    "circle_period_seconds": 16
   }
 }

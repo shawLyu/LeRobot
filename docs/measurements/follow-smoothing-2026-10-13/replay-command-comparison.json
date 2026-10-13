@@ -1,0 +1,224 @@
+{
+  "wrist-normal": {
+    "shoulder_pan": {
+      "before": {
+        "jumps": 10,
+        "max_small_input_step_deg": 1.2768152916507658,
+        "total_variation_deg": 448.9950632942847
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.4309969484422128,
+        "total_variation_deg": 364.28142069931295
+      }
+    },
+    "shoulder_lift": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.49537458624678926,
+        "total_variation_deg": 20.167538532807203
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.1413085663057167,
+        "total_variation_deg": 11.108954571555373
+      }
+    },
+    "elbow_flex": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.377917909429597,
+        "total_variation_deg": 18.91066810892824
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.12937962248630974,
+        "total_variation_deg": 16.31612974190097
+      }
+    },
+    "wrist_flex": {
+      "before": {
+        "jumps": 6,
+        "max_small_input_step_deg": 1.3246621532487612,
+        "total_variation_deg": 53.36078215788822
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.623482219740034,
+        "total_variation_deg": 33.336124877327094
+      }
+    },
+    "wrist_roll": {
+      "before": {
+        "jumps": 25,
+        "max_small_input_step_deg": 1.6420434913948643,
+        "total_variation_deg": 2040.621370799677
+      },
+      "after": {
+        "jumps": 4,
+        "max_small_input_step_deg": 0.9500395947622303,
+        "total_variation_deg": 1920.6802228829974
+      }
+    },
+    "gripper": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.0,
+        "total_variation_deg": 0.0
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.024660696872818525,
+        "total_variation_deg": 0.08929237918856639
+      }
+    }
+  },
+  "elbow-final-confirmed": {
+    "shoulder_pan": {
+      "before": {
+        "jumps": 29,
+        "max_small_input_step_deg": 1.4714461165227342,
+        "total_variation_deg": 268.01068220126047
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.4430199229205212,
+        "total_variation_deg": 145.34514536924092
+      }
+    },
+    "shoulder_lift": {
+      "before": {
+        "jumps": 8,
+        "max_small_input_step_deg": 1.4300921317280613,
+        "total_variation_deg": 266.4422607195056
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.5874307513779449,
+        "total_variation_deg": 227.4028319341603
+      }
+    },
+    "elbow_flex": {
+      "before": {
+        "jumps": 2,
+        "max_small_input_step_deg": 1.0167663023009348,
+        "total_variation_deg": 933.9539700732654
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.7588935146174948,
+        "total_variation_deg": 867.5899321448853
+      }
+    },
+    "wrist_flex": {
+      "before": {
+        "jumps": 26,
+        "max_small_input_step_deg": 2.1256655008039225,
+        "total_variation_deg": 1130.6321484250677
+      },
+      "after": {
+        "jumps": 9,
+        "max_small_input_step_deg": 1.2372104277265508,
+        "total_variation_deg": 1018.4202178972597
+      }
+    },
+    "wrist_roll": {
+      "before": {
+        "jumps": 26,
+        "max_small_input_step_deg": 2.9259409569092045,
+        "total_variation_deg": 623.5615759467454
+      },
+      "after": {
+        "jumps": 11,
+        "max_small_input_step_deg": 1.113180481796099,
+        "total_variation_deg": 483.49901815981883
+      }
+    },
+    "gripper": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.021350826989832386,
+        "total_variation_deg": 1.659298100475837
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.04585707720082304,
+        "total_variation_deg": 1.8241091420423527
+      }
+    }
+  },
+  "trigger-after-cable": {
+    "shoulder_pan": {
+      "before": {
+        "jumps": 1,
+        "max_small_input_step_deg": 0.8154187689889519,
+        "total_variation_deg": 16.186239718786446
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.1129354922087501,
+        "total_variation_deg": 9.137433380616212
+      }
+    },
+    "shoulder_lift": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.0920245398773018,
+        "total_variation_deg": 0.0920245398773018
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.022069768934887407,
+        "total_variation_deg": 0.11654778733964162
+      }
+    },
+    "elbow_flex": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.08992343299216028,
+        "total_variation_deg": 9.519321861868876
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.1146067660743671,
+        "total_variation_deg": 9.932653347233037
+      }
+    },
+    "wrist_flex": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.09730488254378755,
+        "total_variation_deg": 1.7286955454994455
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.036767249012934974,
+        "total_variation_deg": 1.8545516996312013
+      }
+    },
+    "wrist_roll": {
+      "before": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.6063571975220651,
+        "total_variation_deg": 9.639108360994479
+      },
+      "after": {
+        "jumps": 0,
+        "max_small_input_step_deg": 0.05529785564399735,
+        "total_variation_deg": 7.345232222386571
+      }
+    },
+    "gripper": {
+      "before": {
+        "jumps": 24,
+        "max_small_input_step_deg": 2.76547369584307,
+        "total_variation_deg": 1245.596181533703
+      },
+      "after": {
+        "jumps": 1,
+        "max_small_input_step_deg": 0.9445996961095909,
+        "total_variation_deg": 1122.9924898173363
+      }
+    }
+  }
+}

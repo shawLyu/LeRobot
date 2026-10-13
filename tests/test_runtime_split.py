@@ -59,7 +59,7 @@ def test_metadata_ranges_match_the_canonical_explicit_joint_limits():
     assert Circle().model_hash == hashlib.sha256(MODEL.read_bytes()).hexdigest()
     assert POSITION_FEEDBACK == json.loads(CONTROL_CONFIG.read_text())['position_feedback']
     assert TRAJECTORY['control_hz'] == 60
-    assert TRAJECTORY['period_seconds'] == 4
+    assert TRAJECTORY['period_seconds'] == 16
 
 
 @pytest.mark.parametrize('axis', [0, 1, 2])

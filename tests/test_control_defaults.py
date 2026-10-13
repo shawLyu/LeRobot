@@ -39,7 +39,7 @@ def test_shared_configuration_preserves_latest_measured_values():
     assert 'locked_p_coefficients' not in POSITION_FEEDBACK['native_stream']
     assert TRAJECTORY == {"version": 1, "entry_speed_rad_s": .8, "min_entry_seconds": .35,
                           "ramp_seconds": 1., "control_hz": 60,
-                          "reset_speed_rad_s": .5, "period_seconds": 4.}
+                          "reset_speed_rad_s": .5, "period_seconds": 16.}
     assert TRAJECTORY["control_hz"] == CONTROL_HZ
 
 
@@ -60,7 +60,7 @@ def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
     assert manual.parking.planned_speed == push.control.parking.planned_speed == .5
     circle = Circle()
     assert circle.entry_speed == ENTRY_PROFILE["entry_speed_rad_s"] == .8
-    assert circle.period == 4
+    assert circle.period == 16
     # The shared enable path restores the previous RAM values.
     manual.enable_all()
     assert set(bus.sync_read("Acceleration").values()) == {254}

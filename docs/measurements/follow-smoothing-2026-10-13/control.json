@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "name": "shared-joint-pid-v1",
+  "native_defaults": {
+    "source": "installed lerobot 0.6.1 SOFollowerConfig and TeleoperateConfig",
+    "control_hz": 60,
+    "max_relative_target": null,
+    "num_read_retries": 2,
+    "position_p_coefficient": 16,
+    "position_i_coefficient": 0,
+    "position_d_coefficient": 32,
+    "return_delay_time": 0,
+    "maximum_acceleration": 254,
+    "operating_mode": 0,
+    "gripper_max_torque_limit": 500,
+    "gripper_protection_current": 250,
+    "gripper_overload_torque": 25
+  },
+  "position_feedback": {
+    "version": 1,
+    "joints": {
+      "shoulder_pan": {
+        "kp": 0.12,
+        "ki": 1.2,
+        "max_correction_rad": 0.2,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.0015,
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "shoulder_lift": {
+        "kp": 0.1,
+        "ki": 0.8,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.003,
+        "kd": 0.03,
+        "derivative_filter_seconds": 0.04,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "elbow_flex": {
+        "kp": 0.25,
+        "ki": 1.5,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.003,
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "wrist_flex": {
+        "kp": 0.1,
+        "ki": 0.8,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.0015,
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "wrist_roll": {
+        "kp": 0.2,
+        "ki": 0.8,
+        "max_correction_rad": 0.2,
+        "correction_rate_rad_s": 0.3,
+        "error_filter_seconds": 0.04,
+        "error_deadband_rad": 0.0015,
+        "kd": 0.015,
+        "derivative_filter_seconds": 0.04,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 6.0,
+        "reference_filter_seconds": 0.01,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "gripper": {
+        "kp": 0.35,
+        "ki": 0.8,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.04,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.003,
+        "kd": 0.01,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      }
+    },
+    "native_stream": {
+      "acceleration": 254,
+      "velocity_ticks_s": 3000
+    },
+    "name": "shared-joint-pid-v1"
+  },
+  "trajectory": {
+    "version": 1,
+    "entry_speed_rad_s": 0.8,
+    "min_entry_seconds": 0.35,
+    "ramp_seconds": 1.0,
+    "control_hz": 60,
+    "reset_speed_rad_s": 0.5,
+    "period_seconds": 16.0
+  },
+  "simulation_actuator": {
+    "kp": 700.0,
+    "kv": 56.0,
+    "scope": "MuJoCo native position-loop approximation (80 ms effective lag); not hardware register values"
+  }
+}

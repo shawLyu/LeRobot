@@ -7,7 +7,7 @@ The remote Linux host handles USB cameras, perception, motor execution, and enco
 The default configuration belongs to the existing experimental setup. Offline demos can use the included snapshot. For another robot or camera, configure the devices and perform the relevant calibrations.
 Unless a section explicitly says **remote**, run its commands from the local project root.
 
-Latest: [wrist latency retuning, speed-scoped acceptance and online warnings](docs/measurements/follow-retune-2026-10-13/README.md), including physical response curves and the remaining six-axis validation limits.
+Latest: [smoothness-first shared controller and response evidence](docs/measurements/follow-smoothing-2026-10-13/README.md). Predictive lead is disabled; all demos use the same reference shaping and motion-weighted PI-D.
 
 ## Source structure and entry point
 

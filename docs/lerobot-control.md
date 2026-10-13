@@ -7,7 +7,7 @@
 
 ![PID 反馈核心控制框图](figures/shared-pid-control.png)
 
-可下载 [SVG](figures/shared-pid-control.svg) / [PDF](figures/shared-pid-control.pdf)。图示为 PID 反馈核心；当前完整命令还包含下述参考速度前馈分支。
+可下载 [SVG](figures/shared-pid-control.svg) / [PDF](figures/shared-pid-control.pdf)。图示包含当前的参考整形、PI-D 反馈和舵机原生闭环。默认已关闭预测性速度前馈。
 
 ## 闭环结构
 
@@ -19,18 +19,31 @@
 每个关节在第 k 次控制更新时：
 
 ```text
-e       = deadband(q_ref - q)
+q_s     = F(s) q_ref, F(s) = 1 / (1 + 0.025 s)^2
+          # 双极点参考整形；精确零阶保持离散更新，初始状态取实测位置
+e       = deadband(q_s - q)
 e_f     = lowpass(e, tau_error)
 omega_f = lowpass((q[k] - q[k-1]) / actual_dt, tau_D)
-I_next  = I + Ki * e_f * dt
+v_ref   = lowpass((q_s[k] - q_s[k-1]) / actual_dt, tau_reference)
+w       = 1 / (1 + (max(abs(v_ref), abs(omega_f)) / 0.25)^2)
+I_next  = I + Ki * e_f * w * dt   # 含限幅和抗饱和
 u_pid   = slew(Kp * e_f + I - Kd * omega_f, pid_rate)
-v_ref   = lowpass((q_ref[k] - q_ref[k-1]) / actual_dt, 0.015 s)
-u_ff    = bounded_velocity_lead(T_ff * v_ref, increase_rate=4 rad/s)
-          # stop/reversal: clear immediately; decreasing lead: apply immediately
-q_cmd   = clip(q_ref + bounded_correction(u_pid + u_ff), joint_limits)
+q_cmd   = clip(q_s + bounded_correction(u_pid), joint_limits)
 ```
 
-`q_ref` 是名义位置前馈。D 对测量微分，目标阶跃不会产生微分冲击。
+2026-10-13 起默认以平滑优先。旧速度预测在连续两帧变化时开启、单帧停顿时清零，
+量化输入可使其频繁开关；旧实录中参考变化小于 0.3° 时也出现了 1–3° 命令跳变。
+六关节的 `velocity_feedforward_s` 现在统一为 0。
+双极点参考整形不外推目标，阶跃参考本身单调收敛；这不等于实际电机绝不超调。
+其低频延迟约 50 ms，离散采样与电机本身另有延迟。运动时降低积分学习速度，
+保留已学到的静态负载补偿，避免将动态滞后积累为停止后的持续推力。
+当前仍有饱和、死区与速率限制，不能把整个系统视为一个线性 PID 传递函数。
+
+同一配置覆盖所有 demo。圆轨迹默认周期从 4 s 调整到 16 s，以保留原有
+最大关节跟踪误差 <0.01 rad、末端误差 <5 mm 的仿真标准；没有放宽验收阈值。
+
+
+`q_ref` 是原始名义目标，`q_s` 是整形后的名义位置。D 对测量微分，目标阶跃不会产生微分冲击。
 `I` 的单位为 rad；`Kp` 无量纲，`Ki` 为 1/s，`Kd` 为 s。
 积分在补偿幅值或物理边界饱和且误差继续推向边界时冻结，反向误差允许积分释放。
 输出补偿另有变化率限制。相邻轨迹的正常驻留保留已学到的负载补偿；
@@ -105,19 +118,11 @@ MuJoCo 使用相同的 PID 算法、频率和配置，但内部位置执行器�
 [ST3215 文档](https://www.waveshare.com/wiki/ST3215_Servo)。
 
 
-## 2026-10-12 低延迟跟随更新
+## 远端独立控制与历史参数
 
-启动或恢复时先缓慢对齐；名义目标与映射后的主臂角度均相差不超过 2° 后，
-每个周期直接采用最新目标，避免 0.6 rad/s 限速持续积累位置滞后。
-硬件仍受模型/编码器行程和舵机自身速度上限约束。
-
-共享 PID 使用 3 号 elbow_flex 60 ms、5 号 wrist_roll 100 ms、其他关节 80 ms 速度前馈：根据连续参考角度的变化估算速度，以 wrist_roll 10 ms、其他关节 15 ms 一阶滤波降噪。5 号前馈增长速率为 6 rad/s，其他关节为 4 rad/s；停止或反向时仍立即取消前馈。
-只有连续两个同向移动样本才启用；单次位置阶跃不会产生前馈冲击，停止/反向在一个控制周期内清除旧方向前馈，减速时立即减小前馈；只有前馈增大时才按变化率限制。
-PID 反馈修正仍使用原先的缓慢变化率；前馈采用独立的 4 rad/s 变化率，
-与 PID 相加后的修正仍受同一幅度边界及编码器行程限制。暂停/重新使能清除前馈状态。
-
-所有 demo 共用同一配置；修改的是运行期 RAM 加速度和速度，退出恢复原值。
-原生 P/I/D、EEPROM 和实测角度标定未改变。
+2026-10-12 至本次更新前曾使用 60–100 ms 速度预测补偿以降低延迟。
+该参数已被当前平滑优先配置替代；历史曲线不能作为当前配置验收。
+启动对齐仍使用 0.6 rad/s，随后名义目标采用最新映射值，并经过共享参考整形。
 
 跟随由远端 standalone 进程独立拥有双臂串口，启动和保持只接受其控制终端输入。
 采集、标定、映射、PID 和写电机全部在远端完成；看门狗检查远端采集与循环间隔。
@@ -138,12 +143,16 @@ flowchart LR
   subgraph R[远端计算机：60 Hz]
     L[白臂编码器] --> M[独立标定与扳机映射]
     M --> A[启动对齐 / 最新目标 q_ref]
-    A --> S((＋ / −))
-    S --> PID[位置 PID：误差滤波、积分防饱和、测量微分]
-    A --> FF[位置与速度前馈：停止 / 反向清除速度项]
-    PID --> SUM((＋))
-    FF --> SUM
-    SUM --> LIMIT[修正限幅 / 关节限位]
+    A --> F[双极点参考整形 F：τ=25 ms]
+    F --> S((＋ / −))
+    S --> PID[误差滤波 / P + 运动加权 I]
+    Q --> D[测量微分与低通：−Kd·ω]
+    D --> C((＋))
+    PID --> C
+    C --> B[补偿变化率 / 限幅]
+    B --> SUM((＋))
+    F --> SUM
+    SUM --> LIMIT[关节限位]
     LIMIT --> N[舵机原生位置环 + 电机负载]
     N --> Q[黑臂编码器 q]
     Q -->|负反馈| S
@@ -152,3 +161,8 @@ flowchart LR
   end
   T --> V[本地 simulator：仅显示]
 ```
+
+测量微分与参考处理的设计依据可参阅 MathWorks 的
+[PI-D 控制说明](https://www.mathworks.com/help/slcontrol/ug/create-i-pd-and-pi-d-controllers.html)。
+本项目新增双极点参考整形和运动积分权重；没有声称实现独立速度环/电流环。
+测试证据见[平滑跟随报告](measurements/follow-smoothing-2026-10-13/README.md)。

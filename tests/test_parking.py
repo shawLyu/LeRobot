@@ -318,7 +318,13 @@ def test_reset_lag_does_not_trip_a_tracking_or_elapsed_timeout(tmp_path):
     assert all(bus.sync_read("Torque_Enable").values())
     assert {joint: control.raw(joint, control.targets[joint]) for joint in JOINTS} == (
         dict.fromkeys(JOINTS, 2200))
-    assert all(1000 <= value < 2200 for value in bus.sync_read("Goal_Position").values())
+    # Even after a scheduler gap, resume smoothly from measured position.
+    assert all(2200 < value < 2400 for value in bus.sync_read("Goal_Position").values())
+    for _ in range(60):
+        tick(bus, control, now, seconds=1 / 60, follow=False)
+    assert control.parking.active
+    assert not control.stopped
+    assert all(1000 <= value <= 2200 for value in bus.sync_read("Goal_Position").values())
 
 
 def test_bounds_change_does_not_promote_unverified_release(tmp_path):

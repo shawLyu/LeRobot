@@ -1,7 +1,7 @@
 """Shared bounded position PID around the native servo position loop.
 
-All quantities are model radians. Position correction preserves the nominal
-trajectory. Optional native P adjustments require locked, volatile storage and
+All quantities are model radians. Optional reference shaping precedes bounded
+position correction. Native P adjustments require locked, volatile storage and
 are restored by ManualControl; torque and protection settings are unchanged.
 """
 
@@ -44,11 +44,14 @@ class PositionFeedback:
         self.previous_measurement = dict.fromkeys(JOINTS)
         self.measured_velocity = dict.fromkeys(JOINTS, 0.0)
         self.derivative = dict.fromkeys(JOINTS, 0.0)
+        self.reference_filter_stage = dict.fromkeys(JOINTS)
+        self.shaped_reference = dict.fromkeys(JOINTS)
         for parameters in self.profile["joints"].values():
             required = {"kp", "ki", "max_correction_rad", "correction_rate_rad_s"}
             optional = {"kd", "derivative_filter_seconds", "velocity_feedforward_s",
                         "error_filter_seconds", "error_deadband_rad", "feedforward_rate_rad_s",
                         "reference_filter_seconds",
+                        "reference_smoothing_seconds", "integral_velocity_scale_rad_s",
                         "friction_feedforward_rad", "friction_velocity_rad_s"}
             if (not required <= set(parameters) <= required | optional
                     or any(type(v) not in (int, float) or not math.isfinite(v) or v < 0
@@ -61,6 +64,8 @@ class PositionFeedback:
                     or parameters.get("error_filter_seconds", 0) > 0.5
                     or parameters.get("error_deadband_rad", 0) > 0.02
                     or parameters.get("kd", 0) > .5
+                    or parameters.get("reference_smoothing_seconds", 0) > .2
+                    or parameters.get("integral_velocity_scale_rad_s", 0) > 1
                     or (parameters.get("kd", 0) > 0 and
                         not .01 <= parameters.get("derivative_filter_seconds", 0) <= .5)
                     or parameters.get("friction_feedforward_rad", 0) > 0.08
@@ -78,6 +83,7 @@ class PositionFeedback:
             self.filtered_error[joint] = 0.0
             self.previous_measurement[joint] = None
             self.measured_velocity[joint] = self.derivative[joint] = 0.0
+            self.reference_filter_stage[joint] = self.shaped_reference[joint] = None
 
     def finish_reference(self, joints):
         """End trajectory feedforward while retaining learned static load compensation."""
@@ -107,6 +113,19 @@ class PositionFeedback:
         self.derivative[joint] = -p.get('kd', 0)*self.measured_velocity[joint]
         low, high = self.limits[joint]
         reference = max(low, min(high, reference))
+        tau = p.get('reference_smoothing_seconds', 0)
+        if tau:
+            # Exact zero-order-hold update of two identical low-pass poles.
+            # Start at the measured hold pose; no extrapolation beyond an input
+            # step. Keep these states through trajectory dwell, reset on hold.
+            first = self.reference_filter_stage[joint]
+            second = self.shaped_reference[joint]
+            if first is None:
+                first = second = max(low, min(high, measured))
+            decay = math.exp(-dt/tau)
+            self.reference_filter_stage[joint] = reference+(first-reference)*decay
+            reference = reference+((second-reference)+(first-reference)*dt/tau)*decay
+        self.shaped_reference[joint] = reference
         previous = self.previous_reference[joint]
         # Differentiate the reference, not the measured encoder. A short filter
         # attenuates sample noise; the existing correction envelope also bounds
@@ -144,7 +163,16 @@ class PositionFeedback:
             alpha = -math.expm1(-dt / filter_seconds)
             self.filtered_error[joint] += alpha * (error - self.filtered_error[joint])
             error = self.filtered_error[joint]
-        proposed = self.integral[joint] + p["ki"] * error * (dt if elapsed <= .1 else 0)
+        integration_weight = 1.
+        velocity_scale = p.get('integral_velocity_scale_rad_s', 0)
+        if velocity_scale:
+            # Moving-position lag is not a static load bias. Retain learned
+            # support torque while smoothly reducing learning during motion.
+            speed = max(abs(self.reference_velocity[joint]),
+                        abs(self.measured_velocity[joint]))
+            integration_weight = 1/(1+(speed/velocity_scale)**2)
+        proposed = self.integral[joint] + (p["ki"]*error*integration_weight
+                                          * (dt if elapsed <= .1 else 0))
         demanded = (p["kp"]*error+proposed+self.derivative[joint]
                     +feedforward+velocity_feedforward)
         # Freeze accumulation when it would push farther into magnitude/native
@@ -175,4 +203,5 @@ class PositionFeedback:
         return {"profile": self.profile, "correction_rad": dict(self.correction),
                 "velocity_feedforward_rad": dict(self.velocity_feedforward),
                 "integral_rad": dict(self.integral), "derivative_rad": dict(self.derivative),
+                "shaped_reference_rad": dict(self.shaped_reference),
                 "measured_velocity_rad_s": dict(self.measured_velocity)}

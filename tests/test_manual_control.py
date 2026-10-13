@@ -78,8 +78,9 @@ def test_shared_pid_enables_unlocked_servos_without_p_or_eeprom_writes():
     for _ in range(10):
         control.heartbeat()
         step(bus, control, now, 1 / 30)
-        assert all(control.sent[joint] >= 2220 + index * 10
-                   for index, joint in enumerate(JOINTS))
+        assert all(2200 < control.sent[joint] <= 3000 for joint in JOINTS)
+    assert all(control.sent[joint] >= 2219 + index * 10
+               for index, joint in enumerate(JOINTS))
     assert len(bus.writes) == 60
     control.close()
     assert {register for register, _, _ in bus.writes} == {
@@ -142,10 +143,16 @@ def test_hardware_uses_exact_calibrated_raw_endpoints_without_model_margins(setu
     assert control.limits["gripper"] == (-1.5, 1.5)
     control.enable("gripper")
     control.target("gripper", -10)
-    step(bus, control, now, 1 / 60)
+    for _ in range(60):
+        control.heartbeat()
+        step(bus, control, now, 1 / 60)
+        assert 1000 <= control.sent['gripper'] <= 3000
     assert bus.registers["gripper"]["Goal_Position"] == 1000
     control.target("gripper", 10)
-    step(bus, control, now, 1 / 60)
+    for _ in range(60):
+        control.heartbeat()
+        step(bus, control, now, 1 / 60)
+        assert 1000 <= control.sent['gripper'] <= 3000
     assert bus.registers["gripper"]["Goal_Position"] == 3000
 
 def test_inherited_torque_can_be_released_without_enabling_again(setup):
@@ -167,13 +174,14 @@ def test_voltage_preflight_rejects_without_motor_writes(setup):
     assert bus.writes == []
 
 
-def test_official_action_is_sent_without_a_software_slew_limiter(setup):
+def test_latest_action_is_preserved_while_shared_controller_smooths_the_motor_command(setup):
     bus, control, now = setup
     control.enable("gripper")
     control.target("gripper", 1.2)
     step(bus, control, now, 1 / 60)
-    assert control.sent["gripper"] == 2800
-    assert control.command_angles["gripper"] == 1.2
+    assert control.targets['gripper'] == 1.2
+    assert 2200 < control.sent["gripper"] < 2800
+    assert .3 < control.command_angles["gripper"] < 1.2
     assert control.status()["max_relative_target"] is None
     assert control.status()["max_speed_rad_s"] is None
 
@@ -244,12 +252,11 @@ def test_streaming_target_keeps_sub_tick_motion_with_bounded_pid_damping(setup):
         control.target("gripper", target)
         step(bus, control, now, 0.01)
         assert control.targets["gripper"] == target
-        # At 0.09 rad/s the derivative damps by about 0.0009 rad;
-        # quantization is at most another half encoder tick (0.00075 rad).
-        lead = .09*CONTROL["position_feedback"]["joints"]["gripper"]["velocity_feedforward_s"]
-        assert abs(control.command_angles["gripper"] - target) <= lead+.003
-        assert abs(control.angle("gripper", control.sent["gripper"]) - target) <= lead+.003
-    assert control.command_angles["gripper"] > .385
+        # Allow the explicitly chosen smoothing delay, but no growing queue of
+        # old targets: 0.008 rad at this speed is less than 90 ms of command lag.
+        assert abs(control.command_angles["gripper"] - target) <= .008
+        assert abs(control.angle("gripper", control.sent["gripper"]) - target) <= .008
+    assert control.command_angles["gripper"] > .382
 
 
 def test_stationary_running_goal_is_refreshed_after_a_lost_packet(setup):
@@ -370,7 +377,7 @@ def test_changed_joint_targets_share_one_sync_packet(setup):
     assert control.targets["gripper"] == control.targets["wrist_roll"] == .33
     for joint in JOINTS:
         if joint in ("gripper", "wrist_roll"):
-            assert control.sent[joint] > 2220
+            assert 2200 < control.sent[joint] < 2220
         else:
             assert control.sent[joint] == 2200
 
@@ -502,11 +509,17 @@ def test_model_edge_does_not_narrow_real_calibration_or_stop_control(setup):
     control.target(joint, -1.2)
     step(bus, control, now, 1 / 60)
     assert control.targets[joint] == -1.2
-    assert 1000 <= control.sent[joint] <= 1200
+    assert 1200 < control.sent[joint] < 1320
     assert not control.stopped
+    for _ in range(30):
+        control.heartbeat()
+        step(bus, control, now, 1/60)
+    assert 1000 <= control.sent[joint] <= 1200
     control.target(joint, 0)
-    step(bus, control, now, 1 / 60)
-    assert control.sent[joint] == 2000
+    for _ in range(30):
+        control.heartbeat()
+        step(bus, control, now, 1/60)
+    assert control.targets[joint] == 0 and 2000 <= control.sent[joint] <= 3000
 
 
 @pytest.mark.parametrize("bounds", [[1000, 1000], [-1, 3000], [0, 4096], [3000, 1000]])
@@ -529,7 +542,7 @@ def test_transient_status_that_clears_on_independent_read_is_logged_without_hold
     control.step(bus.sync_read("Present_Position"), telemetry)
     assert not control.stopped
     assert control.last_fault is None
-    assert control.sent["gripper"] == 2800
+    assert 2200 < control.sent["gripper"] < 2800
     assert control.status_warning["reported_status"] == 1
     assert control.status_warning["confirmed_status"] == 0
 

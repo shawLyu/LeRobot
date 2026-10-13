@@ -186,3 +186,70 @@ def test_reference_reversal_cancels_old_velocity_lead_in_one_tick():
     assert controller.velocity_feedforward[joint] > .05
     controller.target(joint, .37, .38, 1/60)
     assert controller.velocity_feedforward[joint] == 0
+
+
+def smoothing_controller():
+    from copy import deepcopy
+
+    from lerobot_arm_control.control.control_defaults import POSITION_FEEDBACK
+
+    profile = deepcopy(POSITION_FEEDBACK)
+    for p in profile['joints'].values():
+        p.update(kp=0, ki=0, kd=0)
+    return PositionFeedback(profile, {j: [-3., 3.] for j in JOINTS})
+
+
+def test_smooth_step_has_no_reference_overshoot_and_bounded_added_delay():
+    c = smoothing_controller()
+    joint = 'wrist_roll'
+    outputs = [c.target(joint, .5, 0, 1/60) for _ in range(30)]
+    assert 0 < outputs[0] < .1
+    assert all(0 <= a <= b <= .5 for a, b in zip(outputs, outputs[1:]))
+    assert outputs[11] > .495  # Within 1% in 200 ms, not an arbitrarily slow filter.
+    # Analytic step response of a critically damped pair of identical poles.
+    tau = c.profile['joints'][joint]['reference_smoothing_seconds']
+    t = 1/60
+    assert outputs[0] == pytest.approx(.5*(1-(1+t/tau)*math.exp(-t/tau)))
+
+
+def test_quantized_ramp_plateaus_do_not_switch_prediction_on_and_off():
+    c = smoothing_controller()
+    joint = 'wrist_roll'
+    commands = [c.target(joint, round(k*.0005/.0015)*.0015, 0, 1/60)
+                for k in range(180)]
+    assert all(a <= b for a, b in zip(commands, commands[1:]))
+    assert max(b-a for a, b in zip(commands, commands[1:])) < .0015
+    assert c.velocity_feedforward[joint] == 0
+
+
+def test_dwell_preserves_filter_continuity_and_reset_discards_old_motion():
+    c = smoothing_controller()
+    joint = 'elbow_flex'
+    before = c.target(joint, 1., 0, 1/60)
+    c.finish_reference([joint])
+    after = c.target(joint, 1., 0, 1/60)
+    assert before < after < .5
+    c.reset([joint])
+    assert c.target(joint, -.5, -.5, 1/60) == -.5
+
+
+def test_motion_weight_reduces_lag_integration_without_erasing_load_bias():
+    def run(scale):
+        c = smoothing_controller()
+        joint = 'shoulder_lift'
+        c.profile['joints'][joint].update(ki=.8, integral_velocity_scale_rad_s=scale)
+        c.integral[joint] = .03
+        for k in range(120):
+            reference = .2+k*.003
+            c.target(joint, reference, reference-.08, 1/60)
+        return c.integral[joint]-.03
+    assert 0 < run(.1) < run(0)*.3
+
+
+@pytest.mark.parametrize('field,value', [('reference_smoothing_seconds', .21),
+                                        ('integral_velocity_scale_rad_s', 1.1)])
+def test_smoothing_configuration_rejects_unbounded_values(field, value):
+    c = smoothing_controller()
+    c.profile['joints']['gripper'][field] = value
+    with pytest.raises(ValueError, match='gains or envelope'):
+        PositionFeedback(c.profile, c.limits)

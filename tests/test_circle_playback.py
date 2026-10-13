@@ -48,7 +48,7 @@ def test_matching_local_validation_starts_pure_playback_without_mutating_proof(p
     circle.start_hardware(control, validation, laps=1)
     assert circle.phase == 'entering'
     assert circle.laps == 1
-    assert circle.period == 4
+    assert circle.period == 16
     assert control.enabled == set(JOINTS)
     assert validation == original
     control.close()

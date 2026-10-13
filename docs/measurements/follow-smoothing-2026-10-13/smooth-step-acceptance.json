@@ -1,0 +1,61 @@
+{
+  "scope": "12 physical 3-degree steps, one pose/load; no dynamic-follow acceptance",
+  "criteria": {
+    "overshoot_percent_max": 10,
+    "steady_peak_to_peak_deg_max": 0.25,
+    "settling_time_s_max": 1
+  },
+  "per_joint": {
+    "shoulder_pan": {
+      "previous_overshoot_percent": 15.492957746478853,
+      "overshoot_percent": 5.714285714285761,
+      "rise_time_10_90_ms": 187.33416876057154,
+      "settling_time_s": 0.24992343306075782,
+      "steady_peak_error_deg": 0.04225352112676184,
+      "steady_peak_to_peak_deg": 0.0
+    },
+    "shoulder_lift": {
+      "previous_overshoot_percent": 3.0927835051547836,
+      "overshoot_percent": 8.26210826210787,
+      "rise_time_10_90_ms": 964.4527142588028,
+      "settling_time_s": 0.23271777795162052,
+      "steady_peak_error_deg": 0.17094017094017033,
+      "steady_peak_to_peak_deg": 0.0
+    },
+    "elbow_flex": {
+      "previous_overshoot_percent": 19.444444444444397,
+      "overshoot_percent": 0.0,
+      "rise_time_10_90_ms": 1417.6532701744375,
+      "settling_time_s": 0.7499454489443451,
+      "steady_peak_error_deg": 0.1769911504424755,
+      "steady_peak_to_peak_deg": 0.0
+    },
+    "wrist_flex": {
+      "previous_overshoot_percent": 0.0,
+      "overshoot_percent": 0.0,
+      "rise_time_10_90_ms": 1032.225161645329,
+      "settling_time_s": 0.31528249895200133,
+      "steady_peak_error_deg": 0.1904761904761898,
+      "steady_peak_to_peak_deg": 0.0
+    },
+    "wrist_roll": {
+      "previous_overshoot_percent": 2.7190332326283873,
+      "overshoot_percent": 2.7190332326283873,
+      "rise_time_10_90_ms": 166.37668100185692,
+      "settling_time_s": 0.16653092810884118,
+      "steady_peak_error_deg": 0.18126888217522663,
+      "steady_peak_to_peak_deg": 0.0
+    },
+    "gripper": {
+      "previous_overshoot_percent": 4.2780748663102885,
+      "overshoot_percent": 0.0,
+      "rise_time_10_90_ms": 97.38829864266637,
+      "settling_time_s": 0.14931999193504453,
+      "steady_peak_error_deg": 0.16042780748663432,
+      "steady_peak_to_peak_deg": 0.0
+    }
+  },
+  "passed": true,
+  "dynamic_follow_passed": null,
+  "dynamic_follow_reason": "Candidate live follow interrupted by confirmed white gripper voltage fault before operator motion; final integral refinement has no accepted dynamic capture"
+}

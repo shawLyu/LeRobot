@@ -1,0 +1,1455 @@
+{
+  "time_ns": 1791874334508129425,
+  "arms": {
+    "follower": {
+      "calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "calibrated_joints": 6,
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Position": {
+          "shoulder_pan": 2020,
+          "shoulder_lift": 835,
+          "elbow_flex": 3119,
+          "wrist_flex": 2620,
+          "wrist_roll": 1995,
+          "gripper": 2285
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 52,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 52
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 26,
+          "shoulder_lift": 27,
+          "elbow_flex": 27,
+          "wrist_flex": 28,
+          "wrist_roll": 28,
+          "gripper": 27
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        },
+        "Acceleration": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 48,
+          "elbow_flex": 80,
+          "wrist_flex": 48,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Lock": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 80,
+          "shoulder_lift": 80,
+          "elbow_flex": 80,
+          "wrist_flex": 80,
+          "wrist_roll": 80,
+          "gripper": 80
+        }
+      },
+      "native_and_protection_restored": true,
+      "calibration_unchanged": true
+    },
+    "arm1": {
+      "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "calibrated_joints": 6,
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Position": {
+          "shoulder_pan": 1983,
+          "shoulder_lift": 841,
+          "elbow_flex": 3082,
+          "wrist_flex": 2646,
+          "wrist_roll": 2051,
+          "gripper": 2268
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 53,
+          "gripper": 53
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 28,
+          "shoulder_lift": 27,
+          "elbow_flex": 28,
+          "wrist_flex": 28,
+          "wrist_roll": 27,
+          "gripper": 28
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Acceleration": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 16,
+          "shoulder_lift": 16,
+          "elbow_flex": 16,
+          "wrist_flex": 16,
+          "wrist_roll": 16,
+          "gripper": 16
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Lock": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 120,
+          "shoulder_lift": 80,
+          "elbow_flex": 120,
+          "wrist_flex": 120,
+          "wrist_roll": 120,
+          "gripper": 120
+        }
+      },
+      "native_and_protection_restored": true,
+      "calibration_unchanged": true
+    }
+  },
+  "files": {
+    "README.md": {
+      "sha256": "5838b3f8c6cca0270ce6ab446c4cf0b2d5cb81aca74068e7aadc0e231ec1041d",
+      "matches": true
+    },
+    "assets/so101/so101.xml": {
+      "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+      "matches": true
+    },
+    "configs/control.json": {
+      "sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439",
+      "matches": true
+    },
+    "configs/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "configs/remote-runtime.txt": {
+      "sha256": "ba867a9fe2f862e91170233f949e022d94b8b454ab85047cf0c8654674a76a13",
+      "matches": true
+    },
+    "configs/scenes/tabletop-current.json": {
+      "sha256": "81c175f848c52ebb2d6d81aa0f4eea24dfeb2a56dd7ad714474d9060fade595f",
+      "matches": true
+    },
+    "data/README.md": {
+      "sha256": "0a443e1d2a6df5bacc335c28f48266d445ceff90325b2fd7ba967dfb69be907e",
+      "matches": true
+    },
+    "data/calibration/arm1_mujoco.json": {
+      "sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "matches": true
+    },
+    "data/calibration/follower_mujoco.json": {
+      "sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "matches": true
+    },
+    "data/tabletop/current-scene/configs/control.json": {
+      "sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439",
+      "matches": true
+    },
+    "data/tabletop/current-scene/scene_parameters.json": {
+      "sha256": "81c175f848c52ebb2d6d81aa0f4eea24dfeb2a56dd7ad714474d9060fade595f",
+      "matches": true
+    },
+    "data/trajectories/circle.json": {
+      "sha256": "eeacded7c954b389e190a925ce28a52680dbade033bf0023a6ad6038d8eaba09",
+      "matches": true
+    },
+    "docs/angle-calibration.md": {
+      "sha256": "f1c681914b3bcd970eb88ce2b197674be1495250d133782627a09c03d8fb1375",
+      "matches": true
+    },
+    "docs/camera.md": {
+      "sha256": "2abcd88043e9d8a8cbc226055cf96f30711227f700a0ee76e903a0f49a586f2a",
+      "matches": true
+    },
+    "docs/circle-trajectory.md": {
+      "sha256": "6423a676e78fe0af907f574f2f8a6b796396095cf2fb905060fdbb357a3e3718",
+      "matches": true
+    },
+    "docs/code-layout.md": {
+      "sha256": "a6113ed3f697d888d94ca3b2b892652cd6369c077600203cb618b6102b51d29f",
+      "matches": true
+    },
+    "docs/control-performance.md": {
+      "sha256": "eee02067d468b67267a03dcfa8630852bd6065e23b9c6e2b0240efc1731a631d",
+      "matches": true
+    },
+    "docs/current-scene.md": {
+      "sha256": "e44e47e105e73c56d9c9c300e2db21fbf1da805718ccff9a5c411e70dc1560ef",
+      "matches": true
+    },
+    "docs/figures/shared-pid-control.pdf": {
+      "sha256": "00b358088648d3642b9767e8d5ad2817b6e28112bea5f34e00fe269a490c980e",
+      "matches": true
+    },
+    "docs/figures/shared-pid-control.png": {
+      "sha256": "218ddf59b10e4dcc0f61133b005309cca03b3c54c669936e29d12cb81f7837b1",
+      "matches": true
+    },
+    "docs/figures/shared-pid-control.svg": {
+      "sha256": "29e03011fcb4edf02270883cce1216f4e09449a7e61497a96dfca4f2355a65f8",
+      "matches": true
+    },
+    "docs/follow.md": {
+      "sha256": "a07cb337c059f1cbb7f0bc05b25943c65192a36ef32c88e18c5267321c772e8e",
+      "matches": true
+    },
+    "docs/gripper-verification.md": {
+      "sha256": "194e565d18da4cb35e278808d679124ddbb29ecc9e98c3858953195446c9f773",
+      "matches": true
+    },
+    "docs/height-calibration.md": {
+      "sha256": "f92608bfed67e75a0d4d715b2605af3bb112015c4134cf79e9162a07caa56928",
+      "matches": true
+    },
+    "docs/history/height-calibration-initial.md": {
+      "sha256": "de8d7963d058627dedb485afb6247a5a33e0261be66f3b315176ee670e72a828",
+      "matches": true
+    },
+    "docs/history/setup-initial.md": {
+      "sha256": "bc63736cb87bc9a192429334fede7be81b7357b57c80636ffe5ec19c4462b4e0",
+      "matches": true
+    },
+    "docs/lerobot-control.md": {
+      "sha256": "9d90a081f96596344da8d53ea635b994dd0282f77f3a452e68297df6a80e7cb3",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/README.md": {
+      "sha256": "87520cea76e558e315d12b541d2da840612e7a27c6343099393c69c4af41ec73",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/baseline-report.json": {
+      "sha256": "f12e8fc0c0220865c679848dfb14bd8c2c79292f3539b80df5924c85c94d824f",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/baseline-trace.json.gz": {
+      "sha256": "bd1c4fd3dcabc69917d1894cb4468852e8cd77f244982d9ddd86c18645cc0447",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/deployed-control.json": {
+      "sha256": "3ab417ffb21a34849e78ad94e8e01360cd643d6ae79d035da773990b8df2c718",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/deployment-and-postflight.json": {
+      "sha256": "0b7fc2b42e7fffd35190ff5a4cc3cd112b91974351c1e0bfd4060744320f4eaa",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/fast2-report.json": {
+      "sha256": "edcb061fe5ce383f56acd3f1c32ea5570fcd0b633d258a4c71805d50fcf74672",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/fast2-trace.json.gz": {
+      "sha256": "cae7b931c7d4ead90b9a8806f8a430f6856ed6d11b6d293633349068d8757282",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-control.json.gz": {
+      "sha256": "6608cda24af59365b60b19695b59bf49c0822bc1f9ffe12e51ba3e6fdc32b662",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.csv": {
+      "sha256": "4c6efc11a96d5c987617f46c225d4a79c47527d296e23aa4cf0da6e7914d06d2",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.pdf": {
+      "sha256": "c421a7cbedf0d5cde6fb5ce240f8c61ab709cc9e3b821612be02ab092c1270d6",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.png": {
+      "sha256": "41e54b2937efc9b3fa7e0ba6e446d65c71053c9071f1f6685b44bf70d038fa0a",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-response.svg": {
+      "sha256": "e96b7cdc29f655f099c32ea2b8114bfacd93f48025308ee9dd3476270b8a892c",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-result.json.gz": {
+      "sha256": "18fa7aadcfea1b602ccc930b199f81cf9dfa970ad72a6c2651d300bf75574a7d",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/hardware-step-summary.json": {
+      "sha256": "d373ef76cd92d61ad628a46bdb95ca1c3f748527900bc2039cc0476100c6d998",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/main-report.json": {
+      "sha256": "659c12fb3a122c91b2a8daf1a43f835aa32684135c550d321a21160413168227",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/main-trace.json.gz": {
+      "sha256": "534eaab2c58120c9d247256c944fee745c96beee57af83d8c1ca03bd99511441",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/measured-control.json": {
+      "sha256": "97dbb83430eddeab1c288864e619f8322b4630d32343f40846b6ce3a0ec1e1bd",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/native-lag-fit.json": {
+      "sha256": "9a5f89561067ff3b0ab74b0cdd7b2c2788d494e61d1ad948ea2dadaebae4b040",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.csv": {
+      "sha256": "9c66a0a82fea64883709b057d1298fce4751c40060e23987499b462570a9ae8d",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.pdf": {
+      "sha256": "f4c341ce956db7b9b6bdfe93b6e982d7580e44408e1ce6465978b564a37c9629",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.png": {
+      "sha256": "27603c7aff6ebad2347562e7729d418a01c04e2994cc66a211f8a635e5bd19cf",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-response.svg": {
+      "sha256": "b6aff626f4db38138618176d984ec3ab595dd815e0169e6d2ef8ba64425f15f1",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-result.json.gz": {
+      "sha256": "a5894142fcd9565614b181fb6da9527314658b46c44afb717253e6de72fafe71",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/simulation-step-summary.json": {
+      "sha256": "8cfd2eec194518462bf81f9176069628653dcc4bbddfea1a60cc473e9608eb08",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/six-motor-follow.pdf": {
+      "sha256": "1cac5a174cdf9421a2ec3a89b24c1e8e37967ab5cb299751d5061058c43bdea1",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/six-motor-follow.png": {
+      "sha256": "06b7670f0d194c2b6520bbbcc52881a4734deaa385b904bc472c4246b5e51cc5",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/six-motor-follow.svg": {
+      "sha256": "4369cf441a6be6bb65c83e7b6a52db7e99e8f8cc53987f6d7ebb0e6bf6f15aa1",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/summary.json": {
+      "sha256": "a9ee145fc900ffb8fd792ce61fa4547653f4c8a0725c16c028d93cb293bc86e7",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/trigger-report.json": {
+      "sha256": "3d0d7fb3c51302c3e7e07634e5dac5674e157163bb7d86f950e9dce10e0bd648",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/trigger-trace.json.gz": {
+      "sha256": "ab04ed84739e68418f426c3f776fe12085922d5417dbb7d8dd8618e45a4f86a2",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/wrist-report.json": {
+      "sha256": "7b3bc0b822f4c64b49c4627d2c5271610ec20afda7760a0922c653fefa473e5d",
+      "matches": true
+    },
+    "docs/measurements/follow-latency-2026-10-12/wrist-trace.json.gz": {
+      "sha256": "4b2ba3906a5983540077144b2d38f860c33dbdb93a160663a16c091404421c25",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/README.md": {
+      "sha256": "de8d164dac2b5482c30dc7931ab2c64b2d81fb1a9ebe65f9accd0289224c6f37",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/after-cable.json": {
+      "sha256": "408bbd2bff278618e81c8f45da0fc8946e04ef1bbde043a11ad109dbf0087c27",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/baseline-control.json": {
+      "sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/capture-index.json": {
+      "sha256": "5ad6a049c25826b8fdda39e4a7cd41e010059bb8387b4c4714c35fa1e6ed0169",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/control.json": {
+      "sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-confirmed-report.json": {
+      "sha256": "5978e7c289a5c05997190a924f3cb32dff0f3c309f0ceb20217f7e46ebf09320",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-confirmed-trace.json.gz": {
+      "sha256": "f1d54e75099983b80fc363ec562bf195e1b7682927730c214778067ce953db6d",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-final-confirmed-report.json": {
+      "sha256": "fb66ca08465ca7a4fcd4468696908d1f2e7398bcedb3b046d11443ffd9ac4e3d",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-final-confirmed-reversal.json": {
+      "sha256": "7841afb8a4958e9dc502567f6fa7b86ba38170be06ecc7cb6002820d4441f2d1",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-final-confirmed-trace.json.gz": {
+      "sha256": "b2585161264124324df87c658da01783d52ac14db756c94252299163a90efe63",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-final-confirmed.png": {
+      "sha256": "6652380c060c65b7548fed0957a656978b3780abe6e1e5bf11fa1faa3a59e8a7",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-final-report.json": {
+      "sha256": "adbb6fcfdcb5fde3f6cf60e7a8c9887b203464af18f2690fb9d939c734824817",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/elbow-final-trace.json.gz": {
+      "sha256": "8de3ca251300259ec97b10667e302558600402afcc074ee25b81d454baa0f80c",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/fault-readback.json": {
+      "sha256": "15116542620b8d97143d4ac5a3fdb09f2d0e19ea318931553a53ca484fad9f6c",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/final-mixed-report.json": {
+      "sha256": "dd788b2eef6d72e803fd4a50fc04913602a7a1dff4ee1edf0de33f969b13984b",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/final-mixed-trace.json.gz": {
+      "sha256": "f922a68e9ad6efd3edd330c91bf7a009bba1bf4aeef97a88d6c9cf512c5352ed",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/hardware-step-control.json.gz": {
+      "sha256": "58f59215e3e5148a9ef0bf18cabd1ac4d694671bbb5bb94c0857f71015a3fc1d",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/hardware-step-result.json.gz": {
+      "sha256": "6a973b7824586d7b040cc6428e936c014f3174e17f45d0b5df0e5c96c148fa9d",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/hardware-step-summary.json": {
+      "sha256": "f6c928863d09155c719849c76cac1264844020de901a1eb06a164954987e7120",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/hardware-step.csv": {
+      "sha256": "850e8a50208f03c79b4f41e721a923556dca8c69152833a2e8652537c8d94af3",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/hardware-step.pdf": {
+      "sha256": "1966c06b215c54c1238ce22635beb8337e14a6a47414073d9a316ba3bdc0aafc",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/hardware-step.png": {
+      "sha256": "8e689c87668091d1714450c4e3f3169e4d8c0083157bbf498de0a9c7dea538fc",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/hardware-step.svg": {
+      "sha256": "e36e78af3c1c6e711494f8933fa57c8a1a25b382ec8acf00cc9484aeb48e7f4e",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/leader-fault-monitor.json.gz": {
+      "sha256": "c25109ea69f5f463eb087317f78035054e7a364662f8ce5cd049f054170d41ce",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/lift-repeat-report.json": {
+      "sha256": "ea5cdc6e4358931f9b638787b741e0194c26d49dbab06408a01d140f8ac19638",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/lift-repeat-trace.json.gz": {
+      "sha256": "a7b7d86a0e520071e749f25abbfb1992b6b95e2803758d6d2816e241d8142881",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/lift-repeat.png": {
+      "sha256": "fa79bc7414638c23b28a06cf7fd169dc22957721fa4c5d7570160a9d174cfc10",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/lift-report.json": {
+      "sha256": "2c6c925ab63900be590af861d72787dcc19cc99ef690cd10cf49967ef6b21ff9",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/lift-trace.json.gz": {
+      "sha256": "d4b1274dc1e4406d3f52b656ce1a0300eba73086b6aaed647760946089472f53",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/normal-acceptance.json": {
+      "sha256": "387ee123104b24e72abf80055079897632566fae79592bd9869ea9678af22bb9",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/preflight.json": {
+      "sha256": "ef6ef8bf85aaeb74d604c3f43c37e8c85b8d41ec3a628da5d83073489e980400",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/simulation-step-result.json.gz": {
+      "sha256": "d205d89dbc9ee1362803500efd8489caf319af2526e42098122cf35f5f511910",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/simulation-step-summary.json": {
+      "sha256": "cfaa1ad847721ff76ae1d3d474cdb26a88aa94c889c907584627f7f2e6aa2bc8",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/simulation-step.csv": {
+      "sha256": "fbeb53cd48df4e70db839268771e391d71b26bd00bef08e931b29de9669e7cae",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/simulation-step.pdf": {
+      "sha256": "7ce9462fee5a59d348a43ecca25cead15f4d16487a636866bffd8662bb956420",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/simulation-step.png": {
+      "sha256": "f06198dfe554c9f0dabef8b4f3acae70ccb8183fd8f5eacf85f13984a73c92e6",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/simulation-step.svg": {
+      "sha256": "c729dcdc924990fe70e3259c46403cc7b2694eacb5eda02a47e4cd547bd5b411",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-after-cable-report.json": {
+      "sha256": "b0a9e81ac581a1fa86b352bdc32f16f236febd3cfe0f03dc2556bada0f842446",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-after-cable-reversal.json": {
+      "sha256": "a6abed847e7a391ea3f553cf9bff0fec19780918aaee6771ae7274ad1ad3dd00",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-after-cable-trace.json.gz": {
+      "sha256": "6851654e0757881d89fb879944145902c3df2a317f6355e074fd1e40852051df",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-after-cable.png": {
+      "sha256": "5166e500960938a00457cae028cb582eec219e6519b919bfd2b2d1075cee7bc0",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-fault-readback.json": {
+      "sha256": "9bed5dac64812135b46dab376675b0b8ef3effbab8a6da27af93d3e743c1f948",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-final-confirmed-report.json": {
+      "sha256": "5e7f3bab19d469e2bed4877e043128910e842ab5a067b66b8f4d0e7345419bc2",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-final-confirmed-trace.json.gz": {
+      "sha256": "2d29c906c6ec670127e0eb623551d68273d1f4c4c4b78e475067fd53076f19eb",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-normal-report.json": {
+      "sha256": "2eb6d7d4e2abe251dee0ed463eaaf71408103efd43339e0138e22eebe666e959",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-normal-reversal.json": {
+      "sha256": "8a3d0f84afbd652abba922b0419bb38abb60e4fec39a33485870289390d6d9fd",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-normal-trace.json.gz": {
+      "sha256": "31fbdf68ad88c9ad5b73c1f709e5b2034397ae77435aada3f7e2913807bd7398",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-report.json": {
+      "sha256": "bd6922e4ac3e600027eab668272d48471eeda4cf6c391031cd5d782a7802f9e8",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-slow-repeat-report.json": {
+      "sha256": "8d17bcfe52c1ef61aeb19d9ec43d3f702078ab1e66e1866960327c368b4bf667",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-slow-repeat-reversal.json": {
+      "sha256": "afdb1b8644fb9728e80345648f66005a4fd6e4f00e7b8c029d99a38c8237c038",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-slow-repeat-trace.json.gz": {
+      "sha256": "8effe53d14b8088ef86fea93bcc655c06212e2038f4adc462a5deeed85add602",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-slow-report.json": {
+      "sha256": "633cf98b724450a22106b900e8ebd40d0af0009b96cdc9b832c23058483dff86",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-slow-reversal.json": {
+      "sha256": "1ec76a3f9724410cd48f94ce720bccc167b419d8fa753560645e7c6f5b0708a9",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-slow-trace.json.gz": {
+      "sha256": "9afc6115aa80ecaddaf3c7d3884569787b5cc19d6bafbf4687ecd0e1b32653dc",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-small-report.json": {
+      "sha256": "fd32f541e4549516dc33aaaed075ec5c6f742cecfd815f5e16d73ebf91fc61e8",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-small-reversal.json": {
+      "sha256": "2747bccd4a4f8998200a550ddac2d02a34596325ddb44f77a2eaafeaed6e2939",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-small-trace.json.gz": {
+      "sha256": "9a8e4979ac19b903a719b7f8a3253f5e091212d9c4c1b72e341e8711d470fbd8",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/trigger-trace.json.gz": {
+      "sha256": "6063c1f753817a1570ca9e7df8ecb142fe5428e84fecfa3a685f43d78c782a97",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/warning-online-proof.json": {
+      "sha256": "f285809772e2b721b3c3789da05fe2982324d7604fddfabfe0f5bf7f3bc59c97",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/warning-online-report.json": {
+      "sha256": "ecd335fee7b1f26f0646ab95911d2bced5ef6555dc69209d07e088807bb00734",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/warning-online-trace.json.gz": {
+      "sha256": "3902ccea80ad746c0dd10ccd5198f8719b0e8eb2a002fc62e634fe0c09cb6245",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-baseline-report.json": {
+      "sha256": "6e93d23c7c64be6ac545cea8f37db2c30f096e3502168ac0d689b9941c65c63f",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-baseline-trace.json.gz": {
+      "sha256": "f98b303a2bb1563b95bd306324ff7dc66f536e94a379f3868ba4659fb30daa67",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-candidate-report.json": {
+      "sha256": "994e2e5b8b4ceaf95d75b11b85e8ee0fbfdea521e7bb57fb0ccf66fa15595cce",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-candidate-trace.json.gz": {
+      "sha256": "2f1f418d56caf150657743cf350ae9408dce68c5e73bf77b65e5b21713a241cb",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-normal-report.json": {
+      "sha256": "a5144fb0a448ec538062584c4948001f19e76a4acde259424e44ec0896720a56",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-normal-reversal.json": {
+      "sha256": "398a53e3450a33b35e42cd5174e93e34d6e2e54004880f8263795195ab322ca9",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-normal-trace.json.gz": {
+      "sha256": "5aaa42ac0ab9a8d29840d7b86f15746a506e1a427311aa7a8e404b76fd28e60d",
+      "matches": true
+    },
+    "docs/measurements/follow-retune-2026-10-13/wrist-normal.png": {
+      "sha256": "eb6a47b87e5a4fe6ee5964b087d3e65c2cc0d274d0d190607495148514fefabb",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/README.md": {
+      "sha256": "a8c946038f80870836b8f53bed6d8cf1c117f5579798e2e0a6256a877220a9c5",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/baseline-control.json": {
+      "sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/control.json": {
+      "sha256": "691d7764ddd87a2e6e62a10719e521076ba42e2173c4b7a64332133ea4770439",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/first-hardware-result.json.gz": {
+      "sha256": "50d22eefb7072a9574318298636c24e4793ca5b11805fac45414d9dc224f84ec",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/first-hardware-summary.json": {
+      "sha256": "dffb983c77fba2eec7fd7d82755cfcd243a49e99ff5c64ef734eea61196c3b45",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/first-smoothing-control.json": {
+      "sha256": "8e5feb61ad368cc369e53522507b37081690a222215b3d5a61f9db055ae325ab",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/hardware-control.json.gz": {
+      "sha256": "13818e3e11110a07570a31239f2d845ab134d34feac046a1ce615d7c4325d845",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/hardware-response.csv": {
+      "sha256": "bbfc308cca6687de45f70cbc2d8e643936a2e2f6face5ce1402d0fc36ec52983",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/hardware-response.pdf": {
+      "sha256": "48e57827f1abe9dc19ad9717ec8b508f5459a79c16338f337636b072e479a365",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/hardware-response.png": {
+      "sha256": "3642e7d3d28f33f0eeefd7dfdc071ac3413a1800c5ae1faf2463b019af487d41",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/hardware-response.svg": {
+      "sha256": "00e9714b5c95b690cef5a87c276344d27a4839ad0a2fba13e882017d1ba26b0c",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/hardware-result.json.gz": {
+      "sha256": "b7d5ea8fd847ab30a5cac7f6591787c6f61d468b7e4deecaea10307b63ca0936",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/hardware-summary.json": {
+      "sha256": "4c753d7534cd8bcfd506599460f5c70d9f3b6bd429ed26173efada71f674288d",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/live-interrupted.json.gz": {
+      "sha256": "72689d68dc412dd267d77076791f1a7585d3b4208d898d9626663ab8786a9a19",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/preflight.json": {
+      "sha256": "9026d5d8e9b3e881ad1c38177968a391b96b62af5ec066e9e0628dc95526d986",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/replay-command-comparison.json": {
+      "sha256": "225d538ded95cac62bc6fbefaf57300629bc49fa934c5576403ad6bb8d265352",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/simulation-response.csv": {
+      "sha256": "148e4f5c232cb97a768d01dedbbf5c4c7ff8d06e012e455d57379c6af4638aea",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/simulation-response.pdf": {
+      "sha256": "925d09b65c9e04bff16640cc526e0958343eb0f783c463289f9e48b49f4c3568",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/simulation-response.png": {
+      "sha256": "23c4907492951323d259b25e46d43ccb394e5d252ce756973580b064f8f2a223",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/simulation-response.svg": {
+      "sha256": "7e0c55aff1a38b28a82796dedb243a1943fb2d92676708cf8416477a1dafdf24",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/simulation-result.json.gz": {
+      "sha256": "3f3875e9779c95692e645fcc8fe2f6f59627fba397e2411e5211fe8add88b03e",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/simulation-summary.json": {
+      "sha256": "19bee30ba60327c186c959f27bf95a20d8493fc586411c4affceeca9e51799c5",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/smooth-step-acceptance.json": {
+      "sha256": "c2c2ef032536888ba1ddaa69a05df2d8b5c918b2dcafa654d24ed93c9e1d9287",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/step-comparison.pdf": {
+      "sha256": "4000219185e091cc05e0e3689ecd54e47d4d36a699cacbcb8fe47bb049dd487b",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/step-comparison.png": {
+      "sha256": "756be24b7333e141b8257fbef3e354004a401ee5a07f25253032cbab39b3638c",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/step-comparison.svg": {
+      "sha256": "9d24d766eadd628968d87fdb04e63b6b431bd1ce1bd60e02d8b6b5fe1a136c82",
+      "matches": true
+    },
+    "docs/measurements/follow-smoothing-2026-10-13/surrogate-metrics.json": {
+      "sha256": "ae8133c445a9f69fa6d1f28a18c4e664fdfd83dba9398388dffbdb2b787e35c4",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/arm1-configuration-restoration.json": {
+      "sha256": "b0d15676a447fc168963f111bb8284238d94a96a9673c5b621230d0e99a19632",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/automatic-initialization.json": {
+      "sha256": "b950de1acd164adec24b43e8a4d361c267a62b1b6fd176858a0b1adbc331af5e",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/checksums.json": {
+      "sha256": "2f9bcf984c2959e363f8d90203d5e89a3131aa0e51c5bde76d8d54806eece45b",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/dual-arm-readonly-verification.json": {
+      "sha256": "7649c754900620b5260df1447f2213784f2b5513c77ad9fe1ef419f59d569e28",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-control.json.gz": {
+      "sha256": "04825ce90fed3b936a4a256d642a1d386ef84013478d3d4a80185ed2e6574399",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.csv": {
+      "sha256": "2d648f63ca5ce2e2ef0a55fc62a471c8e7af1ae3dc1449c4d4bebbca3e960bbd",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.pdf": {
+      "sha256": "44c248b1be3261dff31b14c01c2e3259e94de9f79f404ad86553a6df37945953",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.png": {
+      "sha256": "dabaa5a554463956752a0df2aa5d9c12c2114baf79ca7e0b6a528efc6795dbe5",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-response.svg": {
+      "sha256": "2dc552438209ae19bcc754fb33e1e8bc238096268b2709c6218de477498d582e",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-result.json.gz": {
+      "sha256": "0fd0ead9ccaf67ddd3b7fa1f29d08709f15463ed1545c04261c0630a779c2b73",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/hardware-summary.json": {
+      "sha256": "9ede6acf92ae52b37406c2a2f1a1eabf7ba0ee20a03eb8ee7393e0d2c272e6ee",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/initial-pid-summary.json": {
+      "sha256": "ae4d45e5e54957e40a19aac69d228203975e78a7fab47899d40a48bc22f6622c",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.csv": {
+      "sha256": "df48f2402d6ae8e660ee7db00cfdaf8ece5dd7d8a317b33e15019fab0cf34146",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.pdf": {
+      "sha256": "255883eecf7ea176ac5405478042ee7fb2af2795f590e00202a8aae4d76c3204",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.png": {
+      "sha256": "c6c50f10ff07562c865ecf401cf11b4717260872195c73a4c43bdaff931d976b",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-response.svg": {
+      "sha256": "f01de8b202872201a4e1689dec9404b5074c7218d21f9a38a392df8c5efe03b0",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-result.json.gz": {
+      "sha256": "4965719ab608c4479da175b67145bc39df636638c079299a13903a6aba44745f",
+      "matches": true
+    },
+    "docs/measurements/pid-2026-10-12/simulation-summary.json": {
+      "sha256": "6e9067568420c9ee0db68cfd0693bce79e3bf4d7c02f1d5163bc7a640328fc98",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/README.md": {
+      "sha256": "014bb98232828bcfbeb8b60af31ceb6292852c747695a15a935519b1e50669bf",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/control.json": {
+      "sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/deployment-and-postflight.json": {
+      "sha256": "8e2db8296c7fc6912256e60791fcbc88a88123e1f156001ede30c301c7fcbcf8",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/dynamic-report.json": {
+      "sha256": "1832f60824d72a0cce48d1c2d40583fe190faa17921007169c0851329c21c844",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/dynamic-response.png": {
+      "sha256": "9e868fb5e37b1fc94d99370a15979c42c0bf660ae94c4986317bc2e67864dac6",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/dynamic-trace.json.gz": {
+      "sha256": "588c52555c37aff95e384455d5b2218dca806d9e83accf14dd787df8fbe90040",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/follow.json": {
+      "sha256": "8ea4d127e75f039360cadc615d41d71bb0705f03ae658f7267fe287c4b916d81",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.csv": {
+      "sha256": "80da2bd55d987bf13f0595a567171a960d171695d0696f4a00a7d67f2f341e66",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.pdf": {
+      "sha256": "ea269f29b559da4e6cd20c60b71dc2a02d9a2892d384dbfd053511e45bae1b24",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.png": {
+      "sha256": "48a432768a7894a6911c402cb203c85865dca31a49ebc70083f7db406dfaba3a",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-response.svg": {
+      "sha256": "142eadb8a9745d5476eee79f0d158c0be01a3d90856f8a0539cd76b65a900b57",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-step-control.json.gz": {
+      "sha256": "b2d586ac47bebc06a522a69a7e3110c6d9be715d8a59f553c9b19f911fcb83f0",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-step-result.json.gz": {
+      "sha256": "660e7a29eb5e3b3b227ff107df0282e23b26fec75cc348ff4307cdecfd2f1cc1",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/hardware-step-summary.json": {
+      "sha256": "45753e84e67c1ec6962fa0e17cc19f17e54921c13375ebfd380f962f51bbc5aa",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/independence-trace.json.gz": {
+      "sha256": "03f8ea4e5342837f17bfade574dcd338cca8a50f0f5c2438a508cf7d54912110",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/independence.json": {
+      "sha256": "c470120e9641403a86911268780dff146ad5648ab03b69d62abd4f7fa1b90c45",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/intermediate-step-result.json.gz": {
+      "sha256": "04786fca85491c0ae9b520f12ed6a505ec6ef8f6d7c1029700a219dc30f03ed4",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/local-tests.txt": {
+      "sha256": "1aea1905cd526d1a7c97380435a4a2bca24ccc6a24afae8fd2b3782a1bbff538",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/remote-tests.txt": {
+      "sha256": "bba59ece01c48812838c33194e1dcff756f4de99466f67e1cb00b02243819680",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/reversal-report.json": {
+      "sha256": "215ffdde80c9b26bd0509f767b68b6ed2d49b85ed97abe2e00932abf0bb90d8d",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/ruff.txt": {
+      "sha256": "3d7287d499c703fda3b378dece3de5563d7d3ae162ee047b80e995cb66e84308",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.csv": {
+      "sha256": "be4f53b7cbb6069400b591af0e73985294ff684455ec0d69c5fd33263e4b12d5",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.pdf": {
+      "sha256": "bfcfccd729a6751ed65c6d58228412f7bccaf2f6291c465a95cb303e368d9f27",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.png": {
+      "sha256": "7c7477d730a9fdbebb4cec87c2f454a3cb641b476a85d0cacdee5364281d7860",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-response.svg": {
+      "sha256": "2683d6cf3a19c8c6e0ab535a5b99e20d7676cc301bb719ca024226ae90c0784c",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-step-result.json.gz": {
+      "sha256": "73c76a09eea2a9a9a2fe46c86d18f777eade0fa9601ffbbd5c295250af6fdb88",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/simulation-step-summary.json": {
+      "sha256": "edc8e6e4eb98c7dc90b5af2e99a45074b32fef2a9f5b47c34bd2e7e3749dfede",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/step-anchor-preparation.json.gz": {
+      "sha256": "28dfa46e3dfd05845ff2b8fc84542536f0b5cb62c6057e60a2ca91ea45d17f6e",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/step-boundary-rejection.json.gz": {
+      "sha256": "58d9107840b23372118dabf7de98ff90f0c9744bed5ae1753e800b490dc5988c",
+      "matches": true
+    },
+    "docs/measurements/remote-follow-2026-10-12/step-collision-rejection.json.gz": {
+      "sha256": "6bdac96b2dc1db883d13571259869042ca97ede3bcce305f38ca83ea0e900e45",
+      "matches": true
+    },
+    "docs/pick-t.md": {
+      "sha256": "63904e46906bdfa9e3e4f77244243d6c619b92e6df2844f1152a25cdd7fb5056",
+      "matches": true
+    },
+    "docs/precision-calibration.md": {
+      "sha256": "cfb4652159dcf5918a8a4fcb2cdb5cc1b14e33b71b2a9e5fa962c0f518c368ee",
+      "matches": true
+    },
+    "docs/push-t-remote.md": {
+      "sha256": "5b78a1a84959b0425f07328b9b8e9473e9cc51f5f4027f79004e45a73fc09a93",
+      "matches": true
+    },
+    "docs/push-t.md": {
+      "sha256": "437f27d2f52a8b06a33fe1d5b229a84ad92486f3e0c3fb662f58af428ef3b772",
+      "matches": true
+    },
+    "docs/real-control.md": {
+      "sha256": "87d59d8116565390d2f13db8b0989040241ddda92a3733bbcb64d6eced122f1e",
+      "matches": true
+    },
+    "docs/realtime.md": {
+      "sha256": "4443f5321fd4e281ce3b79f7a5af62a37bc4b4255d28e318db222f490808f11f",
+      "matches": true
+    },
+    "docs/setup.md": {
+      "sha256": "71e746fc11df22da7b8f0bb214b5390d3d2403b30744f80cc0e567036735662c",
+      "matches": true
+    },
+    "docs/system.md": {
+      "sha256": "5a4315d033ba6b7306bd816b3348fe35330de6a526cb2048e20a5efa27e5ef88",
+      "matches": true
+    },
+    "docs/tabletop.md": {
+      "sha256": "4e99acc48bc8f27b2f68c295b83eddc9664be41dd69c762ce7ee5ba92cbc40ed",
+      "matches": true
+    },
+    "docs/two-arm-calibration.md": {
+      "sha256": "4633c8917f261a60be3254d74185dfaa9fa5215521fa76cbb9118afa17429330",
+      "matches": true
+    },
+    "docs/verification.md": {
+      "sha256": "6197e23694759c547c380b3377bd8cf291e7608bae7e37ef063375a8e730202d",
+      "matches": true
+    },
+    "scripts/activate.sh": {
+      "sha256": "369eb4407916e57ba2e639714ff30e150211f14e4f61729f846f0723b4c3371e",
+      "matches": true
+    },
+    "scripts/bootstrap.sh": {
+      "sha256": "6e872467fd4b73268a0b1ea42a60963d42111f69fb6b0695310649ac491e12b7",
+      "matches": true
+    },
+    "scripts/camera_x11.py": {
+      "sha256": "1c8819262b8e9a458d1a9c3f09673ab82bc79a9269888c39848cf1c3342a3a07",
+      "matches": true
+    },
+    "scripts/install_uv.py": {
+      "sha256": "ad8921a5fd20c3d9332333d152f37a9fe30cdbcf95f847b83edfc3915c75761c",
+      "matches": true
+    },
+    "scripts/lerobot-arm": {
+      "sha256": "42bc9b15c4c39fb128da2b6c9ff838ca60ab459cf9f18e5ba526ccd0278db6e8",
+      "matches": true
+    },
+    "scripts/test_hardware.sh": {
+      "sha256": "f80229a34ec4aaecda35eac03fa00eb6e26f9ea90b9787229f499fd2a93f6db8",
+      "matches": true
+    },
+    "scripts/uv": {
+      "sha256": "25d32c3904e163d0d80ba0069a6b69cf4e7bc03c97b3cf7fb42f7fb042d3e10c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/__init__.py": {
+      "sha256": "c8188af18d26b653f6658cb9ee02246e13ebd571e6e754e72118d42e511d9dc8",
+      "matches": true
+    },
+    "src/lerobot_arm_control/__main__.py": {
+      "sha256": "273813d76d97b4bea65aa6e3bf7e73a74bfa0e9cc0f69c1c2c1b6b867ac52355",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/__init__.py": {
+      "sha256": "0ae12307377d8dad02d1ad4f412f8aec83f450f8db36e799d6fca4538b1dbe0a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/angle_calibration.py": {
+      "sha256": "4b6311649dc312c27061734430ed2e692dcff075949f30df96dee97fe1e13dc1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/height_records.py": {
+      "sha256": "897c16eaa867492a576328c06d62cb750dbc49ac23d61337ff257e2a5d6bdf18",
+      "matches": true
+    },
+    "src/lerobot_arm_control/calibration/height_sampling.py": {
+      "sha256": "56b32c73b1a8b94b66409cdb42ab97ea0cfeaba8128183371ba2a6c28e66b5ce",
+      "matches": true
+    },
+    "src/lerobot_arm_control/cli.py": {
+      "sha256": "e8568c724e1da4afe10ee6ba2341208d3e3be2014dce82a25ab6a891fd146ad1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/__init__.py": {
+      "sha256": "f2c420efb566c18c3d3b84598e90d0570b03c363a93cbc9334548bfdf8b4534e",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/control_defaults.py": {
+      "sha256": "a5b650255afa3847832543d30dbd567e6ba90f37301262c021c320a9ca4a79ff",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/follow.py": {
+      "sha256": "9662a9bf58f62aec0fd175bc1e33516459281e6391efd7a5c169a627b6825ac1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/joint_path.py": {
+      "sha256": "b410397c58c17bddeab7dcdc1fc7ea018f410d6e92cb62bad89ce4213e6c69a0",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/manual_control.py": {
+      "sha256": "a9801730161cc19d35829e26fd3b386557126f73ddc109c5a0fd84258a59083d",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/motion.py": {
+      "sha256": "db771d0a6dad0e32a91d0191dd769c6e4ad1287eedb5cbc01318026cd1aef4fb",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/parking.py": {
+      "sha256": "560753d31002ee0df32af67c1e31221e4a2a105ef24adf9a94bf329d13ebb178",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/position_feedback.py": {
+      "sha256": "842dbb51ae248692b97116f812638734d0c58228ade02e568d21508f35f43c07",
+      "matches": true
+    },
+    "src/lerobot_arm_control/control/servo_feedback.py": {
+      "sha256": "9948f6ee24cba66a78cdb4cc75d32993a2dd7881a69a31b55db1ed35f156ec3a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/__init__.py": {
+      "sha256": "408b833054668044838d5c9772be62da7f88a7be503d11bdd1198db6a3deb82b",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/api.py": {
+      "sha256": "07788fe8bf4e2ec2b9ea612c8ae92a36eb3f9002bfd2a0eabc7f6b384e673483",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/config.py": {
+      "sha256": "66478bf8d22d2f1d2fce852c3553cba66eda4e5ed1c6aeaa98843eac94ba9a70",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/files.py": {
+      "sha256": "b4bee90ac28ce95fa4357b244f0a8ed751d769e776e376464084fa0a4c274c1c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/paths.py": {
+      "sha256": "12e79a8a1ced3452db3fb6cd45342115e4abf271c7f6a3af5a1360e02d6bf0f5",
+      "matches": true
+    },
+    "src/lerobot_arm_control/core/processes.py": {
+      "sha256": "a4ea3bec97e6ad1b479ae1e8fff91c7d4f580718e9b9349aef65400afd282c15",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/__init__.py": {
+      "sha256": "6cdd83f8e0c2211a1de2cef16f732b9685cb05449b706c600f4aa6197724f5a8",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/cli.py": {
+      "sha256": "50883d4ae82606bcf655c61fb710ecf55246dfb982694b56c425a5ec2336a672",
+      "matches": true
+    },
+    "src/lerobot_arm_control/diagnostics/response_metrics.py": {
+      "sha256": "0770c0e611be8599ce279c9b51ef5923fe823d2e80b718f9e6465ad1512f5cea",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/__init__.py": {
+      "sha256": "e5aea2a4bcc1d0651e3f1f19454bd713119a21872cbf5760456b5bb3406ddbd5",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_geometry.py": {
+      "sha256": "6a7e71197341c16df5602a5f0c3f9ce46d153ee8bc2045e3108e8e4e5dd21cb2",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_perception.py": {
+      "sha256": "a69126422951c93a37db48b913961a02111ce8c9dcbd4732cec829c7de8e9601",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_registration.py": {
+      "sha256": "66a3edebcc80fb89a0a79e6208a69793ba6c9116e390e1363f19a4a32f0731a9",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tabletop_tracking.py": {
+      "sha256": "fc9f3bdd6ad10de52c584aa934c6c4d896d5abdb06441e3c311f91d8ead0b25a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/perception/tool_marker.py": {
+      "sha256": "4874ea55fd534e193758d4f16b763ae78c747721095c711c7de70161ac2f05b1",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/__init__.py": {
+      "sha256": "8ee42b1d010549df9b7f3f819bd951d6abcea0d1cd72a8fc80666144a78afa01",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/__init__.py": {
+      "sha256": "a04131dfd697d8be3094bb2b52fd2953c616f4851bafeac11d745afa97a0b4a2",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/driver.py": {
+      "sha256": "0581c63d37437ae342d2150c97efbc84d4b3d17a82e7fe52e3b04cdadc9dfc73",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/joints.py": {
+      "sha256": "60611286cfaa5ec025ed297fc6202939a04f0258c424d3061b486c456db648c3",
+      "matches": true
+    },
+    "src/lerobot_arm_control/robot/so101/model_metadata.py": {
+      "sha256": "1ccded00f2fdd4e25296e7bb9ac9d4bd008202e54084bd6e8525f0dc5d15ea8a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/__init__.py": {
+      "sha256": "9f9d6ee762e3924946453ea4852d31966915c9cd60409e25a672eadac27aa361",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/follow_observer.py": {
+      "sha256": "0d9424eb9f5bffe4b7cdf964501a738996f9dee433c2c107ac6c661307b30dcc",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/follow_server.py": {
+      "sha256": "df651f51e7c806ab268f6fd0b223e6e147855c5696f6b0416d76c232cae67a88",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/realtime_server.py": {
+      "sha256": "c47788b80f5913ef36f1f8632a90b1a1db7c6a6b50845b41a0feea75b65d60c9",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/tabletop_robot.py": {
+      "sha256": "51429ffcab21417150901146533c966f7bc1103e27deb35f87d6041925ad0e3c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/runtime/tabletop_server.py": {
+      "sha256": "bfdd113a0da382e9e0bab98423cfe4aa3f31d2d8aa3ea244fd7233a0e12b7045",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/__init__.py": {
+      "sha256": "e4b44b992082c4d2e77fc3e69967c1960fb15f01c5d6e397219b5eeb9f945bdb",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/circle/__init__.py": {
+      "sha256": "80d5bab03af940afa4c92528aa3d3d7d06f08736cd565371008af5fc3e0e956a",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/circle/circle_trajectory.py": {
+      "sha256": "8fc35bd0d0ee327d4b5529a4eec9fb4791f36aac8c07af05144780c01f6521de",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/__init__.py": {
+      "sha256": "68abda8ad6bbe6e203023a10be447b59002782ec56e950d57a2ad931ef031821",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/push_t_motor.py": {
+      "sha256": "42fc6071595ba05aa15f63ba467457ca96152c02cac8cabfad2d2e63787e26bc",
+      "matches": true
+    },
+    "src/lerobot_arm_control/tasks/push_t/push_t_receiver.py": {
+      "sha256": "eea1e6425efe74c71071cd1e6bf671527725aa28b60e014b907fdd2e5dd0f54c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/__init__.py": {
+      "sha256": "5c1e6c1ab6aa3be3313a6c35c576f25fd65ce0e41536ea8624da3a8d1c1d347d",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/follow_observer.py": {
+      "sha256": "8aa31d840ad6f4c891a83289b1be38030267d68ff8b31ceefe0ee2c5b8d7004c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/latest_output.py": {
+      "sha256": "77a128dc63a8b6a01220325d8590020b9a6dea4cf1c1eac3563f7d42f6052a82",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/pick_t_protocol.py": {
+      "sha256": "53e01774ab48dd708d7f68b22eb9f6abbd479ab0050215dec05dd61f34314a94",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/realtime.py": {
+      "sha256": "549b206392cb87bfd3994aeeec85aeaf30bd2ee73c91185c72fbea66453a032c",
+      "matches": true
+    },
+    "src/lerobot_arm_control/transport/tabletop_stream.py": {
+      "sha256": "ec9b2118d152ce1c0b409df251db4825ef1c2a1524205d73f79b0f9e53796741",
+      "matches": true
+    },
+    "src/lerobot_arm_control/visualization/__init__.py": {
+      "sha256": "890556705b90cf3d57e5990ed9aabefbcdf3de6a15bbf2b0ccb04dfd69226a46",
+      "matches": true
+    },
+    "src/lerobot_arm_control/visualization/ui.py": {
+      "sha256": "fb7e42febcceb2a916928041d75c509e2769d0caf17ad8dd4549d064898a3a97",
+      "matches": true
+    },
+    "tests/test_angle_calibration.py": {
+      "sha256": "45e740aa84aa816079c8405e2ad69c8ab1bac103fc1920779886cca29929b14f",
+      "matches": true
+    },
+    "tests/test_camera_runtime_calibration.py": {
+      "sha256": "906d9490e1c1b40280da48c951c4809b131b70251e50a8a753f45f130ded5cf0",
+      "matches": true
+    },
+    "tests/test_circle_playback.py": {
+      "sha256": "870ea5bdb58f9a866f6ff759838ec5a2959db663b0359f3d1152f39131be3190",
+      "matches": true
+    },
+    "tests/test_control_timing.py": {
+      "sha256": "15ab1418400b2814466e929a712d1d443d5b9c5a3024b1a6b35e223304dbac4a",
+      "matches": true
+    },
+    "tests/test_follow.py": {
+      "sha256": "ec9f8b70b33b2f3ee7cb942bc8098fe3caee7566c2d8a6a467150afff82c6cf4",
+      "matches": true
+    },
+    "tests/test_follow_fault_diagnostics.py": {
+      "sha256": "d5e0422f8c409acbdf705368ce0be54884102d481a7cdb75d119007eff3ec88d",
+      "matches": true
+    },
+    "tests/test_follow_observer.py": {
+      "sha256": "f99d5ac3a897b48554caed584d811a1c34d3672d35f41bef9c1369d35922d4e3",
+      "matches": true
+    },
+    "tests/test_joint_path.py": {
+      "sha256": "f0125b3a7f8c90ce9326b91842e2f42f42638418a351da3ee5d50df700f00dc9",
+      "matches": true
+    },
+    "tests/test_latest_output.py": {
+      "sha256": "b69c95b5ce5f09cd8646aa33a8ed9801a417daadade9cbc5d9f838852cd77a5a",
+      "matches": true
+    },
+    "tests/test_manual_control.py": {
+      "sha256": "0e620ff2c8e69404b0ce68c7d21721e8dc854c8920c52f2ed537443350a3f433",
+      "matches": true
+    },
+    "tests/test_parking.py": {
+      "sha256": "f513e059cc35d3f02fb66a7f1feac77836361fbdeffa083c085978bf6bf51b72",
+      "matches": true
+    },
+    "tests/test_pick_t_protocol.py": {
+      "sha256": "54181abadfba35b25c5f8b5c7b500e52d336ac7dbdfdbca55cf32cd8bbef9339",
+      "matches": true
+    },
+    "tests/test_position_feedback.py": {
+      "sha256": "386a1632858146638bba8bd4aa655aceb95f582d6205fe47a7fe9435dc77e33d",
+      "matches": true
+    },
+    "tests/test_push_t_receiver.py": {
+      "sha256": "9d1320f9ce153f183a5b5043c59eb62628036f656b4115ffb6e90be8dc333856",
+      "matches": true
+    },
+    "tests/test_push_t_remote.py": {
+      "sha256": "46ee30e4423fdc4097b60b9d08e6b051aa13b4b7a3abd813a150e77ca66304d5",
+      "matches": true
+    },
+    "tests/test_response_metrics.py": {
+      "sha256": "f83fbc34b07ee52d3dc0d71ef49dc12a4f0e0a0d7d598ba437da91ec81adb8c5",
+      "matches": true
+    },
+    "tests/test_runtime_split.py": {
+      "sha256": "de6730b348ff45beb7d8cc05a016ff43a2f902a4dcd9b179fe34d5622326ff35",
+      "matches": true
+    },
+    "tests/test_safety.py": {
+      "sha256": "20dcdce4ab2ac9808a7dd7ae1de8b71809d2f9cb3e647e2b586c184323a487e7",
+      "matches": true
+    },
+    "tests/test_servo_feedback.py": {
+      "sha256": "54d5c1423edabb4dab16238f8f5cbc839952c6d804b3951360f57a95e82f24c2",
+      "matches": true
+    },
+    "tests/test_tabletop_perception.py": {
+      "sha256": "ff661e6051964c0743f2bc1ec26be14f2b666fe9d97e56e617461acf90a76a8d",
+      "matches": true
+    },
+    "tests/test_tabletop_reference.py": {
+      "sha256": "117cbaf9f2459b705570fd7b3a3e40e158aa4c9bd5667c9a54e68239e38cdb1c",
+      "matches": true
+    },
+    "tests/test_tabletop_registration.py": {
+      "sha256": "9f1a32a82810a53085fce1ff2d76106b609c4df1a3456439a08a0e4bb638c929",
+      "matches": true
+    },
+    "tests/test_tabletop_robot.py": {
+      "sha256": "60bc2900db0c952e97de6e4a974b944b8ea92ec4584f428c3403315b36a5e1cb",
+      "matches": true
+    },
+    "tests/test_tabletop_tracking.py": {
+      "sha256": "8b50ec725923fb5e4479abb47af1edda24cba4924fcd1d93f784aa5b6dbb4d56",
+      "matches": true
+    },
+    "tests/test_tool_marker.py": {
+      "sha256": "fa532e4588f0e35dab84e8eaa130bc3f2adfcf16b1dec0d42e94a17800313a8e",
+      "matches": true
+    }
+  },
+  "remote_tests": "321 passed in 2.49s",
+  "files_match": true,
+  "local_tests": "580 passed, 1 skipped in 81.95s (0:01:21)",
+  "hardware_steps_passed": 12,
+  "simulation_steps_passed": 12,
+  "dynamic_follow_accepted": false,
+  "scope": "Deployment consistency and instantaneous postflight; intermittent leader motor-6 voltage alarm remains unresolved",
+  "delivery_passed": true
+}

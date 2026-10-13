@@ -1,6 +1,13 @@
 # Control performance and verification
 
-## Current wrist retuning and warning behavior (2026-10-13)
+## Current smoothness-first controller (2026-10-13)
+
+The [current report](measurements/follow-smoothing-2026-10-13/README.md) separates
+recorded-input command replay, simulated responses and actual motor responses.
+The user selected reduced overshoot/jitter over the former latency target.
+All demos share the reference shaper and motion-weighted PI-D; predictive lead is off.
+
+## Previous wrist retuning and warning behavior (2026-10-13)
 
 See the [latest report](measurements/follow-retune-2026-10-13/README.md) for the
 shared wrist-roll PID/feedforward update, normal-speed/overspeed classification,

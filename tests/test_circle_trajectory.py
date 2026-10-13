@@ -46,13 +46,13 @@ def test_backends_share_timing_but_simulation_instance_cannot_enable_hardware():
     with pytest.raises(ValueError, match="cannot control hardware"):
         simulation.start_hardware(None, None)
     hardware = Circle()
-    assert hardware.period == 4
+    assert hardware.period == 16
     assert hardware.entry_speed == 0.8
     assert hardware.ramp_seconds == 1
     assert hardware.status()["profile_sha256"] == simulation.status()["profile_sha256"]
     simulation.start(simulation.points[0], 0)
     hardware.start(hardware.points[0], 0)
-    assert simulation.period == 4
+    assert simulation.period == 16
     assert simulation.entry_seconds == 0.35
     assert simulation.ramp_seconds == 1
     for now in np.linspace(0, 15, 1501):
@@ -156,7 +156,10 @@ def test_hardware_circle_does_not_abort_or_wait_on_encoder_lag():
     assert control.last_fault is None
     assert circle.status(now[0])["tracking_error_stop_rad"] is None
     assert control.targets["elbow_flex"] == circle.sample(now[0])[2]
-    assert 1000 <= control.sent["elbow_flex"] < control.raw("elbow_flex", circle.sample(now[0])[2])
+    # A long scheduler gap must not skip the reference shaper and jump to target.
+    assert control.raw("elbow_flex", circle.sample(now[0])[2]) < control.sent["elbow_flex"]
+    assert control.sent["elbow_flex"] < bus.registers["elbow_flex"]["Present_Position"]
+    assert 1000 <= control.sent["elbow_flex"] <= 3000
 
 
 @pytest.mark.parametrize("cause", ["fault", "watchdog"])
@@ -233,7 +236,7 @@ def test_valid_hardware_entry_and_laps_follow_without_local_angle_commands(laps)
             peak_average_speed = max(peak_average_speed, float(np.max(np.abs(
                 np.asarray(reference_history[-1]) - np.asarray(reference_history[-11]))) / 0.1))
     assert circle.phase == ("running" if laps is None else "completed")
-    assert 0.12 < peak_average_speed <= speed + 0.0015 / 0.1
+    assert 0.12 * 4 / circle.period < peak_average_speed <= speed + 0.0015 / 0.1
     control.stop()
     assert not circle.active
     assert all(bus.sync_read("Torque_Enable").values())

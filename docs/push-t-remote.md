@@ -73,8 +73,8 @@ Results are atomically saved remotely as `data/calibration/follower_table_base.j
 Restart restores it, even if the base marker is subsequently hidden.
 The cache validates marker mount geometry, table reference, and CAD signature; changed signatures require registration again.
 Before replacing the follower base, archive its base-bound height correction, candidate and samples,
-then collect and validate new height measurements after registration. The previous files from
-2026-10-07 are preserved under `.cleanup/20261007-two-arm-registration/calibration/`.
+then collect and validate new height measurements after registration. Superseded
+base-bound files are retired by the [cleanup](maintenance/README.md).
 After moving the base or primary anchor, archive/recollect with:
 
 ```sh
@@ -109,15 +109,15 @@ Stopping/disconnection retains loaded-joint support and restores prior RAM accel
 
 ## Shared circle controller
 
-Physical Push-T reuses circle ManualControl and `configs/control.json`: RAM acceleration 40,
-velocity 600 ticks/s, 80 ms first-five-joint feedback filtering, per-joint PI,
-velocity feedforward, and continuous friction feedforward. Jaw filtering remains 120 ms.
-Native I/D, EEPROM protections, and measured angle calibration remain unchanged.
-The current V22 response profile uses locked session P coefficients 24 / 24 / 32 / 24 / 24
-for the first five joints and restores previous P on close/release. Two supervised
-free-motion trials passed response comparisons; physical contact behavior and
-1 mm Cartesian validation remain pending. See [Control performance](control-performance.md).
-Compensated push commands are additionally constrained to encoder/CAD range intersections.
+Physical Push-T uses the shared ManualControl and `configs/control.json`: 60 Hz,
+RAM acceleration 254, velocity 3000 ticks/s, reference shaping and bounded PI-D.
+Predictive velocity lead is disabled. Native P/I/D, EEPROM protections and measured
+angle calibration remain unchanged. There are no task-specific PID/native-gain
+profiles. See [the controller](lerobot-control.md) and
+[current response evidence](control-performance.md). Physical contact behavior
+and independent 1 mm Cartesian validation remain pending.
+Compensated push commands are constrained to encoder/CAD range intersections and
+the shared device-bound command envelopes.
 
 The loop shares two packed RAM reads, a 60 Hz grid, and skipped stale slots instead of queued catch-up.
 Automatic cyclic garbage collection is disabled during control and restored after hold/controller closure,
@@ -131,10 +131,10 @@ Session control_config/control_config_sha256 record parameter provenance.
 Each motor sample's control records reference targets, compensation, actual sent targets, and RAM stream settings.
 Changes do not hot-reload. Exit and restart hardware mode, then press P; physical contact effects still need hardware validation.
 
-At the recorded synchronization stage, 98 related local and 122 related remote tests passed:
-V14 consistency, RAM acknowledgement/restoration, compensated CAD limits, 60 Hz scheduling,
-critical-register reads, fault stops, and read-only startup. Shared code/configuration SHA256 values matched.
-Tests used simulated hardware and offline MuJoCo, with no real motor motion.
+Offline tests cover shared control consistency, RAM restoration, calibrated limits,
+60 Hz scheduling, fault holds and read-only startup. Latest cleanup/regression
+results are in [the maintenance record](maintenance/README.md). Offline passes
+are not physical contact validation.
 
 ## Active occlusion recovery
 

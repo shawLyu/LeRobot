@@ -1,27 +1,11 @@
 # Camera capture, preview and perception
 
-## Live check: 2026-10-11, Beijing time
-
-The host `lerobot` at `/home/xy/Research/lerobot` currently enumerates **one**
-USB Camera, exposing `/dev/video0` and `/dev/video1`. The configured capture
-path ending in `video-index0` resolves to `/dev/video0`. These two nodes belong
-to one camera. The previously used icspring camera is absent from the current
-device inventory; its commands below apply after it is reconnected.
-
-The existing remote `scripts/camera_x11.py` successfully captured a 640x480
-snapshot, with the backend reporting 30 fps, saved at
-`logs/camera-check-20261011.png` on the remote host. The reported fps is the
-backend setting, not a measured sustained stream rate. PipeWire had an open
-camera descriptor; the snapshot still succeeded without stopping it. This check
-did not test the X11 live window or the new tabletop worker.
-
-After that initial snapshot check, the remote runtime was updated to source
-version 0.2.0 on the same day. The unified `view tabletop --camera-only`
-entry completed a 10-second session with 16 received frames, confirming fixed
-focus 68 by hardware readback. Its hello message carried the current shared
-control-configuration hash. The base and tool markers were unavailable in this
-view; the session does not validate robot motion. Code and parameter deployment
-checks are recorded in [Verification](verification.md).
+Device selection and preview settings live in `configs/camera.toml`; perception
+and calibrated processing geometry live in `configs/tabletop.json`. Inspect fresh
+capture dimensions and camera controls when reconnecting hardware. Historical
+October 11 snapshot and installation instructions were removed by the
+[cleanup](maintenance/README.md); current deployment is described in
+[System operation](system.md).
 
 ## Choose an entry
 

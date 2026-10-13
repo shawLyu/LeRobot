@@ -44,9 +44,9 @@ that check does not establish completion of the pushing task.
 Focus remains locked at 68 with autofocus off, native capture is 1920x1080,
 processing is 640x360, and the selected October 8 camera calibration is preserved.
 Marker sizes remain 42 mm; heights remain 70 mm for follower and 69 mm for arm1.
-All task and follow control now uses `shared-joint-pid-v1` at 60 Hz. Follow target
-slew remains 0.6 rad/s. Original native P/I/D are preserved; RAM acceleration/velocity
-are temporarily 40/600 and restored on exit. Current controller and role/mapping
+All task and follow control now uses `shared-joint-pid-v1` at 60 Hz. Follow uses the shared reference shaper and motion-weighted PI-D. Native P/I/D
+are preserved; RAM acceleration/velocity are temporarily 254/3000 and restored
+on exit. See [the controller](lerobot-control.md) for current protection settings. Current controller and role/mapping
 parameters, with their hashes, are saved in the scene manifest and snapshot configs.
 
 The accepted table fit uses 51 training and 12 independent validation frames.
@@ -114,7 +114,8 @@ The current snapshot was refreshed after alignment with 39 observed camera frame
 both robot feedback streams were live and independently calibrated. The accepted
 white file has SHA-256 `87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963`.
 All six third-reference checks are below 2 degrees; the largest is 1.91 degrees.
-The previous snapshot is preserved under `.cleanup/scene-before-independent-arm1-*`.
+Superseded snapshots are retired by the [cleanup](maintenance/README.md);
+the current complete snapshot remains available.
 
 ## Independent mappings
 
@@ -129,7 +130,7 @@ The follow demo also has `simulation_shared_calibration: false`.
 White arm1 now has the official SO-101 acquisition handle/trigger geometry in
 both calibration and tabletop views. Black follower retains its gripper. Existing
 base and black joint calibration reference hashes are preserved. Model sources,
-independent mappings and the user-confirmed 0–118-degree trigger travel are saved
+independent mappings and the captured 39.08–140.54-degree trigger endpoints are saved
 with the scene. The leader joint and actuator limits use the same measured range.
 Run `./scripts/lerobot-arm demo follow` for remote-only physical following.
 An optional `./scripts/lerobot-arm view follow` reads both encoder poses and the

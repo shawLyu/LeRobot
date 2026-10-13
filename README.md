@@ -465,7 +465,7 @@ Push-T also requires valid tabletop/object observations and base registration.
 In Push-T, `P` starts or replans, `Space` stops progression and holds, and `Esc` ends the session.
 Closing a control window preserves supporting torque. Communication faults trigger hold; exiting does not mean every motor is released.
 See [Hardware control](docs/real-control.md), [Realtime operation](docs/realtime.md), and [Live Push-T](docs/push-t-remote.md).
-Previous V14 motion tests do not establish successful full Push-T operation on a new robot or scene.
+Recorded motor response tests do not establish successful physical Push-T operation on a new robot or scene.
 
 ### Camera-guided T pick and place
 
@@ -533,7 +533,7 @@ plans are rejected; joint ranges are never widened to accommodate a demo.
 | `data/push_t/measured/` | Included local offline demo/test snapshot |
 | `data/tabletop/static_map.json` | Persistent auxiliary marker registration; retain it |
 | `data/push_t/`, `data/tabletop/`, `logs/` | Generated runtime outputs, ignored by default |
-| `.cleanup/` | Historical recovery snapshots, unused at runtime |
+| `.cleanup/` | Deployment-generated recovery snapshots; retired archives are pruned |
 
 Do not delete the entire data directory: calibration, trajectories, and offline snapshots are inputs.
 Remove old per-frame sessions only after stopping their processes and saving required results elsewhere.
@@ -597,5 +597,6 @@ See [Code layout and shared control](docs/code-layout.md).
 | Height fit rejected | Collect varied poses and reliable height measurements; do not apply rejected candidates |
 | Invalid Reset pose | Check calibration identity/mapping; teach a new rest pose after correction |
 
-This README and operation guides describe current usage. `verification.md`, `control-performance.md`, and history documents
-preserve experiments and their results at the time; full per-frame data from historical sessions may already have been removed.
+This README and operation guides describe current usage. Versioned response
+measurements remain under `docs/measurements/`. Old captures, logs and instructions
+are retired according to the [cleanup record](docs/maintenance/README.md).

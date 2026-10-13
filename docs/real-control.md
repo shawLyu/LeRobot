@@ -1,7 +1,7 @@
 # SO101 hardware control
 
 Default settings come from [Shared configuration](code-layout.md): the current shared profile, 60 Hz synchronous targets,
-RAM acceleration 40, velocity 600 ticks/s, and bounded position compensation.
+RAM acceleration 254, velocity 3000 ticks/s, and bounded PI-D position compensation.
 Native P/I/D, protections, and measured calibration retain their existing values.
 The shared software PID is documented with its [control block diagram](lerobot-control.md).
 [Six-motor response measurements](control-performance.md) report joint-space performance;

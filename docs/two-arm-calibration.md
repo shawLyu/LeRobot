@@ -96,10 +96,9 @@ No motor targets were written during registration. See [white-arm alignment](cur
 At the time of this registration, `configs/control.json` (V14), the original follower encoder calibration, and the
 existing rest pose were preserved. The rest pose identity still matches the
 active raw angle mapping.
-The current shared response profile is V22; see [Control performance](control-performance.md).
+The current shared controller is `shared-joint-pid-v1`; see [Control performance](control-performance.md).
 See [Precision calibration](precision-calibration.md) for camera-only observation,
-the moving-marker interface, supervised gripper measurements and the remaining
-elbow zero/range discrepancy before whole-arm trajectories.
+the moving-marker interface and independent optical validation requirements.
 
 ## Recalibrate after changing the installation
 
@@ -126,9 +125,8 @@ height and CAD mount until a new physical measurement establishes a change.
 ## Height calibration dependency
 
 The previous height correction, candidate and samples were bound to the replaced
-follower base and are preserved on both hosts under
-`.cleanup/20261007-two-arm-registration/calibration/`, with original SHA-256
-values in `manifest.json`. They are no longer active. Raw encoder-to-angle
+follower base and are no longer active. Retired backup removal is recorded in
+the [cleanup](maintenance/README.md). Raw encoder-to-angle
 calibration remains active; collect and validate new fingertip height measurements
 before relying on corrected height for physical Push-T.
 See [Height calibration](height-calibration.md).

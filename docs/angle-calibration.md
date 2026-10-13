@@ -73,12 +73,14 @@ does not copy or overwrite follower mappings. The same B / 1–6 / R / C procedu
 The white leader window displays its acquisition handle and trigger. Joints 1–5
 retain 0/30/60° references; joint 6 uses measured 0/15/30° reference points.
 These points fit the encoder scale; they do not define maximum trigger travel.
-The current user-confirmed full range is 0–118° and is stored in `configs/follow.json`.
+The current user-defined minimum/maximum endpoints were captured at raw 1940/3002,
+corresponding to 39.08–140.54° under this independent mapping. They are stored in
+`configs/follow.json` and are distinct from the calibration reference points.
 The saved calibration file preserves the reference-point convention independently.
 Additional arms use this entry for read-only alignment; physical-control and gripper-test
 flags are rejected. After 6/6 valid mappings and transfer to the remote host, the
-tabletop viewer switches from its explicit temporary follower mapping to white-arm
-read-only feedback with independently validated fits. Close the tabletop viewer before
+tabletop viewer uses white-arm read-only feedback with independently validated fits.
+Missing white calibration reports unavailable feedback without borrowing black-arm fits. Close the tabletop viewer before
 opening either arm's calibration window so only one reader uses each serial bus. See
 [current white-arm alignment](current-scene.md#white-arm-six-joint-alignment).
 

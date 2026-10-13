@@ -59,14 +59,11 @@ To restore the original mapping, close relevant windows, archive `follower_mujoc
 
 This procedure validates fixed fingertip height, not horizontal position, orientation, or absolute precision at every height.
 
-## Existing device measurements
+## Current installation
 
-On 2026-10-07, `fixed_jaw_height_native_pitch_scale` was applied using five table-contact fitting poses and two independent validation poses.
-Fit RMSE was 0.562 mm; validation RMSE 0.881 mm; maximum error 1.137 mm.
-These are historical results for the earlier base installation. After the two-arm base recalibration
-on 2026-10-07, that correction, candidate and sample set were archived under
-`.cleanup/20261007-two-arm-registration/calibration/` on both hosts.
-The active angle mapping remains the original measured mapping without this height correction.
-Collect and validate new height samples against the current follower base before relying on fingertip height.
-The historical results do not establish complete physical Push-T success.
-See [Height calibration history](history/height-calibration-initial.md) for the failed first round, resampling rationale, offsets, and historical tests.
+The old height correction belonged to an earlier base installation and is not
+active. The accepted raw encoder-to-angle mapping remains in use. Collect and
+validate new height samples against the current follower base before applying
+fingertip height corrections. Historical regression samples remain under
+`tests/fixtures/`; retired raw backups and instructions are listed in the
+[cleanup record](maintenance/README.md).

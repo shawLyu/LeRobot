@@ -124,14 +124,9 @@ height and CAD mount until a new physical measurement establishes a change.
 
 ## Height calibration dependency
 
-The previous height correction, candidate and samples were bound to the replaced
-follower base and are no longer active. Retired backup removal is recorded in
-the [cleanup](maintenance/README.md). Raw encoder-to-angle
-calibration remains active; collect and validate new fingertip height measurements
+Raw encoder-to-angle calibration remains active; collect and validate new fingertip height measurements
 before relying on corrected height for physical Push-T.
 See [Height calibration](height-calibration.md).
 
-Live capture evidence is in `logs/two-arm-registration-20261007-final/`;
-`logs/two-arm-registration-20261007-restart/` records the restart check.
-These generated sessions are ignored by Git. The three calibration records are
-explicitly permitted by `.gitignore` for version control.
+Accepted calibration records are explicitly permitted by `.gitignore` for
+version control.

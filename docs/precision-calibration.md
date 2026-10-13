@@ -68,7 +68,5 @@ The command records fresh camera observations and motor feedback. It does not
 certify fingertip accuracy unless the marker-to-tool transform is independently
 validated. Height correction has its own [measurement workflow](height-calibration.md).
 
-Old ID 3 layouts, superseded experimental instructions and unversioned scan
-outputs were retired by the [cleanup](maintenance/README.md). Retained response
-reports identify their exact configurations; their historical gains are not
-current operating instructions.
+Response reports identify their exact configurations; their historical gains
+are not current operating instructions.

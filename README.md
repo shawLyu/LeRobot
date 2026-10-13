@@ -598,5 +598,4 @@ See [Code layout and shared control](docs/code-layout.md).
 | Invalid Reset pose | Check calibration identity/mapping; teach a new rest pose after correction |
 
 This README and operation guides describe current usage. Versioned response
-measurements remain under `docs/measurements/`. Old captures, logs and instructions
-are retired according to the [cleanup record](docs/maintenance/README.md).
+measurements remain under `docs/measurements/`.

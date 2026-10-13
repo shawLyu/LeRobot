@@ -114,8 +114,7 @@ The current snapshot was refreshed after alignment with 39 observed camera frame
 both robot feedback streams were live and independently calibrated. The accepted
 white file has SHA-256 `87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963`.
 All six third-reference checks are below 2 degrees; the largest is 1.91 degrees.
-Superseded snapshots are retired by the [cleanup](maintenance/README.md);
-the current complete snapshot remains available.
+The current complete snapshot remains available.
 
 ## Independent mappings
 

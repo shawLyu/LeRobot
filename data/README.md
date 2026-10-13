@@ -29,18 +29,9 @@ samples needed for regression live at `tests/fixtures/height-first-round-samples
 meshes for offline execution. Scene construction uses its state/calibration/textures
 and copies the canonical meshes from `assets/so101/assets/` when needed.
 
-## Cleanup on 2026-10-13
-
-Retired local capture sessions, demo outputs, duplicate meshes, historical backup
-folders, stale ID 3 registration and superseded logs were removed. Current inputs
-above and versioned response measurements under `docs/measurements/` were retained.
-Latest trigger endpoint and unresolved overload diagnostic records remain under
-`logs/` for the pending physical checks.
-
-The [cleanup record](../docs/maintenance/README.md) lists removal scope, counts,
-bytes and SHA256 verification of retained inputs. The remote deletion plan is
-recorded separately; consult its completion status rather than assuming that a
-local deletion also happened remotely.
+Current trigger endpoint and unresolved overload diagnostic records remain under
+`logs/` for pending physical checks. Versioned motor-response measurements live
+under `docs/measurements/`.
 
 New captures and task runs recreate their output directories. Generated outputs
 are ignored by default. Remove finished sessions only after stopping their

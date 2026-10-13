@@ -73,8 +73,7 @@ Results are atomically saved remotely as `data/calibration/follower_table_base.j
 Restart restores it, even if the base marker is subsequently hidden.
 The cache validates marker mount geometry, table reference, and CAD signature; changed signatures require registration again.
 Before replacing the follower base, archive its base-bound height correction, candidate and samples,
-then collect and validate new height measurements after registration. Superseded
-base-bound files are retired by the [cleanup](maintenance/README.md).
+then collect and validate new height measurements after registration.
 After moving the base or primary anchor, archive/recollect with:
 
 ```sh
@@ -132,9 +131,8 @@ Each motor sample's control records reference targets, compensation, actual sent
 Changes do not hot-reload. Exit and restart hardware mode, then press P; physical contact effects still need hardware validation.
 
 Offline tests cover shared control consistency, RAM restoration, calibrated limits,
-60 Hz scheduling, fault holds and read-only startup. Latest cleanup/regression
-results are in [the maintenance record](maintenance/README.md). Offline passes
-are not physical contact validation.
+60 Hz scheduling, fault holds and read-only startup. Offline passes are not
+physical contact validation.
 
 ## Active occlusion recovery
 

@@ -48,4 +48,4 @@ Manual motion does not perform obstacle planning; the Reset path needs physical 
 
 Only one tool may own the serial port. Close hardware/Push-T windows before headless Reset.
 See [Measured performance](control-performance.md) for historical evidence.
-The code cleanup does not include new physical motion validation.
+Physical motion requires separate validation.

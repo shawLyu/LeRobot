@@ -58,5 +58,4 @@ Do not rerun motor-ID setup merely to connect a bus that already has IDs 1–6.
 Low-level `python -m lerobot_arm_control hardware move` remains a bounded gripper diagnostic, with preview as default.
 Only explicit `--execute --confirm-clear` executes the follower ID 6 test of 16–32 ticks.
 It is not a full-arm demo. Current enable/hold behavior is documented in
-[Hardware control](real-control.md). Superseded installation and gripper trial
-instructions were removed by the [cleanup](maintenance/README.md).
+[Hardware control](real-control.md).

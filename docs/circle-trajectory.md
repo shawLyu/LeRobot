@@ -1,7 +1,7 @@
 # Shared circle trajectory
 
 The absolute joint path is stored in `data/trajectories/circle.json`: a 15 mm Cartesian circle for the SO101 model.
-The cleanup preserves path points and model identity. The historical period in the plan remains provenance.
+Path points and model identity come from the accepted trajectory input. The historical period in the plan remains provenance.
 With the smoothness-first reference shaper (2026-10-13), normal playback uses `trajectory.period_seconds=16` from `configs/control.json`.
 
 ```sh
@@ -22,4 +22,4 @@ Motor faults, lost torque, connection loss, or heartbeat loss still trigger hold
 Read-only model/unit checks do not cause motion; simulation objects cannot enable hardware control.
 
 See [Control performance](control-performance.md) for the latest physical experiment errors and camera records.
-The source cleanup did not include new physical playback. See [Code layout](code-layout.md) for shared parameters and deployment.
+Physical playback requires separate validation. See [Code layout](code-layout.md) for shared parameters and deployment.

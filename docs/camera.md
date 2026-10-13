@@ -2,10 +2,8 @@
 
 Device selection and preview settings live in `configs/camera.toml`; perception
 and calibrated processing geometry live in `configs/tabletop.json`. Inspect fresh
-capture dimensions and camera controls when reconnecting hardware. Historical
-October 11 snapshot and installation instructions were removed by the
-[cleanup](maintenance/README.md); current deployment is described in
-[System operation](system.md).
+capture dimensions and camera controls when reconnecting hardware. Deployment
+is described in [System operation](system.md).
 
 ## Choose an entry
 

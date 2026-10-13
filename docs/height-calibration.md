@@ -64,6 +64,4 @@ This procedure validates fixed fingertip height, not horizontal position, orient
 The old height correction belonged to an earlier base installation and is not
 active. The accepted raw encoder-to-angle mapping remains in use. Collect and
 validate new height samples against the current follower base before applying
-fingertip height corrections. Historical regression samples remain under
-`tests/fixtures/`; retired raw backups and instructions are listed in the
-[cleanup record](maintenance/README.md).
+fingertip height corrections. Regression samples remain under `tests/fixtures/`.

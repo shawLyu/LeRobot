@@ -36,8 +36,7 @@ readings and explicit resume. These protection changes are detailed in the
 | [Smoothness](measurements/follow-smoothing-2026-10-13/README.md) | Current reference shaping, comparison curves and pending checks |
 
 These versioned records retain exact configurations, summaries and compressed
-samples. Superseded unversioned `logs/` copies and old V14/V22 operating instructions
-were removed in the [cleanup](maintenance/README.md).
+samples.
 
 ## Reproduce response measurement
 

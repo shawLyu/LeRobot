@@ -39,7 +39,7 @@ def test_contact_reset_removes_latch():
 
 
 def test_shared_hardware_pid_freezes_at_contact_and_releases_on_opening():
-    from test_manual_control import Bus, Calibration
+    from fakes import Bus, Calibration
 
     from lerobot_arm_control.control.manual_control import ManualControl
     from lerobot_arm_control.transport.realtime import JOINTS

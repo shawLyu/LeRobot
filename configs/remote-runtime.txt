@@ -6,6 +6,7 @@ scripts/install_uv.py
 scripts/lerobot-arm
 scripts/test_hardware.sh
 scripts/uv
+tests/fakes.py
 tests/test_angle_calibration.py
 tests/test_camera_runtime_calibration.py
 tests/test_circle_playback.py

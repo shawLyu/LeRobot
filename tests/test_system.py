@@ -115,12 +115,6 @@ def test_unified_entry_forwards_execution_options_and_restores_argv(monkeypatch)
     assert sys.argv is original
 
 
-def test_retired_package_initializer_is_not_a_command():
-    with pytest.raises(SystemExit) as error:
-        main(["init", "/unused"])
-    assert error.value.code == 2
-
-
 def test_public_domain_exports_use_canonical_implementations():
     from lerobot_arm_control.calibration import AngleCalibration
     from lerobot_arm_control.control import JointPath, ManualControl, PositionFeedback

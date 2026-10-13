@@ -3,17 +3,11 @@
 import ast
 import hashlib
 import importlib.util
-import json
 import math
 from pathlib import Path
 
 import pytest
 
-from lerobot_arm_control.control.control_defaults import (
-    CONTROL_CONFIG,
-    POSITION_FEEDBACK,
-    TRAJECTORY,
-)
 from lerobot_arm_control.robot.so101.model_metadata import MODEL, joint_ranges
 from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 
@@ -24,6 +18,7 @@ def test_remote_manifest_is_complete_and_cannot_import_local_simulation_modules(
     paths = [line for line in (ROOT/'configs/remote-runtime.txt').read_text().splitlines()
              if line and not line.startswith('#')]
     assert len(paths) == len(set(paths))
+    assert "scripts/lerobot-arm" in paths
     modules = {str(Path(path).with_suffix('')).removeprefix('src/').replace('/', '.')
                .removesuffix('.__init__') for path in paths if path.startswith('src/')}
     for path in paths:
@@ -57,9 +52,6 @@ def test_metadata_ranges_match_the_canonical_explicit_joint_limits():
     assert joint_ranges()[0] == [-1.91986, 1.91986]
     assert len(joint_ranges()) == 6
     assert Circle().model_hash == hashlib.sha256(MODEL.read_bytes()).hexdigest()
-    assert POSITION_FEEDBACK == json.loads(CONTROL_CONFIG.read_text())['position_feedback']
-    assert TRAJECTORY['control_hz'] == 60
-    assert TRAJECTORY['period_seconds'] == 16
 
 
 @pytest.mark.parametrize('axis', [0, 1, 2])

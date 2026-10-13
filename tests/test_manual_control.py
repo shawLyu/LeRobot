@@ -1,45 +1,9 @@
 import pytest
+from fakes import Bus, Calibration
 
 from lerobot_arm_control.control.control_defaults import CONTROL
 from lerobot_arm_control.control.manual_control import ManualControl
 from lerobot_arm_control.transport.realtime import JOINTS
-
-
-class Calibration:
-    def count(self):
-        return 6
-
-    def fit(self, joint):
-        return {"zero_raw": 2000, "radians_per_tick": 0.0015}
-
-
-class Bus:
-    def __init__(self):
-        self.registers = {name: {"Present_Position": 2200, "Goal_Position": 1000,
-                                 "Torque_Enable": 0, "Status": 0, "Operating_Mode": 0,
-                                 "Present_Voltage": 52, "Min_Voltage_Limit": 40,
-                                 "Max_Voltage_Limit": 90, "Acceleration": 0,
-                                 "Maximum_Acceleration": 254, "Goal_Time": 0,
-                                 "Goal_Velocity": 0, "Maximum_Velocity_Limit": 1000,
-                                 "Velocity_Unit_factor": 1, "Lock": 1, "P_Coefficient": 16}
-                          for name in JOINTS}
-        self.writes = []
-
-    def read(self, register, joint, normalize=False, num_retry=0):
-        return self.registers[joint][register]
-
-    def sync_read(self, register, normalize=False):
-        return {joint: values[register] for joint, values in self.registers.items()}
-
-    def sync_write(self, register, values, normalize=False):
-        for joint, value in values.items():
-            self.write(register, joint, value, normalize)
-
-    def write(self, register, joint, value, normalize=False):
-        self.writes.append((register, joint, value))
-        self.registers[joint][register] = value
-        if register == "Goal_Position":
-            self.registers[joint]["Torque_Enable"] = 1
 
 
 @pytest.fixture
@@ -575,14 +539,7 @@ def test_narrowed_command_range_does_not_move_an_outside_held_pose(setup):
     assert bus.registers['gripper']['Goal_Position'] == 1800
 
 
-@pytest.mark.parametrize('already_enabled', [False, True])
-def test_sdk_overload_latches_motion_and_keeps_monitoring_and_cleanup_alive(setup, already_enabled):
-    bus, control, now = setup
-    if already_enabled:
-        control.enable_all()
-    else:
-        for registers in bus.registers.values():
-            registers['Torque_Enable'] = 1
+def overload_gripper(bus):
     bus.registers['gripper']['Status'] = 32
     original = bus.read
 
@@ -592,6 +549,17 @@ def test_sdk_overload_latches_motion_and_keeps_monitoring_and_cleanup_alive(setu
         return original(register, joint, **kwargs)
 
     bus.read = fault_read
+
+
+@pytest.mark.parametrize('already_enabled', [False, True])
+def test_sdk_overload_latches_motion_and_keeps_monitoring_and_cleanup_alive(setup, already_enabled):
+    bus, control, now = setup
+    if already_enabled:
+        control.enable_all()
+    else:
+        for registers in bus.registers.values():
+            registers['Torque_Enable'] = 1
+    overload_gripper(bus)
     bus.writes.clear()
     step(bus, control, now, 1/60)
     assert control.faulted_joints == {'gripper'}
@@ -616,15 +584,7 @@ def test_sdk_overload_latches_motion_and_keeps_monitoring_and_cleanup_alive(setu
 
 def test_overload_rearm_preflight_refuses_before_writing(setup):
     bus, control, _ = setup
-    bus.registers['gripper']['Status'] = 32
-    original = bus.read
-
-    def fault_read(register, joint, **kwargs):
-        if joint == 'gripper':
-            raise RuntimeError('[RxPacketError] Overload error!')
-        return original(register, joint, **kwargs)
-
-    bus.read = fault_read
+    overload_gripper(bus)
     with pytest.raises(ValueError, match='overload.*Status=32'):
         control.enable_all()
     assert bus.writes == []

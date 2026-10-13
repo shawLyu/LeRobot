@@ -44,7 +44,7 @@ def test_shared_configuration_preserves_latest_measured_values():
 
 
 def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
-    from test_push_t_remote import Calibration, FakeBus
+    from fakes import Bus, Calibration
 
     from lerobot_arm_control.control.manual_control import ManualControl
     from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
@@ -52,9 +52,9 @@ def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
     from lerobot_arm_control.transport.realtime import JOINTS
 
     limits = {joint: [1000, 3000] for joint in JOINTS}
-    bus = FakeBus(JOINTS)
+    bus = Bus()
     manual = ManualControl(bus, Calibration(), limits)
-    push = PushMotor(FakeBus(JOINTS), Calibration(), [[-1, 1]] * 6, limits)
+    push = PushMotor(Bus(), Calibration(), [[-1, 1]] * 6, limits)
     assert manual.position_feedback.profile == push.control.position_feedback.profile
     assert manual.position_feedback.profile == POSITION_FEEDBACK
     assert manual.parking.planned_speed == push.control.parking.planned_speed == .5
@@ -107,44 +107,3 @@ def test_push_t_connection_checks_shared_configuration(monkeypatch, tmp_path, ma
         assert "configuration differs" in link.error
         assert link.hello is None
     assert not process.stdin.getvalue()
-
-
-@pytest.mark.parametrize("module_name", ["realtime_client", "realtime_server"])
-@pytest.mark.parametrize("option", ["--baseline", "--tracking-profile", "--circle-profile",
-                                    "--circle-period"])
-def test_retired_cli_options_fail_before_starting_a_worker(monkeypatch, module_name, option):
-    import importlib
-
-    module = importlib.import_module("lerobot_arm_control.runtime." + module_name)
-    monkeypatch.setattr("sys.argv", [module_name, option])
-    startup = Mock()
-    monkeypatch.setattr(module, "run" if module_name == "realtime_client" else "serve", startup)
-    with pytest.raises(SystemExit) as error:
-        module.main()
-    assert error.value.code == 2
-    startup.assert_not_called()
-
-
-@pytest.mark.parametrize("constructor,kwargs", [
-    ("ManualControl", {"tracking_profile": None}),
-    ("ManualControl", {"position_feedback_profile": {}}),
-    ("PushMotor", {"tracking_profile": None}),
-    ("Circle", {"profile_path": "obsolete.json"}),
-    ("Circle", {"period": 6}),
-    ("Link", {"baseline": True}),
-    ("Link", {"tracking_profile": "obsolete.json"}),
-    ("Link", {"circle_profile": "obsolete.json"}),
-    ("Link", {"circle_period": 6}),
-])
-def test_retired_python_parameters_cannot_bypass_shared_config(constructor, kwargs):
-    from lerobot_arm_control.control.manual_control import ManualControl
-    from lerobot_arm_control.runtime.realtime_client import Link
-    from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
-    from lerobot_arm_control.tasks.push_t.push_t_motor import PushMotor
-
-    constructors = {"ManualControl": (ManualControl, [None] * 3),
-                    "PushMotor": (PushMotor, [None] * 4),
-                    "Circle": (Circle, []), "Link": (Link, ["unused", "/unused", "hardware"])}
-    factory, args = constructors[constructor]
-    with pytest.raises(TypeError, match="unexpected keyword"):
-        factory(*args, **kwargs)

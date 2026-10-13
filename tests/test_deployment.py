@@ -67,11 +67,6 @@ def test_success_prepares_destination_and_transfers_without_archiving_old_code(c
                for args in configuration)
 
 
-def test_remote_runtime_includes_the_source_launcher():
-    manifest = (ROOT / "configs/remote-runtime.txt").read_text().splitlines()
-    assert "scripts/lerobot-arm" in manifest
-
-
 @pytest.mark.parametrize("failed_command", ["ssh", "rsync"])
 def test_failure_aborts_remaining_transfers(commands, failed_command):
     commands[0]["DEPLOY_TEST_FAIL"] = failed_command

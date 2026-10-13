@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from fakes import Bus, Calibration
 
 from lerobot_arm_control.tasks.push_t.push_t_motor import (
     PushMotor,
@@ -31,43 +32,6 @@ class Push:
     approach_count: int
     transition: str = "low transfer"
 
-class Calibration:
-    def count(self):
-        return 6
-
-    def fit(self, joint):
-        return {'zero_raw': 2000, 'radians_per_tick': .0015}
-
-
-class FakeBus:
-    def __init__(self, joints):
-        self.registers = {j: {'Present_Position': 2200, 'Goal_Position': 1000,
-                              'Torque_Enable': 0, 'Status': 0, 'Operating_Mode': 0,
-                              'Present_Voltage': 52, 'Min_Voltage_Limit': 40,
-                              'Max_Voltage_Limit': 90, 'Acceleration': 0,
-                              'Maximum_Acceleration': 254, 'Goal_Time': 0,
-                              'Goal_Velocity': 0, 'Maximum_Velocity_Limit': 1000,
-                              'Velocity_Unit_factor': 1, 'Lock': 1, 'P_Coefficient': 16}
-                          for j in joints}
-        self.writes = []
-
-    def read(self, register, joint, normalize=False):
-        return self.registers[joint][register]
-
-    def sync_read(self, register, normalize=False):
-        return {j: r[register] for j, r in self.registers.items()}
-
-    def write(self, register, joint, value, normalize=False):
-        self.writes.append((register, joint, value))
-        self.registers[joint][register] = value
-        if register == 'Goal_Position':
-            self.registers[joint]['Torque_Enable'] = 1
-
-    def sync_write(self, register, values, normalize=False):
-        for joint, value in values.items():
-            self.write(register, joint, value)
-
-
 @pytest.fixture
 def observed():
     return {'units': 'm', 'marker_visible': True, 'capture_age_at_send_ms': 20,
@@ -86,7 +50,7 @@ def motor(observed):
     from lerobot_arm_control.transport.realtime import JOINTS
 
     clock = [0.]
-    bus = FakeBus(JOINTS)
+    bus = Bus()
     instance = PushMotor(bus, Calibration(), [[-1, 1]]*6,
                          {j: [1000, 3000] for j in JOINTS}, clock=lambda: clock[0])
     observed['robot']['qpos'] = [.3]*6
@@ -172,12 +136,12 @@ def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observ
     from lerobot_arm_control.control.manual_control import ManualControl
     from lerobot_arm_control.transport.realtime import JOINTS
 
-    bus = FakeBus(JOINTS)
+    bus = Bus()
     clock = [0.]
     limits = {joint: [1000, 3000] for joint in JOINTS}
     instance = PushMotor(bus, Calibration(), [[-1, 1]]*6, limits,
                          clock=lambda: clock[0])
-    circle_control = ManualControl(FakeBus(JOINTS), Calibration(), limits)
+    circle_control = ManualControl(Bus(), Calibration(), limits)
     assert instance.control.position_feedback.profile == circle_control.position_feedback.profile
     observed['robot']['registration'].update(status='fixed', calibrated=True,
                                             fixed_to_table=True,
@@ -209,7 +173,7 @@ def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observ
 def test_push_pid_also_respects_the_cad_joint_envelope():
     from lerobot_arm_control.transport.realtime import JOINTS
 
-    instance = PushMotor(FakeBus(JOINTS), Calibration(), [[-.31, .31]]*6,
+    instance = PushMotor(Bus(), Calibration(), [[-.31, .31]]*6,
                          {j: [1000, 3000] for j in JOINTS})
     feedback = instance.control.position_feedback
     for _ in range(120):

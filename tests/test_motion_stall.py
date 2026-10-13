@@ -32,7 +32,7 @@ def test_moving_loaded_joint_resets_stall_timer():
 def test_shared_hardware_envelope_is_applied_without_writes_and_cannot_be_widened():
     import json
 
-    from test_manual_control import Bus
+    from fakes import Bus
 
     from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
     from lerobot_arm_control.control.manual_control import ManualControl
@@ -54,7 +54,7 @@ def test_shared_hardware_envelope_is_applied_without_writes_and_cannot_be_widene
 
 
 def test_loaded_stall_holds_all_axes_and_removes_stale_goal():
-    from test_manual_control import Bus, Calibration
+    from fakes import Bus, Calibration
 
     from lerobot_arm_control.control.manual_control import ManualControl
     from lerobot_arm_control.transport.realtime import JOINTS

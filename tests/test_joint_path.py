@@ -4,7 +4,7 @@ import hashlib
 from types import SimpleNamespace
 
 import pytest
-from test_manual_control import Bus, Calibration
+from fakes import Bus, Calibration
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.joint_path import ACTIVE, JointPath, plan_digest

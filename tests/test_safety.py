@@ -9,7 +9,7 @@ from lerobot_arm_control.core.config import ArmConfig
 from lerobot_arm_control.robot.so101 import driver
 
 
-def test_serial_bus_reserved_before_any_second_connection(tmp_path, monkeypatch):
+def test_serial_bus_reserved_before_any_second_connection(tmp_path):
     port = tmp_path/'serial-device'
     alias = tmp_path/'by-id'
     alias.symlink_to(port)
@@ -161,7 +161,7 @@ def test_feedback_failure_stops_and_releases_gripper(arm, monkeypatch):
     assert bus.writes[-1] == ("Torque_Enable", 0)
 
 
-def test_feedback_within_tolerance_must_be_settled(arm, monkeypatch):
+def test_feedback_within_tolerance_must_be_settled(monkeypatch):
     bus = FakeBus()
     bus.values["Present_Position"] = 2004
     monkeypatch.setattr(motion.time, "sleep", lambda _: None)

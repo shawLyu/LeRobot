@@ -165,7 +165,7 @@ def serve(args):
         controller = None
         limits = joint_ranges()
         if args.hardware_control:
-            controller = ManualControl(follower_bus, calibration, limits,
+            controller = ManualControl(follower_bus, calibration,
                                        follower_metadata['fingerprint']['raw_limits'])
             stack.callback(controller.close)
             controller.set_command_limits(

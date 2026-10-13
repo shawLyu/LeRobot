@@ -59,7 +59,6 @@ class PushReceiver:
         self.state, self.received = None, 0
         self.last_command = clock()
         self.job_id = None
-        self.last_result = None
         self.task, self.next_stage, self.advanced_job = task, 0, None
 
     def observe(self, state):
@@ -151,7 +150,6 @@ class PushReceiver:
             if not isinstance(result, dict):
                 raise ValueError("local result must be an object")
             self._record("local-results", result)
-            self.last_result = result
         self.last_command = self.clock()
         return self.status()
 

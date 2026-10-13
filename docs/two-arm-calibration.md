@@ -89,13 +89,10 @@ indicates that both endpoints are saved calibrations.
 
 After both bases are accepted, the local viewer shows both articulated SO101
 models, base statuses and their separation. Each reads its own encoder stream.
-The follower uses its independently measured mapping; arm1 temporarily reuses that mapping
-for simulation, labelled `temporary_shared`. Its independent file takes priority and must
-pass its own device identity and six-angle validation. Shared fits cannot enable white-arm control.
+Both arms use their independently measured mappings, validated against their own
+device identities and all six calibrated joints.
 No motor targets were written during registration. See [white-arm alignment](current-scene.md#white-arm-six-joint-alignment).
-At the time of this registration, `configs/control.json` (V14), the original follower encoder calibration, and the
-existing rest pose were preserved. The rest pose identity still matches the
-active raw angle mapping.
+The rest pose identity matches the active raw angle mapping.
 The current shared controller is `shared-joint-pid-v1`; see [Control performance](control-performance.md).
 See [Precision calibration](precision-calibration.md) for camera-only observation,
 the moving-marker interface and independent optical validation requirements.

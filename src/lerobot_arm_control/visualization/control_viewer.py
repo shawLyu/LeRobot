@@ -53,7 +53,6 @@ class ControlViewer:
         self.text = ""
         self.images = []
         self.last_cursor = None
-        self.panel_width = 0
         self.reset_status = None
         self.buttons = []
         self.font_path = next((path for path in (
@@ -139,7 +138,6 @@ class ControlViewer:
             return
         scale = width / window_width
         panel_width = round(width * 0.38)
-        self.panel_width = panel_width
         mujoco.mjv_updateScene(self.model, self.data, self.opt, None, self.cam,
                               mujoco.mjtCatBit.mjCAT_ALL, self.scene)
         mujoco.mjr_render(mujoco.MjrRect(panel_width, 0, width - panel_width, height),

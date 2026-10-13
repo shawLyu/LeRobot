@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -99,8 +100,9 @@ def test_preview_result_is_saved_without_enabling_hardware(receiver):
     endpoint.robot.motor = None
     endpoint.handle({**command, 'op': 'push_result',
                      'result': {'passed': True, 'phase': 'preview'}})
-    assert endpoint.last_result['passed']
-    assert (endpoint.output/'local-results.jsonl').exists()
+    results = [json.loads(line) for line in
+               (endpoint.output/'local-results.jsonl').read_text().splitlines()]
+    assert results == [{'passed': True, 'phase': 'preview'}]
     with pytest.raises(ValueError, match='disabled'):
         endpoint.handle(command)
     assert motor.status()['phase'] == 'idle'

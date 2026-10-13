@@ -142,7 +142,7 @@ def test_application_preserves_raw_points_and_corrects_control_inverse_mapping(m
     raw = {j: uncorrected.fit(j)['zero_raw'] for j in JOINTS}
     assert corrected.angles(raw, [0.]*6) == pytest.approx(
         [candidate['offsets_rad'][j] for j in JOINTS])
-    control = ManualControl(None, corrected, [[-3, 3]]*6, identity['raw_limits'])
+    control = ManualControl(None, corrected, identity['raw_limits'])
     for joint in JOINTS:
         assert control.raw(joint, control.angle(joint, 2200)) == 2200
     with pytest.raises(ValueError, match='Archive'):
@@ -277,7 +277,7 @@ def test_native_scale_changes_only_pitch_axes_and_keeps_the_motor_inverse_consis
     original = AngleCalibration(angles, json.loads(angles.read_text())['fingerprint'])
     apply_candidate(candidate, angles_path=angles, base_path=base)
     corrected = AngleCalibration(angles, original.fingerprint)
-    control = ManualControl(None, corrected, [[-3, 3]]*6, original.fingerprint['raw_limits'])
+    control = ManualControl(None, corrected, original.fingerprint['raw_limits'])
     for joint in JOINTS:
         fit_value = corrected.fit(joint)
         if joint in PITCH_JOINTS:

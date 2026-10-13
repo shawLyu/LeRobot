@@ -118,7 +118,7 @@ def test_original_gripper_prediction_matches_complete_executed_motion(sim):
     initial_time = sim.data.time
     action = sim.plan()
     assert action is not None
-    sim.predict(action, pose(sim.data), friction=.4)
+    sim.predict(action, friction=.4)
     predicted = sim.roll_data.qpos.copy()
     np.testing.assert_array_equal(sim.data.qpos, initial)
     assert sim.data.time == initial_time

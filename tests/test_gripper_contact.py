@@ -45,8 +45,8 @@ def test_shared_hardware_pid_freezes_at_contact_and_releases_on_opening():
     from lerobot_arm_control.transport.realtime import JOINTS
 
     bus, now = Bus(), [0.]
-    control = ManualControl(bus, Calibration(), [(-1, 1)]*6,
-                            {j: [1000, 3000] for j in JOINTS}, clock=lambda: now[0])
+    control = ManualControl(bus, Calibration(), {j: [1000, 3000] for j in JOINTS},
+                            clock=lambda: now[0])
     control.enable_all()
     control.target('gripper', 0)
     for _ in range(40):

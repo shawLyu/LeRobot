@@ -84,7 +84,7 @@ environment, deployment and camera workflows:
 | --- | --- |
 | `scripts/lerobot-arm` | Control, simulation, tasks, calibration and verification |
 | `bootstrap.sh`, `install_uv.py`, `uv`, `activate.sh` | Linux runtime installation and environment selection |
-| `deploy_code.sh` | Selected remote runtime transfer and recovery archive |
+| `deploy_code.sh` | Selected remote runtime transfer |
 | `test_hardware.sh` | Environment diagnosis and repeated read-only bus checks |
 | `view_camera_x11.sh`, `camera_x11.py` | SSH/X11 camera preview |
 
@@ -137,8 +137,7 @@ STS3215 identity and disconnects with `disable_torque=False`.
 ## Deployment and verification
 
 `scripts/deploy_code.sh --dry-run` previews the runtime transfer. An actual
-deployment first archives existing code under remote `.cleanup/`, transfers
-canonical source and selected tests, then retires obsolete interface files.
+deployment creates the destination and transfers canonical source and selected tests.
 Existing calibration, logs, environments and machine configuration are preserved.
 A fresh deployment seeds an unassigned USB device template. Configure the actual
 devices before motor operations.

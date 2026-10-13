@@ -43,7 +43,7 @@ def test_shared_hardware_envelope_is_applied_without_writes_and_cannot_be_widene
     saved = json.loads(path.read_text())
     calibration = AngleCalibration(path, saved['fingerprint'])
     bus = Bus()
-    control = ManualControl(bus, calibration, [(-3, 3)]*6, saved['fingerprint']['raw_limits'])
+    control = ManualControl(bus, calibration, saved['fingerprint']['raw_limits'])
     assert control.raw_limits['wrist_flex'] == (862, 2920)
     assert control.raw_limits['gripper'] == (1479, 2982)
     assert all(control.raw_limits[j] == tuple(saved['fingerprint']['raw_limits'][j])
@@ -60,8 +60,8 @@ def test_loaded_stall_holds_all_axes_and_removes_stale_goal():
     from lerobot_arm_control.transport.realtime import JOINTS
 
     bus, now = Bus(), [0.]
-    control = ManualControl(bus, Calibration(), [(-1, 1)]*6,
-                            {j: [1000, 3000] for j in JOINTS}, clock=lambda: now[0])
+    control = ManualControl(bus, Calibration(), {j: [1000, 3000] for j in JOINTS},
+                            clock=lambda: now[0])
     control.enable_all()
     control.target('wrist_flex', .5)
     for _ in range(60):

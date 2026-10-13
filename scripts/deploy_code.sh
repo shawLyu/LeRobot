@@ -25,16 +25,7 @@ case "$REMOTE_ROOT/" in
 esac
 if [ -z "$DRY_RUN" ]; then
   ssh "$HOST" "set -eu
-    mkdir -p '$REMOTE_ROOT'
-    cd '$REMOTE_ROOT'
-    mkdir -p .cleanup
-    set --
-    for entry in src scripts tests docs configs README.md pyproject.toml uv.lock; do
-      if [ -e \"\$entry\" ]; then set -- \"\$@\" \"\$entry\"; fi
-    done;
-    if [ \"\$#\" -gt 0 ]; then
-      tar --exclude=__pycache__ -czf .cleanup/code-before-\$(date -u +%Y%m%dT%H%M%S)-\$\$.tar.gz \"\$@\"
-    fi"
+    mkdir -p '$REMOTE_ROOT'"
 fi
 # Preserve remote-only files, calibration, datasets, logs, the installed runtime
 # and machine-specific device/perception configuration.
@@ -57,28 +48,4 @@ rsync -az $DRY_RUN --ignore-existing --itemize-changes \
 if [ "$WITH_CONFIG" = true ]; then
   rsync -az $DRY_RUN --itemize-changes "$ROOT/configs/tabletop.json" \
     "$HOST:$REMOTE_ROOT/configs/"
-fi
-# Retire the flat namespace and console scripts only after successful transfers.
-# Keep their contents recoverable alongside the pre-deployment code archive.
-if [ -z "$DRY_RUN" ]; then
-  ssh "$HOST" "cd '$REMOTE_ROOT' &&
-    retired=.cleanup/retired-interfaces-\$(date -u +%Y%m%dT%H%M%S)-\$\$ &&
-    for entry in src/arm_control .venv/bin/arm-control .venv/bin/lerobot-arm \
-      scripts/analyze_control_video.py scripts/analyze_tracking_trace.py \
-      scripts/calibrate_height.sh scripts/calibrate_table_reference.sh \
-      scripts/check_gripper_precision.sh scripts/check_marker_precision.sh \
-      scripts/configure_control.py scripts/control_arm_realtime.sh \
-      scripts/inspect_tool_mount.sh scripts/local_runtime.sh \
-      scripts/pick_t_realtime.sh scripts/push_t_realtime.sh \
-      scripts/record_control_camera.py scripts/reset_arm_remote.sh \
-      scripts/simulate_push_t.sh scripts/verify_circle_parity.py \
-      scripts/verify_circle_tracking.py scripts/verify_gripper_jog.py \
-      scripts/verify_joint_response.py scripts/verify_response.py \
-      scripts/verify_response.sh scripts/view_arm_realtime.sh \
-      scripts/view_tabletop_realtime.sh assets/so101/scene_hardware.xml; do
-      if [ -e \"\$entry\" ]; then
-        mkdir -p \"\$retired/\$(dirname \"\$entry\")\" &&
-        mv \"\$entry\" \"\$retired/\$entry\" || exit 1
-      fi
-    done"
 fi

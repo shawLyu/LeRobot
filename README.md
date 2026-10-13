@@ -164,7 +164,7 @@ LEROBOT_HOST=my-robot LEROBOT_REMOTE_ROOT=/home/robot/lerobot ./scripts/deploy_c
 For the first deployment, run `deploy_code.sh` directly. It creates the destination, which must be under `/home/`.
 A dry-run before first deployment requires the destination to exist already.
 The script sends the files in the [remote runtime manifest](configs/remote-runtime.txt), plus shared configuration, documentation, and dependency locks.
-Before each actual update, it backs up existing code under remote `.cleanup/`. Incremental deployment preserves remote-only files.
+Incremental deployment preserves remote-only files without generating code archives.
 `arms.toml`, `camera.toml`, and `tabletop.json` are seeded only when missing. Existing device configuration and calibration are preserved.
 Use `--config` explicitly to replace remote `tabletop.json` after changing camera or marker installation settings:
 
@@ -333,7 +333,7 @@ Intrinsics must match the processed image size. Scaling requires scaling focal l
 
 The tabletop anchor is AprilTag 36h10 / ID 1, with a 150 mm black border.
 The current stationary auxiliary is AprilTag 16h5 / ID 0, also with a 150 mm
-black border. The previous ID 3 installation is archived. Native camera frames supply their corners,
+black border. Native camera frames supply their corners,
 including markers outside the calibrated low-resolution crop. A registered,
 unmoved auxiliary retains the original frame when the primary is outside the view.
 For a new scene, verify dictionary, ID, dimensions, fixed layout, and actual object geometry. See [Tabletop perception](docs/tabletop.md).
@@ -533,7 +533,6 @@ plans are rejected; joint ranges are never widened to accommodate a demo.
 | `data/push_t/measured/` | Included local offline demo/test snapshot |
 | `data/tabletop/static_map.json` | Persistent auxiliary marker registration; retain it |
 | `data/push_t/`, `data/tabletop/`, `logs/` | Generated runtime outputs, ignored by default |
-| `.cleanup/` | Deployment-generated recovery snapshots; retired archives are pruned |
 
 Do not delete the entire data directory: calibration, trajectories, and offline snapshots are inputs.
 Remove old per-frame sessions only after stopping their processes and saving required results elsewhere.

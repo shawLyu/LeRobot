@@ -435,10 +435,6 @@ def run(args):
                 other_bases = '\n'.join(
                     f"{name} base: {pose.get('status', 'disabled')} | joints: "
                     f"{state.get('robot_feedback', {}).get(name, {}).get('status', 'unmeasured')}"
-                    + (" | TEMP shared from "
-                       f"{state['robot_feedback'][name]['calibration_source_arm']}"
-                       if state.get('robot_feedback', {}).get(name, {}).get(
-                           'calibration_mode') == 'temporary_shared' else '')
                     for name, pose in state.get('base_registrations', {}).items()
                     if name != hello['config'].get('robot', {}).get('arm'))
                 distances = '\n'.join(

@@ -3,7 +3,6 @@
 The observed desktop uses right AprilTag `DICT_APRILTAG_36h10` / ID 1 as origin,
 with left `DICT_APRILTAG_16h5` / ID 0 as auxiliary. Both black borders are 150 mm.
 The black follower base is ArUco 4x4 ID 7; the white arm1 base is ID 6.
-The former ID 3 reference and old image search regions have been archived.
 
 ```sh
 ./scripts/lerobot-arm view tabletop --fps 5
@@ -119,7 +118,6 @@ The current complete snapshot remains available.
 ## Independent mappings
 
 `additional_robots[].joint_calibration` stays `data/calibration/arm1_mujoco.json`.
-The former `joint_calibration_fallback` has been removed from the current configuration.
 Both buses retain their own fingerprints and accepted files. Missing, invalid or
 incomplete white calibration reports an error instead of borrowing black-arm fits.
 The follow demo also has `simulation_shared_calibration: false`.

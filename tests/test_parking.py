@@ -10,8 +10,7 @@ from lerobot_arm_control.transport.realtime import JOINTS
 
 def setup(tmp_path):
     bus, now = Bus(), [0.0]
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
-                            {joint: [1000, 3000] for joint in JOINTS},
+    control = ManualControl(bus, Calibration(), {joint: [1000, 3000] for joint in JOINTS},
                             clock=lambda: now[0], rest_path=tmp_path / "rest.json")
     return bus, control, now
 
@@ -230,7 +229,7 @@ def test_rest_includes_native_endpoint_without_extra_margin(tmp_path):
     joint = "shoulder_lift"
     # Make the EEPROM limit, rather than the model, the binding rest boundary.
     limits = {name: [1300, 3000] for name in JOINTS}
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6, limits,
+    control = ManualControl(bus, Calibration(), limits,
                             clock=lambda: now[0], rest_path=tmp_path / "rest.json")
     bus.registers[joint]["Present_Position"] = 1307
     for _ in range(50):

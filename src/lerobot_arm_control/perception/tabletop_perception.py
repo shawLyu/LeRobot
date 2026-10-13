@@ -210,7 +210,7 @@ class Perception:
         return min(solutions, key=lambda x: x[0]) if solutions else None
 
     def process(self, frame, sequence, captured_ns, native_frame=None, low_to_native=None,
-                robot=None, *, marker_only=False):
+                *, marker_only=False):
         started = time.monotonic()
         if list(frame.shape[1::-1]) != self.config["image_size"]:
             raise ValueError("Camera resolution differs from calibrated image_size")
@@ -379,8 +379,7 @@ class Perception:
 
             poses = {}
             for index, (name, registration) in enumerate(self.base_registrations.items()):
-                poses[name] = registration.process(frame, state, native_frame, low_to_native,
-                                                   robot)
+                poses[name] = registration.process(frame, state, native_frame, low_to_native)
                 for marker in poses[name]['markers']:
                     cv2.polylines(annotated, [np.int32(marker['corners'])], True,
                                   (255, 180, 0), 1)

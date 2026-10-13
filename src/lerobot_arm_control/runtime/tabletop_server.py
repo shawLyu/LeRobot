@@ -139,8 +139,7 @@ def main():
         robot = RobotFeedback(config["robot"], hardware_control=args.hardware_control,
                               task='pick_t' if args.pick_t else 'push_t')
         robot.start()
-    additional_feedback = start_additional_feedback(config, camera_only=args.camera_only,
-                                                    primary_feedback=robot)
+    additional_feedback = start_additional_feedback(config, camera_only=args.camera_only)
     if (args.push_t or args.pick_t) and robot is None:
         raise ValueError('Robot policies require configured SO101 feedback')
     push = None
@@ -238,7 +237,6 @@ def main():
                 frame = cv2.warpAffine(frame, cv2.invertAffineTransform(np.array(mapping)),
                                        tuple(config["image_size"]), flags=cv2.INTER_AREA)
             state = perception.process(frame, sequence, captured_ns, native_frame, mapping,
-                                       robot.snapshot() if robot else None,
                                        marker_only=args.marker_only)
             if not args.marker_only and time.monotonic()-last_map_save > 1:
                 perception.save_static_map(static_map, state)

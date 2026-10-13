@@ -53,7 +53,7 @@ def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
 
     limits = {joint: [1000, 3000] for joint in JOINTS}
     bus = FakeBus(JOINTS)
-    manual = ManualControl(bus, Calibration(), [[-1, 1]] * 6, limits)
+    manual = ManualControl(bus, Calibration(), limits)
     push = PushMotor(FakeBus(JOINTS), Calibration(), [[-1, 1]] * 6, limits)
     assert manual.position_feedback.profile == push.control.position_feedback.profile
     assert manual.position_feedback.profile == POSITION_FEEDBACK
@@ -142,7 +142,7 @@ def test_retired_python_parameters_cannot_bypass_shared_config(constructor, kwar
     from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
     from lerobot_arm_control.tasks.push_t.push_t_motor import PushMotor
 
-    constructors = {"ManualControl": (ManualControl, [None] * 4),
+    constructors = {"ManualControl": (ManualControl, [None] * 3),
                     "PushMotor": (PushMotor, [None] * 4),
                     "Circle": (Circle, []), "Link": (Link, ["unused", "/unused", "hardware"])}
     factory, args = constructors[constructor]

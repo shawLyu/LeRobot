@@ -332,7 +332,7 @@ class BaseRegistration:
         tvec = (table_rotation@(position-camera)).reshape(3, 1)
         return rvec, tvec
 
-    def process(self, frame, table_state, native_frame=None, low_to_native=None, robot=None):
+    def process(self, frame, table_state, native_frame=None, low_to_native=None):
         if self.fixed_pose is not None:
             # A bolted base keeps its table transform. No detector or base fit after calibration.
             return self.fixed_result()

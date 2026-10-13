@@ -38,10 +38,9 @@ configs/*.local.*
 *.swo
 .ipynb_checkpoints/
 
-# Experiment logs and recovery snapshots stay on the workstation.
+# Experiment logs stay on the workstation.
 /logs/*
 !/logs/.gitkeep
-/.cleanup/
 
 # Live reconstructed scenes, appearance and copied meshes are generated.
 # The small marker image remains a scene-test input.

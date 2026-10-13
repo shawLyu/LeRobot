@@ -113,15 +113,10 @@ See [Two-arm calibration](two-arm-calibration.md) for the measured poses and sep
 `base_registrations` carries both mounting poses; `base_distances` carries their measured separation.
 The follower has live calibrated joint feedback. An additional arm reads its own
 `joint_calibration` when that file exists and passes device identity/angle validation.
-The current white configuration explicitly sets `joint_calibration_fallback` to
-`{"mode": "simulation_only", "arm": "follower"}`. With no independent white file,
-its own bus is sampled using the validated follower fits, labelled `TEMP shared from follower`.
-The white identity remains separate; this does not count as independently measured calibration.
-An existing invalid white file reports an error and never silently falls back.
-Without either an independent mapping or a validated configured fallback, it reports
-`uncalibrated` and opens no white bus. Additional feedback is read-only.
+Missing independent calibration reports `uncalibrated` and opens no white bus.
+An invalid existing file reports an error. Additional feedback is read-only.
 The local scene includes a separate six-joint white-arm model at its measured
-base; its temporary shared-calibration pose is slightly translucent. `--camera-only` skips the
+base, using its independent calibrated joint feedback. `--camera-only` skips the
 motor bus entirely and can run alongside a controller. See
 [Precision calibration](precision-calibration.md) for independent wrist-marker
 measurement and the current physical validation limits.

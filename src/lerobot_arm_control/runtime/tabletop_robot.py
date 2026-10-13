@@ -23,8 +23,8 @@ from lerobot_arm_control.transport.realtime import JOINTS
 ROOT = workspace_root()
 
 
-def start_additional_feedback(config, *, camera_only=False, primary_feedback=None):
-    """Prefer independent mappings; explicit simulation fallback reuses validated fits."""
+def start_additional_feedback(config, *, camera_only=False):
+    """Read each additional arm only with its independent calibration."""
     feedback = {}
     if camera_only:
         return feedback
@@ -32,17 +32,8 @@ def start_additional_feedback(config, *, camera_only=False, primary_feedback=Non
         if not entry.get('enabled') or not entry.get('joint_calibration'):
             continue
         own_mapping = (ROOT/entry['joint_calibration']).exists()
-        fallback = entry.get('joint_calibration_fallback', {})
-        borrowed = None
-        if not own_mapping and fallback.get('mode') == 'simulation_only' and primary_feedback:
-            source = primary_feedback.metadata_snapshot()
-            if (fallback.get('arm') == config.get('robot', {}).get('arm')
-                    and source.get('independently_calibrated') is True
-                    and source.get('status') == 'live'
-                    and set(source.get('fits', {})) == set(JOINTS)):
-                borrowed = {**source, 'arm': fallback['arm']}
-        robot = RobotFeedback(entry, borrowed_calibration=borrowed)
-        if own_mapping or borrowed:
+        robot = RobotFeedback(entry)
+        if own_mapping:
             robot.start()
         else:
             path = entry['joint_calibration']
@@ -65,12 +56,8 @@ def calibration_identity(bus, arm, model_path):
 
 
 class RobotFeedback:
-    def __init__(self, config, *, hardware_control=False, task='push_t',
-                 borrowed_calibration=None):
-        if hardware_control and borrowed_calibration:
-            raise ValueError('Shared calibration is for read-only simulation only')
+    def __init__(self, config, *, hardware_control=False, task='push_t'):
         self.config = config
-        self.borrowed_calibration = borrowed_calibration
         self.hardware_control = hardware_control
         self.task = task
         self.motor = None
@@ -94,31 +81,16 @@ class RobotFeedback:
             calibration_path = ROOT / self.config["joint_calibration"]
             with connected(arm) as bus, ExitStack() as lifecycle:
                 identity = calibration_identity(bus, arm, model_path)
-                calibration = None
-                if calibration_path.exists() or not self.borrowed_calibration:
-                    calibration = AngleCalibration(calibration_path, identity)
-                    if calibration.count() != len(JOINTS):
-                        raise ValueError("All six measured joint calibrations are required")
-                    fits = {name: calibration.fit(name) for name in JOINTS}
-                    self.metadata.update(joint_calibration=str(calibration_path),
-                        joint_calibration_sha256=hashlib.sha256(
-                            calibration_path.read_bytes()).hexdigest(),
-                        kinematic_correction=calibration.correction,
-                        calibration_mode='independent',
-                        calibration_source_arm=self.config['arm'], independently_calibrated=True)
-                else:
-                    source = self.borrowed_calibration
-                    if (source['fingerprint']['mjcf_sha256'] != identity['mjcf_sha256']
-                            or source['fingerprint']['motors'] != identity['motors']):
-                        raise ValueError('Shared mapping requires matching SO101 model and joints')
-                    fits = source['fits']
-                    self.metadata.update(joint_calibration=source['joint_calibration'],
-                        joint_calibration_sha256=source['joint_calibration_sha256'],
-                        independent_joint_calibration=str(calibration_path),
-                        calibration_mode='temporary_shared', calibration_source_arm=source['arm'],
-                        calibration_source_fingerprint=source['fingerprint'],
-                        independently_calibrated=False, kinematic_correction=source.get(
-                            'kinematic_correction'))
+                calibration = AngleCalibration(calibration_path, identity)
+                if calibration.count() != len(JOINTS):
+                    raise ValueError("All six measured joint calibrations are required")
+                fits = {name: calibration.fit(name) for name in JOINTS}
+                self.metadata.update(joint_calibration=str(calibration_path),
+                    joint_calibration_sha256=hashlib.sha256(
+                        calibration_path.read_bytes()).hexdigest(),
+                    kinematic_correction=calibration.correction,
+                    calibration_mode='independent',
+                    calibration_source_arm=self.config['arm'], independently_calibrated=True)
                 self.metadata.update(fingerprint=identity, fits=fits)
                 if self.hardware_control:
                     from lerobot_arm_control.tasks.push_t.push_t_motor import (

@@ -20,7 +20,7 @@ from lerobot_arm_control.visualization.ui import motor_fault_text
 
 
 class ManualControl:
-    def __init__(self, bus, calibration, model_ranges, raw_limits, clock=time.monotonic,
+    def __init__(self, bus, calibration, raw_limits, clock=time.monotonic,
                  rest_path=None):
         if calibration.count() != 6:
             raise ValueError("real control requires all six calibrated joints")

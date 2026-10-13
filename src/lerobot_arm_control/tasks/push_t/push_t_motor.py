@@ -140,7 +140,7 @@ class PushMotor:
     """Submissions cross threads; all preflight, enable, writes and hold run on the bus owner."""
     def __init__(self, bus, calibration, model_ranges, raw_limits, *, clock=time.monotonic,
                  task='push_t'):
-        self.control = ManualControl(bus, calibration, model_ranges, raw_limits, clock=clock)
+        self.control = ManualControl(bus, calibration, raw_limits, clock=clock)
         if self.control.position_feedback:
             self.control.position_feedback.limits = {
                 joint: (max(self.control.limits[joint][0], model_ranges[i][0]),

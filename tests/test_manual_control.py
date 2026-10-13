@@ -46,8 +46,8 @@ class Bus:
 def setup():
     bus = Bus()
     now = [0.0]
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
-                            {name: [1000, 3000] for name in JOINTS}, clock=lambda: now[0])
+    control = ManualControl(bus, Calibration(), {name: [1000, 3000] for name in JOINTS},
+                            clock=lambda: now[0])
     return bus, control, now
 
 
@@ -63,8 +63,7 @@ def test_shared_pid_enables_unlocked_servos_without_p_or_eeprom_writes():
     for registers in bus.registers.values():
         registers.update(Lock=0, Acceleration=40)
     originals = {joint: dict(registers) for joint, registers in bus.registers.items()}
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
-                            {name: [1000, 3000] for name in JOINTS},
+    control = ManualControl(bus, Calibration(), {name: [1000, 3000] for name in JOINTS},
                             clock=lambda: now[0])
     control.enable_all()
     assert control.enabled == set(JOINTS)
@@ -528,7 +527,7 @@ def test_invalid_native_calibration_is_rejected_before_motor_writes(bounds):
     limits = {joint: [1000, 3000] for joint in JOINTS}
     limits["gripper"] = bounds
     with pytest.raises(ValueError, match="invalid control limits"):
-        ManualControl(bus, Calibration(), [[-1, 1]] * 6, limits)
+        ManualControl(bus, Calibration(), limits)
     assert bus.writes == []
 
 

@@ -177,7 +177,7 @@ def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observ
     limits = {joint: [1000, 3000] for joint in JOINTS}
     instance = PushMotor(bus, Calibration(), [[-1, 1]]*6, limits,
                          clock=lambda: clock[0])
-    circle_control = ManualControl(FakeBus(JOINTS), Calibration(), [[-1, 1]]*6, limits)
+    circle_control = ManualControl(FakeBus(JOINTS), Calibration(), limits)
     assert instance.control.position_feedback.profile == circle_control.position_feedback.profile
     observed['robot']['registration'].update(status='fixed', calibrated=True,
                                             fixed_to_table=True,

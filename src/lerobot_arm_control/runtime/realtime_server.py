@@ -11,7 +11,6 @@ from pathlib import Path
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, CONTROL_HZ
 from lerobot_arm_control.core.paths import resource_path, workspace_root
-from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
 from lerobot_arm_control.runtime.common import (
     defer_cyclic_gc,
     next_deadline,
@@ -96,7 +95,7 @@ def serve(args):
                 args.model.read_bytes()).hexdigest()}
             calibration = AngleCalibration(ROOT / "data/calibration/follower_mujoco.json",
                                            identity)
-            controller = ManualControl(bus, calibration, joint_ranges(args.model), limits,
+            controller = ManualControl(bus, calibration, limits,
                                        rest_path=ROOT / "data/calibration/follower_rest.json")
             defer_cyclic_gc(stack)
             stack.callback(controller.close)

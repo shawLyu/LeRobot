@@ -231,22 +231,22 @@ def test_workspace_and_saved_keyframe_cover_both_current_arms(tmp_path, two_arm_
     np.testing.assert_allclose(model.body('arm1__robot_root').pos, [1.2, .2, .0024])
 
 
-def test_shared_mapping_pose_remains_explicit_in_the_saved_scene(tmp_path, two_arm_scene):
+def test_independent_mapping_is_preserved_in_the_saved_scene(tmp_path, two_arm_scene):
     from lerobot_arm_control.visualization.tabletop_scene import scene_arms, update_scene_robots
     from lerobot_arm_control.visualization.tabletop_snapshot import save_scene_snapshot
 
     state, config = two_arm_scene
-    state['robot_feedback']['arm1'].update(calibration_mode='temporary_shared',
-        calibration_source_arm='follower', independently_calibrated=False)
-    assert scene_arms(state, config)[1]['joint_pose_source'] == 'live_encoders_shared_calibration'
+    state['robot_feedback']['arm1'].update(calibration_mode='independent',
+        calibration_source_arm='arm1', independently_calibrated=True)
+    assert scene_arms(state, config)[1]['joint_pose_source'] == 'live_encoders'
     parameters = save_scene_snapshot(tmp_path, state, {'config': config})
-    assert parameters['arms']['arm1']['calibration_source_arm'] == 'follower'
-    assert parameters['arms']['arm1']['independently_calibrated'] is False
+    assert parameters['arms']['arm1']['calibration_source_arm'] == 'arm1'
+    assert parameters['arms']['arm1']['independently_calibrated'] is True
     model = mujoco.MjModel.from_xml_path(str(tmp_path/'scene.xml'))
     data = mujoco.MjData(model)
     update_scene_robots(model, data, state, config, .01)
     np.testing.assert_allclose(data.qpos[6:], state['robot_feedback']['arm1']['qpos'])
-    assert model.geom('arm1__base_marker_6_0_0').rgba[3] == pytest.approx(.8)
+    assert model.geom('arm1__base_marker_6_0_0').rgba[3] == pytest.approx(1.)
 
 
 def test_observed_materials_compile_and_preserve_calibrated_joints(tmp_path):

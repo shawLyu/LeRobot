@@ -13,8 +13,7 @@ from lerobot_arm_control.transport.realtime import JOINTS
 @pytest.fixture
 def playback():
     bus = Bus()
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
-                            {joint: [1000, 3000] for joint in JOINTS})
+    control = ManualControl(bus, Calibration(), {joint: [1000, 3000] for joint in JOINTS})
     circle = Circle()
     for joint, angle in zip(JOINTS, circle.points[0]):
         bus.registers[joint]['Present_Position'] = control.raw(joint, angle)

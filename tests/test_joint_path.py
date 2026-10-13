@@ -18,8 +18,8 @@ def playback(tmp_path):
     calibration.path = tmp_path/'angles.json'
     calibration.path.write_text('{}')
     calibration.fingerprint = {'mjcf_sha256': 'model'}
-    control = ManualControl(bus, calibration, [[-1, 1]]*6,
-                            {j: [1000, 3000] for j in JOINTS}, clock=lambda: now[0])
+    control = ManualControl(bus, calibration, {j: [1000, 3000] for j in JOINTS},
+                            clock=lambda: now[0])
     plan = {'version': 1, 'initial_raw': dict.fromkeys(JOINTS, 2200),
             'waypoints': [{'raw': dict.fromkeys(ACTIVE, 2400), 'dwell_seconds': 2}]}
     validation = {'checked': True, 'plan_sha256': plan_digest(plan),

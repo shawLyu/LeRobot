@@ -258,7 +258,7 @@ def test_execute_wires_only_follower_controller_and_closes_it_on_disconnect(
     monkeypatch.setattr(follow_server, 'joint_ranges', lambda: limits)
 
     class Controller:
-        def __init__(self, bus, calibration, limits, raw_limits):
+        def __init__(self, bus, calibration, raw_limits):
             assert bus.arm.name == 'follower'
             self.limits = {joint: [-1, 1] for joint in JOINTS}
             self.rest_limits = dict(self.limits)

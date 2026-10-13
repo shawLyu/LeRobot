@@ -54,22 +54,17 @@ def test_dry_run_only_previews_transfers_and_uses_unassigned_device_template(com
     assert "--ignore-existing" in arms[0]
 
 
-def test_success_archives_before_transfers_and_retires_only_afterwards(commands):
+def test_success_prepares_destination_and_transfers_without_archiving_old_code(commands):
     result, calls = run_deploy(commands)
     assert result.returncode == 0, result.stderr
-    assert calls[0][0] == calls[-1][0] == "ssh"
-    assert "set -eu" in calls[0][1][-1]
-    assert "tar --exclude=__pycache__" in calls[0][1][-1]
-    for name, args in calls:
-        if name == "ssh":
-            syntax = subprocess.run(["sh", "-n", "-c", args[-1]], capture_output=True, text=True)
-            assert syntax.returncode == 0, syntax.stderr
-    assert all(name == "rsync" for name, _ in calls[1:-1])
-    assert "retired-interfaces" in calls[-1][1][-1]
-    assert "mv " in calls[-1][1][-1]
-    assert "scripts/view_tabletop_realtime.sh" in calls[-1][1][-1]
-    assert "scripts/control_arm_realtime.sh" in calls[-1][1][-1]
-    assert "scripts/lerobot-arm " not in calls[-1][1][-1]
+    assert calls[0] == ["ssh", ["test-robot", "set -eu\n    mkdir -p '/home/test/project'"]]
+    assert all(name == "rsync" for name, _ in calls[1:])
+    for _, args in calls[1:]:
+        assert "--delete" not in args
+    configuration = [args for _, args in calls if "--exclude=/arms.toml" in args]
+    assert len(configuration) == 2
+    assert all("--exclude=/camera.toml" in args and "--exclude=/tabletop.json" in args
+               for args in configuration)
 
 
 def test_remote_runtime_includes_the_source_launcher():
@@ -78,13 +73,11 @@ def test_remote_runtime_includes_the_source_launcher():
 
 
 @pytest.mark.parametrize("failed_command", ["ssh", "rsync"])
-def test_failure_aborts_before_retiring_old_runtime(commands, failed_command):
+def test_failure_aborts_remaining_transfers(commands, failed_command):
     commands[0]["DEPLOY_TEST_FAIL"] = failed_command
     result, calls = run_deploy(commands)
     assert result.returncode == 23
-    assert not any("retired-interfaces" in " ".join(args) for _, args in calls)
-    if failed_command == "ssh":
-        assert len(calls) == 1
+    assert len(calls) == (1 if failed_command == "ssh" else 2)
 
 
 @pytest.mark.parametrize("root", ["/home/test/../../etc", "/home/test/./project",

@@ -427,7 +427,7 @@ class PushSimulation:
                 return True
         return False
 
-    def predict(self, action, current, friction=.4):
+    def predict(self, action, friction=.4):
         m, d = self.roll_model, self.roll_data
         mujoco.mj_copyData(d, m, self.data)
         self.position_controller(m, d).copy_state_from(self.position_controller(
@@ -463,7 +463,7 @@ class PushSimulation:
                     continue
                 if not self.trajectory(action, lift=lift):
                     continue
-                action.score = self.predict(action, current)
+                action.score = self.predict(action)
                 if math.isfinite(action.score):
                     feasible.append(action)
                 if len(feasible) >= 20:
@@ -477,8 +477,8 @@ class PushSimulation:
             return None
         feasible.sort(key=lambda a: a.score)
         for action in feasible[:4]:
-            action.score = max(action.score, self.predict(action, current, .22),
-                               self.predict(action, current, .65))
+            action.score = max(action.score, self.predict(action, friction=.22),
+                               self.predict(action, friction=.65))
         return min(feasible[:4], key=lambda a: a.score)
 
     def step(self, target, duration, model=None, data=None):

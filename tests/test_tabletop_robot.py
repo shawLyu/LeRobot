@@ -76,27 +76,8 @@ def test_changed_eeprom_is_rejected():
         AngleCalibration(path, identity)
 
 
-def test_shared_fallback_needs_a_validated_primary_and_cannot_enable_motor_control(
-        tmp_path, monkeypatch):
-    from lerobot_arm_control.runtime import tabletop_robot
-
-    monkeypatch.setattr(tabletop_robot, 'ROOT', tmp_path)
-    config = {'robot': {'arm': 'follower'}, 'additional_robots': [
-        {'arm': 'arm1', 'enabled': True, 'joint_calibration': 'arm1.json',
-         'joint_calibration_fallback': {'arm': 'follower', 'mode': 'simulation_only'}}]}
-    invalid = SimpleNamespace(metadata_snapshot=lambda: {'status': 'error'})
-    for primary in (None, invalid):
-        feedback = tabletop_robot.start_additional_feedback(config, primary_feedback=primary)
-        assert feedback['arm1'].snapshot()['status'] == 'uncalibrated'
-        assert feedback['arm1'].worker.ident is None
-        feedback['arm1'].close()
-    with pytest.raises(ValueError, match='read-only simulation'):
-        tabletop_robot.RobotFeedback({}, hardware_control=True, borrowed_calibration={'arm':
-                                      'follower'})
-
-
-@pytest.mark.parametrize('own_mapping', [False, True, 'wrong_identity'])
-def test_white_feedback_keeps_its_identity_and_prefers_its_independent_mapping(
+@pytest.mark.parametrize('own_mapping', [True, 'wrong_identity'])
+def test_white_feedback_validates_its_independent_mapping(
         tmp_path, monkeypatch, own_mapping):
     from contextlib import contextmanager
     from copy import deepcopy
@@ -106,22 +87,17 @@ def test_white_feedback_keeps_its_identity_and_prefers_its_independent_mapping(
     source_path = ROOT/'data/calibration/follower_mujoco.json'
     saved = json.loads(source_path.read_text())
     source = AngleCalibration(source_path, saved['fingerprint'], use_kinematic=False)
-    metadata = {'fingerprint': saved['fingerprint'], 'fits': {
-        joint: source.fit(joint) for joint in JOINTS}, 'status': 'live',
-        'joint_calibration': str(source_path), 'joint_calibration_sha256': 'source-hash',
-        'independently_calibrated': True}
     identity = deepcopy(saved['fingerprint'])
     identity['port'] = '/dev/white-arm'
     identity['homing_offsets']['shoulder_pan'] += 300
     identity['phase']['shoulder_pan'] = 76
     own_path = tmp_path/'arm1.json'
-    if own_mapping:
-        independent = deepcopy(saved)
-        independent['fingerprint'] = identity if own_mapping is True else saved['fingerprint']
-        for points in independent['points'].values():
-            for point in points.values():
-                point['raw'] += 100
-        own_path.write_text(json.dumps(independent))
+    independent = deepcopy(saved)
+    independent['fingerprint'] = identity if own_mapping is True else saved['fingerprint']
+    for points in independent['points'].values():
+        for point in points.values():
+            point['raw'] += 100
+    own_path.write_text(json.dumps(independent))
     monkeypatch.setattr(tabletop_robot, 'ROOT', tmp_path)
     monkeypatch.setattr(tabletop_robot, 'load_arms', lambda: {'arm1': SimpleNamespace(
         port=identity['port'], motors=identity['motors'])})
@@ -142,11 +118,9 @@ def test_white_feedback_keeps_its_identity_and_prefers_its_independent_mapping(
 
     monkeypatch.setattr(tabletop_robot, 'connected', connection)
     monkeypatch.setattr(tabletop_robot.RobotFeedback, 'start', lambda self: None)
-    config = {'robot': {'arm': 'follower'}, 'additional_robots': [{
-        'enabled': True, 'arm': 'arm1', 'joint_calibration': 'arm1.json',
-        'joint_calibration_fallback': {'arm': 'follower', 'mode': 'simulation_only'}}]}
-    feedback = tabletop_robot.start_additional_feedback(config,
-        primary_feedback=SimpleNamespace(metadata_snapshot=lambda: metadata))
+    config = {'additional_robots': [{
+        'enabled': True, 'arm': 'arm1', 'joint_calibration': 'arm1.json'}]}
+    feedback = tabletop_robot.start_additional_feedback(config)
     feedback['arm1']._run()
     state = feedback['arm1'].snapshot()
     if own_mapping == 'wrong_identity':
@@ -156,20 +130,11 @@ def test_white_feedback_keeps_its_identity_and_prefers_its_independent_mapping(
     actual = feedback['arm1'].metadata_snapshot()
     assert actual['fingerprint'] == identity
     assert state['read_only'] is True and actual['motion_available'] is False
-    if own_mapping:
-        assert state['calibration_mode'] == 'independent'
-        assert state['calibration_source_arm'] == 'arm1'
-        assert state['independently_calibrated'] is True
-        assert state['qpos'] == pytest.approx(
-            [10*source.fit(j)['radians_per_tick'] for j in JOINTS])
-    else:
-        assert state['calibration_mode'] == 'temporary_shared'
-        assert state['calibration_source_arm'] == 'follower'
-        assert state['independently_calibrated'] is False
-        assert actual['calibration_source_fingerprint'] == saved['fingerprint']
-        assert state['qpos'] == pytest.approx(
-            [110*source.fit(j)['radians_per_tick'] for j in JOINTS])
-        assert not own_path.exists()
+    assert state['calibration_mode'] == 'independent'
+    assert state['calibration_source_arm'] == 'arm1'
+    assert state['independently_calibrated'] is True
+    assert state['qpos'] == pytest.approx(
+        [10*source.fit(j)['radians_per_tick'] for j in JOINTS])
 
 
 @pytest.mark.parametrize('hardware_control', [False, True])

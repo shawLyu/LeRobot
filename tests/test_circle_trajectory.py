@@ -103,8 +103,7 @@ def test_invalid_deployed_plan_is_rejected(tmp_path, change):
 
 def test_entry_collision_is_rejected_before_any_motor_write():
     bus = Bus()
-    control = ManualControl(bus, Calibration(), [[-3, 3]] * 6,
-                            {joint: [0, 4095] for joint in JOINTS})
+    control = ManualControl(bus, Calibration(), {joint: [0, 4095] for joint in JOINTS})
     # Folded support pose from the onsite read-only snapshot.
     q = [0.07227, -1.63345, 1.48739, 1.24168, 0.07435, 0.308]
     for joint, angle in zip(JOINTS, q):
@@ -135,8 +134,7 @@ def test_one_lap_closes_with_zero_terminal_speed_and_acceleration():
 
 def test_hardware_circle_does_not_abort_or_wait_on_encoder_lag():
     bus, now = Bus(), [0.0]
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
-                            {joint: [1000, 3000] for joint in JOINTS},
+    control = ManualControl(bus, Calibration(), {joint: [1000, 3000] for joint in JOINTS},
                             clock=lambda: now[0])
     circle = Circle()
     initial = list(circle.points[0])
@@ -165,8 +163,7 @@ def test_hardware_circle_does_not_abort_or_wait_on_encoder_lag():
 @pytest.mark.parametrize("cause", ["fault", "watchdog"])
 def test_hardware_circle_cancels_and_holds_on_feedback_or_connection_failure(cause):
     bus, now = Bus(), [0.0]
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
-                            {joint: [1000, 3000] for joint in JOINTS},
+    control = ManualControl(bus, Calibration(), {joint: [1000, 3000] for joint in JOINTS},
                             clock=lambda: now[0])
     control.enable_all()
     circle = Circle()
@@ -200,8 +197,7 @@ def test_hardware_circle_cancels_and_holds_on_feedback_or_connection_failure(cau
 @pytest.mark.parametrize("laps", [None, 1])
 def test_valid_hardware_entry_and_laps_follow_without_local_angle_commands(laps):
     bus, now = Bus(), [0.0]
-    control = ManualControl(bus, Calibration(), [[-1, 1]] * 6,
-                            {joint: [1000, 3000] for joint in JOINTS},
+    control = ManualControl(bus, Calibration(), {joint: [1000, 3000] for joint in JOINTS},
                             clock=lambda: now[0])
     for joint, angle in zip(JOINTS, [0, -0.5, 0.8, -0.3, 0, 0.3]):
         bus.registers[joint]["Present_Position"] = control.raw(joint, angle)

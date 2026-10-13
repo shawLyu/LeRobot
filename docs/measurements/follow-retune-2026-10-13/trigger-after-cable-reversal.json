@@ -1,0 +1,133 @@
+{
+  "shoulder_pan": {
+    "span_deg": 0.9348441926345603,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.1784005492069612,
+    "peak_actual_speed_rad_s": 0.5340339871535368,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "shoulder_lift": {
+    "span_deg": 0.0920245398773018,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.0957968602022575,
+    "peak_actual_speed_rad_s": 0.0,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "elbow_flex": {
+    "span_deg": 0.087463556851311,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09165241932055337,
+    "peak_actual_speed_rad_s": 0.0,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_flex": {
+    "span_deg": 0.09584664536741232,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.10067443547893148,
+    "peak_actual_speed_rad_s": 0.10051233632443836,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_roll": {
+    "span_deg": 0.26470588235294124,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09343368932841974,
+    "peak_actual_speed_rad_s": 0.1917243414085444,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "gripper": {
+    "span_deg": 66.53567958544748,
+    "speed_p95_rad_s": 1.5284782312847212,
+    "peak_speed_rad_s": 2.2279548987710767,
+    "peak_actual_speed_rad_s": 1.8684410584802402,
+    "reversals": 19,
+    "worst_reversal_overshoot_deg": 2.287590038223496,
+    "events": [
+      {
+        "time_seconds": 13.616671440075152,
+        "overshoot_deg": 0.888648472648058
+      },
+      {
+        "time_seconds": 15.350100562092848,
+        "overshoot_deg": 1.393650548066276
+      },
+      {
+        "time_seconds": 17.899674695101567,
+        "overshoot_deg": 0.9343971559554075
+      },
+      {
+        "time_seconds": 20.450123996008188,
+        "overshoot_deg": 1.5478607605094343
+      },
+      {
+        "time_seconds": 23.250134012079798,
+        "overshoot_deg": 1.1846337074474274
+      },
+      {
+        "time_seconds": 26.29999110708013,
+        "overshoot_deg": 1.273316703046621
+      },
+      {
+        "time_seconds": 29.266682954039425,
+        "overshoot_deg": 1.0693917090650364
+      },
+      {
+        "time_seconds": 32.10005209909286,
+        "overshoot_deg": 0.9242134626808604
+      },
+      {
+        "time_seconds": 34.98332980007399,
+        "overshoot_deg": 1.6654062133229581
+      },
+      {
+        "time_seconds": 12.566757287015207,
+        "overshoot_deg": 1.5995672507665415
+      },
+      {
+        "time_seconds": 14.350062687997706,
+        "overshoot_deg": 2.287590038223496
+      },
+      {
+        "time_seconds": 16.216806737007573,
+        "overshoot_deg": 2.194940944393242
+      },
+      {
+        "time_seconds": 19.216697585070506,
+        "overshoot_deg": 1.4438502673796716
+      },
+      {
+        "time_seconds": 21.850130722043104,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 24.89998835104052,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 27.716694248025306,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 30.683318807044998,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 33.78342256799806,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 36.266697033075616,
+        "overshoot_deg": 0.0
+      }
+    ]
+  }
+}

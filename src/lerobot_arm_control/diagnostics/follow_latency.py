@@ -42,15 +42,21 @@ def estimate_lag(reference_time, reference, measured_time, measured):
             'valid': bool(-.099 < delay < .499 and .65 <= gain <= 1.35 and quality >= .85)}
 
 
-def analyze(trace, required_joints=JOINTS):
+def analyze(trace, required_joints=JOINTS, normal_speed_limits=None):
     if not required_joints or not set(required_joints) <= set(JOINTS):
         raise ValueError('invalid latency acceptance joints')
+    if normal_speed_limits is not None and (len(normal_speed_limits) != 6 or
+            any(not np.isfinite(v) or v <= 0 for v in normal_speed_limits)):
+        raise ValueError('normal speed limits require six finite positive values')
     frames = trace['frames']
     config = trace['metadata']['follow_config']
     result = {'definition': '4 s moving-window delay fit from leader encoder to follower encoder; '
               '100 ms bound includes worst encoder sampling interval',
               'control_config_sha256': trace['control_config_sha256'],
-              'required_joints': list(required_joints), 'joints': {}}
+              'required_joints': list(required_joints), 'joints': {},
+              'normal_speed_limits_rad_s': normal_speed_limits,
+              'speed_classification': 'Peak mapped leader speed over each 4 s window plus '
+              '0.5 s preceding history; overspeed windows are retained separately'}
     if not frames:
         return {**result, 'passed': False, 'error': 'empty trace'}
     rt = np.array([f['leader_time'] for f in frames])
@@ -66,6 +72,7 @@ def analyze(trace, required_joints=JOINTS):
     labels = [f.get('measurement_joint') for f in frames]
     guided = any(label is not None for label in labels)
     result['guided'] = guided
+    result['faulted_frames'] = sum(any(f.get('leader_status', {}).values()) for f in frames)
     for index, joint in enumerate(JOINTS):
         windows = []
         for start in np.arange(rt[0]+1, rt[-1]-4, 1):
@@ -78,22 +85,42 @@ def analyze(trace, required_joints=JOINTS):
                 continue
             gap = max(np.diff(rt[mask]).max(), np.diff(mt[mask]).max())*1000
             mapping = estimate_lag(rt[mask], desired[mask, index], rt[mask], nominal[mask, index])
+            history = (rt >= start-.5) & (rt < start+4)
+            peak_speed = float(np.max(np.abs(np.diff(desired[history, index]) /
+                                             np.diff(rt[history]))))
+            in_range = (normal_speed_limits is None or
+                        peak_speed <= normal_speed_limits[index])
             windows.append({'start_seconds': float(start-rt[0]), **measured,
                             'sampling_bound_ms': float(gap),
                             'upper_lag_ms': measured['lag_ms']+float(gap),
                             'mapping_lag_ms': mapping['lag_ms'] if mapping else None,
+                            'peak_speed_with_history_rad_s': peak_speed,
+                            'speed_class': 'normal' if in_range else 'overspeed',
                             'speed_p95_rad_s': float(np.percentile(np.abs(
                                 np.diff(desired[mask, index])/np.diff(rt[mask])), 95))})
         valid = [w for w in windows if w['valid']]
+        normal = [w for w in windows if w['speed_class'] == 'normal']
+        stress = [w for w in windows if w['speed_class'] == 'overspeed']
+        def passes(items):
+            return len(items) >= 2 and all(w['valid'] and w['upper_lag_ms'] < 100
+                                          for w in items)
         result['joints'][joint] = {
             'windows': windows, 'valid_windows': len(valid),
             'worst_upper_lag_ms': max((w['upper_lag_ms'] for w in valid), default=None),
-            'passed': len(valid) >= 2 and len(valid) == len(windows)
-                      and all(w['upper_lag_ms'] < 100 for w in valid)}
+            'invalid_windows': len(windows)-len(valid),
+            'worst_candidate_upper_lag_ms': max((w['upper_lag_ms'] for w in windows),
+                                               default=None),
+            'normal_windows': len(normal), 'overspeed_windows': len(stress),
+            'normal_worst_upper_lag_ms': max((w['upper_lag_ms'] for w in normal), default=None),
+            'overspeed_worst_upper_lag_ms': max((w['upper_lag_ms'] for w in stress), default=None),
+            'unrestricted_passed': passes(windows),
+            'passed': passes(normal)}
     result['sensor_to_command_ms'] = {
         'p95': float(np.percentile([f['sensor_to_command_ms'] for f in frames], 95)),
         'max': max(f['sensor_to_command_ms'] for f in frames)}
     result['passed'] = all(result['joints'][j]['passed'] for j in required_joints)
+    if result['faulted_frames']:
+        result['passed'] = False
     if trace['metadata'].get('measurement_completed') is False:
         result.update(passed=False, capture_completed=False)
     return result
@@ -124,15 +151,18 @@ def save_plot(trace, report, path):
         ax.plot(t, reference[:, i], color='#bd8528', alpha=.75, label='Nominal target')
         ax.plot(measured_t, actual[:, i], color='#1870a0', label='Follower encoder')
         metric = report['joints'][joint]
-        worst = metric['worst_upper_lag_ms']
+        scoped = report.get('normal_speed_limits_rad_s') is not None
+        worst = metric['normal_worst_upper_lag_ms'] if scoped else metric['worst_upper_lag_ms']
         value = f'{worst:.1f} ms upper lag' if worst is not None else 'insufficient motion'
         title = f'{joint}: {value}'
-        ax.set_title(title+' | '+('PASS' if metric['passed'] else 'REVIEW'))
+        ax.set_title(title+' | '+('NORMAL ' if scoped else '')+
+                     ('PASS' if metric['passed'] else 'REVIEW'))
         ax.set_xlabel('Remote monotonic time (s)')
         ax.set_ylabel('Angle (deg)')
         ax.grid(alpha=.2)
     axes.flat[0].legend(fontsize=8)
-    fig.suptitle('Real leader → real follower | encoder tracking latency\n'
+    capture = 'ACCEPTED' if report['passed'] else 'NOT ACCEPTED'
+    fig.suptitle(f'Real leader → real follower | encoder tracking latency | {capture}\n'
                  '4 s window fits; upper lag includes encoder sampling interval')
     fig.savefig(path, dpi=160)
     plt.close(fig)
@@ -145,16 +175,22 @@ def main():
     parser.add_argument('--plot', type=Path)
     parser.add_argument('--joints', nargs='+', choices=JOINTS, default=JOINTS,
                         help='Explicit subset to accept; defaults to all six motors')
+    parser.add_argument('--normal-speed-limits', nargs=6, type=float,
+                        help='Six peak mapped-reference limits (rad/s, motor order); '
+                             'accept normal windows and retain overspeed results separately')
     args = parser.parse_args()
     opener = gzip.open if args.trace.suffix == '.gz' else open
     with opener(args.trace, 'rt') as stream:
         trace = json.load(stream)
-    report = analyze(trace, required_joints=args.joints)
+    report = analyze(trace, required_joints=args.joints,
+                     normal_speed_limits=args.normal_speed_limits)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     if args.plot:
         save_plot(trace, report, args.plot)
-    print(json.dumps({j: {k: v for k, v in m.items() if k != 'windows'}
-                      for j, m in report['joints'].items()}, indent=2))
+    print(json.dumps({'passed': report['passed'],
+                      'faulted_frames': report.get('faulted_frames', 0),
+                      'joints': {j: {k: v for k, v in m.items() if k != 'windows'}
+                                 for j, m in report['joints'].items()}}, indent=2))
     if not report['passed']:
         raise SystemExit(2)
 

@@ -1,0 +1,162 @@
+{
+  "arms": {
+    "follower": {
+      "calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "count": 6,
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 53,
+          "shoulder_lift": 52,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 52
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 48,
+          "elbow_flex": 80,
+          "wrist_flex": 48,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Acceleration": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Lock": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        }
+      }
+    },
+    "arm1": {
+      "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "count": 6,
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 52
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 16,
+          "shoulder_lift": 16,
+          "elbow_flex": 16,
+          "wrist_flex": 16,
+          "wrist_roll": 16,
+          "gripper": 16
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Acceleration": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Lock": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        }
+      }
+    }
+  },
+  "events": [],
+  "samples": 1218
+}

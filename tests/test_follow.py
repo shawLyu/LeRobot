@@ -426,3 +426,53 @@ def test_device_error_during_leader_status_confirmation_remains_a_fault():
         def read(self, *args, **kwargs):
             raise RuntimeError('[RxPacketError] Input voltage error!')
     assert follow_server.read_leader_status(Bus())['gripper'] == 1
+
+
+def test_voltage_warning_keeps_process_online_and_holds_until_explicit_resume(remote, monkeypatch):
+    config, _, packets = remote
+    config['trigger_range_measured'] = True
+    writes, holds, closed = [], [], []
+    monkeypatch.setattr(follow_server, 'FollowBroadcast',
+                        lambda path: nullcontext(follow_server.send))
+    monkeypatch.setattr(follow_server.signal, 'signal', lambda *args: None)
+
+    class Controller:
+        def __init__(self, *args):
+            self.limits = {j: [-1, 1] for j in JOINTS}
+            self.stopped = {}
+        def enable_all(self):
+            pass
+        def heartbeat(self):
+            pass
+        def target(self, *args):
+            writes.append(args)
+        def stop(self, reason):
+            self.stopped = {'gripper': reason}
+            holds.append(reason)
+        def step(self, *args):
+            pass
+        def status(self):
+            return {}
+        def close(self):
+            closed.append(True)
+
+    statuses = iter([0, 1, 0, 0])  # Resume preflight, active fault, then healthy samples.
+    monkeypatch.setattr(follow_server, 'read_leader_status',
+                        lambda *args: {'gripper': next(statuses)})
+    monkeypatch.setattr(follow_server, 'ManualControl', Controller)
+    monkeypatch.setattr(follow_server, 'read_control_feedback',
+                        lambda bus: {'Present_Position': {j: 2200 for j in JOINTS}})
+    def send(packet):
+        packets.append(packet)
+        if packet['type'] == 'state' and packet['seq'] == 2:
+            raise StopIteration('test finished after three live states')
+    monkeypatch.setattr(follow_server, 'send', send)
+    with pytest.raises(StopIteration, match='three live states'):
+        follow_server.serve(SimpleNamespace(config=None, hardware_control=True, standalone=True))
+    states = [p for p in packets if p['type'] == 'state']
+    assert len(states) == 3 and len(holds) == 1 and closed == [True]
+    assert not writes
+    assert all(p['stage'] == 'held' and 'process online' in p['notice'] for p in states)
+    assert states[0]['warning']['active'] is True
+    assert states[-1]['warning']['active'] is False
+    assert 'e + Enter resumes' in states[-1]['notice']

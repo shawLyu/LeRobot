@@ -1,0 +1,61 @@
+{
+  "shoulder_pan": {
+    "span_deg": 0.33994334277620375,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09040801653986372,
+    "peak_actual_speed_rad_s": 0.2670079223095511,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "shoulder_lift": {
+    "span_deg": 0.0,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.0,
+    "peak_actual_speed_rad_s": 0.09007052289640985,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "elbow_flex": {
+    "span_deg": 0.087463556851311,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09150203862743321,
+    "peak_actual_speed_rad_s": 0.0923813960803782,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_flex": {
+    "span_deg": 0.0,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.0,
+    "peak_actual_speed_rad_s": 0.10021222871729558,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_roll": {
+    "span_deg": 0.1764705882352944,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09253058301182489,
+    "peak_actual_speed_rad_s": 0.09579626273368536,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "gripper": {
+    "span_deg": 60.9246464428371,
+    "speed_p95_rad_s": 1.492011734825245,
+    "peak_speed_rad_s": 1.8370694654282864,
+    "peak_actual_speed_rad_s": 1.8690920113757445,
+    "reversals": 1,
+    "worst_reversal_overshoot_deg": 1.3213428619757324,
+    "events": [
+      {
+        "time_seconds": 9.237139881006442,
+        "overshoot_deg": 1.3213428619757324
+      }
+    ]
+  }
+}

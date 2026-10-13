@@ -70,6 +70,43 @@ def test_interrupted_guided_capture_cannot_pass_on_partial_good_windows():
     assert analyze(trace)['passed']
 
 
+def test_speed_scope_preserves_overspeed_failures_and_requires_normal_motion():
+    report = analyze(synthetic_trace(.09), normal_speed_limits=[.1]*6)
+    assert not report['passed']
+    for metric in report['joints'].values():
+        assert metric['normal_windows'] == 0
+        assert metric['overspeed_windows'] > 0
+        assert metric['overspeed_worst_upper_lag_ms'] > 100
+        assert not metric['unrestricted_passed']
+    assert analyze(synthetic_trace(.04), normal_speed_limits=[2]*6)['passed']
+
+
+def test_peak_limit_not_percentile_and_preceding_overspeed_is_included():
+    trace = synthetic_trace(.04)
+    # One short burst before the first fit window must not disappear into p95.
+    trace['frames'][45]['leader'][0] += .06
+    report = analyze(trace, normal_speed_limits=[2]*6)
+    window = report['joints']['shoulder_pan']['windows'][0]
+    assert window['speed_p95_rad_s'] < 2
+    assert window['peak_speed_with_history_rad_s'] > 2
+    assert window['speed_class'] == 'overspeed'
+    assert report['joints']['shoulder_pan']['normal_windows'] > 0
+
+
+def test_any_captured_leader_fault_invalidates_otherwise_good_capture():
+    trace = synthetic_trace(.04)
+    trace['frames'][-1]['leader_status'] = {'gripper': 1}
+    report = analyze(trace, normal_speed_limits=[2]*6)
+    assert report['faulted_frames'] == 1
+    assert not report['passed']
+
+
+@pytest.mark.parametrize('limits', [[2]*5, [2]*5+[0], [2]*5+[float('nan')]])
+def test_invalid_speed_scope_is_rejected(limits):
+    with pytest.raises(ValueError, match='speed limits'):
+        analyze(synthetic_trace(.04), normal_speed_limits=limits)
+
+
 def test_cli_reads_archived_trace_and_exits_nonzero_for_failed_acceptance(tmp_path, monkeypatch):
     import gzip
     import json

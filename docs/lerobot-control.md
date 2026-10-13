@@ -44,10 +44,10 @@ q_cmd   = clip(q_ref + bounded_correction(u_pid + u_ff), joint_limits)
 | shoulder_lift | 0.10 | 0.80 | 0.03 | 0.16 | 0.24 |
 | elbow_flex | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
 | wrist_flex | 0.10 | 0.80 | 0.02 | 0.16 | 0.24 |
-| wrist_roll | 0.25 | 1.50 | 0.02 | 0.16 | 0.24 |
+| wrist_roll | 0.20 | 0.80 | 0.015 | 0.20 | 0.30 |
 | gripper | 0.35 | 0.80 | 0.01 | 0.12 | 0.04 |
 
-D 滤波时间常数为 shoulder_lift 40 ms、其他关节 80 ms；误差滤波为前五轴 80 ms、夹爪 120 ms。
+D 滤波时间常数为 shoulder_lift/wrist_roll 40 ms、其他关节 80 ms；误差滤波为 wrist_roll 40 ms、夹爪 120 ms、其他关节 80 ms。
 死区为 pan/wrist_flex/wrist_roll 0.0015 rad，lift/elbow/gripper 0.003 rad。
 物理编码器边界始终约束最终命令，Push-T 另取 CAD 边界交集。
 
@@ -111,7 +111,7 @@ MuJoCo 使用相同的 PID 算法、频率和配置，但内部位置执行器�
 每个周期直接采用最新目标，避免 0.6 rad/s 限速持续积累位置滞后。
 硬件仍受模型/编码器行程和舵机自身速度上限约束。
 
-共享 PID 使用 3 号 elbow_flex 60 ms、其他关节 80 ms 速度前馈：根据连续参考角度的变化估算速度，以 15 ms 一阶滤波降噪。
+共享 PID 使用 3 号 elbow_flex 60 ms、5 号 wrist_roll 100 ms、其他关节 80 ms 速度前馈：根据连续参考角度的变化估算速度，以 wrist_roll 10 ms、其他关节 15 ms 一阶滤波降噪。5 号前馈增长速率为 6 rad/s，其他关节为 4 rad/s；停止或反向时仍立即取消前馈。
 只有连续两个同向移动样本才启用；单次位置阶跃不会产生前馈冲击，停止/反向在一个控制周期内清除旧方向前馈，减速时立即减小前馈；只有前馈增大时才按变化率限制。
 PID 反馈修正仍使用原先的缓慢变化率；前馈采用独立的 4 rad/s 变化率，
 与 PID 相加后的修正仍受同一幅度边界及编码器行程限制。暂停/重新使能清除前馈状态。

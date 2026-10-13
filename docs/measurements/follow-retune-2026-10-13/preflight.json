@@ -1,0 +1,343 @@
+{
+  "time_unix_ns": 1791869461033991391,
+  "arms": {
+    "follower": {
+      "calibration": {
+        "arm": "follower",
+        "fingerprint": {
+          "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+          "motors": {
+            "shoulder_pan": 1,
+            "shoulder_lift": 2,
+            "elbow_flex": 3,
+            "wrist_flex": 4,
+            "wrist_roll": 5,
+            "gripper": 6
+          },
+          "raw_limits": {
+            "shoulder_pan": [
+              844,
+              3440
+            ],
+            "shoulder_lift": [
+              809,
+              3238
+            ],
+            "elbow_flex": [
+              773,
+              3126
+            ],
+            "wrist_flex": [
+              862,
+              3192
+            ],
+            "wrist_roll": [
+              0,
+              4095
+            ],
+            "gripper": [
+              1441,
+              2982
+            ]
+          },
+          "homing_offsets": {
+            "shoulder_pan": -1214,
+            "shoulder_lift": 1932,
+            "elbow_flex": 1070,
+            "wrist_flex": -1980,
+            "wrist_roll": -1910,
+            "gripper": -1632
+          },
+          "phase": {
+            "shoulder_pan": 12,
+            "shoulder_lift": 12,
+            "elbow_flex": 12,
+            "wrist_flex": 12,
+            "wrist_roll": 12,
+            "gripper": 12
+          },
+          "mode": {
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 0
+          },
+          "model": "so101",
+          "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+        },
+        "path": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
+        "sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+        "mode": "independent"
+      },
+      "registers": {
+        "Present_Position": {
+          "shoulder_pan": 2380,
+          "shoulder_lift": 1636,
+          "elbow_flex": 2376,
+          "wrist_flex": 2801,
+          "wrist_roll": 3328,
+          "gripper": 2382
+        },
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 52,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 52
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 24,
+          "shoulder_lift": 24,
+          "elbow_flex": 25,
+          "wrist_flex": 26,
+          "wrist_roll": 25,
+          "gripper": 24
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 48,
+          "elbow_flex": 80,
+          "wrist_flex": 48,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Acceleration": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Lock": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        }
+      },
+      "qpos": [
+        0.3495574924416812,
+        -0.553433463666578,
+        0.3598776245262644,
+        1.2217304763960306,
+        2.084903885917093,
+        1.066797505363379
+      ]
+    },
+    "arm1": {
+      "calibration": {
+        "arm": "arm1",
+        "fingerprint": {
+          "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+          "motors": {
+            "shoulder_pan": 1,
+            "shoulder_lift": 2,
+            "elbow_flex": 3,
+            "wrist_flex": 4,
+            "wrist_roll": 5,
+            "gripper": 6
+          },
+          "raw_limits": {
+            "shoulder_pan": [
+              699,
+              3416
+            ],
+            "shoulder_lift": [
+              795,
+              3280
+            ],
+            "elbow_flex": [
+              807,
+              3094
+            ],
+            "wrist_flex": [
+              794,
+              3200
+            ],
+            "wrist_roll": [
+              0,
+              4095
+            ],
+            "gripper": [
+              1512,
+              2759
+            ]
+          },
+          "homing_offsets": {
+            "shoulder_pan": -2030,
+            "shoulder_lift": 1084,
+            "elbow_flex": 924,
+            "wrist_flex": -1986,
+            "wrist_roll": 1818,
+            "gripper": 1844
+          },
+          "phase": {
+            "shoulder_pan": 76,
+            "shoulder_lift": 12,
+            "elbow_flex": 76,
+            "wrist_flex": 76,
+            "wrist_roll": 76,
+            "gripper": 76
+          },
+          "mode": {
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 0
+          },
+          "model": "so101",
+          "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+        },
+        "path": "/home/xy/Research/lerobot/data/calibration/arm1_mujoco.json",
+        "sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+        "mode": "independent"
+      },
+      "registers": {
+        "Present_Position": {
+          "shoulder_pan": 2053,
+          "shoulder_lift": 838,
+          "elbow_flex": 3100,
+          "wrist_flex": 2548,
+          "wrist_roll": 2192,
+          "gripper": 2370
+        },
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 53,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 53
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 25,
+          "shoulder_lift": 24,
+          "elbow_flex": 25,
+          "wrist_flex": 25,
+          "wrist_roll": 24,
+          "gripper": 24
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "P_Coefficient": {
+          "shoulder_pan": 16,
+          "shoulder_lift": 16,
+          "elbow_flex": 16,
+          "wrist_flex": 16,
+          "wrist_roll": 16,
+          "gripper": 16
+        },
+        "I_Coefficient": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "D_Coefficient": {
+          "shoulder_pan": 32,
+          "shoulder_lift": 32,
+          "elbow_flex": 32,
+          "wrist_flex": 32,
+          "wrist_roll": 32,
+          "gripper": 32
+        },
+        "Acceleration": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Goal_Velocity": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Lock": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        }
+      },
+      "qpos": [
+        0.09196352432604682,
+        -1.9337819810440238,
+        1.5463718941139262,
+        0.9434814998001294,
+        0.2540994058050568,
+        1.3990425883024609
+      ]
+    }
+  }
+}

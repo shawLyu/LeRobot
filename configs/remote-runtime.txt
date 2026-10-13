@@ -92,3 +92,4 @@ tests/test_latest_output.py
 src/lerobot_arm_control/transport/follow_observer.py
 src/lerobot_arm_control/runtime/follow_observer.py
 tests/test_follow_observer.py
+tests/test_follow_fault_diagnostics.py

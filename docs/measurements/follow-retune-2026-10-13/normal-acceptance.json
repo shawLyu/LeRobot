@@ -1,0 +1,98 @@
+{
+  "passed": false,
+  "normal_speed_limits_rad_s": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    1.2
+  ],
+  "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+  "joints": {
+    "shoulder_pan": {
+      "capture": "elbow-final-confirmed",
+      "faulted_frames": 0,
+      "valid_windows": 18,
+      "worst_upper_lag_ms": 81.88314606528743,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 81.88314606528743,
+      "normal_windows": 18,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": 81.88314606528743,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": true,
+      "passed": true
+    },
+    "shoulder_lift": {
+      "capture": "elbow-final-confirmed",
+      "faulted_frames": 0,
+      "valid_windows": 7,
+      "worst_upper_lag_ms": 47.47923903167259,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 47.47923903167259,
+      "normal_windows": 7,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": 47.47923903167259,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": true,
+      "passed": true
+    },
+    "elbow_flex": {
+      "capture": "elbow-final-confirmed",
+      "faulted_frames": 0,
+      "valid_windows": 22,
+      "worst_upper_lag_ms": 34.99851092416803,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 34.99851092416803,
+      "normal_windows": 22,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": 34.99851092416803,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": true,
+      "passed": true
+    },
+    "wrist_flex": {
+      "capture": "elbow-final-confirmed",
+      "faulted_frames": 0,
+      "valid_windows": 19,
+      "worst_upper_lag_ms": 59.88314606528741,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 59.88314606528741,
+      "normal_windows": 9,
+      "overspeed_windows": 10,
+      "normal_worst_upper_lag_ms": 37.580759013071756,
+      "overspeed_worst_upper_lag_ms": 59.88314606528741,
+      "unrestricted_passed": true,
+      "passed": true
+    },
+    "wrist_roll": {
+      "capture": "elbow-final-confirmed",
+      "faulted_frames": 0,
+      "valid_windows": 15,
+      "worst_upper_lag_ms": 57.58075901307178,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 57.58075901307178,
+      "normal_windows": 6,
+      "overspeed_windows": 9,
+      "normal_worst_upper_lag_ms": 39.09637697786103,
+      "overspeed_worst_upper_lag_ms": 57.58075901307178,
+      "unrestricted_passed": true,
+      "passed": true
+    },
+    "gripper": {
+      "capture": "trigger-after-cable",
+      "faulted_frames": 0,
+      "valid_windows": 25,
+      "worst_upper_lag_ms": 65.10449904203428,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 65.10449904203428,
+      "normal_windows": 0,
+      "overspeed_windows": 25,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": 65.10449904203428,
+      "unrestricted_passed": true,
+      "passed": false
+    }
+  }
+}

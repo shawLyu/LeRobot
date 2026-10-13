@@ -1,0 +1,110 @@
+{
+  "shoulder_pan": {
+    "span_deg": 11.133144475920679,
+    "speed_p95_rad_s": 0.08866251326378063,
+    "peak_speed_rad_s": 0.8001962627910203,
+    "peak_actual_speed_rad_s": 1.3348840578499306,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "shoulder_lift": {
+    "span_deg": 0.46012269938650263,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09729549205855849,
+    "peak_actual_speed_rad_s": 0.17797721050403184,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "elbow_flex": {
+    "span_deg": 0.174927113702622,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09223685434992997,
+    "peak_actual_speed_rad_s": 0.09264137563022863,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_flex": {
+    "span_deg": 0.5750798722044739,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.10110836651686277,
+    "peak_actual_speed_rad_s": 0.10182309457337768,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_roll": {
+    "span_deg": 38.8235294117647,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 2.045003015129151,
+    "peak_actual_speed_rad_s": 2.383298406173542,
+    "reversals": 1,
+    "worst_reversal_overshoot_deg": 2.9656122267638128,
+    "events": [
+      {
+        "time_seconds": 17.20204282994382,
+        "overshoot_deg": 2.9656122267638128
+      }
+    ]
+  },
+  "gripper": {
+    "span_deg": 65.00539781928101,
+    "speed_p95_rad_s": 1.594553163890988,
+    "peak_speed_rad_s": 2.590467583259184,
+    "peak_actual_speed_rad_s": 1.886722046506729,
+    "reversals": 12,
+    "worst_reversal_overshoot_deg": 1.6844919786096233,
+    "events": [
+      {
+        "time_seconds": 19.535385507973842,
+        "overshoot_deg": 0.6530986080553864
+      },
+      {
+        "time_seconds": 21.918669710983522,
+        "overshoot_deg": 1.572142287670857
+      },
+      {
+        "time_seconds": 24.518674363964237,
+        "overshoot_deg": 0.409616547000568
+      },
+      {
+        "time_seconds": 27.435349941952154,
+        "overshoot_deg": 0.892025717866662
+      },
+      {
+        "time_seconds": 30.58548155799508,
+        "overshoot_deg": 0.9654851311727736
+      },
+      {
+        "time_seconds": 33.35218610393349,
+        "overshoot_deg": 0.9931439035528
+      },
+      {
+        "time_seconds": 16.901977078989148,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 20.735454647918232,
+        "overshoot_deg": 0.4010695187165776
+      },
+      {
+        "time_seconds": 22.91868607699871,
+        "overshoot_deg": 1.6844919786096233
+      },
+      {
+        "time_seconds": 25.968678741017357,
+        "overshoot_deg": 0.3208556149732519
+      },
+      {
+        "time_seconds": 28.818764286930673,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 31.61845753097441,
+        "overshoot_deg": 1.2436575623448216
+      }
+    ]
+  }
+}

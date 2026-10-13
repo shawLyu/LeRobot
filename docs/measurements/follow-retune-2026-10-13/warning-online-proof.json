@@ -1,0 +1,448 @@
+{
+  "first_fault_seq": 920,
+  "last_seq": 7196,
+  "seconds_online_after_first_fault": 104.6166625469923,
+  "frames_after_first_fault": 6276,
+  "remained_held_after_fault": true,
+  "warnings": [
+    "WARNING: leader voltage alarm active; process online; follower held; joints=['gripper']; waiting for healthy readings",
+    "WARNING: leader voltage alarm cleared; process online; follower held; joints=['gripper']; remote e + Enter resumes",
+    "WARNING: leader voltage alarm active; process online; follower held; joints=['wrist_roll']; waiting for healthy readings",
+    "WARNING: leader voltage alarm cleared; process online; follower held; joints=['wrist_roll']; remote e + Enter resumes"
+  ],
+  "fault_events": [
+    {
+      "time_unix_ns": 1791871988919088444,
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 1
+      },
+      "packet_errors": {
+        "gripper": "Failed to read 'Status' on id_=6 after 1 tries. [RxPacketError] Input voltage error!"
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 53
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 28,
+          "shoulder_lift": 26,
+          "elbow_flex": 27,
+          "wrist_flex": 28,
+          "wrist_roll": 27,
+          "gripper": 27
+        },
+        "Present_Current": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 120,
+          "shoulder_lift": 80,
+          "elbow_flex": 120,
+          "wrist_flex": 120,
+          "wrist_roll": 120,
+          "gripper": 120
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    },
+    {
+      "time_unix_ns": 1791871994777466193,
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 1,
+        "gripper": 0
+      },
+      "packet_errors": {
+        "wrist_roll": "Failed to read 'Status' on id_=5 after 1 tries. [RxPacketError] Input voltage error!"
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 53,
+          "wrist_roll": 52,
+          "gripper": 52
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 28,
+          "shoulder_lift": 26,
+          "elbow_flex": 28,
+          "wrist_flex": 28,
+          "wrist_roll": 27,
+          "gripper": 27
+        },
+        "Present_Current": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 120,
+          "shoulder_lift": 80,
+          "elbow_flex": 120,
+          "wrist_flex": 120,
+          "wrist_roll": 120,
+          "gripper": 120
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    },
+    {
+      "time_unix_ns": 1791871996376007128,
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 1
+      },
+      "packet_errors": {
+        "gripper": "Failed to read 'Status' on id_=6 after 1 tries. [RxPacketError] Input voltage error!"
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 52
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 28,
+          "shoulder_lift": 26,
+          "elbow_flex": 28,
+          "wrist_flex": 28,
+          "wrist_roll": 27,
+          "gripper": 27
+        },
+        "Present_Current": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 120,
+          "shoulder_lift": 80,
+          "elbow_flex": 120,
+          "wrist_flex": 120,
+          "wrist_roll": 120,
+          "gripper": 120
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    },
+    {
+      "time_unix_ns": 1791872023894070402,
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 1
+      },
+      "packet_errors": {
+        "gripper": "Failed to read 'Status' on id_=6 after 1 tries. [RxPacketError] Input voltage error!"
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 53,
+          "gripper": 53
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 28,
+          "shoulder_lift": 26,
+          "elbow_flex": 27,
+          "wrist_flex": 28,
+          "wrist_roll": 27,
+          "gripper": 27
+        },
+        "Present_Current": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 120,
+          "shoulder_lift": 80,
+          "elbow_flex": 120,
+          "wrist_flex": 120,
+          "wrist_roll": 120,
+          "gripper": 120
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    },
+    {
+      "time_unix_ns": 1791872073177173510,
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 1
+      },
+      "packet_errors": {
+        "gripper": "Failed to read 'Status' on id_=6 after 1 tries. [RxPacketError] Input voltage error!"
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 53
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 28,
+          "shoulder_lift": 26,
+          "elbow_flex": 27,
+          "wrist_flex": 27,
+          "wrist_roll": 27,
+          "gripper": 27
+        },
+        "Present_Current": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 120,
+          "shoulder_lift": 80,
+          "elbow_flex": 120,
+          "wrist_flex": 120,
+          "wrist_roll": 120,
+          "gripper": 120
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    },
+    {
+      "time_unix_ns": 1791872087877492649,
+      "status": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 1
+      },
+      "packet_errors": {
+        "gripper": "Failed to read 'Status' on id_=6 after 1 tries. [RxPacketError] Input voltage error!"
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 53,
+          "wrist_roll": 53,
+          "gripper": 52
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 28,
+          "shoulder_lift": 26,
+          "elbow_flex": 28,
+          "wrist_flex": 28,
+          "wrist_roll": 27,
+          "gripper": 27
+        },
+        "Present_Current": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Min_Voltage_Limit": {
+          "shoulder_pan": 40,
+          "shoulder_lift": 40,
+          "elbow_flex": 40,
+          "wrist_flex": 40,
+          "wrist_roll": 40,
+          "gripper": 40
+        },
+        "Max_Voltage_Limit": {
+          "shoulder_pan": 120,
+          "shoulder_lift": 80,
+          "elbow_flex": 120,
+          "wrist_flex": 120,
+          "wrist_roll": 120,
+          "gripper": 120
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    }
+  ],
+  "passed": true
+}

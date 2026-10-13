@@ -1,6 +1,14 @@
 # Control performance and verification
 
-## Current remote-only controller and overshoot tuning (2026-10-12)
+## Current wrist retuning and warning behavior (2026-10-13)
+
+See the [latest report](measurements/follow-retune-2026-10-13/README.md) for the
+shared wrist-roll PID/feedforward update, normal-speed/overspeed classification,
+online warnings, and exact-configuration physical and simulation response curves.
+The current six-axis dynamic acceptance remains incomplete; finite step success
+is not a substitute for measured leader-to-follower latency.
+
+## Previous remote-only controller and overshoot tuning (2026-10-12)
 
 Following now runs independently on the robot computer. The simulator is an optional
 read-only subscriber. See the [current report and six-channel response curves](measurements/remote-follow-2026-10-12/README.md)

@@ -1,0 +1,161 @@
+{
+  "definition": "4 s moving-window delay fit from leader encoder to follower encoder; 100 ms bound includes worst encoder sampling interval",
+  "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+  "required_joints": [
+    "shoulder_lift"
+  ],
+  "joints": {
+    "shoulder_pan": {
+      "windows": [
+        {
+          "start_seconds": 10.0,
+          "lag_ms": 42.00000000000012,
+          "signed_lag_ms": 42.00000000000012,
+          "gain": 1.020620317206979,
+          "r_squared": 0.9787992529783516,
+          "valid": true,
+          "sampling_bound_ms": 17.914536991156638,
+          "upper_lag_ms": 59.91453699115676,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "peak_speed_with_history_rad_s": 0.44415359551838096,
+          "speed_class": "normal",
+          "speed_p95_rad_s": 0.17778385846200606
+        },
+        {
+          "start_seconds": 11.0,
+          "lag_ms": 48.00000000000013,
+          "signed_lag_ms": 48.00000000000013,
+          "gain": 1.0124562116937625,
+          "r_squared": 0.9891974043634351,
+          "valid": true,
+          "sampling_bound_ms": 17.914536991156638,
+          "upper_lag_ms": 65.91453699115677,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "peak_speed_with_history_rad_s": 0.44415359551838096,
+          "speed_class": "normal",
+          "speed_p95_rad_s": 0.1785275028858472
+        }
+      ],
+      "valid_windows": 2,
+      "worst_upper_lag_ms": 65.91453699115677,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 65.91453699115677,
+      "normal_windows": 2,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": 65.91453699115677,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": true,
+      "passed": true
+    },
+    "shoulder_lift": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "elbow_flex": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "wrist_flex": {
+      "windows": [
+        {
+          "start_seconds": 10.0,
+          "lag_ms": 30.00000000000011,
+          "signed_lag_ms": 30.00000000000011,
+          "gain": 1.0139172396961966,
+          "r_squared": 0.9953936924053728,
+          "valid": true,
+          "sampling_bound_ms": 17.914536991156638,
+          "upper_lag_ms": 47.91453699115675,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "peak_speed_with_history_rad_s": 2.0015053261874423,
+          "speed_class": "overspeed",
+          "speed_p95_rad_s": 0.7226513826399209
+        },
+        {
+          "start_seconds": 11.0,
+          "lag_ms": 30.00000000000011,
+          "signed_lag_ms": 30.00000000000011,
+          "gain": 1.0197569727444606,
+          "r_squared": 0.9926261944011008,
+          "valid": true,
+          "sampling_bound_ms": 17.914536991156638,
+          "upper_lag_ms": 47.91453699115675,
+          "mapping_lag_ms": 8.326672684688674e-14,
+          "peak_speed_with_history_rad_s": 2.0015053261874423,
+          "speed_class": "overspeed",
+          "speed_p95_rad_s": 0.815316453474503
+        }
+      ],
+      "valid_windows": 2,
+      "worst_upper_lag_ms": 47.91453699115675,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": 47.91453699115675,
+      "normal_windows": 0,
+      "overspeed_windows": 2,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": 47.91453699115675,
+      "unrestricted_passed": true,
+      "passed": false
+    },
+    "wrist_roll": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "gripper": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    }
+  },
+  "normal_speed_limits_rad_s": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    1.2
+  ],
+  "speed_classification": "Peak mapped leader speed over each 4 s window plus 0.5 s preceding history; overspeed windows are retained separately",
+  "guided": false,
+  "faulted_frames": 2,
+  "sensor_to_command_ms": {
+    "p95": 5.766996426973492,
+    "max": 13.082372024655342
+  },
+  "passed": false
+}

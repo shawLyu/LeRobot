@@ -1,0 +1,108 @@
+{
+  "definition": "4 s moving-window delay fit from leader encoder to follower encoder; 100 ms bound includes worst encoder sampling interval",
+  "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+  "required_joints": [
+    "shoulder_pan",
+    "shoulder_lift",
+    "elbow_flex",
+    "wrist_flex",
+    "wrist_roll",
+    "gripper"
+  ],
+  "joints": {
+    "shoulder_pan": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "shoulder_lift": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "elbow_flex": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "wrist_flex": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "wrist_roll": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    },
+    "gripper": {
+      "windows": [],
+      "valid_windows": 0,
+      "worst_upper_lag_ms": null,
+      "invalid_windows": 0,
+      "worst_candidate_upper_lag_ms": null,
+      "normal_windows": 0,
+      "overspeed_windows": 0,
+      "normal_worst_upper_lag_ms": null,
+      "overspeed_worst_upper_lag_ms": null,
+      "unrestricted_passed": false,
+      "passed": false
+    }
+  },
+  "normal_speed_limits_rad_s": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    1.2
+  ],
+  "speed_classification": "Peak mapped leader speed over each 4 s window plus 0.5 s preceding history; overspeed windows are retained separately",
+  "guided": false,
+  "faulted_frames": 0,
+  "sensor_to_command_ms": {
+    "p95": 4.921684885630384,
+    "max": 5.689564975909889
+  },
+  "passed": false
+}

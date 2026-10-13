@@ -105,7 +105,38 @@ if acceptance fails. Use `--log` to choose a different local destination.
 The finite buffer retains up to 36,000 frames (about ten minutes at 60 Hz).
 The [latency measurement definition](measurements/follow-latency-2026-10-12/README.md#measurement-definition)
 requires reversals and sufficient movement; read-to-command timing alone is not motor
-response. The current profile does not yet have an uninterrupted six-axis <100 ms pass.
+response. See the [latest retuning report](measurements/follow-retune-2026-10-13/README.md).
+The current profile does not yet have an uninterrupted six-axis <100 ms pass.
+
+To separate the agreed normal operation envelope from overspeed stress tests:
+
+```sh
+./scripts/lerobot-arm verify follow-latency logs/follow-remote-trace.json \
+  --normal-speed-limits 2 2 2 2 2 1.2 \
+  --output logs/follow-scoped.json --plot logs/follow-scoped.png
+```
+
+Limits are peak **mapped leader** radians/second in motor order, including 0.5 s
+of preceding motion. The gripper limit applies after the 118° → 90° mapping.
+Every candidate window is retained; overspeed failures stay in the report. At least
+two valid normal windows per requested joint are required. Any recorded leader
+alarm or unfinished guided capture rejects the overall capture. These limits
+classify measurements; they do not add an input rate limiter to the controller.
+
+## Online warnings and recovery
+
+A confirmed leader motor alarm displays `WARNING`, holds the follower, and keeps
+the process, readings and read-only observer online. It records the original
+driver error and post-hold voltage, temperature and protection thresholds in
+`metadata.leader_fault_events`. When current readings become healthy, the display
+says the alarm cleared; **e + Enter** in the owning terminal explicitly resumes.
+An active alarm still rejects resume. There is no automatic torque release or
+voltage-threshold change. `--duration` ends a finite test even if a warning is
+being displayed; ordinary `demo follow` has no such time limit.
+
+The observed white-gripper voltage limits were already 4–12 V. A valid 5.3 V
+readback alongside a device voltage-error packet does not establish that the
+transient fault is harmless; widening that range is not part of this update.
 
 ## Upstream model and mapping
 

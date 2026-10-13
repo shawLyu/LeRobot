@@ -1,0 +1,166 @@
+{
+  "shoulder_pan": {
+    "span_deg": 1.6997167138810194,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.26731045809279347,
+    "peak_actual_speed_rad_s": 0.6122781951984909,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "shoulder_lift": {
+    "span_deg": 0.0,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.0,
+    "peak_actual_speed_rad_s": 0.0,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "elbow_flex": {
+    "span_deg": 0.174927113702622,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.09267980560569562,
+    "peak_actual_speed_rad_s": 0.0,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_flex": {
+    "span_deg": 0.9584664536741232,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.20069542665845552,
+    "peak_actual_speed_rad_s": 0.40243422194822986,
+    "reversals": 0,
+    "worst_reversal_overshoot_deg": null,
+    "events": []
+  },
+  "wrist_roll": {
+    "span_deg": 5.117647058823527,
+    "speed_p95_rad_s": 0.0,
+    "peak_speed_rad_s": 0.8319570947491056,
+    "peak_actual_speed_rad_s": 1.4878906939530152,
+    "reversals": 1,
+    "worst_reversal_overshoot_deg": 1.3128665363426333,
+    "events": [
+      {
+        "time_seconds": 11.316657570074312,
+        "overshoot_deg": 1.3128665363426333
+      }
+    ]
+  },
+  "gripper": {
+    "span_deg": 65.87984454280472,
+    "speed_p95_rad_s": 1.6069475167850205,
+    "peak_speed_rad_s": 2.7571688265496146,
+    "peak_actual_speed_rad_s": 1.9181379144630601,
+    "reversals": 26,
+    "worst_reversal_overshoot_deg": 2.7272727272727173,
+    "events": [
+      {
+        "time_seconds": 3.7167132740141824,
+        "overshoot_deg": 0.23903102504875948
+      },
+      {
+        "time_seconds": 5.783447738038376,
+        "overshoot_deg": 0.7282206651614258
+      },
+      {
+        "time_seconds": 7.716744969016872,
+        "overshoot_deg": 0.966610879578977
+      },
+      {
+        "time_seconds": 9.816658638999797,
+        "overshoot_deg": 2.4652417963249773
+      },
+      {
+        "time_seconds": 12.383395186974667,
+        "overshoot_deg": 1.0581082461936695
+      },
+      {
+        "time_seconds": 15.250044787069783,
+        "overshoot_deg": 0.7129970828683533
+      },
+      {
+        "time_seconds": 17.93337888503447,
+        "overshoot_deg": 0.665533798142334
+      },
+      {
+        "time_seconds": 21.383338086074218,
+        "overshoot_deg": 0.10910233976702684
+      },
+      {
+        "time_seconds": 25.29967315401882,
+        "overshoot_deg": 0.5078943828618298
+      },
+      {
+        "time_seconds": 28.600039958022535,
+        "overshoot_deg": 0.7587197873663254
+      },
+      {
+        "time_seconds": 31.566700813011266,
+        "overshoot_deg": 0.7767837194842774
+      },
+      {
+        "time_seconds": 34.283412588061765,
+        "overshoot_deg": 1.0004872470024708
+      },
+      {
+        "time_seconds": 37.41665367304813,
+        "overshoot_deg": 0.8118377929327263
+      },
+      {
+        "time_seconds": 2.8167546960758045,
+        "overshoot_deg": 1.3238974448975247
+      },
+      {
+        "time_seconds": 4.616696759010665,
+        "overshoot_deg": 2.3734326839978137
+      },
+      {
+        "time_seconds": 6.700053855078295,
+        "overshoot_deg": 1.636257989205528
+      },
+      {
+        "time_seconds": 8.783347313059494,
+        "overshoot_deg": 2.085561497326201
+      },
+      {
+        "time_seconds": 10.966664501000196,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 14.133492222987115,
+        "overshoot_deg": 1.4193349309339036
+      },
+      {
+        "time_seconds": 16.433385894051753,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 19.550004383083433,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 23.13339382200502,
+        "overshoot_deg": 0.0
+      },
+      {
+        "time_seconds": 26.850018131081015,
+        "overshoot_deg": 1.096227819148245
+      },
+      {
+        "time_seconds": 30.116664616041817,
+        "overshoot_deg": 1.122994652406407
+      },
+      {
+        "time_seconds": 32.99966640397906,
+        "overshoot_deg": 2.7272727272727173
+      },
+      {
+        "time_seconds": 35.90004155400675,
+        "overshoot_deg": 0.0
+      }
+    ]
+  }
+}

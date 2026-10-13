@@ -1218,7 +1218,7 @@
     },
     "control.json": {
       "file": "configs/control.json",
-      "sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae"
+      "sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779"
     },
     "follow.json": {
       "file": "configs/follow.json",
@@ -1353,7 +1353,7 @@
     "hz": 60
   },
   "controller_update": {
-    "date": "2026-10-12",
+    "date": "2026-10-13",
     "source": "configs/control.json",
     "hz": 60,
     "profile": "shared-joint-pid-v1",
@@ -1364,10 +1364,19 @@
       "evidence": "docs/measurements/pid-2026-10-12/arm1-configuration-restoration.json",
       "leader_torque_enabled": false
     },
-    "latency_update": "Remote-only 60 Hz acquisition, mapping and PID; motor 3 velocity lead 60 ms, others 80 ms; immediate lead cancellation at stops/reversals; independent read-only telemetry",
-    "latency_evidence": "docs/measurements/remote-follow-2026-10-12/dynamic-report.json",
+    "latency_update": "Remote-only 60 Hz shared PID; wrist-roll lead 100 ms, reference filter 10 ms, correction bound 0.20 rad; immediate stop/reversal cancellation retained",
+    "latency_evidence": "docs/measurements/follow-retune-2026-10-13/normal-acceptance.json",
     "simulation_inner_loop": "kp=700, kv=56; approximately 80 ms effective lag, shared outer PID unchanged",
-    "overshoot_evidence": "docs/measurements/remote-follow-2026-10-12/README.md",
-    "control_config_sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae"
+    "overshoot_evidence": "docs/measurements/follow-retune-2026-10-13/README.md",
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "normal_operation_peak_speed_rad_s": {
+      "shoulder_pan": 2,
+      "shoulder_lift": 2,
+      "elbow_flex": 2,
+      "wrist_flex": 2,
+      "wrist_roll": 2,
+      "gripper": 1.2
+    },
+    "leader_alarm_behavior": "Warning and online monitoring; follower held until healthy readings and explicit remote resume; device voltage limits unchanged"
   }
 }

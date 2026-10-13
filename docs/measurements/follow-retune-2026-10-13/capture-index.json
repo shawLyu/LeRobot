@@ -1,0 +1,170 @@
+{
+  "wrist-baseline": {
+    "control_config_sha256": "225011bb1c5f9f4a61ee7b92c0a7a0a220eae4f2277b6b62038f80e3386ba8ae",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "wrist_roll"
+    ],
+    "frames": 2498
+  },
+  "wrist-candidate": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "wrist_roll"
+    ],
+    "frames": 1918
+  },
+  "wrist-normal": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": true,
+    "faulted_frames": 0,
+    "required_joints": [
+      "shoulder_pan",
+      "wrist_roll"
+    ],
+    "frames": 2098
+  },
+  "lift": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 2,
+    "required_joints": [
+      "shoulder_lift"
+    ],
+    "frames": 2398
+  },
+  "lift-repeat": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": true,
+    "faulted_frames": 0,
+    "required_joints": [
+      "shoulder_lift"
+    ],
+    "frames": 2398
+  },
+  "trigger": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "gripper"
+    ],
+    "frames": 2098
+  },
+  "trigger-normal": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "gripper"
+    ],
+    "frames": 2395
+  },
+  "trigger-slow": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 2,
+    "required_joints": [
+      "gripper"
+    ],
+    "frames": 2398
+  },
+  "trigger-slow-repeat": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "gripper"
+    ],
+    "frames": 2398
+  },
+  "trigger-small": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 1,
+    "required_joints": [
+      "gripper"
+    ],
+    "frames": 2698
+  },
+  "final-mixed": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 1,
+    "required_joints": [
+      "shoulder_pan",
+      "shoulder_lift",
+      "elbow_flex",
+      "wrist_flex",
+      "wrist_roll",
+      "gripper"
+    ],
+    "frames": 3526
+  },
+  "trigger-after-cable": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "gripper"
+    ],
+    "frames": 2398
+  },
+  "elbow-final": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "elbow_flex"
+    ],
+    "frames": 2398
+  },
+  "elbow-confirmed": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 2,
+    "required_joints": [
+      "elbow_flex"
+    ],
+    "frames": 2531
+  },
+  "elbow-final-confirmed": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": true,
+    "faulted_frames": 0,
+    "required_joints": [
+      "shoulder_pan",
+      "shoulder_lift",
+      "elbow_flex",
+      "wrist_flex",
+      "wrist_roll"
+    ],
+    "frames": 3388
+  },
+  "trigger-final-confirmed": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 6,
+    "required_joints": [
+      "gripper"
+    ],
+    "frames": 7197
+  },
+  "warning-online": {
+    "control_config_sha256": "813c45bc7814ad85eb2f3a119be1f340eaaffa500bb88d2ca646f8f849673779",
+    "passed": false,
+    "faulted_frames": 0,
+    "required_joints": [
+      "shoulder_pan",
+      "shoulder_lift",
+      "elbow_flex",
+      "wrist_flex",
+      "wrist_roll",
+      "gripper"
+    ],
+    "frames": 3000
+  }
+}

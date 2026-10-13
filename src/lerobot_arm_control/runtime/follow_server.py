@@ -60,19 +60,35 @@ def angles(raw, fits):
 
 
 
-def read_leader_status(bus):
+def read_leader_status(bus, diagnostics=None):
     """Confirm bulk flags independently, as on the follower, without motor writes."""
     status = bus.sync_read('Status', normalize=False)
     for joint, value in status.items():
         if value:
             try:
                 status[joint] = int(bus.read('Status', joint, normalize=False))
-            except RuntimeError:
+            except RuntimeError as exc:
                 # The SDK raises on a device-error bit in the reply header.
                 # Retain the fault flag so motion holds; do not turn a hardware
                 # alarm into a clean sample or kill the monitoring process.
                 status[joint] = int(value)
+                if diagnostics is not None:
+                    diagnostics[joint] = str(exc)
     return status
+
+
+def leader_fault_snapshot(bus, status, packet_errors):
+    """Read diagnostic evidence after holding, without clearing or masking a fault."""
+    evidence = {'time_unix_ns': time.time_ns(), 'status': dict(status),
+                'packet_errors': dict(packet_errors), 'registers': {}}
+    for register in ('Status', 'Present_Voltage', 'Present_Temperature',
+                     'Present_Current', 'Min_Voltage_Limit', 'Max_Voltage_Limit',
+                     'Torque_Enable'):
+        try:
+            evidence['registers'][register] = bus.sync_read(register, normalize=False)
+        except (ConnectionError, RuntimeError) as exc:
+            evidence['registers'][register] = {'error': str(exc)}
+    return evidence
 
 
 def receive_console(commands, disconnected):
@@ -100,6 +116,9 @@ def serve(args):
     with ExitStack() as stack:
         trace = deque(maxlen=36000)
         metadata = {'follow_config': config}
+        metadata['leader_fault_events'] = []
+        previous_leader_faults = {}
+        latched_leader_faults = {}
         if getattr(args, 'latency_test', False):
             metadata.update(measurement_completed=False,
                             measurement_joints=list(args.latency_joints))
@@ -212,6 +231,7 @@ def serve(args):
                                 previous = initialization_started
                         mapping.resume(measured if controller else mapping.target)
                         active = True
+                        latched_leader_faults = {}
                         heartbeat = time.monotonic()
                         command_error = None
                         notice = ('Initializing follower into its model range'
@@ -232,7 +252,8 @@ def serve(args):
             leader_raw = leader_bus.sync_read('Present_Position', normalize=False)
             leader_sampled = time.monotonic()
             leader_qpos = angles(leader_raw, leader_fits)
-            leader_status = read_leader_status(leader_bus)
+            leader_packet_errors = {}
+            leader_status = read_leader_status(leader_bus, leader_packet_errors)
             if controller:
                 telemetry = read_control_feedback(follower_bus)
                 raw = telemetry.pop('Present_Position')
@@ -288,6 +309,17 @@ def serve(args):
                     mapping.hold(measured)
                     notice = command_error or 'Follower held: '+str(controller.stopped)
             command_sent = time.monotonic()
+            leader_faults = {j: v for j, v in leader_status.items() if v}
+            if leader_faults:
+                latched_leader_faults = leader_faults
+            if leader_faults and leader_faults != previous_leader_faults:
+                evidence = leader_fault_snapshot(leader_bus, leader_status, leader_packet_errors)
+                metadata['leader_fault_events'].append(evidence)
+                metadata['leader_fault_events'] = metadata['leader_fault_events'][-256:]
+                if standalone:
+                    print(f'Leader fault evidence (after hold): {evidence}',
+                          file=sys.stderr, flush=True)
+            previous_leader_faults = leader_faults
             stage = ('initializing' if initialize_to is not None else
                      'following' if active and mapping.tracking else
                      'aligning' if active else 'held')
@@ -295,6 +327,17 @@ def serve(args):
                 notice = 'Aligning slowly to leader; then live tracking; Space holds'
             elif stage == 'following':
                 notice = 'Following live leader'
+            warning = None
+            if latched_leader_faults:
+                warning = {'severity': 'warning', 'source': 'leader',
+                           'status': dict(latched_leader_faults),
+                           'active': bool(leader_faults), 'requires_resume': True}
+                kind = ('voltage' if all(v == 1 for v in latched_leader_faults.values())
+                        else 'motor')
+                condition = 'active' if leader_faults else 'cleared'
+                notice = (f'WARNING: leader {kind} alarm {condition}; process online; '
+                          f'follower held; joints={list(latched_leader_faults)}; '
+                          + ('waiting for healthy readings' if leader_faults else 'E resumes'))
             if getattr(args, 'latency_test', False) and stage == 'following':
                 measurement_elapsed += min(now-previous, .1)
                 if measurement_elapsed >= 12*len(args.latency_joints):
@@ -305,6 +348,7 @@ def serve(args):
             if standalone:
                 notice = notice.replace('Space holds', 'remote h + Enter holds')
                 notice = notice.replace('E required', 'remote e + Enter required')
+                notice = notice.replace('E resumes', 'remote e + Enter resumes')
             if standalone and notice != last_notice:
                 print(notice+' | remote terminal: h + Enter holds, e + Enter resumes, q quits',
                       file=sys.stderr, flush=True)
@@ -319,6 +363,7 @@ def serve(args):
                                           for i, j in enumerate(JOINTS)] if controller else target,
                               'stage': stage,
                               'leader_status': dict(leader_status),
+                              'warning': warning,
                               'notice': notice,
                               'sample_ms': (now-sampled)*1000,
                               'sensor_to_command_ms': (command_sent-leader_sampled)*1000})
@@ -327,6 +372,7 @@ def serve(args):
                   'target_qpos': target,
                   'following': active and initialize_to is None and mapping.tracking,
                   'stage': stage, 'notice': notice,
+                  'warning': warning,
                   'command_error': command_error,
                   'leader_status': leader_status, 'sample_age_ms': (now-sampled)*1000,
                   'heartbeat_age_ms': (now-heartbeat)*1000,

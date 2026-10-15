@@ -171,16 +171,18 @@ def test_capture_command_requires_explicit_execution_before_opening_a_bus(monkey
     assert result.value.code == 2
 
 
-def test_integral_limit_alias_does_not_mutate_the_shared_driver_control_table():
+def test_adjacent_byte_registers_do_not_mutate_the_shared_driver_control_table():
     from types import SimpleNamespace
 
     from lerobot_arm_control.diagnostics.native_pid import add_native_registers
 
-    original = {'sts3215': {'P_Coefficient': (21, 1)}}
+    original = {'sts3215': {'P_Coefficient': (21, 1), 'Minimum_Startup_Force': (24, 2)}}
     bus = SimpleNamespace(model_ctrl_table=original)
     add_native_registers(bus)
     assert bus.model_ctrl_table['sts3215']['Integral_Limit'] == (25, 1)
+    assert bus.model_ctrl_table['sts3215']['Minimum_Startup_Force'] == (24, 1)
     assert 'Integral_Limit' not in original['sts3215']
+    assert original['sts3215']['Minimum_Startup_Force'] == (24, 2)
 
 
 def test_partial_gain_write_failure_still_restores_the_original_configuration():

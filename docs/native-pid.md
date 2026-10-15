@@ -37,7 +37,8 @@ Targets must fit both the saved authorization and actual EEPROM limits. Begin wi
 small angles before expanding the experiment. `--p`, `--i`, `--d`, `--deadzone`,
 `--integral-limit`, `--startup-force` and `--acceleration` affect only this trial.
 Integral-limit register 25 uses four native output counts per unit; the installed
-LeRobot 0.6.1 table omits its name, so this entry adds a per-instance alias matching
+LeRobot 0.6.1 table omits its name and gives startup-force register 24 an overlapping
+two-byte width. This entry uses per-instance one-byte definitions for both, matching
 the [manufacturer's STS table](https://ftservo.github.io/ftservo-wiki/reference/parameter/memory-sts/).
 
 Storage remains locked throughout; no EEPROM unlock is issued. Capture seeds the
@@ -87,3 +88,11 @@ overshoot to two ticks with one-to-two-tick residuals. Neither passes the strict
 precision and 50 ms large-angle requirements. All original settings were restored
 and torque disabled; no candidate was persisted. Consult that report for the exact
 deadzone, integral clamp and startup-force settings used with each PID.
+
+On 2026-10-16 the user selected the faster candidate for the single black ID 1.
+P64/I4/D128, CW/CCW deadzones 0, integral limit 8 and startup force 16 were applied
+using EEPROM write mode, then locked and verified through a new serial connection.
+The [application readback](measurements/native-pid-single-joint-2026-10-16/applied-settings.json)
+records Lock=1, torque off, no alarm and raw position 2067 with unchanged zero/limits.
+A physical power cycle has not yet been verified. This update applies only to that
+motor and load; the six-axis software controller configuration remains separate.

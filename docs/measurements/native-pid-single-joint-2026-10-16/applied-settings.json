@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "applied_date": "2026-10-16",
+  "profile": "faster",
+  "scope": "Black ID1 shoulder_pan only, simple load; other motors unchanged",
+  "identity": {
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+    "joint": "shoulder_pan",
+    "id": 1,
+    "model": "sts3215",
+    "registers": {
+      "Homing_Offset": -1110,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Min_Position_Limit": 844,
+      "Max_Position_Limit": 3440,
+      "Angular_Resolution": 1
+    }
+  },
+  "requested": {
+    "P_Coefficient": 64,
+    "I_Coefficient": 4,
+    "D_Coefficient": 128,
+    "CW_Dead_Zone": 0,
+    "CCW_Dead_Zone": 0,
+    "Integral_Limit": 8,
+    "Minimum_Startup_Force": 16
+  },
+  "verified_readback": {
+    "P_Coefficient": 64,
+    "I_Coefficient": 4,
+    "D_Coefficient": 128,
+    "CW_Dead_Zone": 0,
+    "CCW_Dead_Zone": 0,
+    "Integral_Limit": 8,
+    "Minimum_Startup_Force": 16,
+    "Lock": 1,
+    "Torque_Enable": 0,
+    "Status": 0,
+    "Present_Position": 2067,
+    "Present_Voltage": 53,
+    "Present_Temperature": 25
+  },
+  "completed": true,
+  "eeprom_write_mode": "Lock=0 during acknowledged changed-register writes; Lock=1 restored",
+  "power_cycle_verified": false,
+  "verification_unix_ns": 1792085319066009997,
+  "sdk_correction": {
+    "register": "Minimum_Startup_Force",
+    "installed_definition": [
+      24,
+      2
+    ],
+    "correct_definition": [
+      24,
+      1
+    ],
+    "reason": "Byte 25 is Integral_Limit; a two-byte startup read combined 16 + 256*8 into 2064. Corrected one-byte read is 16."
+  }
+}

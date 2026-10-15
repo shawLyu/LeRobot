@@ -99,3 +99,19 @@ Final independent readback: **P16/I0/D32, deadzones 1/1, integral limit 0, start
 force 16, Lock=1, Torque_Enable=0, Status=0, Present_Position=2067**, 26°C, 5.3 V.
 All final trial restoration error lists are empty. Candidate values were not
 persisted or applied to the assembled-arm demos.
+
+## Subsequent application on 2026-10-16
+
+After these experiments the user selected the faster candidate for black ID 1.
+The changed values were written with Lock=0 and then relocked. An independent new
+connection confirmed **P64/I4/D128, deadzones 0/0, integral limit 8, startup force
+16, Lock=1, Torque_Enable=0, Status=0 and raw 2067**. Zero, phase, mode and EEPROM
+limits match the experiment fingerprint. See [applied-settings.json](applied-settings.json).
+This readback does not include an actual physical power-cycle test.
+
+The initial post-write check exposed an installed SDK table error: startup-force
+address 24 had a two-byte width, overlapping integral-limit byte 25. Its readback
+was 2064 (=16+256×8), although the actual startup byte was 16. The native diagnostic
+now uses the manufacturer's one-byte definition for each address, independently
+verifies 16 and 8, and includes regression coverage without changing the shared SDK
+table. The historical response samples and candidate settings above are unchanged.

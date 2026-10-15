@@ -23,11 +23,14 @@ TUNING_REGISTERS = ('P_Coefficient', 'I_Coefficient', 'D_Coefficient',
 
 
 def add_native_registers(bus):
-    """STS address 25 is documented by Feetech but absent in installed LeRobot 0.6.1."""
+    """Correct adjacent byte registers in the installed LeRobot 0.6.1 STS table."""
     table = dict(bus.model_ctrl_table['sts3215'])
     if table.get('Integral_Limit', (25, 1)) != (25, 1):
         raise ValueError('unexpected native integral-limit register')
+    if table.get('Minimum_Startup_Force', (24, 1)) not in ((24, 1), (24, 2)):
+        raise ValueError('unexpected native startup-force register')
     table['Integral_Limit'] = (25, 1)
+    table['Minimum_Startup_Force'] = (24, 1)
     bus.model_ctrl_table = {**bus.model_ctrl_table, 'sts3215': table}
 
 

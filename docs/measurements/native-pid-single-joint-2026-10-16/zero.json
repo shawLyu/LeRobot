@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "identity": {
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+    "joint": "shoulder_pan",
+    "id": 1,
+    "model": "sts3215",
+    "registers": {
+      "Homing_Offset": -1110,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Min_Position_Limit": 844,
+      "Max_Position_Limit": 3440,
+      "Angular_Resolution": 1
+    }
+  },
+  "zero_raw": 2067,
+  "direction": 1,
+  "ticks_per_turn": 4096,
+  "samples": [
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067,
+    2067
+  ],
+  "captured_unix_ns": 1792075111759691223,
+  "reference": "User confirmed zero position; simple load; clear travel +/-90 degrees",
+  "allowed_degrees": [
+    -90,
+    90
+  ],
+  "initial_registers": {
+    "Homing_Offset": -1110,
+    "Phase": 12,
+    "Operating_Mode": 0,
+    "Min_Position_Limit": 844,
+    "Max_Position_Limit": 3440,
+    "Angular_Resolution": 1,
+    "Torque_Enable": 0,
+    "P_Coefficient": 16,
+    "I_Coefficient": 0,
+    "D_Coefficient": 32,
+    "CW_Dead_Zone": 1,
+    "CCW_Dead_Zone": 1,
+    "Lock": 1,
+    "Acceleration": 0,
+    "Goal_Time": 0,
+    "Goal_Velocity": 0,
+    "Torque_Limit": 1000,
+    "Maximum_Velocity_Limit": 68,
+    "Velocity_Unit_factor": 50
+  },
+  "scope": "Encoder reference only; no external absolute-angle validation; EEPROM unchanged"
+}

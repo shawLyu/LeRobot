@@ -1,0 +1,24 @@
+{
+  "scope": "Experimental single ID1 with simple load; do not apply to assembled arms without validation",
+  "performance_passed": false,
+  "persistence": "Not written to EEPROM; original settings restored after each trial",
+  "zero_raw": 2067,
+  "profiles": {
+    "faster": {
+      "p": 64,
+      "i": 4,
+      "d": 128,
+      "deadzone": 0,
+      "integral_limit": 8,
+      "startup_force": 16
+    },
+    "smoother": {
+      "p": 48,
+      "i": 8,
+      "d": 96,
+      "deadzone": 0,
+      "integral_limit": 8,
+      "startup_force": 0
+    }
+  }
+}

@@ -101,3 +101,6 @@ tests/test_follow_observer.py
 tests/test_follow_fault_diagnostics.py
 tests/test_gripper_contact.py
 tests/test_motion_stall.py
+
+src/lerobot_arm_control/diagnostics/native_pid.py
+tests/test_native_pid.py

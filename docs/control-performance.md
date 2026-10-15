@@ -34,6 +34,7 @@ readings and explicit resume. These protection changes are detailed in the
 | [Remote following](measurements/remote-follow-2026-10-12/README.md) | Remote independence, reversal and overshoot comparison |
 | [Wrist retuning](measurements/follow-retune-2026-10-13/README.md) | Normal-speed/stress separation and warning evidence |
 | [Smoothness](measurements/follow-smoothing-2026-10-13/README.md) | Current reference shaping, comparison curves and pending checks |
+| [Single-servo native PID](measurements/native-pid-single-joint-2026-10-16/README.md) | One installed ID 1, native-loop tuning, large steps and unmet strict precision/50 ms goals |
 
 These versioned records retain exact configurations, summaries and compressed
 samples.

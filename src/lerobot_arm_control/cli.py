@@ -29,6 +29,7 @@ COMMANDS = {
     ("verify", "joints"): ("diagnostics.joint_precision", ()),
     ("verify", "circle"): ("planning.circle_simulation", ()),
     ("verify", "response"): ("diagnostics.response", ()),
+    ("verify", "native-pid"): ("diagnostics.native_pid", ()),
     ("verify", "motors"): ("diagnostics.motor_response", ()),
     ("verify", "follow-latency"): ("diagnostics.follow_latency", ()),
     ("verify", "tracking"): ("diagnostics.circle_tracking", ()),

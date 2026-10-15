@@ -486,6 +486,10 @@ The current base mount fit is rejected, so physical grasp/placement validation i
 
 ## 8. Configuration, layout, and data
 
+For one installed servo, use the [single-servo native PID benchmark](docs/native-pid.md).
+It captures an independent encoder zero and measures native position-loop response
+without the software outer PID or simulator, with temporary gains and verified restoration.
+
 The sole active motor control configuration is [configs/control.json](configs/control.json),
 currently **shared-joint-pid-v1**: 60 Hz, bounded position PID with filtered measurement
 derivative and integral antiwindup. Manual control, Reset, circles, finite paths,

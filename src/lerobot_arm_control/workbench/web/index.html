@@ -58,7 +58,7 @@
             <button id="enable" class="primary" disabled>使能勾选电机</button
             ><button id="release" disabled>释放勾选电机</button>
           </div>
-          <div class="section-label">当前电机动作范围 <span>tick</span></div>
+          <div class="section-label">当前电机软件动作范围 <span>tick</span></div>
           <div class="range-row">
             <input id="bound-low" aria-label="动作范围下限" type="number" step="1" /><span>—</span
             ><input id="bound-high" aria-label="动作范围上限" type="number" step="1" /><button
@@ -68,9 +68,11 @@
               设置
             </button>
           </div>
+          <p id="bounds-status" class="help" role="status"></p>
           <p class="help">
             初次连接默认限制在当前位置附近
-            ±10°；扩大范围前请检查机构。修改零点、相位或限位后需重新设置。
+            ±10°；扩大范围前请检查机构。此处仅设置本次连接的软件范围，不改写舵机 EEPROM
+            限位。修改零点、相位或限位后需重新设置。
           </p>
           <label
             >目标位置 <span class="unit">tick</span

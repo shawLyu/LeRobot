@@ -25,6 +25,7 @@ let info,
 let params = {},
   edits = {},
   targets = {},
+  boundsDrafts = {},
   result = null,
   fetchedResult = null,
   loadingResult = false;
@@ -96,6 +97,7 @@ function resetSession() {
   edits = {};
   history = [];
   targets = {};
+  boundsDrafts = {};
   result = null;
   fetchedResult = null;
   lastSeq = -1;
@@ -137,6 +139,7 @@ async function connectArm() {
   params = {};
   edits = {};
   targets = {};
+  boundsDrafts = {};
   history = [];
   result = null;
   fetchedResult = null;
@@ -236,6 +239,22 @@ function renderControls() {
   $('enable').disabled = busy || !confirmed || !joints.length || motion || !!state().fault;
   $('release').disabled = busy || !joints.length;
   $('save-bounds').disabled = busy || !available || !confirmed || enabled(active) || motion;
+  const applied = state().bounds?.[active];
+  const draft = boundsDrafts[active];
+  const pending = draft && draft.some((v, i) => v === '' || Number(v) !== applied?.[i]);
+  const reason = !available
+    ? '请先连接当前电机。'
+    : busy
+      ? '正在处理请求，请稍候。'
+      : motion
+        ? '请先停止运动，再设置范围。'
+        : enabled(active)
+          ? '请先释放当前电机扭矩，再设置范围。'
+          : !confirmed
+            ? '请先勾选行程无干涉确认。'
+            : '可设置；范围须包含当前位置，并处于 EEPROM 限位内。';
+  $('bounds-status').textContent =
+    `${applied ? `已应用 ${applied[0]} — ${applied[1]} tick。` : '尚未设置有效范围。'} ${pending ? '输入尚未应用。' : ''}${reason}`;
   for (const id of ['send-target', 'jog-minus', 'jog-plus'])
     $(id).disabled =
       busy || !available || !confirmed || !enabled(active) || motion || !!state().fault;
@@ -295,7 +314,7 @@ function render() {
   const m = isConnected ? state().frame?.motors[active] : null;
   if (m && targets[active] === undefined) targets[active] = m.position;
   if (document.activeElement !== $('target')) $('target').value = targets[active] ?? '';
-  const bounds = state().bounds?.[active];
+  const bounds = boundsDrafts[active] || state().bounds?.[active];
   if (document.activeElement !== $('bound-low')) $('bound-low').value = bounds?.[0] ?? '';
   if (document.activeElement !== $('bound-high')) $('bound-high').value = bounds?.[1] ?? '';
   JOINTS.forEach((joint) => {
@@ -818,12 +837,22 @@ async function initialize() {
   $('release').addEventListener('click', () =>
     action(() => command('release', { joints: checked() }), '已释放勾选电机扭矩。'),
   );
-  $('save-bounds').addEventListener('click', () =>
-    action(
-      () => command('bounds', { joint: active, bounds: [value('bound-low'), value('bound-high')] }),
-      '动作范围已设置。',
-    ),
-  );
+  for (const id of ['bound-low', 'bound-high'])
+    $(id).addEventListener('input', () => {
+      boundsDrafts[active] = [$('bound-low').value, $('bound-high').value];
+      renderControls();
+    });
+  $('save-bounds').addEventListener('click', () => {
+    const joint = active;
+    const inputs = [$('bound-low').value, $('bound-high').value];
+    const bounds = inputs.map(Number);
+    if (inputs.some((v) => v === '') || !bounds.every(Number.isInteger) || bounds[0] >= bounds[1])
+      return notice('范围上下限必须是整数，且下限小于上限。', 'error');
+    action(async () => {
+      const response = await command('bounds', { joint, bounds });
+      state().bounds[joint] = response.bounds;
+    }, '动作范围已设置（仅本次连接有效）。');
+  });
   $('target').addEventListener('input', () => {
     targets[active] = value('target');
   });

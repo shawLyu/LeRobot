@@ -65,6 +65,12 @@ motion envelope. Set and inspect the new envelope before enabling again.
    by EEPROM limits. EEPROM limits alone do not prove a collision-free range.
 2. Confirm the inspected travel in the interface. Keep the initial envelope or
    explicitly set lower/upper raw counts. The current position must be inside it.
+   Stop motion and release the current motor's torque before setting this range.
+   The editor retains each motor's draft while feedback refreshes and while
+   switching between motors. The status below it shows the applied range, any
+   unapplied input and the reason setting is disabled. A rejected edit keeps its
+   draft. This software range lasts for the current connection; it does not change
+   EEPROM `Min_Position_Limit` / `Max_Position_Limit` in the parameter table.
 3. Check the channels to control, then enable them. The worker first seeds each
    goal from fresh actual position. Position motion requires mode 0, encoder scale
    1, Goal_Time=0 and locked storage. No reset-to-zero command is issued.
@@ -147,7 +153,12 @@ the state endpoint mocked offline and does not operate hardware:
 
 ```sh
 node tests/browser/servo_workbench.cjs
+node tests/browser/servo_workbench_bounds.cjs
 ```
+
+The range-editor regression mocks every API and checks editing across feedback
+refreshes, focus changes, motor selection, successful/rejected saves and disabled
+controls. It never sends commands to hardware, including an already open session.
 
 `--hardware` is a separate, physically gated acceptance for this repository's
 recorded black ID 1 and simple-load installation. It verifies the applied-parameter

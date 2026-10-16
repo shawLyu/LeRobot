@@ -66,7 +66,7 @@ def test_browser_assets_are_self_contained_and_session_token_is_inserted(server)
     assert status == 200 and server.token.encode() in body and b'__TOKEN__' not in body
     assert 'frame-ancestors' in headers['Content-Security-Policy']
     assert b'cdn.' not in body
-    for path in ('/app.js', '/style.css'):
+    for path in ('/app.js', '/measurement.js', '/style.css'):
         status, body, _ = request(server, path)
         assert status == 200 and len(body) > 1000
     assert request(server, '/api/info')[0] == 200

@@ -92,6 +92,7 @@ class Handler(BaseHTTPRequestHandler):
                 body = (WEB / 'index.html').read_text().replace('__TOKEN__', self.server.token)
                 return self.respond(200, body.encode(), 'text/html; charset=utf-8')
             assets = {'/app.js': ('app.js', 'text/javascript; charset=utf-8'),
+                      '/measurement.js': ('measurement.js', 'text/javascript; charset=utf-8'),
                       '/style.css': ('style.css', 'text/css; charset=utf-8')}
             if parsed.path in assets:
                 filename, content_type = assets[parsed.path]

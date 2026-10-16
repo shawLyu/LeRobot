@@ -10,6 +10,15 @@ const JOINTS = [
   'gripper',
 ];
 const COLORS = ['#1858ba', '#d27624', '#188576', '#8b54a6', '#b74362', '#5d798b'];
+const FIELD_UNITS = {
+  position: 'tick',
+  velocity: 'raw',
+  load: '×0.1%',
+  current_raw: '×6.5 mA',
+  voltage: 'V',
+  temperature: '°C',
+};
+const measurements = new Map();
 const token = document.querySelector('meta[name="workbench-token"]').content;
 const escapeHTML = (value) =>
   String(value).replace(
@@ -92,6 +101,9 @@ async function action(fn, success) {
 }
 
 function clearSessionData() {
+  measurements.forEach((measurement) => measurement.reset());
+  paused = false;
+  $('pause-display').textContent = '暂停显示';
   params = {};
   edits = {};
   history = [];
@@ -589,7 +601,23 @@ function plot(canvasId, series, options = {}) {
   ctx.setLineDash([]);
   ctx.fillStyle = '#7c8c9c';
   ctx.textAlign = 'right';
-  ctx.fillText(options.unit || 's', rect.width - 1, rect.height - 9);
+  ctx.fillText(`t / ${options.unit || 's'}`, rect.width - margin.right, 10);
+  ctx.textAlign = 'left';
+  ctx.fillText(options.yUnit, margin.left, 10);
+  measurements.get(canvasId)?.draw({
+    xmin,
+    xmax,
+    ymin,
+    ymax,
+    left: margin.left,
+    top: margin.top,
+    width,
+    height,
+    series,
+    hasData: points.length > 0,
+    yUnit: options.yUnit,
+    key: options.measureKey,
+  });
 }
 
 function drawCharts() {
@@ -603,25 +631,37 @@ function drawCharts() {
       const color = COLORS[JOINTS.indexOf(j)];
       curves.push({
         color,
+        label: `J${JOINTS.indexOf(j) + 1} 实测`,
         data: history.filter((f) => f.motors[j]).map((f) => [f.t, f.motors[j][field]]),
       });
       if (field === 'position')
         curves.push({
           color,
+          label: `J${JOINTS.indexOf(j) + 1} 目标`,
           dashed: true,
           alpha: 0.6,
           data: history.filter((f) => f.motors[j]).map((f) => [f.t, f.motors[j].goal]),
         });
       errors.push({
         color,
+        label: `J${JOINTS.indexOf(j) + 1} 误差`,
         data: history
           .filter((f) => f.motors[j])
           .map((f) => [f.t, f.motors[j].goal - f.motors[j].position]),
       });
     }
     const domain = { xmin: Math.max(0, last - 20), xmax: Math.max(20, last) };
-    plot('live-chart', curves, domain);
-    plot('error-chart', errors, { ...domain, reference: 0 });
+    plot('live-chart', curves, {
+      ...domain,
+      yUnit: FIELD_UNITS[field],
+      measureKey: `${field}:${joints}`,
+    });
+    plot('error-chart', errors, {
+      ...domain,
+      reference: 0,
+      yUnit: 'tick',
+      measureKey: String(joints),
+    });
     $('live-empty').hidden = connected() && history.length > 0 && joints.length > 0;
     $('live-empty').textContent = connected()
       ? joints.length
@@ -643,12 +683,14 @@ function drawCharts() {
     const segments = (result?.segments || []).filter((s) => s.kind === 'step' && s.joint === joint);
     const curves = segments.map((s) => ({
       color: s.direction === 'positive' ? COLORS[0] : COLORS[1],
+      label: `${s.direction === 'positive' ? '正向' : '反向'} ${s.repeat + 1}`,
       alpha: 0.8,
       dashed: s.direction === 'negative',
       data: s.frames.map((f) => [f.t, (100 * (f.position - s.start)) / (s.target - s.start)]),
     }));
     const tails = segments.map((s) => ({
       color: s.direction === 'positive' ? COLORS[0] : COLORS[1],
+      label: `${s.direction === 'positive' ? '正向' : '反向'} ${s.repeat + 1}`,
       alpha: 0.8,
       dashed: s.direction === 'negative',
       data: s.frames
@@ -662,8 +704,17 @@ function drawCharts() {
       ymax: 115,
       reference: 100,
       timeReference: 0.05,
+      yUnit: '%',
+      measureKey: `${result?.id}:${joint}`,
     });
-    plot('settled-chart', tails, { xmin: -0.3, xmax: 0, band: [-1, 1], reference: 0 });
+    plot('settled-chart', tails, {
+      xmin: -0.3,
+      xmax: 0,
+      band: [-1, 1],
+      reference: 0,
+      yUnit: 'tick',
+      measureKey: `${result?.id}:${joint}`,
+    });
     $('response-empty').hidden = segments.length > 0;
   }
 }
@@ -792,6 +843,17 @@ async function initialize() {
       if (j === active) $('target').value = e.target.value;
     });
   });
+  for (const id of ['live-chart', 'error-chart', 'response-chart', 'settled-chart']) {
+    measurements.set(
+      id,
+      new ChartMeasurement($(id), queueDraw, () => {
+        if (id === 'live-chart' || id === 'error-chart') {
+          paused = true;
+          $('pause-display').textContent = '继续显示';
+        }
+      }),
+    );
+  }
   selectArm();
   render();
   renderParameters();
@@ -951,10 +1013,13 @@ async function initialize() {
   $('response-joint').addEventListener('change', renderResponse);
   $('pause-display').addEventListener('click', () => {
     paused = !paused;
+    if (!paused) for (const id of ['live-chart', 'error-chart']) measurements.get(id).reset();
     $('pause-display').textContent = paused ? '继续显示' : '暂停显示';
+    queueDraw();
   });
   $('clear-display').addEventListener('click', () => {
     history = [];
+    for (const id of ['live-chart', 'error-chart']) measurements.get(id).reset();
     queueDraw();
   });
   $('export-live-csv').addEventListener('click', () => downloadRemote('csv'));

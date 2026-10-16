@@ -114,5 +114,6 @@ src/lerobot_arm_control/workbench/server.py
 src/lerobot_arm_control/workbench/web/index.html
 src/lerobot_arm_control/workbench/web/style.css
 src/lerobot_arm_control/workbench/web/app.js
+src/lerobot_arm_control/workbench/web/measurement.js
 tests/test_servo_workbench.py
 tests/test_servo_workbench_http.py

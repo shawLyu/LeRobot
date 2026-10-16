@@ -569,6 +569,59 @@ canvas {
   font-size: 13px;
   pointer-events: none;
 }
+.measurement {
+  padding: 9px 0 5px;
+  border-top: 1px solid var(--line);
+}
+.measurement-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.measurement-tools > label:first-child {
+  flex-direction: row;
+  align-items: center;
+}
+.measurement-tools select {
+  min-width: 125px;
+}
+.measurement-tools button,
+.measurement-tools select {
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.cursor-picks {
+  display: flex;
+  gap: 3px;
+}
+.cursor-picks [aria-pressed='true'] {
+  background: #edf2f8;
+  border-color: var(--blue);
+}
+.measurement-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 9px 0 5px;
+  color: var(--ink);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.measurement-values span:last-child {
+  font-weight: 650;
+}
+.measurement-hint {
+  font-size: 10px;
+}
+canvas.measuring {
+  cursor: crosshair;
+  touch-action: none;
+}
+canvas:focus-visible {
+  outline: 2px solid #8bb2ed;
+}
 .plot-subtitle {
   display: flex;
   justify-content: space-between;

@@ -92,6 +92,24 @@ analysis uses the full remote samples and separates command-to-90%, 10–90% ris
 settling, final 300 ms error and overshoot. Select each tested motor to inspect its
 curves; the table retains both directions for every tested channel.
 
+Each of the four charts has independent **A/B measurement cursors** below it.
+Choose horizontal (`Δt`), vertical (`Δy`) or both axes; click A or B to select a
+cursor, then click the plot or drag its line/intersection. Arrow keys move the
+selected cursor by 0.1% of the visible axis span; Shift uses 1%. Coordinates stay
+in data units when the window size or display pixel density changes. Differences
+are signed **B − A**; time differences use milliseconds and vertical differences
+use the chart's displayed units. Free cursors measure coordinates; **snap to sample**
+selects the closest visible sample in screen distance and identifies its curve.
+It does not interpolate values between samples.
+
+Enabling a live-chart measurement pauses display updates to keep the measured
+waveform still. Remote acquisition, heartbeat and motor control continue. **Resume
+display** exits live measurements; clearing the display or reconnecting clears
+the old cursors. Changing the displayed quantity, selected channels, response
+motor or response result resets their coordinates. Live measurements use feedback
+received by the browser; performance acceptance still uses the remote response
+samples and metrics. PNG export retains the cursor lines drawn on the chart.
+
 **Acquisition completed is not a performance pass.** The 50 ms target refers to
 command-to-90%, not movement onset. Strict error below one quantized tick requires
 every settled sample to equal the target; an average near zero is insufficient.
@@ -154,6 +172,7 @@ the state endpoint mocked offline and does not operate hardware:
 ```sh
 node tests/browser/servo_workbench.cjs
 node tests/browser/servo_workbench_bounds.cjs
+node tests/browser/servo_workbench_measurement.cjs
 ```
 
 The range-editor regression mocks every API and checks editing across feedback

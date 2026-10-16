@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "verified_unix_ns": 1792137792074472807,
+  "identity": {
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+    "joint": "shoulder_pan",
+    "id": 1,
+    "model": "sts3215",
+    "registers": {
+      "Homing_Offset": -1110,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Min_Position_Limit": 844,
+      "Max_Position_Limit": 3440,
+      "Angular_Resolution": 1
+    }
+  },
+  "registers": {
+    "P_Coefficient": 64,
+    "I_Coefficient": 4,
+    "D_Coefficient": 128,
+    "CW_Dead_Zone": 0,
+    "CCW_Dead_Zone": 0,
+    "Integral_Limit": 8,
+    "Minimum_Startup_Force": 16,
+    "Lock": 1,
+    "Torque_Enable": 0,
+    "Status": 0,
+    "Present_Position": 2234
+  }
+}

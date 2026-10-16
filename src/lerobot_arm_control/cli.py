@@ -14,6 +14,7 @@ from .core.paths import WORKSPACE_ENV
 COMMANDS = {
     ("hardware",): ("diagnostics.cli", ()),
     ("view", "arm"): ("runtime.realtime_client", ("--backend", "mujoco")),
+    ("view", "motors"): ("workbench.server", ()),
     ("view", "tabletop"): ("runtime.tabletop_client", ()),
     ("task", "circle"): ("runtime.realtime_client", ("--backend", "mujoco", "--circle")),
     ("task", "push-t"): ("planning.push_t", ()),
@@ -35,6 +36,7 @@ COMMANDS = {
     ("verify", "tracking"): ("diagnostics.circle_tracking", ()),
     ("inspect", "tool-mount"): ("calibration.tool_mount", ()),
     ("serve", "arm"): ("runtime.realtime_server", ()),
+    ("serve", "motors"): ("workbench.worker", ()),
     ("serve", "follow"): ("runtime.follow_server", ()),
     ("serve", "tabletop"): ("runtime.tabletop_server", ()),
     ("serve", "simulation"): ("runtime.simulation_server", ()),

@@ -19,6 +19,7 @@ src/lerobot_arm_control/
 │   └── common.py     shared worker timing, stdio and deferred log persistence
 ├── visualization/    views, reconstructed scenes and appearance
 ├── diagnostics/      motor diagnostics and precision checks
+├── workbench/        six-channel native parameter editor, browser UI and remote executor
 ├── cli.py            unified command routing
 └── __main__.py       python -m lerobot_arm_control
 ```
@@ -43,6 +44,7 @@ listed in [Code layout](code-layout.md).
 ```bash
 ./scripts/lerobot-arm --help
 ./scripts/lerobot-arm view arm --headless --duration 3
+./scripts/lerobot-arm view motors
 ./scripts/lerobot-arm task circle --headless --duration 3
 ./scripts/lerobot-arm task push-t --headless --fast --limit 1 --output /tmp/push-demo
 ./scripts/lerobot-arm task pick-t --snapshot data/push_t/measured --output /tmp/pick-demo
@@ -133,6 +135,10 @@ Domain imports load implementations on demand. Importing the root namespace or
 requesting hardware help does not load LeRobot, PyTorch, MuJoCo or OpenCV and
 never opens a serial port. The bus adapter preserves serial ownership, checks
 STS3215 identity and disconnects with `disable_torque=False`.
+
+The [servo workbench](servo-workbench.md) has a loopback browser gateway and an
+exclusive remote worker. Native parameter writes, bounded moves and full response
+sampling run remotely; missing motor IDs remain visible as offline slots.
 
 ## Deployment and verification
 

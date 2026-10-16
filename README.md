@@ -20,6 +20,7 @@ After installing the local environment below:
 ```bash
 ./scripts/lerobot-arm --help
 ./scripts/lerobot-arm view arm --headless --duration 3
+./scripts/lerobot-arm view motors
 ./scripts/lerobot-arm task circle --headless --duration 3
 ./scripts/lerobot-arm task push-t --headless --fast --limit 1 --output data/push_t/run
 ```
@@ -485,6 +486,13 @@ for calibration, failure handling, offline replay, outputs, and validation limit
 The current base mount fit is rejected, so physical grasp/placement validation is pending.
 
 ## 8. Configuration, layout, and data
+
+For a six-channel browser interface, use the [servo workbench](docs/servo-workbench.md):
+`./scripts/lerobot-arm view motors`, then open `http://127.0.0.1:8765`.
+Select an arm, inspect all native parameters, make temporary or EEPROM edits,
+send bounded position targets and plot/export measured responses. Missing motors
+stay offline without blocking the installed channels. This diagnostic operates
+the native position loop directly; normal task demos retain the shared outer controller.
 
 For one installed servo, use the [single-servo native PID benchmark](docs/native-pid.md).
 It captures an independent encoder zero and measures native position-loop response

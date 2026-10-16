@@ -104,3 +104,15 @@ tests/test_motion_stall.py
 
 src/lerobot_arm_control/diagnostics/native_pid.py
 tests/test_native_pid.py
+src/lerobot_arm_control/workbench/__init__.py
+src/lerobot_arm_control/workbench/registers.py
+src/lerobot_arm_control/workbench/hardware.py
+src/lerobot_arm_control/workbench/controller.py
+src/lerobot_arm_control/workbench/worker.py
+src/lerobot_arm_control/workbench/link.py
+src/lerobot_arm_control/workbench/server.py
+src/lerobot_arm_control/workbench/web/index.html
+src/lerobot_arm_control/workbench/web/style.css
+src/lerobot_arm_control/workbench/web/app.js
+tests/test_servo_workbench.py
+tests/test_servo_workbench_http.py

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="workbench-token" content="__TOKEN__" />
+    <title>LeRobot · 舵机工作台</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">L</span><strong>LeRobot</strong><span class="divider">/</span>
+        <h1>舵机工作台</h1>
+      </div>
+      <div class="header-actions">
+        <span id="connection-status" role="status">未连接</span
+        ><button id="hold" class="stop" disabled>停止并保持</button
+        ><button id="release-all" disabled>释放全部扭矩</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="connection" aria-label="连接机械臂">
+        <label>机械臂<select id="arm"></select></label>
+        <label>波特率<select id="baudrate"></select></label>
+        <div class="ids">
+          <span class="field-label">通道 ID</span>
+          <div id="device-ids"></div>
+        </div>
+        <button id="connect" class="primary">连接并扫描</button
+        ><button id="disconnect" disabled>断开</button>
+        <span id="sample-rate" class="mono">— Hz</span>
+      </section>
+      <div class="connection-meta">
+        <span id="port-label">选择机械臂后连接；连接本身不会使电机运动。</span
+        ><span id="freshness"></span>
+      </div>
+      <div id="notice" class="notice" role="alert" hidden></div>
+      <div id="fault-banner" class="fault-banner" hidden>
+        <span id="fault-text"></span><button id="clear-fault">检查后清除故障</button>
+      </div>
+
+      <section id="motors" class="motors" aria-label="六个电机实时数值"></section>
+
+      <div class="workspace">
+        <aside class="control-panel">
+          <div class="panel-heading">
+            <h2>位置控制</h2>
+            <span id="active-id" class="mono">J1</span>
+          </div>
+          <div id="active-name" class="muted">shoulder_pan</div>
+          <label class="check-line"
+            ><input id="motion-confirmed" type="checkbox" />已确认所选电机行程无干涉</label
+          >
+          <div class="button-pair">
+            <button id="enable" class="primary" disabled>使能勾选电机</button
+            ><button id="release" disabled>释放勾选电机</button>
+          </div>
+          <div class="section-label">当前电机动作范围 <span>tick</span></div>
+          <div class="range-row">
+            <input id="bound-low" aria-label="动作范围下限" type="number" step="1" /><span>—</span
+            ><input id="bound-high" aria-label="动作范围上限" type="number" step="1" /><button
+              id="save-bounds"
+              disabled
+            >
+              设置
+            </button>
+          </div>
+          <p class="help">
+            初次连接默认限制在当前位置附近
+            ±10°；扩大范围前请检查机构。修改零点、相位或限位后需重新设置。
+          </p>
+          <label
+            >目标位置 <span class="unit">tick</span
+            ><input id="target" type="number" step="1" value="2067"
+          /></label>
+          <label
+            >移动速度 <span class="unit">°/s</span
+            ><input id="speed" type="number" min="1" max="600" value="60"
+          /></label>
+          <div class="jog">
+            <button id="jog-minus" disabled>−10 tick</button
+            ><button id="send-target" class="primary" disabled>移动当前电机</button
+            ><button id="jog-plus" disabled>+10 tick</button>
+          </div>
+          <details class="multi-target">
+            <summary>六电机独立目标</summary>
+            <div id="multi-targets"></div>
+            <button id="send-multi" disabled>发送勾选电机目标</button>
+          </details>
+          <div class="panel-heading response-heading">
+            <h2>阶跃响应</h2>
+            <span>远端独立执行</span>
+          </div>
+          <div class="test-fields">
+            <label
+              >完整阶跃幅值 °<input
+                id="amplitude"
+                type="number"
+                min="1"
+                max="170"
+                value="5" /></label
+            ><label>往返次数<input id="repeats" type="number" min="1" max="5" value="1" /></label
+            ><label
+              >每段保持 s<input id="dwell" type="number" min="0.8" max="5" step="0.1" value="1.2"
+            /></label>
+          </div>
+          <p class="help">
+            5° 表示围绕当前位置 −2.5° ↔ +2.5°。按勾选顺序逐个测试，完成后回到各自起始位置。
+          </p>
+          <button id="start-step" class="primary wide" disabled>测试勾选电机</button>
+          <div id="job-progress" class="job-progress" role="status">尚无进行中的测试</div>
+        </aside>
+
+        <section class="data-panel">
+          <nav class="tabs" aria-label="工作区">
+            <button data-tab="live" class="active">实时曲线</button
+            ><button data-tab="parameters">舵机参数 <span id="dirty-count"></span></button
+            ><button data-tab="response">响应分析 <span id="result-count"></span></button>
+          </nav>
+
+          <section id="tab-live" class="tab-content">
+            <div class="plot-toolbar">
+              <div>
+                <h2>实时反馈</h2>
+                <p>勾选通道可叠加比较；虚线为目标位置。</p>
+              </div>
+              <label
+                >显示量<select id="plot-field">
+                  <option value="position">位置 · tick</option>
+                  <option value="velocity">速度 · raw</option>
+                  <option value="load">输出占空比 · 0.1%</option>
+                  <option value="current_raw">电流 · 6.5 mA</option>
+                  <option value="voltage">电压 · V</option>
+                  <option value="temperature">温度 · °C</option>
+                </select></label
+              ><button id="pause-display">暂停显示</button>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="live-chart" aria-label="实时电机反馈曲线">实时反馈曲线</canvas>
+              <div id="live-empty" class="chart-empty">连接机械臂以开始读取反馈</div>
+            </div>
+            <div class="plot-subtitle">
+              <h3>位置误差</h3>
+              <span>目标 − 实测 · tick</span>
+            </div>
+            <div class="error-wrap">
+              <canvas id="error-chart" aria-label="实时位置误差曲线">位置误差曲线</canvas>
+            </div>
+            <div class="plot-footer">
+              <span id="plot-legend"></span><span>曲线显示最近 20 秒</span>
+            </div>
+            <div class="export-toolbar">
+              <button id="export-live-csv" disabled>导出实时 CSV</button
+              ><button id="export-json" disabled>导出完整 JSON</button
+              ><button id="export-live-png">保存曲线 PNG</button
+              ><button id="clear-display">清空显示</button>
+            </div>
+            <p class="footnote">
+              响应测试使用远端原始采样计时。浏览器刷新率和网络延迟不参与电机控制。
+            </p>
+          </section>
+
+          <section id="tab-parameters" class="tab-content" hidden>
+            <div class="parameter-toolbar">
+              <label
+                >筛选<input
+                  id="parameter-search"
+                  type="search"
+                  placeholder="名称、地址或 PID" /></label
+              ><label
+                >参数区<select id="parameter-group">
+                  <option value="all">全部参数</option>
+                  <option value="EEPROM">EEPROM · 可保存</option>
+                  <option value="RAM">RAM · 运行参数</option>
+                  <option value="readonly">只读反馈与出厂参数</option>
+                </select></label
+              ><button id="refresh-parameters" disabled>读取当前电机</button>
+            </div>
+            <div id="parameter-state" class="help">连接后可读取当前电机的完整参数表。</div>
+            <div class="table-scroll">
+              <table class="parameter-table">
+                <thead>
+                  <tr>
+                    <th>地址</th>
+                    <th>参数</th>
+                    <th>当前值</th>
+                    <th>新值</th>
+                    <th>单位 / 范围</th>
+                  </tr>
+                </thead>
+                <tbody id="parameter-rows"></tbody>
+              </table>
+            </div>
+            <div class="write-toolbar">
+              <label class="check-line"
+                ><input id="persist" type="checkbox" />保存到 EEPROM（掉电保留）</label
+              ><button id="discard-edits">撤销修改</button
+              ><button id="review-write" class="primary" disabled>检查并写入</button>
+            </div>
+            <div class="export-toolbar">
+              <button id="export-parameters" disabled>导出参数 JSON</button
+              ><label class="file-button"
+                >导入参数<input id="import-parameters" type="file" accept="application/json,.json"
+              /></label>
+            </div>
+            <p class="footnote">
+              参数写入前需释放在线电机扭矩。只读、预留地址与写入锁不可直接修改；写入锁由事务管理。修改通信参数时总线仅允许一只在线舵机。
+            </p>
+          </section>
+
+          <section id="tab-response" class="tab-content" hidden>
+            <div class="plot-toolbar">
+              <div>
+                <h2>阶跃响应分析</h2>
+                <p id="response-description">完成一次测试后显示原始响应和各电机指标。</p>
+              </div>
+              <label>电机<select id="response-joint"></select></label>
+            </div>
+            <div class="response-metrics" id="response-summary"></div>
+            <div class="chart-wrap">
+              <canvas id="response-chart" aria-label="阶跃响应百分比曲线">阶跃响应曲线</canvas>
+              <div id="response-empty" class="chart-empty">尚无测试结果</div>
+            </div>
+            <div class="plot-subtitle">
+              <h3>稳态误差</h3>
+              <span>最后 300 ms · tick；阴影为 ±1 tick</span>
+            </div>
+            <div class="error-wrap">
+              <canvas id="settled-chart" aria-label="阶跃稳态误差曲线">稳态误差曲线</canvas>
+            </div>
+            <div class="response-table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>电机</th>
+                    <th>方向</th>
+                    <th>到达 90%</th>
+                    <th>10–90% 上升</th>
+                    <th>稳定时间</th>
+                    <th>稳态峰值</th>
+                    <th>超调</th>
+                  </tr>
+                </thead>
+                <tbody id="response-rows"></tbody>
+              </table>
+            </div>
+            <div class="export-toolbar">
+              <button id="export-response-csv" disabled>导出响应 CSV</button
+              ><button id="export-response-json" disabled>导出测试 JSON</button
+              ><button id="export-response-png">保存响应 PNG</button>
+            </div>
+            <p class="footnote">
+              50 ms 指发出指令至到达 90% 的时间。严格误差 &lt;1 tick
+              要求稳态每个样本都等于目标；编码器读数不能单独证明绝对机械精度。
+            </p>
+          </section>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>STS3215 · 六通道原生舵机调试</span
+        ><a
+          href="https://ftservo.github.io/ftservo-wiki/reference/parameter/memory-sts/"
+          target="_blank"
+          rel="noreferrer"
+          >厂商寄存器定义</a
+        >
+      </footer>
+    </main>
+
+    <dialog id="write-dialog">
+      <form method="dialog">
+        <div class="panel-heading">
+          <h2>确认写入参数</h2>
+          <button value="cancel" aria-label="关闭">关闭</button>
+        </div>
+        <p id="write-scope"></p>
+        <div id="write-preview"></div>
+        <p id="write-mode" class="notice"></p>
+        <div class="dialog-actions">
+          <button value="cancel">返回修改</button
+          ><button id="confirm-write" class="primary" type="button">写入并读回验证</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

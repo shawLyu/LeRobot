@@ -20,10 +20,11 @@ def test_remote_manifest_is_complete_and_cannot_import_local_simulation_modules(
     assert len(paths) == len(set(paths))
     assert "scripts/lerobot-arm" in paths
     modules = {str(Path(path).with_suffix('')).removeprefix('src/').replace('/', '.')
-               .removesuffix('.__init__') for path in paths if path.startswith('src/')}
+               .removesuffix('.__init__') for path in paths
+               if path.startswith('src/') and Path(path).suffix == '.py'}
     for path in paths:
         assert (ROOT/path).is_file(), path
-        if not path.startswith('src/'):
+        if not path.startswith('src/') or Path(path).suffix != '.py':
             continue
         module = str(Path(path).with_suffix('')).removeprefix('src/').replace('/', '.')
         package = module.rsplit('.', 1)[0]

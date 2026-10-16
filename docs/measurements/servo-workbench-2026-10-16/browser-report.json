@@ -1,0 +1,98 @@
+{
+  "hardware": true,
+  "checks": [
+    "six slots, arm selection, disabled motion before connection",
+    "real ID1, five absent motors tolerated, full parameter readback",
+    "temporary PID write and independent displayed readback",
+    "EEPROM write, relock and baseline restoration",
+    "invalid PID rejected; managed lock and factory registers read-only",
+    "real heartbeat timeout holds, stale display blocks motion, reenable required",
+    "six independent target inputs, checked-target +10 tick move and single-target return",
+    "remote 5 degree step completed, both-direction metrics and JSON export",
+    "response graph, settled errors, CSV export",
+    "final native settings retained, starting pose recovered, torque off",
+    "mobile layout without horizontal page overflow"
+  ],
+  "started": "2026-10-16T08:01:57.932Z",
+  "initial": {
+    "position": 2234,
+    "native": {
+      "P_Coefficient": 64,
+      "I_Coefficient": 4,
+      "D_Coefficient": 128,
+      "CW_Dead_Zone": 0,
+      "CCW_Dead_Zone": 0,
+      "Integral_Limit": 8,
+      "Minimum_Startup_Force": 16
+    }
+  },
+  "device_context": {
+    "arm": "follower",
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+    "baudrate": 1000000,
+    "model": "sts3215"
+  },
+  "response": [
+    {
+      "direction": "positive",
+      "rise_time_10_90_s": 0.04379832203267143,
+      "time_to_90_s": 0.09066010758979247,
+      "overshoot_percent": 7.14285714285714,
+      "settling_time_s": 0.35766545310616493,
+      "settling_band_deg": 0.0439453125,
+      "steady_error_deg": 0,
+      "steady_peak_error_deg": 0,
+      "rms_error_deg": 1.1602850443133432,
+      "max_sample_gap_s": 0.010346123948693275,
+      "samples": 122,
+      "effective_sample_hz": 100.19360289660384,
+      "median_sample_hz": 100.0074999443493,
+      "passed": false,
+      "onset_seconds": 0.047662233002483845,
+      "steady_mean_error_ticks": 0,
+      "steady_rms_error_ticks": 0,
+      "steady_peak_error_ticks": 0,
+      "exact_target_fraction": 1,
+      "overshoot_ticks": 4,
+      "step_ticks": 56,
+      "command_ack_seconds": 0.0003160920459777117,
+      "encoder_precision_passed": true,
+      "response_passed": false
+    },
+    {
+      "direction": "negative",
+      "rise_time_10_90_s": 0.046786193558946254,
+      "time_to_90_s": 0.08977886366192252,
+      "overshoot_percent": 5.35714285714286,
+      "settling_time_s": 0.29781191295478493,
+      "settling_band_deg": 0.0439453125,
+      "steady_error_deg": 0,
+      "steady_peak_error_deg": 0,
+      "rms_error_deg": 1.1359086753285952,
+      "max_sample_gap_s": 0.01019364595413208,
+      "samples": 122,
+      "effective_sample_hz": 100.19781026817579,
+      "median_sample_hz": 100.00220020485823,
+      "passed": false,
+      "onset_seconds": 0.03779278451111168,
+      "steady_mean_error_ticks": 0,
+      "steady_rms_error_ticks": 0,
+      "steady_peak_error_ticks": 0,
+      "exact_target_fraction": 1,
+      "overshoot_ticks": 3,
+      "step_ticks": 56,
+      "command_ack_seconds": 0.00032456102780997753,
+      "encoder_precision_passed": true,
+      "response_passed": false
+    }
+  ],
+  "final": {
+    "position": 2234,
+    "torque": 0,
+    "lock": 1,
+    "status": 0
+  },
+  "completed": true,
+  "browser_errors": [],
+  "finished": "2026-10-16T08:02:09.634Z"
+}

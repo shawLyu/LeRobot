@@ -6,6 +6,7 @@ import math
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, TRAJECTORY
 from lerobot_arm_control.control.parking import smooth_fraction
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.transport.realtime import JOINTS
 
 ACTIVE = JOINTS[:5]
@@ -41,8 +42,7 @@ class JointPath:
         expected = {'checked': True, 'plan_sha256': plan_digest(plan),
                     'control_config_sha256': CONTROL_CONFIG_SHA256,
                     'model_sha256': control.calibration.fingerprint['mjcf_sha256'],
-                    'joint_calibration_sha256': hashlib.sha256(
-                        control.calibration.path.read_bytes()).hexdigest()}
+                    'joint_calibration_sha256': file_digest(control.calibration.path)}
         if validation != expected:
             raise ValueError('joint path requires matching local collision validation and inputs')
         points = plan.get('waypoints', [])

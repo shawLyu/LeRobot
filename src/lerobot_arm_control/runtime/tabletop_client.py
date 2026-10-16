@@ -2,7 +2,6 @@
 
 import argparse
 import base64
-import hashlib
 import io
 import json
 import math
@@ -15,7 +14,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
-from lerobot_arm_control.core.files import atomic_json
+from lerobot_arm_control.core.files import atomic_json, file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.core.processes import remote_python
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
@@ -92,7 +91,7 @@ class TableLink:
                                             self.output / "so101_source.xml")
                         if fingerprint is not None:
                             source = resource_path('assets/so101/so101.xml')
-                            if hashlib.sha256(source.read_bytes()).hexdigest() != model_hash:
+                            if file_digest(source) != model_hash:
                                 raise ValueError("Local SO101 model differs from joint calibration")
                         marker = base64.b64decode(message.pop("tag_png"), validate=True)
                         (self.output / "marker.png").write_bytes(marker)

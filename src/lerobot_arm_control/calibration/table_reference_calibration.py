@@ -8,6 +8,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from lerobot_arm_control.core.files import atomic_json, file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.perception.tabletop_perception import (
     Perception,
@@ -146,10 +147,8 @@ def fit_capture(directory, config):
                            'training_sequences': [s['sequence'] for s in training],
                            'held_out_sequences': [s['sequence'] for s in validation],
                            'rejected_sequences': rejected,
-                           'capture_metadata_sha256': hashlib.sha256(
-                               (directory/'calibration.json').read_bytes()).hexdigest(),
-                           'observations_sha256': hashlib.sha256(
-                               (directory/'states.jsonl').read_bytes()).hexdigest()},
+                           'capture_metadata_sha256': file_digest(directory / 'calibration.json'),
+                           'observations_sha256': file_digest(directory / 'states.jsonl')},
             'observed_unix_ns': samples[-1]['captured_unix_ns'],
             'physical_precision_validated': False,
             'accuracy_scope': 'Stationary two-tag image registration; sampling stability '
@@ -163,9 +162,7 @@ def main():
     args = parser.parse_args()
     result = fit_capture(args.capture, read_config(ROOT/'configs/tabletop.json'))
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    temporary = args.output.with_suffix('.tmp')
-    temporary.write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
-    temporary.replace(args.output)
+    atomic_json(args.output, result)
     print(json.dumps({'output': str(args.output), 'auxiliary': result['auxiliary'],
                       'quality': result['quality']}))
 

@@ -1,13 +1,13 @@
 """Local-only circle generation, collision checking and dynamics verification."""
 
 import argparse
-import hashlib
 import json
 import math
 from pathlib import Path
 
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.control.simulation_control import SimulationControl
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.tasks.circle.circle_trajectory import PLAN, ROOT, Circle, load_profile
@@ -83,8 +83,8 @@ def generate(path):
     check_path(model, points)
     period = load_profile()[0]["period_seconds"]
     saved = {"version": 1, "joints": list(JOINTS),
-             "model_sha256": hashlib.sha256((resource_path('assets/so101/so101.xml')).read_bytes())
-             .hexdigest(), "site": "gripperframe", "plane": "XZ", "radius_m": radius,
+             "model_sha256": file_digest(resource_path('assets/so101/so101.xml')),
+             "site": "gripperframe", "plane": "XZ", "radius_m": radius,
              "center_m": center.tolist(), "period_seconds": period, "qpos": points,
              "ik_max_error_m": max(errors)}
     path.parent.mkdir(parents=True, exist_ok=True)

@@ -2,7 +2,6 @@
 
 import argparse
 import csv
-import hashlib
 import json
 import math
 import subprocess
@@ -15,6 +14,7 @@ import numpy as np
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL, CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.simulation_control import SimulationControl
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.diagnostics.response import motor_observation
@@ -174,7 +174,7 @@ def hardware_trial(args, report):
                 raise TimeoutError('initial feedback absent')
             time.sleep(.01)
         hello = link.snapshot()[0]
-        if hello['joint_calibration_sha256'] != hashlib.sha256(angle_path.read_bytes()).hexdigest():
+        if hello['joint_calibration_sha256'] != file_digest(angle_path):
             raise ValueError('local/remote joint calibration differs')
         report.update(hello=hello, initial_state=state)
         initial = state['qpos']

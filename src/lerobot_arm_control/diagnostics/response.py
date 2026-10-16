@@ -1,7 +1,6 @@
 """Local collision checks and a finite, supervised five-joint response benchmark."""
 
 import argparse
-import hashlib
 import json
 import subprocess
 import time
@@ -13,6 +12,7 @@ import numpy as np
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.joint_path import ACTIVE, plan_digest
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
@@ -166,7 +166,7 @@ def trial(args):
                 raise TimeoutError('initial motor/camera feedback absent')
             time.sleep(.01)
         hello = link.snapshot()[0]
-        if hello['joint_calibration_sha256'] != hashlib.sha256(angle_path.read_bytes()).hexdigest():
+        if hello['joint_calibration_sha256'] != file_digest(angle_path):
             raise ValueError('local and remote encoder mapping differs')
         initial = state['raw']
         anchor = json.loads(args.anchor.read_text()) if args.anchor else initial.copy()
@@ -181,7 +181,7 @@ def trial(args):
         checked = check_plan(plan, calibration)
         validation = {'checked': True, 'plan_sha256': plan_digest(plan),
                       'control_config_sha256': CONTROL_CONFIG_SHA256,
-                      'model_sha256': hashlib.sha256(MODEL.read_bytes()).hexdigest(),
+                      'model_sha256': file_digest(MODEL),
                       'joint_calibration_sha256': hello['joint_calibration_sha256']}
         proof.update(plan=plan, local_collision_samples=checked, initial_state=state)
         command('joint_path_start', plan=plan, validation=validation)

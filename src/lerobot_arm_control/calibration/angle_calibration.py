@@ -1,11 +1,11 @@
 """Measured encoder-to-MJCF alignment; never writes motor registers."""
 
-import hashlib
 import json
 import math
 import statistics
 from pathlib import Path
 
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.transport.realtime import JOINTS
 
 TICKS_PER_RADIAN = 4096 / (2 * math.pi)
@@ -73,13 +73,13 @@ class AngleCalibration:
             correction_path = path.with_name(path.stem+'_kinematic.json')
             if use_kinematic and correction_path.exists():
                 correction = json.loads(correction_path.read_text())
-                validate_correction(correction, hashlib.sha256(path.read_bytes()).hexdigest(),
+                validate_correction(correction, file_digest(path),
                                     fingerprint)
                 base_name = correction.get('base_calibration_file', '')
                 if not base_name or Path(base_name).name != base_name:
                     raise ValueError('Invalid base file in kinematic correction')
                 base_path = path.parent/base_name
-                if (not base_path.exists() or hashlib.sha256(base_path.read_bytes()).hexdigest()
+                if (not base_path.exists() or file_digest(base_path)
                         != correction.get('base_calibration_sha256')):
                     raise ValueError('Kinematic correction base calibration changed')
                 self.correction = correction

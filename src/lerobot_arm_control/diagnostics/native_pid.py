@@ -11,10 +11,11 @@ from lerobot_arm_control.control.servo_feedback import read_control_feedback
 from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.core.paths import workspace_root
-from lerobot_arm_control.diagnostics.response_metrics import step_metrics
+from lerobot_arm_control.core.processes import interrupt
+from lerobot_arm_control.diagnostics.response_metrics import DEGREES_PER_TICK
+from lerobot_arm_control.diagnostics.response_metrics import native_step_metrics as metrics
 from lerobot_arm_control.robot.so101.driver import connected
 
-DEGREES_PER_TICK = 360 / 4096
 IDENTITY_REGISTERS = ('Homing_Offset', 'Phase', 'Operating_Mode', 'Min_Position_Limit',
                       'Max_Position_Limit', 'Angular_Resolution')
 TUNING_REGISTERS = ('P_Coefficient', 'I_Coefficient', 'D_Coefficient',
@@ -68,34 +69,6 @@ def validate_plan(zero, actual_identity, amplitudes):
     if not bounds[0] <= zero['zero_raw'] <= bounds[1] or not targets:
         raise ValueError('zero outside authorized travel or empty plan')
     return bounds, targets
-
-
-def metrics(segment, *, response_ms=50):
-    frames = segment['frames']
-    times = [frame['t'] for frame in frames]
-    positions = [frame['position'] for frame in frames]
-    start, target = segment['start'], segment['target']
-    result = step_metrics(times, [p * DEGREES_PER_TICK for p in positions],
-                          start * DEGREES_PER_TICK, target * DEGREES_PER_TICK,
-                          band_deg=.5 * DEGREES_PER_TICK, tail_seconds=.3)
-    tail = [target - frame['position'] for frame in frames if frame['t'] >= times[-1] - .3]
-    direction = 1 if target > start else -1
-    onset = next((frame['t'] for frame in frames
-                  if (frame['position'] - start) * direction >= 2), None)
-    result.update(onset_seconds=onset, steady_mean_error_ticks=statistics.mean(tail),
-                  steady_rms_error_ticks=math.sqrt(statistics.mean(e * e for e in tail)),
-                  steady_peak_error_ticks=max(map(abs, tail)),
-                  exact_target_fraction=sum(e == 0 for e in tail) / len(tail),
-                  overshoot_ticks=max(0, max((p - target) * direction for p in positions)),
-                  step_ticks=abs(target - start),
-                  command_ack_seconds=segment['command_ack_seconds'])
-    result['encoder_precision_passed'] = result['steady_peak_error_ticks'] < 1
-    result['response_passed'] = (result['time_to_90_s'] is not None
-                                 and result['time_to_90_s'] <= response_ms / 1000)
-    result['passed'] = (result['encoder_precision_passed'] and result['response_passed']
-                        and result['settling_time_s'] is not None
-                        and result['max_sample_gap_s'] <= .02)
-    return result
 
 
 def zero_metrics(segment, zero_raw):
@@ -327,10 +300,6 @@ def capture(args):
     print(str(args.output / 'result.json'), flush=True)
     if not report['completed'] or report.get('error') or report.get('restoration_errors'):
         raise SystemExit(1)
-
-
-def interrupt(signum, frame):
-    raise KeyboardInterrupt(f'signal {signum}')
 
 
 def capture_zero(args):

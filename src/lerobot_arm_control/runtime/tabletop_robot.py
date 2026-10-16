@@ -1,6 +1,5 @@
 """Remote read-only SO101 feedback, with the existing measured joint calibration."""
 
-import hashlib
 import threading
 import time
 from collections import deque
@@ -14,6 +13,7 @@ from lerobot_arm_control.control.control_defaults import (
 )
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
 from lerobot_arm_control.core.config import load_arms
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.robot.so101.driver import connected
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
@@ -52,7 +52,7 @@ def calibration_identity(bus, arm, model_path):
             "homing_offsets": bus.sync_read("Homing_Offset", normalize=False),
             "phase": bus.sync_read("Phase", normalize=False),
             "mode": bus.sync_read("Operating_Mode", normalize=False),
-            "model": "so101", "mjcf_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest()}
+            "model": "so101", "mjcf_sha256": file_digest(model_path)}
 
 
 class RobotFeedback:
@@ -86,8 +86,7 @@ class RobotFeedback:
                     raise ValueError("All six measured joint calibrations are required")
                 fits = {name: calibration.fit(name) for name in JOINTS}
                 self.metadata.update(joint_calibration=str(calibration_path),
-                    joint_calibration_sha256=hashlib.sha256(
-                        calibration_path.read_bytes()).hexdigest(),
+                    joint_calibration_sha256=file_digest(calibration_path),
                     kinematic_correction=calibration.correction,
                     calibration_mode='independent',
                     calibration_source_arm=self.config['arm'], independently_calibrated=True)

@@ -91,8 +91,7 @@ async function action(fn, success) {
   }
 }
 
-function resetSession() {
-  pack = {};
+function clearSessionData() {
   params = {};
   edits = {};
   history = [];
@@ -101,6 +100,11 @@ function resetSession() {
   result = null;
   fetchedResult = null;
   lastSeq = -1;
+}
+
+function resetSession() {
+  pack = {};
+  clearSessionData();
   selected.clear();
   $('motion-confirmed').checked = false;
   $('write-dialog').close();
@@ -136,14 +140,7 @@ async function connectArm() {
     }),
   );
   if (!hello) return;
-  params = {};
-  edits = {};
-  targets = {};
-  boundsDrafts = {};
-  history = [];
-  result = null;
-  fetchedResult = null;
-  lastSeq = -1;
+  clearSessionData();
   pack = { connected: true, hello, state: hello.state, age_seconds: 0 };
   receivedAt = performance.now();
   active = JOINTS.find((j) => hello.state.discovery[j]?.online) || JOINTS[0];
@@ -220,6 +217,21 @@ function renderMotors() {
   }
 }
 
+function renderBounds() {
+  const applied = state().bounds?.[active];
+  const draft = boundsDrafts[active];
+  const pending = draft && draft.some((v, i) => v === '' || Number(v) !== applied?.[i]);
+  let reason = '';
+  if (!online(active)) reason = '请先连接当前电机。';
+  else if (busy) reason = '正在处理请求，请稍候。';
+  else if (hasMotion()) reason = '请先停止运动，再设置范围。';
+  else if (enabled(active)) reason = '请先释放当前电机扭矩，再设置范围。';
+  else if (!$('motion-confirmed').checked) reason = '请先勾选行程无干涉确认。';
+  $('save-bounds').disabled = !!reason;
+  $('bounds-status').textContent =
+    `${applied ? `已应用 ${applied[0]} — ${applied[1]} tick。` : '尚未设置有效范围。'} ${pending ? '输入尚未应用。' : ''}${reason || '可设置；范围须包含当前位置，并处于 EEPROM 限位内。'}`;
+}
+
 function renderControls() {
   const isConnected = connected(),
     available = online(active),
@@ -238,23 +250,7 @@ function renderControls() {
     !pack.connected || !JOINTS.some((j) => state().discovery?.[j]?.online);
   $('enable').disabled = busy || !confirmed || !joints.length || motion || !!state().fault;
   $('release').disabled = busy || !joints.length;
-  $('save-bounds').disabled = busy || !available || !confirmed || enabled(active) || motion;
-  const applied = state().bounds?.[active];
-  const draft = boundsDrafts[active];
-  const pending = draft && draft.some((v, i) => v === '' || Number(v) !== applied?.[i]);
-  const reason = !available
-    ? '请先连接当前电机。'
-    : busy
-      ? '正在处理请求，请稍候。'
-      : motion
-        ? '请先停止运动，再设置范围。'
-        : enabled(active)
-          ? '请先释放当前电机扭矩，再设置范围。'
-          : !confirmed
-            ? '请先勾选行程无干涉确认。'
-            : '可设置；范围须包含当前位置，并处于 EEPROM 限位内。';
-  $('bounds-status').textContent =
-    `${applied ? `已应用 ${applied[0]} — ${applied[1]} tick。` : '尚未设置有效范围。'} ${pending ? '输入尚未应用。' : ''}${reason}`;
+  renderBounds();
   for (const id of ['send-target', 'jog-minus', 'jog-plus'])
     $(id).disabled =
       busy || !available || !confirmed || !enabled(active) || motion || !!state().fault;

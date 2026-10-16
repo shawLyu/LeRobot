@@ -41,7 +41,9 @@ const { chromium } = require('playwright');
       },
     };
     let failSave = false,
-      polls = 0;
+      polls = 0,
+      connected = true;
+    const hello = { arm: 'follower', port: 'mock', baudrate: 1000000 };
     // Fail closed: unexpected API requests fail locally, never reach real hardware.
     await page.route('**/api/**', async (route) => {
       const path = new URL(route.request().url()).pathname;
@@ -57,11 +59,18 @@ const { chromium } = require('playwright');
         state.frame.seq++;
         state.frame.t += 0.1;
         result = {
-          connected: true,
+          connected,
           age_seconds: 0,
-          hello: { arm: 'follower', port: 'mock', baudrate: 1000000 },
+          hello,
           state,
         };
+      } else if (path === '/api/disconnect') {
+        connected = false;
+        result = { disconnected: true };
+      } else if (path === '/api/connect') {
+        connected = true;
+        state.bounds.shoulder_pan = [2010, 2140];
+        result = { ...hello, state };
       } else if (path === '/api/command') {
         const command = route.request().postDataJSON();
         commands.push(command);
@@ -150,10 +159,17 @@ const { chromium } = require('playwright');
       document.querySelector('#bounds-status').textContent.includes('勾选'),
     );
     assert.equal(await page.locator('#save-bounds').isDisabled(), true);
+    await page.locator('#disconnect').click();
+    await page.waitForFunction(() => !document.querySelector('#connect').disabled);
+    await page.locator('#connect').click();
+    await page.waitForFunction(() => document.querySelector('#bound-low').value === '2010');
+    assert.equal(await page.locator('#bound-high').inputValue(), '2140');
+    assert.equal(await page.locator('#motion-confirmed').isChecked(), false);
+    assert.match(await page.locator('#bounds-status').textContent(), /2010.*2140/);
     assert.deepEqual(errors, []);
     assert.ok(commands.every((c) => ['bounds', 'parameters'].includes(c.operation)));
     console.log(
-      'PASS: range drafts survive polling, blur, joint switches, save and rejection; guards explained; no hardware API used.',
+      'PASS: range drafts survive polling, blur, joint switches, save and rejection; guards explained; reconnect clears old drafts; no hardware API used.',
     );
   } finally {
     await browser.close();

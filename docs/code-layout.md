@@ -21,6 +21,7 @@ LeRobot/
 │   │   └── common.py     worker 共用定时、stdio 通信与延后日志写入
 │   ├── visualization/    本地窗口、场景重建与外观
 │   ├── diagnostics/      响应曲线、跟踪指标和精度验收
+│   ├── workbench/        六电机监测、原生参数事务、位置控制和浏览器工作台
 │   ├── cli.py            命令路由
 │   └── __main__.py       python -m lerobot_arm_control
 ├── configs/              运行配置、场景参数与远端部署清单
@@ -43,6 +44,11 @@ LeRobot/
 `runtime/follow_server.py --standalone` 中完成。本地 simulator 通过只读状态流显示。
 `runtime/common.py` 提供公共 worker 工具；具体 worker 不再从另一个 worker 导入它们。
 规划、MuJoCo 和图形窗口留在本地；远端导入闭包由测试校验。
+
+文件指纹统一调用 `core/files.py` 的 `file_digest`，文件内容仍按原始字节计算 SHA256；
+计划等结构化数据保留各自协议规定的 JSON 哈希格式。原生舵机阶跃指标集中在
+`diagnostics/response_metrics.py`，命令行验收和工作台调用同一实现；工作台不再依赖
+原生 PID 验收命令入口。进程中断处理归属 `core/processes.py`。
 
 ## 参数放在哪里
 

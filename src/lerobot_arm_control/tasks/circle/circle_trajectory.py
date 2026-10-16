@@ -1,6 +1,5 @@
 """Validated Cartesian circle and worker-clock playback for the SO-101."""
 
-import hashlib
 import json
 import math
 from copy import deepcopy
@@ -12,6 +11,7 @@ from lerobot_arm_control.control.control_defaults import (
     TRAJECTORY,
 )
 from lerobot_arm_control.control.parking import smooth_fraction
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -40,10 +40,10 @@ class Circle:
         self.control_hz = profile["control_hz"]
         saved = json.loads(Path(path).read_text())
         if (saved.get("version") != 1 or saved.get("joints") != list(JOINTS)
-                or saved.get("model_sha256") != hashlib.sha256(
-                    (resource_path('assets/so101/so101.xml')).read_bytes()).hexdigest()):
+                or saved.get("model_sha256") != file_digest(
+                    resource_path('assets/so101/so101.xml'))):
             raise ValueError("circle identity does not match the model")
-        self.plan_hash = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+        self.plan_hash = file_digest(path)
         self.model_hash = saved["model_sha256"]
         self.points = saved["qpos"]
         self.period = profile["period_seconds"]

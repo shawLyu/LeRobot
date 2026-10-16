@@ -1,10 +1,10 @@
 """Local fixed-jaw CAD inspection and the user-specified nominal ID 8 mount."""
 
-import hashlib
 import json
 
 import numpy as np
 
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
 
 
@@ -45,10 +45,9 @@ def cad_reference(model_path=MODEL):
     assert contact.bodyid[0] == body and frame.bodyid[0] == body
     return {
         'model_file': 'assets/so101/so101.xml',
-        'model_sha256': hashlib.sha256(model_path.read_bytes()).hexdigest(),
+        'model_sha256': file_digest(model_path),
         'fixed_jaw_mesh': mesh_name,
-        'mesh_sha256': hashlib.sha256(
-            (model_path.parent/'assets'/f'{mesh_name}.stl').read_bytes()).hexdigest(),
+        'mesh_sha256': file_digest(model_path.parent / 'assets' / f'{mesh_name}.stl'),
         'body': 'gripper',
         'coordinates': 'meters in gripper body frame; not table coordinates',
         'outer_flat_surface': {

@@ -1,4 +1,4 @@
-"""Build quoted source worker commands for the remote robot checkout."""
+"""Shared process commands and interrupt handling for robot workers."""
 
 import shlex
 
@@ -10,3 +10,7 @@ def remote_python(root, module, arguments=()):
     command = ["env", "PYTHONPATH=src", "LEROBOT_ARM_WORKSPACE=.",
                ".venv/bin/python", "-u", "-m", module, *map(str, arguments)]
     return f"cd {shlex.quote(root)} && exec " + shlex.join(command)
+
+
+def interrupt(signum, frame):
+    raise KeyboardInterrupt(f'signal {signum}')

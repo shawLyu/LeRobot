@@ -5,7 +5,6 @@ the existing remote worker using the shared control profile and watchdog.
 """
 
 import argparse
-import hashlib
 import json
 import math
 import subprocess
@@ -17,6 +16,7 @@ import numpy as np
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, TRAJECTORY
 from lerobot_arm_control.control.parking import smooth_fraction
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
@@ -185,8 +185,8 @@ def trial(args):
         raw = initial_raw if args.reference_raw is None else args.reference_raw
         if abs(raw-initial_raw) > args.amplitude_ticks:
             raise ValueError('Reference center is farther than one trial amplitude from the arm')
-        identity = {**hello['fingerprint'], 'model': 'so101', 'mjcf_sha256': hashlib.sha256(
-            (resource_path('assets/so101/so101.xml')).read_bytes()).hexdigest()}
+        identity = {**hello['fingerprint'], 'model': 'so101',
+                    'mjcf_sha256': file_digest(resource_path('assets/so101/so101.xml'))}
         calibration = AngleCalibration(ROOT/'data/calibration/follower_mujoco.json', identity)
         if not np.allclose(calibration.angles(start['raw'], [0]*6), start['qpos'], atol=1e-10):
             raise ValueError('local and remote angle mappings differ')

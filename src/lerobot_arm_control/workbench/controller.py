@@ -7,7 +7,7 @@ from pathlib import Path
 
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
 from lerobot_arm_control.core.files import atomic_json
-from lerobot_arm_control.diagnostics.native_pid import metrics
+from lerobot_arm_control.diagnostics.response_metrics import native_step_metrics
 from lerobot_arm_control.workbench.registers import BAUDRATES, BY_KEY, REGISTERS
 
 IDENTITY = ('Homing_Offset', 'Phase', 'Operating_Mode', 'Angular_Resolution',
@@ -404,7 +404,7 @@ class Workbench:
                 self.hold(self.fault)
                 return
             if now - segment['sent'] >= job['dwell']:
-                segment['metrics'] = metrics(segment)
+                segment['metrics'] = native_step_metrics(segment)
                 job['segments'].append(segment)
                 job['active'] = None
                 job['index'] += 1

@@ -1,7 +1,6 @@
 """One remote process owns both buses; the leader bus is strictly read-only."""
 
 import argparse
-import hashlib
 import math
 import queue
 import signal
@@ -24,6 +23,7 @@ from lerobot_arm_control.control.follow import (
 from lerobot_arm_control.control.manual_control import ManualControl
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
 from lerobot_arm_control.core.config import load_arms
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.robot.so101.driver import connected
 from lerobot_arm_control.robot.so101.model_metadata import MODEL, joint_ranges
@@ -47,7 +47,7 @@ def calibrated_mapping(arm, bus):
     if calibration.count() != 6:
         raise ValueError(f'{arm.name}: independent six-joint calibration required: {path}')
     metadata = {'arm': arm.name, 'fingerprint': identity, 'path': str(path),
-                'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                'sha256': file_digest(path),
                 'mode': 'independent'}
     return calibration, metadata
 

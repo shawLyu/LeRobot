@@ -2,13 +2,13 @@
 
 import argparse
 import copy
-import hashlib
 import json
 import math
 import shutil
 import time
 from pathlib import Path
 
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.planning.pick_t import PickPlanner
 from lerobot_arm_control.robot.so101.model_metadata import MODEL, joint_ranges
@@ -201,7 +201,7 @@ def main():
         parser.error('timeout must be in (0, 120] seconds')
     args.output.mkdir(parents=True, exist_ok=False)
     result = {'passed': False, 'physical_motion': False, 'status': 'initializing',
-              'model_sha256': hashlib.sha256(MODEL.read_bytes()).hexdigest()}
+              'model_sha256': file_digest(MODEL)}
     try:
         if args.snapshot:
             planner = PickPlanner(args.snapshot, args.output/'simulation')

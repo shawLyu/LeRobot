@@ -1,7 +1,6 @@
 """Local geometric T pick/place policy with the original SO101 jaws and contact physics."""
 
 import copy
-import hashlib
 import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -12,6 +11,7 @@ import numpy as np
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, TRAJECTORY
 from lerobot_arm_control.control.parking import smooth_fraction
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.planning.push_t import build_scene, errors, pose, rotation
 from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
@@ -261,4 +261,4 @@ class PickPlanner:
     def validation(self, segments):
         return {'checked': True, 'segments_sha256': segment_digest(segments),
                 'control_config_sha256': CONTROL_CONFIG_SHA256,
-                'model_sha256': hashlib.sha256(MODEL.read_bytes()).hexdigest()}
+                'model_sha256': file_digest(MODEL)}

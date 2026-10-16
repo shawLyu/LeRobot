@@ -3,6 +3,8 @@
 import math
 import statistics
 
+DEGREES_PER_TICK = 360 / 4096
+
 
 def step_metrics(times, measured, start, target, *, band_deg=.5, tail_seconds=.75):
     if (len(times) != len(measured) or len(times) < 3
@@ -44,4 +46,32 @@ def step_metrics(times, measured, start, target, *, band_deg=.5, tail_seconds=.7
     result['passed'] = (t90 is not None and settling is not None and settling <= 3.
                         and result['steady_peak_error_deg'] <= band_deg
                         and overshoot <= 35 and max(gaps) <= .1)
+    return result
+
+
+def native_step_metrics(segment, *, response_ms=50):
+    frames = segment['frames']
+    times = [frame['t'] for frame in frames]
+    positions = [frame['position'] for frame in frames]
+    start, target = segment['start'], segment['target']
+    result = step_metrics(times, [p * DEGREES_PER_TICK for p in positions],
+                          start * DEGREES_PER_TICK, target * DEGREES_PER_TICK,
+                          band_deg=.5 * DEGREES_PER_TICK, tail_seconds=.3)
+    tail = [target - frame['position'] for frame in frames if frame['t'] >= times[-1] - .3]
+    direction = 1 if target > start else -1
+    onset = next((frame['t'] for frame in frames
+                  if (frame['position'] - start) * direction >= 2), None)
+    result.update(onset_seconds=onset, steady_mean_error_ticks=statistics.mean(tail),
+                  steady_rms_error_ticks=math.sqrt(statistics.mean(e * e for e in tail)),
+                  steady_peak_error_ticks=max(map(abs, tail)),
+                  exact_target_fraction=sum(e == 0 for e in tail) / len(tail),
+                  overshoot_ticks=max(0, max((p - target) * direction for p in positions)),
+                  step_ticks=abs(target - start),
+                  command_ack_seconds=segment['command_ack_seconds'])
+    result['encoder_precision_passed'] = result['steady_peak_error_ticks'] < 1
+    result['response_passed'] = (result['time_to_90_s'] is not None
+                                 and result['time_to_90_s'] <= response_ms / 1000)
+    result['passed'] = (result['encoder_precision_passed'] and result['response_passed']
+                        and result['settling_time_s'] is not None
+                        and result['max_sample_gap_s'] <= .02)
     return result

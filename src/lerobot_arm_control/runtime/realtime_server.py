@@ -1,7 +1,6 @@
 """Remote hardware worker; stdout carries the stdio protocol."""
 
 import argparse
-import hashlib
 import json
 import queue
 import threading
@@ -10,6 +9,7 @@ from contextlib import ExitStack
 from pathlib import Path
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, CONTROL_HZ
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.runtime.common import (
     defer_cyclic_gc,
@@ -91,8 +91,7 @@ def serve(args):
             from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
             from lerobot_arm_control.control.manual_control import ManualControl
 
-            identity = {**fingerprint, "model": "so101", "mjcf_sha256": hashlib.sha256(
-                args.model.read_bytes()).hexdigest()}
+            identity = {**fingerprint, "model": "so101", "mjcf_sha256": file_digest(args.model)}
             calibration = AngleCalibration(ROOT / "data/calibration/follower_mujoco.json",
                                            identity)
             controller = ManualControl(bus, calibration, limits,
@@ -110,8 +109,8 @@ def serve(args):
               "units": "radians" if ranges else "encoder_ticks", "ranges": ranges,
               "raw_limits": limits, "hardware_motion_enabled": args.allow_gripper,
               "fingerprint": fingerprint,
-              'joint_calibration_sha256': (hashlib.sha256((ROOT / 'data/calibration/'
-                    'follower_mujoco.json').read_bytes()).hexdigest() if controller else None),
+              'joint_calibration_sha256': (file_digest(
+                  ROOT / 'data/calibration/follower_mujoco.json') if controller else None),
               'joint_angle_mapping': ({joint: calibration.fit(joint) for joint in JOINTS}
                                       if controller else None),
               'native_parameters': ({register: bus.sync_read(register, normalize=False)
@@ -247,8 +246,7 @@ def serve(args):
                             )
 
                             identity = {**fingerprint, "model": "so101",
-                                        "mjcf_sha256": hashlib.sha256(
-                                            args.model.read_bytes()).hexdigest()}
+                                        "mjcf_sha256": file_digest(args.model)}
                             calibration = AngleCalibration(
                                 ROOT / "data/calibration/follower_mujoco.json", identity)
                             calibration.check_gripper_test(plan)

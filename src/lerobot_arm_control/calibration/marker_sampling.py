@@ -1,7 +1,6 @@
 """Finite local orchestration of supervised five-joint camera calibration poses."""
 
 import argparse
-import hashlib
 import json
 import shutil
 import subprocess
@@ -13,6 +12,7 @@ import numpy as np
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
 from lerobot_arm_control.control.parking import smooth_fraction
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.model_metadata import MODEL
@@ -75,7 +75,7 @@ def acquire(args):
     if not args.relative_only:
         inputs['base'] = ROOT/'data/calibration/follower_table_base.json'
     for name, path in inputs.items():
-        provenance[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+        provenance[name] = file_digest(path)
         shutil.copyfile(path, output/('input-'+name+path.suffix))
     trace = args.remote_root+'/logs/'+output.name+'-control.json'
     proof = {'version': 1, 'completed': False, 'control_config_sha256':
@@ -160,7 +160,7 @@ def acquire(args):
             raise RuntimeError('initial servo fault')
         poses = validate_plan(plan, initial['raw'], hello['raw_limits'])
         identity = {**hello['fingerprint'], 'model': 'so101', 'mjcf_sha256':
-                    hashlib.sha256(MODEL.read_bytes()).hexdigest()}
+                    file_digest(MODEL)}
         calibration = AngleCalibration(ROOT/'data/calibration/follower_mujoco.json', identity)
         if hello.get('joint_calibration_sha256') != provenance['angles'] or any(
                 not np.allclose([hello['joint_angle_mapping'][j][key]

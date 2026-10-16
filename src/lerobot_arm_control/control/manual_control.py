@@ -1,6 +1,5 @@
 """LeRobot-style synchronized position control with explicit hold and release."""
 
-import hashlib
 import math
 import time
 from collections import deque
@@ -15,6 +14,7 @@ from lerobot_arm_control.control.control_defaults import (
 from lerobot_arm_control.control.gripper_contact import GripperContact
 from lerobot_arm_control.control.motion_stall import MotionStall
 from lerobot_arm_control.control.position_feedback import PositionFeedback
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.transport.realtime import JOINTS, WATCHDOG_SECONDS
 from lerobot_arm_control.visualization.ui import motor_fault_text
 
@@ -66,7 +66,7 @@ class ManualControl:
         for envelope in CONTROL['hardware_command_envelopes']:
             if envelope['port'] != getattr(calibration, 'fingerprint', {}).get('port'):
                 continue
-            digest = hashlib.sha256(calibration.path.read_bytes()).hexdigest()
+            digest = file_digest(calibration.path)
             if digest != envelope['calibration_sha256']:
                 raise ValueError('hardware command envelope calibration changed; review limits')
             for joint, bounds in envelope['raw_limits'].items():

@@ -1,7 +1,6 @@
 """Local MuJoCo simulation, or local display of the remote hardware worker."""
 
 import argparse
-import hashlib
 import json
 import math
 import queue
@@ -15,6 +14,7 @@ from pathlib import Path
 
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.control_input import JogCommands, ResetThenCircle
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path, source_environment, workspace_root
 from lerobot_arm_control.core.processes import remote_python
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
@@ -240,8 +240,7 @@ def run(args):
             from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 
             fingerprint = {**hello["fingerprint"], "model": "so101",
-                           "mjcf_sha256": hashlib.sha256(
-                               (resource_path('assets/so101/so101.xml')).read_bytes()).hexdigest()}
+                           "mjcf_sha256": file_digest(resource_path('assets/so101/so101.xml'))}
             try:
                 calibration = AngleCalibration(
                     args.calibration, fingerprint,

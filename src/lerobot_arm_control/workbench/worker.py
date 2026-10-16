@@ -8,7 +8,7 @@ import time
 
 from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.paths import workspace_root
-from lerobot_arm_control.diagnostics.native_pid import interrupt
+from lerobot_arm_control.core.processes import interrupt
 from lerobot_arm_control.runtime.common import next_deadline, receive, send
 from lerobot_arm_control.transport.latest_output import LatestOutput
 from lerobot_arm_control.workbench.controller import Workbench

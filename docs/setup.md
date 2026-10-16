@@ -11,7 +11,9 @@ Maintain all source locally; remote Linux runs hardware services.
 | Remote Linux x86_64 | `./scripts/bootstrap.sh` | Python 3.12, locked LeRobot 0.6.1 / Feetech, CPU Torch, development tools; no MuJoCo |
 
 `scripts/lerobot-arm` selects the local interpreter and sets an absolute PYTHONPATH.
-`LEROBOT_MUJOCO_ENV` takes precedence, followed by project `.venv`; Mac retains the legacy UWLab fallback.
+`LEROBOT_MUJOCO_ENV` takes precedence, followed by project `.venv`. An optional
+Mac fallback belongs in ignored `configs/runtime.local.json`; public defaults
+contain no personal environment path.
 Do not use the Linux x86_64 `uv.lock` to install a Mac environment.
 
 Remote `scripts/uv` keeps cache, Python downloads, and environment inside the project.
@@ -21,8 +23,8 @@ Remote `scripts/uv` keeps cache, Python downloads, and environment inside the pr
 ## Routine remote operation
 
 ```bash
-ssh lerobot
-cd /home/xy/Research/lerobot
+ssh robot-host
+cd ~/lerobot
 ./scripts/uv sync --locked --extra hardware
 ./scripts/uv pip check
 ./scripts/uv run --locked --extra hardware python -m lerobot_arm_control hardware doctor
@@ -37,9 +39,10 @@ Do not install the optional `simulation` extra remotely: simulation is a local r
 ## Device configuration
 
 Remote `configs/arms.toml` stores roles, stable USB paths, IDs, baud rate, and model.
-Existing follower: SO-101, USB `5B8E114461`. USB `5B91028324` is arm1 with an unconfirmed role.
+Assign a verified port and role for each installed arm; use the unassigned template
+in `configs/examples/arms.toml` when configuring a new host.
 Check actual `/dev/serial/by-id/` paths rather than historical ttyACM numbering.
-Both original buses were checked with IDs 1–6 and STS3215; verify mappings on new hardware.
+The template uses IDs 1–6 and STS3215; verify mappings on each new installation.
 
 `doctor`/`read` connect read-only through FeetechMotorsBus and disconnect with `disable_torque=False`.
 They do not invoke high-level automatic robot configuration, change PID/EEPROM, or calibrate automatically.

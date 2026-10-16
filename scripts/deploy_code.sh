@@ -34,6 +34,7 @@ rsync -az $DRY_RUN --itemize-changes --files-from="$ROOT/configs/remote-runtime.
 for directory in docs configs; do
   rsync -az $DRY_RUN --itemize-changes \
     --exclude='__pycache__/' --exclude='*.pyc' --exclude='._*' --exclude='.DS_Store' \
+    --exclude='*.local.*' \
     --exclude='/arms.toml' --exclude='/camera.toml' --exclude='/tabletop.json' \
     "$ROOT/$directory/" "$HOST:$REMOTE_ROOT/$directory/"
 done

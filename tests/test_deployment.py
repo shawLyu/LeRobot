@@ -65,6 +65,7 @@ def test_success_prepares_destination_and_transfers_without_archiving_old_code(c
     assert len(configuration) == 2
     assert all("--exclude=/camera.toml" in args and "--exclude=/tabletop.json" in args
                for args in configuration)
+    assert all("--exclude=*.local.*" in args for args in configuration)
 
 
 @pytest.mark.parametrize("failed_command", ["ssh", "rsync"])

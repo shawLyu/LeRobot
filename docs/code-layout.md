@@ -54,7 +54,8 @@ LeRobot/
 
 | 文件/目录 | 负责的参数 | 修改方式 |
 | --- | --- | --- |
-| `configs/runtime.json` | 默认 SSH 主机、远端项目目录、本地备用 Python 环境 | 编辑配置；SSH 可由 CLI 或环境变量覆盖 |
+| `configs/runtime.json` | 通用连接默认值，不包含个人账户和环境路径 | 共享示例 |
+| `configs/runtime.local.json` | 当前账户的 SSH、远端目录与可选本地环境 | Git 忽略、部署排除；每台机器独立维护 |
 | `configs/arms.toml` | 两臂角色、USB 设备、波特率、电机 ID | 每台设备单独配置；部署保留已有文件 |
 | `configs/control.json` | 唯一电机控制频率、PID、参考整形、轨迹速度、接触/受阻阈值及绑定设备的指令范围 | 修改后部署并重启；控制连接核对 SHA256 |
 | `configs/follow.json` | 主从映射、扳机端点、初始化策略及验收速度范围 | 实测确认后保存；不重复定义 PID |
@@ -64,7 +65,7 @@ LeRobot/
 | `data/calibration/` | 两臂独立角度、静止姿态、基座与桌面参考标定 | 标定流程生成；保留原始测量和身份绑定 |
 | `configs/remote-runtime.txt` | 远端所需源文件、脚本、资源与测试 | 模块依赖变化后更新并校验闭包 |
 
-连接设置优先级为 **显式参数 → 环境变量 → runtime.json**。
+连接设置优先级为 **显式参数 → 环境变量 → runtime.local.json → runtime.json**。
 本地/远端客户端统一接受 `--host` 和 `--remote-root`；部署和 X11 脚本使用
 `LEROBOT_HOST`、`LEROBOT_REMOTE_ROOT`。本地启动器优先使用 `LEROBOT_MUJOCO_ENV`，
 其次是项目 `.venv`，Mac 最后读取 `local.fallback_environment`。

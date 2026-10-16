@@ -43,6 +43,25 @@ def test_missing_workspace_config_never_borrows_another_robots_defaults(workspac
         runtime_config.remote_runtime()
 
 
+def test_private_override_merges_sections_and_remains_below_environment(workspace, monkeypatch):
+    (workspace/'configs/runtime.local.json').write_text(json.dumps({
+        'version': 1, 'remote': {'root': '/home/private/robot'},
+        'local': {'fallback_environment': None}}))
+    settings = runtime_config.remote_runtime()
+    assert (settings.host, settings.root) == ('other-robot', '/home/private/robot')
+    assert runtime_config.load_runtime_config()['local']['fallback_environment'] is None
+    monkeypatch.setenv('LEROBOT_REMOTE_ROOT', '/home/environment/robot')
+    assert runtime_config.remote_runtime().root == '/home/environment/robot'
+    assert runtime_config.remote_runtime(root='/home/explicit/robot').root == '/home/explicit/robot'
+
+
+@pytest.mark.parametrize('override', [[], {'version': 2}, {'remote': []}, {'local': 'invalid'}])
+def test_invalid_private_override_is_rejected(workspace, override):
+    (workspace/'configs/runtime.local.json').write_text(json.dumps(override))
+    with pytest.raises(ValueError, match='local runtime'):
+        runtime_config.load_runtime_config()
+
+
 @pytest.mark.parametrize('host,root', [('-oProxyCommand=x', '/home/robot'),
                                      ('robot host', '/home/robot'), ('robot', 'relative')])
 def test_invalid_connection_settings_rejected(workspace, host, root):

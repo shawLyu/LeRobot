@@ -16,9 +16,20 @@ class RemoteRuntime:
 
 
 def load_runtime_config():
-    config = json.loads(resource_path('configs/runtime.json').read_text())
+    path = resource_path('configs/runtime.json')
+    config = json.loads(path.read_text())
     if config.get('version') != 1:
         raise ValueError('invalid runtime configuration version')
+    private = path.with_name('runtime.local.json')
+    if private.exists():
+        override = json.loads(private.read_text())
+        if not isinstance(override, dict) or override.get('version', 1) != 1:
+            raise ValueError('invalid local runtime configuration version')
+        for section in ('remote', 'local'):
+            values = override.get(section, {})
+            if not isinstance(values, dict):
+                raise ValueError(f'invalid local runtime section: {section}')
+            config.setdefault(section, {}).update(values)
     return config
 
 

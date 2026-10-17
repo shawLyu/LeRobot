@@ -192,6 +192,8 @@ servo parameters with readback, set a software motion range, send position targe
 and record step responses. The charts include horizontal/vertical A/B cursors,
 `Δt`/`Δy`, sample snapping and CSV/JSON/PNG export. Connecting does not enable torque.
 See [Servo workbench](docs/servo-workbench.md) for write modes and measurement units.
+For finite per-joint PID sweeps near an already held pose, see
+[near-pose tuning and response reports](docs/native-pid.md#tune-an-assembled-arm-near-its-current-held-pose).
 
 For cameras, edit remote `configs/camera.toml` and use a verified capture node:
 

@@ -1,0 +1,117 @@
+{
+  "scope": "Follower STS3215 assembled arm; held pose, current load, small-angle steps",
+  "settings": {
+    "shoulder_pan": {
+      "P_Coefficient": 40,
+      "I_Coefficient": 0,
+      "D_Coefficient": 64,
+      "CW_Dead_Zone": 2,
+      "CCW_Dead_Zone": 2,
+      "Integral_Limit": 8,
+      "Minimum_Startup_Force": 16
+    },
+    "shoulder_lift": {
+      "P_Coefficient": 32,
+      "I_Coefficient": 4,
+      "D_Coefficient": 80,
+      "CW_Dead_Zone": 0,
+      "CCW_Dead_Zone": 0,
+      "Integral_Limit": 8,
+      "Minimum_Startup_Force": 12
+    },
+    "elbow_flex": {
+      "P_Coefficient": 56,
+      "I_Coefficient": 8,
+      "D_Coefficient": 128,
+      "CW_Dead_Zone": 1,
+      "CCW_Dead_Zone": 1,
+      "Integral_Limit": 48,
+      "Minimum_Startup_Force": 4
+    },
+    "wrist_flex": {
+      "P_Coefficient": 48,
+      "I_Coefficient": 4,
+      "D_Coefficient": 96,
+      "CW_Dead_Zone": 1,
+      "CCW_Dead_Zone": 1,
+      "Integral_Limit": 16,
+      "Minimum_Startup_Force": 8
+    },
+    "wrist_roll": {
+      "P_Coefficient": 48,
+      "I_Coefficient": 2,
+      "D_Coefficient": 96,
+      "CW_Dead_Zone": 0,
+      "CCW_Dead_Zone": 0,
+      "Integral_Limit": 8,
+      "Minimum_Startup_Force": 16
+    },
+    "gripper": {
+      "P_Coefficient": 48,
+      "I_Coefficient": 4,
+      "D_Coefficient": 64,
+      "CW_Dead_Zone": 0,
+      "CCW_Dead_Zone": 0,
+      "Integral_Limit": 16,
+      "Minimum_Startup_Force": 16
+    }
+  },
+  "centers": {
+    "shoulder_pan": 2046,
+    "shoulder_lift": 1490,
+    "elbow_flex": 2442,
+    "wrist_flex": 1633,
+    "wrist_roll": 3040,
+    "gripper": 590
+  },
+  "identities": {
+    "shoulder_pan": {
+      "Homing_Offset": -1110,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Angular_Resolution": 1,
+      "Min_Position_Limit": 844,
+      "Max_Position_Limit": 3440
+    },
+    "shoulder_lift": {
+      "Homing_Offset": 1932,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Angular_Resolution": 1,
+      "Min_Position_Limit": 809,
+      "Max_Position_Limit": 3238
+    },
+    "elbow_flex": {
+      "Homing_Offset": 1070,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Angular_Resolution": 1,
+      "Min_Position_Limit": 773,
+      "Max_Position_Limit": 3126
+    },
+    "wrist_flex": {
+      "Homing_Offset": -1980,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Angular_Resolution": 1,
+      "Min_Position_Limit": 862,
+      "Max_Position_Limit": 3192
+    },
+    "wrist_roll": {
+      "Homing_Offset": -1910,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Angular_Resolution": 1,
+      "Min_Position_Limit": 0,
+      "Max_Position_Limit": 4095
+    },
+    "gripper": {
+      "Homing_Offset": -1632,
+      "Phase": 12,
+      "Operating_Mode": 0,
+      "Angular_Resolution": 1,
+      "Min_Position_Limit": 200,
+      "Max_Position_Limit": 2982
+    }
+  }
+}

@@ -117,3 +117,6 @@ src/lerobot_arm_control/workbench/web/app.js
 src/lerobot_arm_control/workbench/web/measurement.js
 tests/test_servo_workbench.py
 tests/test_servo_workbench_http.py
+
+src/lerobot_arm_control/diagnostics/near_pose_pid.py
+tests/test_near_pose_pid.py

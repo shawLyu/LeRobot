@@ -14,7 +14,7 @@ measurement of absolute mechanical angle.
 On the robot computer, capture a new origin with torque already off:
 
 ```sh
-cd /home/xy/Research/lerobot
+cd "$HOME/lerobot"
 PYTHONPATH=src .venv/bin/python -m lerobot_arm_control verify native-pid zero \
   --arm follower --joint shoulder_pan --allowed-degrees -90 90 --confirm-zero \
   --output data/calibration/new_single_zero.json
@@ -66,7 +66,7 @@ motor speed and acceleration limits; onset, rise and settling are distinct metri
 Download reports and create curves in the local simulation environment:
 
 ```sh
-rsync -az lerobot:/home/xy/Research/lerobot/logs/native-pid-baseline/ logs/native-pid-baseline/
+rsync -az robot-host:lerobot/logs/native-pid-baseline/ logs/native-pid-baseline/
 ./scripts/lerobot-arm verify native-pid report logs/native-pid-baseline/result.json \
   --output logs/native-pid-comparison
 ```
@@ -96,3 +96,66 @@ The [application readback](measurements/native-pid-single-joint-2026-10-16/appli
 records Lock=1, torque off, no alarm and raw position 2067 with unchanged zero/limits.
 A physical power cycle has not yet been verified. This update applies only to that
 motor and load; the six-axis software controller configuration remains separate.
+
+## Tune an assembled arm near its current held pose
+
+`verify near-pose-pid` runs a finite, sequential native-gain search on the robot host.
+All online joints must already be holding position with torque enabled, position
+mode active and EEPROM locked. It does not release supporting joints, reset the
+mechanical zero, or change travel limits. Close the workbench connection before
+starting so there is exactly one serial owner.
+
+```sh
+PYTHONPATH=src .venv/bin/python -m lerobot_arm_control verify near-pose-pid \
+  --arm follower --output logs/near-pose-search --execute
+```
+
+Use `--joints shoulder_pan` to test a subset. Confirm that the current pose has
+clear travel within ±5° before execution. Targets stay inside this envelope and
+EEPROM limits with a four-tick margin. The search compares 3° bidirectional steps,
+then repeats 5° steps for the finalists. Each coefficient set is read back before
+motion. Voltage-only warnings retain the existing warning behavior; other device
+alarms, lost torque, temperature ≥50°C and bounds violations stop the run. A
+candidate with >8 tick overshoot or >10 tick persistent jitter is rejected.
+
+The seven tuning registers are changed with Lock=1, so trials do not persist across
+power cycles. No torque or reference writes are used during coefficient changes.
+Results include the original values, selected values, per-trial samples and final
+readback. Completed joint winners stay active in volatile memory; an interrupted
+joint returns to its original gains if device health permits. Restoration errors
+are explicitly reported. The final action holds the arm; it does not release it.
+
+Finalists are distinct coefficient sets, ranked by their worst recorded trial;
+a profile with a rejected repeat is excluded. The selection score prioritizes
+oscillation and static error over speed. The
+reported local acceptance band is peak steady error ≤2 tick, steady peak-to-peak
+motion ≤2 tick, overshoot ≤3 tick, command-to-90% ≤200 ms and sample gaps ≤25 ms.
+`completed` only means the search finished: inspect each selected `acceptable`
+value. These results characterize this pose, load and small amplitude, not a global
+optimum, large-angle travel or an external absolute-angle accuracy measurement.
+
+For a refinement run, pass `--anchor logs/near-pose-search/result.json` to retain
+exactly the first run's pose envelope and mechanical identity. `--profiles FILE`
+accepts an object mapping joint names to lists of native-register overrides; each
+candidate inherits unspecified tuning fields from the actual readback. This makes
+load-specific searches repeatable without changing shared controller defaults.
+Use `--search-amplitude 5` with an explicit profile file to compare refinement
+candidates at the final step amplitude.
+A rejected candidate holds only the tested joint, so it does not repeatedly reseed
+the goals of supporting joints.
+
+Generate plots and a comparison table locally without opening any serial device:
+
+```sh
+./scripts/lerobot-arm verify near-pose-pid \
+  --report logs/near-pose-search/result.json --output logs/near-pose-curves
+```
+
+A corrupt feedback packet gets at most one immediate re-read, only if the failed
+read took no more than 50 ms. Repeated failures stop the run. The report records
+retry counts and actual sample gaps; missing 90% crossings remain null.
+
+The [assembled six-axis report](measurements/native-pid-near-pose-2026-10-17/README.md)
+contains 244 trials, independent verification and the final EEPROM readback.
+Only IDs 5 and 6 met every local performance threshold; the report retains the
+remaining static error, overshoot and sampling exclusions explicitly.

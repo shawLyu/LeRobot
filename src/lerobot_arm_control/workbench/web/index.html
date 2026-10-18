@@ -69,11 +69,17 @@
               设置
             </button>
           </div>
+          <div class="button-pair">
+            <button id="capture-low" disabled>当前位置记为下限</button>
+            <button id="capture-high" disabled>当前位置记为上限</button>
+          </div>
+          <label class="check-line"><input id="persist-bounds" type="checkbox" checked />保存范围，重连后保留</label>
+          <p id="native-bounds" class="help"></p>
           <p id="bounds-status" class="help" role="status"></p>
           <p class="help">
             初次连接默认限制在当前位置附近
-            ±10°；扩大范围前请检查机构。此处仅设置本次连接的软件范围，不改写舵机 EEPROM
-            限位。修改零点、相位或限位后需重新设置。
+            ±10°；扩大范围前请检查机构。保存的是当前机械臂的软件范围，不改写舵机 EEPROM
+            限位。上下限按 tick 大小排列，可能与实际运动方向相反。修改零点、相位或限位后需重新设置。
           </p>
           <label
             >目标位置 <span class="unit">tick</span

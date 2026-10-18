@@ -231,17 +231,26 @@ function renderMotors() {
 
 function renderBounds() {
   const applied = state().bounds?.[active];
+  const native = state().native_limits?.[active];
+  const actual = state().frame?.motors[active];
+  const details = state().bounds_info?.[active];
   const draft = boundsDrafts[active];
   const pending = draft && draft.some((v, i) => v === '' || Number(v) !== applied?.[i]);
   let reason = '';
   if (!online(active)) reason = '请先连接当前电机。';
   else if (busy) reason = '正在处理请求，请稍候。';
   else if (hasMotion()) reason = '请先停止运动，再设置范围。';
-  else if (enabled(active)) reason = '请先释放当前电机扭矩，再设置范围。';
+  else if (enabled(active) || actual?.torque !== 0)
+    reason = '请先释放当前电机扭矩，再设置范围。';
   else if (!$('motion-confirmed').checked) reason = '请先勾选行程无干涉确认。';
   $('save-bounds').disabled = !!reason;
+  for (const id of ['capture-low', 'capture-high'])
+    $(id).disabled = !online(active) || busy || hasMotion() || actual?.torque !== 0;
+  $('native-bounds').textContent = native
+    ? `EEPROM 限位 ${native[0]} — ${native[1]} tick；当前位置 ${actual?.position ?? '—'} tick。${actual && (actual.position < native[0] || actual.position > native[1]) ? '当前位置在限位外，请先检查参数表中的位置限位；软件范围无法覆盖它。' : ''}`
+    : '';
   $('bounds-status').textContent =
-    `${applied ? `已应用 ${applied[0]} — ${applied[1]} tick。` : '尚未设置有效范围。'} ${pending ? '输入尚未应用。' : ''}${reason || '可设置；范围须包含当前位置，并处于 EEPROM 限位内。'}`;
+    `${applied ? `已应用 ${applied[0]} — ${applied[1]} tick${details?.source === 'saved' ? '（已保存）' : details?.source === 'default' ? '（默认附近范围）' : '（本次连接）'}。` : '尚未设置有效范围。'} ${details?.reason || ''} ${applied && actual && (actual.position < applied[0] || actual.position > applied[1]) ? '当前位置超出软件范围，禁止使能；请手动返回或重新检查范围。' : ''} ${pending ? '输入尚未应用。' : ''}${reason || '可设置；范围须包含当前位置，并处于 EEPROM 限位内。'}`;
 }
 
 function renderControls() {
@@ -260,7 +269,11 @@ function renderControls() {
   $('hold').disabled = !pack.connected;
   $('release-all').disabled =
     !pack.connected || !JOINTS.some((j) => state().discovery?.[j]?.online);
-  $('enable').disabled = busy || !confirmed || !joints.length || motion || !!state().fault;
+  $('enable').disabled = busy || !confirmed || !joints.length || motion || !!state().fault ||
+    joints.some((j) => {
+      const bounds = state().bounds?.[j], position = state().frame?.motors[j]?.position;
+      return !bounds || position < bounds[0] || position > bounds[1];
+    });
   $('release').disabled = busy || !joints.length;
   renderBounds();
   for (const id of ['send-target', 'jog-minus', 'jog-plus'])
@@ -309,7 +322,7 @@ function render() {
   if (isConnected) {
     $('port-label').textContent =
       `${pack.hello.port} · ${pack.hello.baudrate.toLocaleString()} baud · 高频采样在远端运行`;
-    $('freshness').textContent = `最近反馈 ${Math.round((pack.age_seconds || 0) * 1000)} ms 前`;
+    $('freshness').textContent = `最近反馈 ${Math.round((pack.age_seconds || 0) * 1000)} ms 前 · 通讯重读 ${state().sample_retries || 0} 次`;
   } else $('freshness').textContent = '';
   const recent = history.filter((f) => history.at(-1)?.t - f.t <= 2);
   $('sample-rate').textContent =
@@ -900,6 +913,16 @@ async function initialize() {
       boundsDrafts[active] = [$('bound-low').value, $('bound-high').value];
       renderControls();
     });
+  for (const [id, index] of [['capture-low', 0], ['capture-high', 1]])
+    $(id).addEventListener('click', () => {
+      const position = state().frame?.motors[active]?.position;
+      if (!Number.isInteger(position)) return;
+      const draft = [$('bound-low').value, $('bound-high').value];
+      draft[index] = String(position);
+      boundsDrafts[active] = draft;
+      render();
+      notice(`已记录当前位置 ${position} tick 为${index ? '上' : '下'}限草稿；设置后才会应用。`);
+    });
   $('save-bounds').addEventListener('click', () => {
     const joint = active;
     const inputs = [$('bound-low').value, $('bound-high').value];
@@ -907,9 +930,13 @@ async function initialize() {
     if (inputs.some((v) => v === '') || !bounds.every(Number.isInteger) || bounds[0] >= bounds[1])
       return notice('范围上下限必须是整数，且下限小于上限。', 'error');
     action(async () => {
-      const response = await command('bounds', { joint, bounds });
+      const response = await command('bounds', { joint, bounds, persist: $('persist-bounds').checked });
       state().bounds[joint] = response.bounds;
-    }, '动作范围已设置（仅本次连接有效）。');
+      state().bounds_info ||= {};
+      state().bounds_info[joint] = { source: response.saved ? 'saved' : 'session', reason: '' };
+      renderBounds();
+      return response;
+    }, (response) => response.saved ? '动作范围已设置并保存，重连后保留。' : '动作范围已设置（仅本次连接有效）。');
   });
   $('target').addEventListener('input', () => {
     targets[active] = value('target');

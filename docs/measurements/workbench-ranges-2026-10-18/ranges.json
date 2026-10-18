@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "arm": "follower",
+  "software_bounds": {
+    "shoulder_pan": [
+      860,
+      3318
+    ],
+    "shoulder_lift": [
+      857,
+      3209
+    ],
+    "elbow_flex": [
+      905,
+      3079
+    ],
+    "wrist_flex": [
+      931,
+      2868
+    ],
+    "wrist_roll": [
+      353,
+      3924
+    ],
+    "gripper": [
+      464,
+      1881
+    ]
+  },
+  "native_limits": {
+    "shoulder_pan": [
+      844,
+      3440
+    ],
+    "shoulder_lift": [
+      809,
+      3238
+    ],
+    "elbow_flex": [
+      773,
+      3126
+    ],
+    "wrist_flex": [
+      862,
+      3192
+    ],
+    "wrist_roll": [
+      0,
+      4095
+    ],
+    "gripper": [
+      452,
+      1893
+    ]
+  },
+  "manual_observed": {
+    "shoulder_pan": [
+      770,
+      3334
+    ],
+    "shoulder_lift": [
+      841,
+      3225
+    ],
+    "elbow_flex": [
+      889,
+      3095
+    ],
+    "wrist_flex": [
+      915,
+      2884
+    ],
+    "wrist_roll": [
+      337,
+      3940
+    ],
+    "gripper": [
+      450,
+      1894
+    ]
+  },
+  "gripper_user_endpoints": {
+    "minimum_opening": 452,
+    "maximum_opening": 1893
+  },
+  "tested_centers": {
+    "shoulder_pan": 2185,
+    "shoulder_lift": 1061,
+    "elbow_flex": 2888,
+    "wrist_flex": 1586,
+    "wrist_roll": 3204,
+    "gripper": 571
+  },
+  "native_pid_unchanged": {
+    "shoulder_pan": {
+      "P_Coefficient": 40,
+      "I_Coefficient": 0,
+      "D_Coefficient": 64,
+      "CW_Dead_Zone": 2,
+      "CCW_Dead_Zone": 2,
+      "Integral_Limit": 8,
+      "Minimum_Startup_Force": 16
+    },
+    "shoulder_lift": {
+      "P_Coefficient": 32,
+      "I_Coefficient": 4,
+      "D_Coefficient": 80,
+      "CW_Dead_Zone": 0,
+      "CCW_Dead_Zone": 0,
+      "Integral_Limit": 8,
+      "Minimum_Startup_Force": 12
+    },
+    "elbow_flex": {
+      "P_Coefficient": 56,
+      "I_Coefficient": 8,
+      "D_Coefficient": 128,
+      "CW_Dead_Zone": 1,
+      "CCW_Dead_Zone": 1,
+      "Integral_Limit": 48,
+      "Minimum_Startup_Force": 4
+    },
+    "wrist_flex": {
+      "P_Coefficient": 48,
+      "I_Coefficient": 4,
+      "D_Coefficient": 96,
+      "CW_Dead_Zone": 1,
+      "CCW_Dead_Zone": 1,
+      "Integral_Limit": 16,
+      "Minimum_Startup_Force": 8
+    },
+    "wrist_roll": {
+      "P_Coefficient": 48,
+      "I_Coefficient": 2,
+      "D_Coefficient": 96,
+      "CW_Dead_Zone": 0,
+      "CCW_Dead_Zone": 0,
+      "Integral_Limit": 8,
+      "Minimum_Startup_Force": 16
+    },
+    "gripper": {
+      "P_Coefficient": 48,
+      "I_Coefficient": 4,
+      "D_Coefficient": 64,
+      "CW_Dead_Zone": 0,
+      "CCW_Dead_Zone": 0,
+      "Integral_Limit": 16,
+      "Minimum_Startup_Force": 16
+    }
+  },
+  "storage_lock": {
+    "shoulder_pan": 1,
+    "shoulder_lift": 1,
+    "elbow_flex": 1,
+    "wrist_flex": 1,
+    "wrist_roll": 1,
+    "gripper": 1
+  },
+  "motion_verified": true,
+  "reconnect_verified": true,
+  "sample_retries_final": 2,
+  "hold_metrics": {
+    "shoulder_pan": {
+      "jitter_ticks": 0,
+      "peak_error_ticks": 2
+    },
+    "shoulder_lift": {
+      "jitter_ticks": 0,
+      "peak_error_ticks": 0
+    },
+    "elbow_flex": {
+      "jitter_ticks": 5,
+      "peak_error_ticks": 3
+    },
+    "wrist_flex": {
+      "jitter_ticks": 6,
+      "peak_error_ticks": 3
+    },
+    "wrist_roll": {
+      "jitter_ticks": 4,
+      "peak_error_ticks": 3
+    },
+    "gripper": {
+      "jitter_ticks": 4,
+      "peak_error_ticks": 2
+    }
+  },
+  "test_scope": "Manual single-joint travel capture; low-speed +/-11-tick motion near held pose; not full-boundary automated or Cartesian collision verification",
+  "subsequent_monitor": {
+    "connected": true,
+    "fault": null,
+    "sample_retries": 8,
+    "all_torque_on": true,
+    "all_status_zero": true
+  }
+}

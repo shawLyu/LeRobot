@@ -40,6 +40,7 @@ const { chromium } = require('playwright');
         ),
       },
     };
+    state.native_limits = { shoulder_pan: [844, 3440], shoulder_lift: [844, 3440] };
     let failSave = false,
       polls = 0,
       connected = true;
@@ -85,7 +86,9 @@ const { chromium } = require('playwright');
               },
             });
           state.bounds[command.payload.joint] = command.payload.bounds;
-          result = { bounds: command.payload.bounds };
+          state.bounds_info ||= {};
+          state.bounds_info[command.payload.joint] = { source: command.payload.persist ? 'saved' : 'session', reason: '' };
+          result = { bounds: command.payload.bounds, saved: command.payload.persist };
         } else throw new Error(`Unexpected motor operation: ${command.operation}`);
       } else throw new Error(`Unexpected API: ${path}`);
       await route.fulfill({ json: { ok: true, result } });
@@ -93,6 +96,10 @@ const { chromium } = require('playwright');
     await page.goto(process.env.SERVO_WORKBENCH_URL || 'http://127.0.0.1:8765');
     await page.waitForFunction(() => document.querySelector('#bound-low').value === '1953');
     await page.locator('#motion-confirmed').check();
+    assert.match(await page.locator('#native-bounds').textContent(), /844.*3440/);
+    await page.locator('#capture-low').click();
+    assert.equal(await page.locator('#bound-low').inputValue(), '2067');
+    assert.equal(commands.filter((c) => c.operation === 'bounds').length, 0);
     await page.locator('#bound-low').fill('1800');
     await page.locator('#bound-high').focus();
     const before = polls;
@@ -116,16 +123,18 @@ const { chromium } = require('playwright');
     assert.deepEqual(commands.find((c) => c.operation === 'bounds').payload, {
       joint: 'shoulder_pan',
       bounds: [1800, 2300],
+      persist: true,
     });
     await page.waitForTimeout(350);
     assert.equal(await page.locator('#bound-low').inputValue(), '1800');
-    assert.match(await page.locator('#bounds-status').textContent(), /1800.*2300/);
+    assert.match(await page.locator('#bounds-status').textContent(), /1800.*2300.*已保存/);
 
     await page.locator('#bound-low').fill('1700');
     await page.locator('[data-joint="shoulder_lift"] .joint-name').click();
     assert.equal(await page.locator('#bound-low').inputValue(), '1953');
     await page.locator('[data-joint="shoulder_pan"] .joint-name').click();
     assert.equal(await page.locator('#bound-low').inputValue(), '1700');
+    await page.locator('#persist-bounds').uncheck();
     failSave = true;
     await page.locator('#save-bounds').click();
     await page.waitForFunction(() =>
@@ -134,6 +143,7 @@ const { chromium } = require('playwright');
     await page.waitForTimeout(350);
     assert.equal(await page.locator('#bound-low').inputValue(), '1700', 'rejection retains draft');
     assert.match(await page.locator('#bounds-status').textContent(), /尚未应用/);
+    assert.equal(commands.filter((c) => c.operation === 'bounds').at(-1).payload.persist, false);
     await page.locator('#bound-low').fill('');
     await page.locator('#bound-high').focus();
     await page.waitForTimeout(250);
@@ -145,10 +155,12 @@ const { chromium } = require('playwright');
     );
     assert.equal(commands.length, count, 'empty bound must not become zero');
 
-    state.enabled = ['shoulder_pan'];
+    state.frame.motors.shoulder_pan.torque = 1;
+    // Real torque must block editing even if a new worker has no enabled set.
+    assert.deepEqual(state.enabled, []);
     await page.waitForFunction(() => document.querySelector('#save-bounds').disabled);
     assert.match(await page.locator('#bounds-status').textContent(), /释放.*扭矩/);
-    state.enabled = [];
+    state.frame.motors.shoulder_pan.torque = 0;
     state.motion = 'moving';
     await page.waitForFunction(() =>
       document.querySelector('#bounds-status').textContent.includes('停止'),
@@ -159,6 +171,11 @@ const { chromium } = require('playwright');
       document.querySelector('#bounds-status').textContent.includes('勾选'),
     );
     assert.equal(await page.locator('#save-bounds').isDisabled(), true);
+    state.bounds.shoulder_pan = null;
+    state.native_limits.shoulder_pan = [2100, 3440];
+    await page.waitForFunction(() => document.querySelector('#native-bounds').textContent.includes('限位外'));
+    assert.equal(await page.locator('#enable').isDisabled(), true);
+    state.native_limits.shoulder_pan = [844, 3440];
     await page.locator('#disconnect').click();
     await page.waitForFunction(() => !document.querySelector('#connect').disabled);
     await page.locator('#connect').click();

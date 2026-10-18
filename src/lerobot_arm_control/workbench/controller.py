@@ -1,5 +1,6 @@
 """All motion, sampling and parameter transactions run beside the physical bus."""
 
+import json
 import math
 import time
 from collections import deque
@@ -15,13 +16,17 @@ IDENTITY = ('Homing_Offset', 'Phase', 'Operating_Mode', 'Angular_Resolution',
 
 
 class Workbench:
-    def __init__(self, bus, discovery, *, log_root, clock=time.monotonic, context=None):
+    def __init__(self, bus, discovery, *, log_root, clock=time.monotonic, context=None,
+                 bounds_path=None):
         self.bus, self.discovery, self.clock = bus, discovery, clock
         self.context = dict(context or {})
+        self.bounds_path = Path(bounds_path) if bounds_path else None
+        self.native_limits, self.bounds_info = {}, {}
         self.online = [j for j, d in discovery.items() if d['online']]
         self.log_root = Path(log_root)
         self.origin = clock()
         self.sequence = 0
+        self.sample_retries = 0
         self.history = deque(maxlen=12000)
         self.frame = None
         self.enabled, self.bounds, self.last_goal = set(), {}, {}
@@ -35,10 +40,58 @@ class Workbench:
         for joint in self.online:
             current = self.read('Present_Position', joint)
             low, high = self.position_limits(joint)
+            self.native_limits[joint] = [low, high]
             # New installations start with a small, explicit envelope around the live pose.
             self.bounds[joint] = ([max(low, current - 114), min(high, current + 114)]
                                   if 0 <= low <= current <= high <= 4095 and low < high else None)
             self.max_temperatures[joint] = self.read('Max_Temperature_Limit', joint)
+            self.bounds_info[joint] = {
+                'source': 'default',
+                'reason': ('' if self.bounds[joint] else
+                           f'当前位置 {current} 不在 EEPROM 限位 {low}—{high} 内，请检查限位参数'),
+            }
+        self.load_bounds()
+
+    def bounds_record(self, joint, bounds):
+        return {'context': self.context, 'id': self.discovery[joint]['id'],
+                'reference': self.identity(joint), 'bounds': bounds}
+
+    def read_bounds_file(self):
+        if self.bounds_path is None or not self.bounds_path.exists():
+            return {'version': 1, 'arms': {}}
+        record = json.loads(self.bounds_path.read_text())
+        if record.get('version') != 1 or not isinstance(record.get('arms'), dict):
+            raise ValueError('无效的范围文件')
+        return record
+
+    def load_bounds(self):
+        try:
+            saved = self.read_bounds_file()['arms'].get(self.context.get('arm'), {})
+            if not isinstance(saved, dict):
+                raise ValueError('无效的机械臂范围记录')
+        except (OSError, ValueError, TypeError, AttributeError) as exc:
+            for joint in self.online:
+                self.bounds[joint] = None
+                self.bounds_info[joint] = {
+                    'source': 'invalid', 'reason': f'保存范围读取失败：{exc}'}
+            return
+        for joint in self.online:
+            if joint not in saved:
+                continue
+            item = saved[joint]
+            bounds = item.get('bounds') if isinstance(item, dict) else None
+            low, high = self.native_limits[joint]
+            if (not isinstance(bounds, list) or len(bounds) != 2
+                    or any(type(v) is not int for v in bounds)
+                    or not 0 <= low <= bounds[0] < bounds[1] <= high <= 4095
+                    or item != self.bounds_record(joint, bounds)):
+                self.bounds[joint] = None
+                self.bounds_info[joint] = {'source': 'invalid', 'reason':
+                    '保存范围与当前电机、零点或 EEPROM 限位不匹配，请重新检查并设置'}
+            else:
+                # A pose outside this interval must not silently recenter or widen it.
+                self.bounds[joint] = list(bounds)
+                self.bounds_info[joint] = {'source': 'saved', 'reason': ''}
 
     def read(self, key, joint):
         return int(self.bus.read(key, joint, normalize=False))
@@ -77,9 +130,10 @@ class Workbench:
         if maximum <= 0 or temperature >= maximum:
             raise RuntimeError(f'{joint}: 达到温度保护阈值')
 
-    def configure_bounds(self, joint, bounds):
+    def configure_bounds(self, joint, bounds, persist=False):
         self.selected([joint])
-        if joint in self.enabled or self.job or self.move_job:
+        if (joint in self.enabled or self.job or self.move_job
+                or self.read('Torque_Enable', joint) != 0):
             raise ValueError('请先停止并释放电机，再设置动作范围')
         if (not isinstance(bounds, list) or len(bounds) != 2
                 or any(type(v) is not int for v in bounds)):
@@ -90,8 +144,20 @@ class Workbench:
             raise ValueError('动作范围必须处于单圈 EEPROM 位置限制内')
         if not bounds[0] <= current <= bounds[1]:
             raise ValueError('当前位置必须处于动作范围内')
+        if type(persist) is not bool:
+            raise ValueError('保存范围选项必须是布尔值')
+        if persist:
+            if self.bounds_path is None or not self.context.get('arm'):
+                raise ValueError('当前连接未配置范围保存路径')
+            record = self.read_bounds_file()
+            record['arms'].setdefault(self.context['arm'], {})[joint] = self.bounds_record(
+                joint, list(bounds))
+            self.bounds_path.parent.mkdir(parents=True, exist_ok=True)
+            atomic_json(self.bounds_path, record)
         self.bounds[joint] = list(bounds)
-        return {'bounds': self.bounds[joint]}
+        self.native_limits[joint] = [low, high]
+        self.bounds_info[joint] = {'source': 'saved' if persist else 'session', 'reason': ''}
+        return {'bounds': self.bounds[joint], 'saved': persist}
 
     def validate_target(self, joint, target):
         if joint not in self.enabled:
@@ -229,12 +295,20 @@ class Workbench:
                 high = changes.get(high_key, self.read(high_key, joint))
                 if not low < high and not (low == high == 0 and 'Position' in low_key):
                     raise ValueError(f'{low_key} 必须小于 {high_key}')
+                if (low_key == 'Min_Position_Limit' and low < high
+                        and not {'Homing_Offset', 'Phase', 'Angular_Resolution',
+                                 'Operating_Mode'} & changes.keys()
+                        and self.read('Operating_Mode', joint) == 0
+                        and not low <= self.read('Present_Position', joint) <= high):
+                    raise ValueError('新 EEPROM 位置限位必须包含当前位置，请先手动移入拟定范围')
         audit = {'joint': joint, 'id': self.discovery[joint]['id'], 'before': before,
                  'requested': changes, 'persist': persist, 'unix_ns': time.time_ns(),
                  'device_context': self.context.copy(), 'reference': self.identity(joint),
                  'completed': False, 'rollback_errors': []}
         if any(BY_KEY[key].effect == 'reference' for key in changes):
             self.bounds[joint] = None
+            self.bounds_info[joint] = {'source': 'invalid', 'reason':
+                '参考参数已修改，请重新检查并设置动作范围'}
         try:
             if persist:
                 self.checked_write('Lock', joint, 0)
@@ -277,6 +351,7 @@ class Workbench:
                 self.fault = f'EEPROM 写入锁无法确认：{exc}'
                 raise
             finally:
+                self.native_limits[joint] = self.position_limits(joint)
                 if audit['rollback_errors']:
                     self.fault = '参数恢复失败，请检查读回值后再使能'
                 self.audit_sequence += 1
@@ -488,7 +563,9 @@ class Workbench:
     def state(self):
         return {'frame': self.frame, 'discovery': self.discovery, 'enabled': sorted(self.enabled),
                 'device_context': self.context.copy(),
-                'bounds': self.bounds, 'fault': self.fault,
+                'bounds': self.bounds, 'bounds_info': self.bounds_info,
+                'native_limits': self.native_limits, 'fault': self.fault,
+                'sample_retries': self.sample_retries,
                 'motion': 'response' if self.job else 'moving' if self.move_job else 'idle',
                 'job': ({'id': self.job['id'], 'index': self.job['index'],
                          'total': len(self.job['plan'])} if self.job else None),
@@ -504,7 +581,8 @@ class Workbench:
             return self.write_settings(payload['joint'], payload['changes'],
                                        payload['expected'], payload.get('persist', False))
         if operation == 'bounds':
-            return self.configure_bounds(payload['joint'], payload['bounds'])
+            return self.configure_bounds(payload['joint'], payload['bounds'],
+                                         payload.get('persist', False))
         if operation == 'enable':
             return self.enable(payload['joints'])
         if operation == 'hold':

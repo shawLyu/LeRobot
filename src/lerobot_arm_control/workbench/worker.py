@@ -16,6 +16,17 @@ from lerobot_arm_control.workbench.hardware import open_hardware
 from lerobot_arm_control.workbench.registers import BAUDRATES, schema
 
 
+def sample_state(controller):
+    started = controller.clock()
+    try:
+        return controller.tick()
+    except ConnectionError:
+        if controller.clock() - started > .05:
+            raise
+    controller.sample_retries += 1
+    return controller.tick()
+
+
 def run(arm, ids, baudrate, *, hz=100):
     commands, disconnected = queue.Queue(maxsize=32), threading.Event()
     threading.Thread(target=receive, args=(commands, disconnected), daemon=True).start()
@@ -24,7 +35,9 @@ def run(arm, ids, baudrate, *, hz=100):
         with open_hardware(arm, ids, baudrate) as (bus, discovery):
             controller = Workbench(bus, discovery, log_root=directory,
                                    context={'arm': arm.name, 'port': arm.port,
-                                            'baudrate': baudrate, 'model': arm.model})
+                                            'baudrate': baudrate, 'model': arm.model},
+                                   bounds_path=(workspace_root() /
+                                                'configs/workbench-ranges.local.json'))
             try:
                 publish({'type': 'hello', 'arm': arm.name, 'port': arm.port,
                          'baudrate': baudrate, 'schema': schema(), 'state': controller.state(),
@@ -53,7 +66,7 @@ def run(arm, ids, baudrate, *, hz=100):
                             response['error'] = str(exc)
                         publish(response)
                     try:
-                        state = controller.tick()
+                        state = sample_state(controller)
                     except Exception as exc:
                         controller.fault = f'采样失败：{exc}'
                         controller.hold(controller.fault)

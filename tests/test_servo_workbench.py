@@ -445,3 +445,133 @@ def test_low_level_access_keeps_alarm_packets_readable_and_corrects_adjacent_byt
     assert access.read('Minimum_Startup_Force', JOINTS[0]) == 16
     access.write('Minimum_Startup_Force', JOINTS[0], 0)
     assert memory[24] == 0 and memory[25] == 8
+
+
+def test_live_torque_after_reconnect_blocks_bounds_edit_without_writes(rig):
+    control, bus, _ = rig
+    bus.registers[JOINTS[0]]['Torque_Enable'] = 1
+    assert not control.enabled
+    with pytest.raises(ValueError, match='释放'):
+        control.configure_bounds(JOINTS[0], [2000, 2200])
+    assert not bus.writes
+
+
+def test_saved_bounds_survive_reconnect_without_recentering_or_motor_writes(rig, tmp_path):
+    control, bus, clock = rig
+    control.bounds_path = tmp_path / 'ranges.local.json'
+    control.context = {'arm': 'follower', 'port': 'test-bus', 'baudrate': 1000000}
+    control.command('bounds', {'joint': JOINTS[0], 'bounds': [2000, 2200], 'persist': True})
+    bus.registers[JOINTS[0]]['Present_Position'] = 2300
+    other = Workbench(bus, control.discovery, log_root=tmp_path / 'other', clock=clock,
+                      context=control.context, bounds_path=control.bounds_path)
+    assert other.bounds[JOINTS[0]] == [2000, 2200]
+    assert other.bounds_info[JOINTS[0]]['source'] == 'saved'
+    with pytest.raises(ValueError, match='不在动作范围'):
+        other.enable([JOINTS[0]])
+    assert not bus.writes
+
+
+@pytest.mark.parametrize('change', ['Homing_Offset', 'Min_Position_Limit', 'ID', 'port'])
+def test_saved_range_rejects_changed_reference_or_device(rig, tmp_path, change):
+    control, bus, clock = rig
+    control.bounds_path = tmp_path / 'ranges.local.json'
+    control.context = {'arm': 'follower', 'port': 'test-bus'}
+    control.configure_bounds(JOINTS[0], [2000, 2200], True)
+    if change == 'port':
+        control.context = {**control.context, 'port': 'other-bus'}
+    elif change == 'ID':
+        control.discovery[JOINTS[0]]['id'] = 9
+    else:
+        bus.registers[JOINTS[0]][change] += 1
+    other = Workbench(bus, control.discovery, log_root=tmp_path / 'other', clock=clock,
+                      context=control.context, bounds_path=control.bounds_path)
+    assert other.bounds[JOINTS[0]] is None
+    assert '不匹配' in other.bounds_info[JOINTS[0]]['reason']
+    with pytest.raises(ValueError, match='重新设置'):
+        other.enable([JOINTS[0]])
+    assert not bus.writes
+
+
+def test_saved_ranges_are_separate_for_each_arm(rig, tmp_path):
+    control, bus, clock = rig
+    control.bounds_path = tmp_path / 'ranges.local.json'
+    control.context = {'arm': 'follower'}
+    control.configure_bounds(JOINTS[0], [2000, 2200], True)
+    control.context = {'arm': 'leader'}
+    control.configure_bounds(JOINTS[0], [1900, 2300], True)
+    other = Workbench(bus, control.discovery, log_root=tmp_path / 'other', clock=clock,
+                      context={'arm': 'follower'}, bounds_path=control.bounds_path)
+    assert other.bounds[JOINTS[0]] == [2000, 2200]
+    assert not bus.writes
+
+
+def test_corrupt_range_file_blocks_enable_instead_of_restoring_default(rig, tmp_path):
+    control, bus, clock = rig
+    saved = tmp_path / 'ranges.local.json'
+    saved.write_text('{broken')
+    other = Workbench(bus, control.discovery, log_root=tmp_path / 'other', clock=clock,
+                      context={'arm': 'follower'}, bounds_path=saved)
+    assert all(v is None for v in other.bounds.values())
+    with pytest.raises(ValueError):
+        other.enable([JOINTS[0]])
+    assert not bus.writes
+
+
+def test_failed_range_save_does_not_apply_unsaved_bounds(rig, tmp_path, monkeypatch):
+    control, bus, _ = rig
+    control.bounds_path = tmp_path / 'ranges.local.json'
+    control.context = {'arm': 'follower'}
+    original = control.bounds[JOINTS[0]][:]
+    def fail(*args):
+        raise OSError('disk full')
+    monkeypatch.setattr('lerobot_arm_control.workbench.controller.atomic_json', fail)
+    with pytest.raises(OSError):
+        control.configure_bounds(JOINTS[0], [2000, 2200], True)
+    assert control.bounds[JOINTS[0]] == original
+    assert not bus.writes
+
+
+def test_outside_eeprom_pose_shows_the_actual_conflict(rig, tmp_path):
+    control, bus, clock = rig
+    bus.registers[JOINTS[5]].update(Present_Position=590, Min_Position_Limit=1441)
+    other = Workbench(bus, control.discovery, log_root=tmp_path, clock=clock)
+    assert other.bounds[JOINTS[5]] is None
+    assert other.native_limits[JOINTS[5]] == [1441, 3440]
+    assert '590' in other.bounds_info[JOINTS[5]]['reason']
+    with pytest.raises(ValueError):
+        other.configure_bounds(JOINTS[5], [452, 1893])
+    assert not bus.writes
+
+
+def test_position_limit_edit_cannot_strand_the_current_pose_outside_eeprom(rig):
+    control, bus, _ = rig
+    with pytest.raises(ValueError, match='必须包含当前位置'):
+        control.write_settings(JOINTS[0], {'Min_Position_Limit': 2200},
+                               {'Min_Position_Limit': 844}, True)
+    assert not bus.writes
+
+
+@pytest.mark.parametrize('duration,fail_twice', [(.01, False), (.01, True), (.051, False)])
+def test_worker_retries_only_one_short_failed_read(rig, duration, fail_twice, monkeypatch):
+    from lerobot_arm_control.workbench.worker import sample_state
+
+    control, bus, clock = rig
+    calls = []
+    original_tick = control.tick
+
+    def intermittent():
+        calls.append(True)
+        if len(calls) == 1 or fail_twice:
+            clock.advance(duration)
+            raise ConnectionError('bad packet')
+        return original_tick()
+
+    monkeypatch.setattr(control, 'tick', intermittent)
+    if duration > .05 or fail_twice:
+        with pytest.raises(ConnectionError):
+            sample_state(control)
+    else:
+        assert sample_state(control)['frame'] is not None
+    assert len(calls) == (1 if duration > .05 else 2)
+    assert control.sample_retries == (0 if duration > .05 else 1)
+    assert not bus.writes

@@ -69,8 +69,16 @@ motion envelope. Set and inspect the new envelope before enabling again.
    The editor retains each motor's draft while feedback refreshes and while
    switching between motors. The status below it shows the applied range, any
    unapplied input and the reason setting is disabled. A rejected edit keeps its
-   draft. This software range lasts for the current connection; it does not change
-   EEPROM `Min_Position_Limit` / `Max_Position_Limit` in the parameter table.
+   draft. **Capture current position as lower/upper bound** only changes the draft;
+   it never moves or enables a motor. Bounds are ordered by raw count, which may
+   run opposite to physical opening/rotation direction.
+   **Save range across reconnects** stores the checked interval on the robot host,
+   in ignored `configs/workbench-ranges.local.json`, separately for each arm and
+   channel. Uncheck it for a session-only interval. This never changes EEPROM
+   `Min_Position_Limit` / `Max_Position_Limit` in the parameter table.
+   The interface displays both EEPROM and software ranges, and explains when the
+   actual position is outside either. A pose outside EEPROM limits requires
+   checking the hardware limits before setting a software interval.
 3. Check the channels to control, then enable them. The worker first seeds each
    goal from fresh actual position. Position motion requires mode 0, encoder scale
    1, Goal_Time=0 and locked storage. No reset-to-zero command is issued.
@@ -122,6 +130,15 @@ finishes. Response and parameter transactions also save under the remote directo
 `logs/servo-workbench/<session>/`. If disk saving fails, feedback/holding still run,
 the result reports `log_error`, and in-memory data can be exported.
 
+Saved ranges are checked against the arm's bus, channel ID, zero, phase, encoder
+scale, operating mode and EEPROM limits on connection. A changed reference or
+unreadable range file invalidates the affected range and blocks enable; the worker
+does not silently substitute a wider default. A current pose outside a valid saved
+range also blocks enable without recentering it. Editing a range requires the
+actual motor torque to be off, even if a newly connected worker has not enabled it.
+These are per-joint intervals: they do not establish collision-free combinations
+of joint angles, Cartesian workspace or a new mechanical zero calibration.
+
 ## Stop, disconnect and recover
 
 **Stop and hold** cancels the ramp/response and commands fresh healthy feedback
@@ -136,7 +153,10 @@ stop/release remain available for an existing session. The worker stops new moti
 on lost torque, feedback outside the envelope, non-voltage device alarms, the
 configured temperature limit, excessive step overshoot or loaded stall. Voltage
 bit 0 remains a visible warning, following the user's chosen policy. Transport
-failure requests a hold and ends the worker; no automatic motion restart occurs.
+failure permits one immediate re-read only when the failed snapshot took no more
+than 50 ms. The retry count appears beside feedback age, and missing samples are not
+filled in. A repeated/longer failure requests a hold and ends the worker; no
+automatic motion restart occurs.
 After inspection, clear the fault and enable explicitly. Fault recovery may relock
 an unloaded device, but does not reset gains, clear hardware protection by sending
 a new goal, or resume an interrupted trajectory.
@@ -199,3 +219,7 @@ which provides search, configuration and basic motor testing. Seeed also lists a
 Register definitions follow the
 [manufacturer STS table](https://ftservo.github.io/ftservo-wiki/reference/parameter/memory-sts/),
 not reserved bytes or field widths inferred from screenshots.
+
+The [2026-10-18 follower range record](measurements/workbench-ranges-2026-10-18/README.md)
+contains the manually inspected six-axis ranges, corrected gripper limits,
+reconnect verification and finite near-pose motion tests.

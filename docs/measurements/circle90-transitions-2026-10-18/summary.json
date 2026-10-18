@@ -1,0 +1,134 @@
+[
+  {
+    "height_cm": 38,
+    "steady_phase_fit_speed_deg_s": 89.65043753287684,
+    "tracking_rms_mm": 9.755500036075976,
+    "tracking_max_mm": 21.265163454340488,
+    "circle_rms_mm": 5.975130560446331,
+    "tcp_hf_error_rms_mm": 0.493752491102005,
+    "control_config_sha256": "bc6f8ef3f856aacd8a18b25704dab9b1700d913667bd86dd41d78d2f447e0370",
+    "plan_sha256": "5127bd94c6c0ccc4826f5e169cafb1b3e9c0b707b8590bd89340fbaf109c3f52",
+    "trace_sha256": "93c7342a4578ed6ce61cba6bcb17ac59c17c3c87dfa175ba33e9ddec9c93e6bc",
+    "schedule_checks": {
+      "observed_native_acceleration_range": {
+        "shoulder_pan": [
+          16,
+          32
+        ],
+        "shoulder_lift": [
+          16,
+          32
+        ],
+        "elbow_flex": [
+          16,
+          32
+        ],
+        "wrist_flex": [
+          16,
+          32
+        ],
+        "wrist_roll": [
+          16,
+          32
+        ],
+        "gripper": [
+          16,
+          32
+        ]
+      },
+      "steady_acceleration_all_32": true,
+      "first_acceleration_all_16": true,
+      "last_acceleration_all_16": true,
+      "max_full_trace_frame_period_ms": 18.361202906817198,
+      "fault_flags": 0
+    }
+  },
+  {
+    "height_cm": 34,
+    "steady_phase_fit_speed_deg_s": 89.72966248301661,
+    "tracking_rms_mm": 12.99850585151525,
+    "tracking_max_mm": 33.07161138144028,
+    "circle_rms_mm": 7.829139339211102,
+    "tcp_hf_error_rms_mm": 0.45138644026508384,
+    "control_config_sha256": "bc6f8ef3f856aacd8a18b25704dab9b1700d913667bd86dd41d78d2f447e0370",
+    "plan_sha256": "01e2de3536f2d6ef04d6d287401a27e1bcbc282e5bbb68d78188fad439acd75d",
+    "trace_sha256": "4a38b25da4abfaf49ad260d8b0f53272069cdf94201b58223527e473285219bf",
+    "schedule_checks": {
+      "observed_native_acceleration_range": {
+        "shoulder_pan": [
+          16,
+          32
+        ],
+        "shoulder_lift": [
+          16,
+          32
+        ],
+        "elbow_flex": [
+          16,
+          32
+        ],
+        "wrist_flex": [
+          16,
+          32
+        ],
+        "wrist_roll": [
+          16,
+          32
+        ],
+        "gripper": [
+          16,
+          32
+        ]
+      },
+      "steady_acceleration_all_32": true,
+      "first_acceleration_all_16": true,
+      "last_acceleration_all_16": true,
+      "max_full_trace_frame_period_ms": 18.795812968164682,
+      "fault_flags": 0
+    }
+  },
+  {
+    "height_cm": 36,
+    "steady_phase_fit_speed_deg_s": 89.71364883377889,
+    "tracking_rms_mm": 10.664366784749404,
+    "tracking_max_mm": 24.676161523964517,
+    "circle_rms_mm": 6.322115785056353,
+    "tcp_hf_error_rms_mm": 0.5025885028721667,
+    "control_config_sha256": "bc6f8ef3f856aacd8a18b25704dab9b1700d913667bd86dd41d78d2f447e0370",
+    "plan_sha256": "36174f8923c2f67120ea8489719b40603a1ea12c9e7ecd81ed4ba5f2d36f0e80",
+    "trace_sha256": "d4f7d90b8600ddec99df9d2475ab31ecc61a6608f7d081c0d616e34317eae65f",
+    "schedule_checks": {
+      "observed_native_acceleration_range": {
+        "shoulder_pan": [
+          16,
+          32
+        ],
+        "shoulder_lift": [
+          16,
+          32
+        ],
+        "elbow_flex": [
+          16,
+          32
+        ],
+        "wrist_flex": [
+          16,
+          32
+        ],
+        "wrist_roll": [
+          16,
+          32
+        ],
+        "gripper": [
+          16,
+          32
+        ]
+      },
+      "steady_acceleration_all_32": true,
+      "first_acceleration_all_16": true,
+      "last_acceleration_all_16": true,
+      "max_full_trace_frame_period_ms": 19.00615799240768,
+      "fault_flags": 0
+    }
+  }
+]

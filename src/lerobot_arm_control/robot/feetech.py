@@ -28,12 +28,17 @@ def make_bus(arm):
 def validate_position_stream(stream, joints):
     """Validate native STS RAM streaming knobs independently of controller gains."""
     if stream is not None and (not {"acceleration", "velocity_ticks_s"} <= set(stream)
-                               <= {"acceleration", "velocity_ticks_s", "locked_p_coefficients"}
+                               <= {"acceleration", "velocity_ticks_s", "locked_p_coefficients",
+                                   "transition_acceleration"}
                                or any(type(stream[k]) is not int for k in
                                       ("acceleration", "velocity_ticks_s"))
                                or not 1 <= stream["acceleration"] <= 254
                                or not 1 <= stream["velocity_ticks_s"] <= 3000):
         raise ValueError("invalid native streaming profile")
+    if stream is not None and 'transition_acceleration' in stream:
+        transition = stream['transition_acceleration']
+        if type(transition) is not int or not 1 <= transition <= stream['acceleration']:
+            raise ValueError('invalid native transition acceleration')
     coefficients = stream.get('locked_p_coefficients', {}) if stream else {}
     if (not isinstance(coefficients, dict) or not set(coefficients) <= (set(joints) - {'gripper'})
             or any(type(v) is not int or not 16 <= v <= 32

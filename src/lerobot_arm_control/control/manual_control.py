@@ -37,6 +37,7 @@ class ManualControl:
         self.command_angles = {}
         self.original_acceleration = {}
         self.native_acceleration = {}
+        self.stream_acceleration_bounds = {}
         self.original_velocity = {}
         self.native_velocity = {}
         self.original_p = {}
@@ -105,7 +106,10 @@ class ManualControl:
                for joint in joints):
             raise ValueError("invalid native acceleration configuration")
         acceleration = stream["acceleration"]
-        requested = {joint: min(acceleration, maximum[joint]) for joint in joints}
+        transition = stream.get('transition_acceleration', acceleration)
+        requested = {joint: min(transition, maximum[joint]) for joint in joints}
+        self.stream_acceleration_bounds.update({joint: (requested[joint],
+            min(acceleration, maximum[joint])) for joint in joints})
         for joint in joints:
             self.original_acceleration.setdefault(joint, current[joint])
         changed = {joint: value for joint, value in requested.items() if current[joint] != value}
@@ -143,6 +147,34 @@ class ManualControl:
                 raise RuntimeError(f'{joint}: temporary P could not be confirmed')
             self.native_p[joint] = value
 
+    def schedule_stream_acceleration(self, fraction):
+        """Slew the optional circle RAM acceleration between its validated endpoints."""
+        if (type(fraction) not in (int, float) or not math.isfinite(fraction)
+                or not 0 <= fraction <= 1):
+            raise ValueError('invalid native acceleration fraction')
+        stream = self.position_feedback.profile.get('native_stream', {})
+        if 'transition_acceleration' not in stream:
+            return
+        if not self.enabled or self.stopped:
+            raise ValueError('acceleration scheduling requires enabled, running joints')
+        changed = {}
+        for joint in self.enabled:
+            low, high = self.stream_acceleration_bounds[joint]
+            value = round(low+(high-low)*fraction)
+            if self.native_acceleration[joint] != value:
+                changed[joint] = value
+        if not changed:
+            return
+        try:
+            self.bus.sync_write('Acceleration', changed, normalize=False)
+            observed = self.bus.sync_read('Acceleration', normalize=False)
+            if any(int(observed[joint]) != value for joint, value in changed.items()):
+                raise RuntimeError('scheduled native acceleration could not be confirmed')
+        except Exception:
+            self.stop('native acceleration scheduling failed: hold')
+            raise
+        self.native_acceleration.update(changed)
+
     def restore_position_stream(self, joints):
         for joint in joints:
             if joint in self.original_p:
@@ -168,6 +200,7 @@ class ManualControl:
                     raise RuntimeError(f"{joint}: native acceleration restore failed")
                 self.original_acceleration.pop(joint)
                 self.native_acceleration.pop(joint, None)
+                self.stream_acceleration_bounds.pop(joint, None)
 
     def bounded_raw(self, joint, raw):
         """Nearest integer encoder target inside the ordinary motion bounds."""

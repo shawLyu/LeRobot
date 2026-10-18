@@ -23,11 +23,12 @@
       38
     ],
     "operator_confirmed_empty_gripper_and_clear_scene": true,
-    "visual_performance_feedback": "not yet received",
+    "visual_performance_feedback": "启停仍有明显顿挫",
     "final_status_flags": 0,
     "raw_trace_and_parameter_hashes_checked": true,
     "native_ram_restored": true,
-    "native_pid_origins_limits_unchanged": true
+    "native_pid_origins_limits_unchanged": true,
+    "visual_smoothness_accepted": false
   },
   "known_limits": [
     "Mean speed near 90 deg/s; significant instantaneous speed ripple remains",

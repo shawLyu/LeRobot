@@ -95,6 +95,10 @@ def test_finite_circle_is_independent_but_keeps_hardware_guards(monkeypatch, tmp
     assert record['frames'][-1]['circle']['phase'] == (
         'completed' if case == 'completed' else 'stopped: control feedback deadline: hold')
     assert record['metadata']['autonomous_circle'] is True
+    if case == 'completed' and plan_name.startswith('table-circle90'):
+        acceleration = [f['telemetry']['Acceleration']['shoulder_pan'] for f in record['frames']]
+        assert min(acceleration) == 16 and max(acceleration) == 32
+        assert acceleration[-1] == 16
     assert all(r['Torque_Enable'] == 1 and r['Acceleration'] == 0 for r in bus.registers.values())
     assert all(r['Goal_Position'] == r['Present_Position'] for r in bus.registers.values())
     assert all(r['D_Coefficient'] == 32 and r['Lock'] == 1 for r in bus.registers.values())

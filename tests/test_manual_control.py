@@ -271,6 +271,59 @@ def test_native_acceleration_readback_failure_cannot_start_motion(setup):
     assert not any(register == "Torque_Enable" for register, _, _ in bus.writes)
 
 
+def test_scheduled_acceleration_stays_inside_caps_and_restores_original_ram(setup):
+    bus, control, _ = setup
+    control.position_feedback.profile['native_stream'].update(
+        acceleration=32, transition_acceleration=16)
+    bus.registers['gripper']['Maximum_Acceleration'] = 10
+    control.enable_all()
+    for fraction, expected in [(0, 16), (.25, 20), (.5, 24), (1, 32), (.5, 24), (0, 16)]:
+        control.schedule_stream_acceleration(fraction)
+        assert bus.registers['shoulder_pan']['Acceleration'] == expected
+        assert bus.registers['gripper']['Acceleration'] == 10
+    bus.writes.clear()
+    control.schedule_stream_acceleration(0)
+    assert not bus.writes  # No redundant register writes at steady speed or rest.
+    control.close()
+    assert set(bus.sync_read('Acceleration').values()) == {0}
+    assert set(bus.sync_read('Torque_Enable').values()) == {1}
+    assert not control.stream_acceleration_bounds
+    assert not any(r in ('Maximum_Acceleration', 'P_Coefficient', 'Lock') for r, _, _ in bus.writes)
+
+
+@pytest.mark.parametrize('value', [0, 33, True, 16.5])
+def test_invalid_transition_acceleration_is_rejected_before_io(value):
+    from copy import deepcopy
+
+    from lerobot_arm_control.control.control_defaults import POSITION_FEEDBACK
+
+    bus = Bus()
+    profile = deepcopy(POSITION_FEEDBACK)
+    profile['native_stream'].update(acceleration=32, transition_acceleration=value)
+    with pytest.raises(ValueError, match='transition acceleration'):
+        ManualControl(bus, Calibration(), {j: [1000, 3000] for j in JOINTS},
+                      feedback_profile=profile)
+    assert not bus.writes
+
+
+def test_failed_scheduled_acceleration_readback_holds_instead_of_moving(setup):
+    bus, control, _ = setup
+    control.position_feedback.profile['native_stream'].update(
+        acceleration=32, transition_acceleration=16)
+    control.enable_all()
+    original = bus.sync_write
+
+    def dropped(register, values, normalize=False):
+        if register != 'Acceleration':
+            original(register, values, normalize)
+
+    bus.sync_write = dropped
+    with pytest.raises(RuntimeError, match='scheduled native acceleration'):
+        control.schedule_stream_acceleration(1)
+    assert set(control.stopped) == set(JOINTS)
+    assert bus.sync_read('Goal_Position') == bus.sync_read('Present_Position')
+
+
 def test_temporary_p_keeps_lock_and_restores_while_holding(setup):
     bus, control, _ = setup
     control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {

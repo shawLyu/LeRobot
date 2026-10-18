@@ -189,6 +189,14 @@ class Circle:
             cycles = (elapsed - ramp / 2) / self.period
         return cycles
 
+    def speed_fraction(self, now):
+        elapsed = max(0., now-self.started-self.entry_seconds)
+        if elapsed < self.ramp_seconds:
+            return smooth_fraction(elapsed/self.ramp_seconds)
+        if self.laps is not None and elapsed >= self.laps*self.period:
+            return 1-smooth_fraction(min(1., (elapsed-self.laps*self.period)/self.ramp_seconds))
+        return 1.
+
     def sample(self, now):
         elapsed = max(0.0, now - self.started)
         if elapsed < self.entry_seconds:
@@ -254,7 +262,10 @@ class Circle:
         if control.stopped or set(control.enabled) != set(JOINTS):
             self.cancel("motor is not enabled")
             return
-        target = self.sample(control.clock())
+        now = control.clock()
+        target = self.sample(now)
+        if 'transition_acceleration' in self.feedback_profile.get('native_stream', {}):
+            control.schedule_stream_acceleration(self.speed_fraction(now))
         if self.phase == "completed":
             control.stop("circle completed: hold")
             return

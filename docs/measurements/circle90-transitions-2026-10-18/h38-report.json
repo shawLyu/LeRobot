@@ -1,0 +1,255 @@
+{
+  "running_control_frames": 1080,
+  "steady_control_frames": 330,
+  "requested_angular_speed_deg_s": 90.0,
+  "steady_phase_fit_speed_deg_s": 89.65043753287684,
+  "speed_7sample_p05_p50_p95_deg_s": [
+    71.90249647365017,
+    86.0356660675202,
+    118.47017621732466
+  ],
+  "control_hz": 59.99981819305753,
+  "max_running_control_period_ms": 18.361202906817198,
+  "circle_rms_mm": 5.975130560446331,
+  "circle_max_mm": 12.258091953555292,
+  "tracking_rms_mm": 9.755500036075976,
+  "tracking_max_mm": 21.265163454340488,
+  "tcp_hf_error_rms_mm": 0.493752491102005,
+  "per_joint": {
+    "shoulder_pan": {
+      "tracking_rms_degrees": 0.9669496242341942,
+      "tracking_max_degrees": 4.113449094539028,
+      "hf_error_rms_degrees": 0.05801385369486815,
+      "overshoot_degrees": 0.41421625585208555
+    },
+    "shoulder_lift": {
+      "tracking_rms_degrees": 2.5346299721373833,
+      "tracking_max_degrees": 5.628583855843959,
+      "hf_error_rms_degrees": 0.05739593699729375,
+      "overshoot_degrees": 2.0899348073966206
+    },
+    "elbow_flex": {
+      "tracking_rms_degrees": 1.235226085199447,
+      "tracking_max_degrees": 2.916789831648611,
+      "hf_error_rms_degrees": 0.06095184376501692,
+      "overshoot_degrees": 0.4247324253719202
+    },
+    "wrist_flex": {
+      "tracking_rms_degrees": 0.5809081217066805,
+      "tracking_max_degrees": 1.7368775973545656,
+      "hf_error_rms_degrees": 0.06543709306704441,
+      "overshoot_degrees": 0.7643523578358565
+    },
+    "wrist_roll": {
+      "tracking_rms_degrees": 0.0,
+      "tracking_max_degrees": 0.0,
+      "hf_error_rms_degrees": 0.0,
+      "overshoot_degrees": 0.0
+    },
+    "gripper": {
+      "tracking_rms_degrees": 0.0,
+      "tracking_max_degrees": 0.0,
+      "hf_error_rms_degrees": 0.0,
+      "overshoot_degrees": 0.0
+    }
+  },
+  "status_flags": 0,
+  "plan_sha256": "5127bd94c6c0ccc4826f5e169cafb1b3e9c0b707b8590bd89340fbaf109c3f52",
+  "trace_sha256": "93c7342a4578ed6ce61cba6bcb17ac59c17c3c87dfa175ba33e9ddec9c93e6bc",
+  "joint_calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+  "control_config_sha256": "bc6f8ef3f856aacd8a18b25704dab9b1700d913667bd86dd41d78d2f447e0370",
+  "profile": {
+    "version": 1,
+    "joints": {
+      "shoulder_pan": {
+        "kp": 0.08,
+        "ki": 0.4,
+        "max_correction_rad": 0.2,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.12,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.025,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "shoulder_lift": {
+        "kp": 0.06,
+        "ki": 0.3,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "derivative_filter_seconds": 0.04,
+        "velocity_feedforward_s": 0.135,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.025,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "elbow_flex": {
+        "kp": 0.08,
+        "ki": 0.4,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.12,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.025,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "wrist_flex": {
+        "kp": 0.06,
+        "ki": 0.3,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.115,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.025,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "wrist_roll": {
+        "kp": 0.2,
+        "ki": 0.8,
+        "max_correction_rad": 0.2,
+        "correction_rate_rad_s": 0.3,
+        "error_filter_seconds": 0.04,
+        "error_deadband_rad": 0.0015,
+        "kd": 0.015,
+        "derivative_filter_seconds": 0.04,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 6.0,
+        "reference_filter_seconds": 0.01,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "gripper": {
+        "kp": 0.35,
+        "ki": 0.8,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.04,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.003,
+        "kd": 0.01,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      }
+    },
+    "native_stream": {
+      "acceleration": 32,
+      "velocity_ticks_s": 3000,
+      "transition_acceleration": 16
+    },
+    "name": "smooth-circle90-v2"
+  },
+  "final_native_parameters": {
+    "P_Coefficient": {
+      "shoulder_pan": 40,
+      "shoulder_lift": 32,
+      "elbow_flex": 56,
+      "wrist_flex": 48,
+      "wrist_roll": 48,
+      "gripper": 48
+    },
+    "I_Coefficient": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 4,
+      "elbow_flex": 8,
+      "wrist_flex": 4,
+      "wrist_roll": 2,
+      "gripper": 4
+    },
+    "D_Coefficient": {
+      "shoulder_pan": 64,
+      "shoulder_lift": 80,
+      "elbow_flex": 128,
+      "wrist_flex": 96,
+      "wrist_roll": 96,
+      "gripper": 64
+    },
+    "Lock": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1,
+      "gripper": 1
+    },
+    "Acceleration": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Goal_Velocity": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Torque_Enable": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1,
+      "gripper": 1
+    }
+  },
+  "method": "Encoder + calibrated CAD; not independent optical measurement. Jitter is steady tracking residual >=3Hz, detrended, Hann-windowed; speed percentiles use a seven-control-sample average. Null steady metrics mean the finite motion had no adequate steady segment.",
+  "acceleration_schedule_checks": {
+    "observed_native_acceleration_range": {
+      "shoulder_pan": [
+        16,
+        32
+      ],
+      "shoulder_lift": [
+        16,
+        32
+      ],
+      "elbow_flex": [
+        16,
+        32
+      ],
+      "wrist_flex": [
+        16,
+        32
+      ],
+      "wrist_roll": [
+        16,
+        32
+      ],
+      "gripper": [
+        16,
+        32
+      ]
+    },
+    "steady_acceleration_all_32": true,
+    "first_acceleration_all_16": true,
+    "last_acceleration_all_16": true,
+    "max_full_trace_frame_period_ms": 18.361202906817198,
+    "fault_flags": 0
+  },
+  "height_above_table_cm": 38
+}

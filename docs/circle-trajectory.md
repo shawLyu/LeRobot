@@ -42,8 +42,12 @@ it is not a portable absolute motion command for a differently assembled robot.
 The experimental plans `data/trajectories/table-circle90-h34cm.json`,
 `table-circle90-h36cm.json` and `table-circle90-h38cm.json` use TCP heights of
 34/36/38 cm above the table, the same XY center/radius and fixed tool inclination.
-The `smooth-circle90-v1` profile inherits the circle gains but uses native
-acceleration 32 instead of 16: the 90-degree path requires higher joint acceleration.
+The `smooth-circle90-v2` profile inherits the circle gains. Native RAM acceleration
+starts at 16 during approach and varies continuously with the quintic circle-speed
+ramp toward 32 at full speed, then returns to 16 before normal completion.
+`transition_acceleration` and `acceleration` configure those endpoints; integer
+register changes are written only when needed and verified by readback. Both are
+clamped to the motor's original maximum. A failed update triggers immediate hold.
 The original 60-degree plan and its acceleration remain unchanged.
 
 ```sh
@@ -60,7 +64,9 @@ explicit speed retains the original one-period ramp limit.
 
 These are measured experiments, not precision guarantees. See the
 [multi-height 90-degree report](measurements/table-circle90-height-2026-10-18/README.md)
-for completed trials, remaining errors and the rejected low-acceleration baseline.
+for the original fixed-acceleration trials, remaining errors and rejected low-acceleration baseline.
+The [transition follow-up](measurements/circle90-transitions-2026-10-18/README.md)
+records the subsequent start/stop repair. Emergency/fault holds remain immediate.
 
 ## Remote execution and saved responses
 
@@ -97,7 +103,7 @@ the calibrated CAD model; they are not independent optical measurements.
 ## Plan parameters and checks
 
 An optional hashed `execution_profile` can lower `entry_speed_rad_s`, increase
-`ramp_seconds`, explicitly select `controller_profile: "smooth-circle-v1"` or `"smooth-circle90-v1"`, and
+`ramp_seconds`, explicitly select `controller_profile: "smooth-circle-v1"` or `"smooth-circle90-v2"`, and
 request `angular_speed_deg_s`. An explicit speed requires an XY plan whose
 `period_seconds` equals `360/angular_speed_deg_s`. The shared experimental maximum
 is 90 degrees/second; the default reviewed 8 cm plan remains at 60 degrees/second. Planned joint speed and sampled entry/ramp acceleration

@@ -1,0 +1,42 @@
+{
+  "local_pytest": {
+    "passed": 765,
+    "skipped": 1,
+    "seconds": 90.01
+  },
+  "remote_pytest": {
+    "passed": 513,
+    "seconds": 10.9
+  },
+  "ruff_remote_runtime": "passed",
+  "ruff_modified_files": "passed",
+  "git_diff_check": "passed",
+  "physical_tests": {
+    "completed_laps_per_height": 3,
+    "heights_above_table_cm": [
+      34,
+      36,
+      38
+    ],
+    "operator_confirmed_empty_gripper_and_clear_scene": true,
+    "visual_feedback_h38": "启停已平顺，可以接受",
+    "visual_feedback_h34_h36": "两轮都可以接受",
+    "visual_start_stop_smoothness_accepted": true,
+    "final_status_flags": 0,
+    "raw_trace_and_parameter_hashes_checked": true,
+    "native_ram_restored": true,
+    "native_pid_origins_limits_unchanged": true,
+    "all_six_acceleration_readbacks_start_and_end_16_middle_32": true
+  },
+  "known_limits": [
+    "Significant instantaneous speed ripple remains despite near-target mean speed",
+    "Encoder/CAD TCP error exceeds 5 mm dynamic target; not independent optical measurement",
+    "Joints 5/6 held; their dynamics were not tested",
+    "Earlier approximate dynamics accuracy check remains failed"
+  ],
+  "deployment": {
+    "checked_files": 438,
+    "mismatched_files": [],
+    "verification_document_synced_after_check": true
+  }
+}

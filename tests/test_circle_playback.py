@@ -121,10 +121,22 @@ def test_ninety_degree_profile_has_adequate_acceleration_without_changing_sixty(
 
     for height in (34, 36, 38):
         circle = Circle(resource_path(f'data/trajectories/table-circle90-h{height}cm.json'))
-        assert circle.feedback_profile['name'] == 'smooth-circle90-v1'
+        assert circle.feedback_profile['name'] == 'smooth-circle90-v2'
         assert circle.feedback_profile['native_stream']['acceleration'] == 32
+        assert circle.feedback_profile['native_stream']['transition_acceleration'] == 16
         assert circle.period == 4 and circle.ramp_seconds == 6
     assert CIRCLE_POSITION_FEEDBACK['native_stream']['acceleration'] == 16
+
+
+def test_acceleration_schedule_follows_the_same_continuous_speed_ramps():
+    from lerobot_arm_control.core.paths import resource_path
+
+    circle = Circle(resource_path('data/trajectories/table-circle90-h38cm.json'))
+    circle.start(circle.points[0], 0, laps=3)
+    start = circle.entry_seconds
+    for elapsed, expected in [(0, 0), (3, .5), (6, 1), (12, 1), (15, .5), (18, 0)]:
+        assert circle.speed_fraction(start+elapsed) == pytest.approx(expected)
+    assert circle.speed_fraction(start/2) == 0
 
 
 def test_fast_circle_remote_budget_is_rechecked_before_any_motor_write(tmp_path):

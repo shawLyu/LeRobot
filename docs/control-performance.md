@@ -9,11 +9,14 @@ See [the controller and block diagram](lerobot-control.md).
 
 ## Current evidence and limits
 
-The [90°/s multi-height experiment](measurements/table-circle90-height-2026-10-18/README.md)
-records 34/36/38 cm circles at mean speeds 89.79/89.70/89.63°/s.
-The separate high-speed profile uses native acceleration 32. Temporal TCP RMS
-was 12.74/10.49/9.64 mm, with substantial instantaneous speed ripple; average
-speed alone is not a tracking-accuracy pass. The default 60°/s plan remains unchanged.
+The [90°/s start/stop follow-up](measurements/circle90-transitions-2026-10-18/README.md)
+records accepted start/stop smoothness at all three heights, 34/36/38 cm. The
+`smooth-circle90-v2` profile schedules native RAM acceleration from 16 at low speed
+to 32 in the middle and back to 16, using the same six-second speed ramps.
+Mean speeds were 89.73/89.71/89.65°/s; temporal TCP RMS was 13.00/10.66/9.76 mm.
+Substantial instantaneous speed ripple remains; average speed and visual acceptance
+do not establish a tracking-accuracy pass. The [fixed-32 baseline](measurements/table-circle90-height-2026-10-18/README.md)
+retains the operator's rejected start/stop feedback. The default 60°/s plan remains unchanged.
 
 The [8 cm horizontal circle at 60°/s](measurements/table-circle60deg-s-2026-10-18/README.md)
 records real three-lap trials and the operator's accepted start/stop smoothness.

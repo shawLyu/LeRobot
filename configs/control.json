@@ -232,9 +232,10 @@
     }
   },
   "circle90_position_feedback": {
-    "name": "smooth-circle90-v1",
+    "name": "smooth-circle90-v2",
     "native_stream": {
-      "acceleration": 32
+      "acceleration": 32,
+      "transition_acceleration": 16
     }
   }
 }

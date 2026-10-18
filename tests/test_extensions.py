@@ -207,7 +207,11 @@ def test_pid_accepts_other_revolute_joint_counts(count):
 
 @pytest.mark.parametrize('stream', [{'acceleration': 0, 'velocity_ticks_s': 100},
     {'acceleration': 20, 'velocity_ticks_s': 3001},
-    {'acceleration': 20, 'velocity_ticks_s': 100, 'locked_p_coefficients': {'gripper': 32}}])
+    {'acceleration': 20, 'velocity_ticks_s': 100, 'locked_p_coefficients': {'gripper': 32}},
+    {'acceleration': 20, 'velocity_ticks_s': 100, 'locked_i_coefficients': {'gripper': 0}},
+    {'acceleration': 20, 'velocity_ticks_s': 100, 'locked_i_coefficients': {'base': -1}},
+    {'acceleration': 20, 'velocity_ticks_s': 100, 'locked_i_coefficients': {'base': 17}},
+    {'acceleration': 20, 'velocity_ticks_s': 100, 'locked_i_coefficients': {'base': True}}])
 def test_native_register_stream_validation_remains_on_the_feetech_adapter(stream):
     from lerobot_arm_control.robot.feetech import validate_position_stream
 

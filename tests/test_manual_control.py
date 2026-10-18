@@ -22,13 +22,17 @@ def step(bus, control, now, elapsed):
                   for key in ("Status", "Torque_Enable", "Goal_Position")})
 
 
-def test_shared_pid_enables_unlocked_servos_without_p_or_eeprom_writes():
+def test_unlocked_servos_work_without_native_gain_overrides():
+    from copy import deepcopy
+
     bus, now = Bus(), [0.0]
     for registers in bus.registers.values():
         registers.update(Lock=0, Acceleration=40)
     originals = {joint: dict(registers) for joint, registers in bus.registers.items()}
+    profile = deepcopy(CONTROL['position_feedback'])
+    profile['native_stream'].pop('locked_i_coefficients')
     control = ManualControl(bus, Calibration(), {name: [1000, 3000] for name in JOINTS},
-                            clock=lambda: now[0])
+                            clock=lambda: now[0], feedback_profile=profile)
     control.enable_all()
     assert control.enabled == set(JOINTS)
     assert not control.stopped
@@ -338,6 +342,59 @@ def test_temporary_p_keeps_lock_and_restores_while_holding(setup):
     assert not any(register == 'Lock' for register, _, _ in bus.writes)
 
 
+def test_temporary_i_restores_original_after_reenable_without_dropping_support(setup):
+    bus, control, _ = setup
+    bus.registers['shoulder_lift']['I_Coefficient'] = 4
+    control.position_feedback.profile['native_stream']['locked_i_coefficients'] = {
+        'shoulder_lift': 0}
+    control.enable('shoulder_lift')
+    control.enable('shoulder_lift')
+    assert control.status()['native_locked_i_coefficients'] == {'shoulder_lift': 0}
+    assert bus.registers['shoulder_lift']['I_Coefficient'] == 0
+    control.close()
+    assert bus.registers['shoulder_lift']['I_Coefficient'] == 4
+    assert bus.registers['shoulder_lift']['Lock'] == 1
+    assert bus.registers['shoulder_lift']['Torque_Enable'] == 1
+    assert not any(r == 'Lock' or (r == 'Torque_Enable' and v == 0)
+                   for r, _, v in bus.writes)
+
+
+@pytest.mark.parametrize('unlocked', [False, True])
+def test_unconfirmed_or_unlocked_temporary_i_is_not_silently_accepted(setup, unlocked):
+    bus, control, _ = setup
+    bus.registers['shoulder_lift']['I_Coefficient'] = 4
+    control.position_feedback.profile['native_stream']['locked_i_coefficients'] = {
+        'shoulder_lift': 0}
+    original = bus.write
+
+    def drop_i(register, joint, value, normalize=False):
+        if not (register == 'I_Coefficient' and value == 0):
+            original(register, joint, value, normalize)
+
+    if unlocked:
+        bus.registers['shoulder_lift']['Lock'] = 0
+    else:
+        bus.write = drop_i
+    with pytest.raises(RuntimeError, match='storage lock|temporary I'):
+        control.enable('shoulder_lift')
+    assert bus.registers['shoulder_lift']['I_Coefficient'] == 4
+    if unlocked:
+        assert not control.enabled
+        assert not bus.writes
+    else:
+        assert 'shoulder_lift' in control.stopped
+        control.close()
+
+
+def test_unlocked_native_i_in_any_joint_blocks_enable_all_before_goal_writes(setup):
+    bus, control, _ = setup
+    bus.registers['elbow_flex']['Lock'] = 0
+    with pytest.raises(RuntimeError, match='storage lock'):
+        control.enable_all()
+    assert not bus.writes
+    assert not control.enabled
+
+
 def test_unlocked_storage_cannot_receive_temporary_p(setup):
     bus, control, _ = setup
     control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {
@@ -345,8 +402,8 @@ def test_unlocked_storage_cannot_receive_temporary_p(setup):
     bus.registers['shoulder_pan']['Lock'] = 0
     with pytest.raises(RuntimeError, match='storage lock'):
         control.enable('shoulder_pan')
-    assert 'shoulder_pan' in control.stopped
-    assert not any(register == 'P_Coefficient' for register, _, _ in bus.writes)
+    assert not control.enabled
+    assert not bus.writes
 
 
 def test_dropped_temporary_p_is_held_and_restored_on_close(setup):
@@ -499,7 +556,7 @@ def test_enable_all_checks_every_motor_before_writing_and_uses_fresh_goals(setup
     control.enable_all()
     assert [register for register, _, _ in bus.writes] == (
         ["Goal_Position"] * 6 + ["Acceleration"] * 6
-        + ["Goal_Velocity"] * 6 + ["Torque_Enable"] * 6)
+        + ["Goal_Velocity"] * 6 + ["I_Coefficient"] * 2 + ["Torque_Enable"] * 6)
     assert all(bus.sync_read("Torque_Enable").values())
     assert bus.sync_read("Goal_Position") == bus.sync_read("Present_Position")
 

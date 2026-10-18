@@ -1,7 +1,7 @@
 """Shared bounded position PID around the native servo position loop.
 
 All quantities are model radians. Optional reference shaping precedes bounded
-position correction. Native P adjustments require locked, volatile storage and
+position correction. Native P/I adjustments require locked, volatile storage and
 are restored by ManualControl; torque and protection settings are unchanged.
 """
 
@@ -42,6 +42,7 @@ class PositionFeedback:
         for parameters in self.profile["joints"].values():
             required = {"kp", "ki", "max_correction_rad", "correction_rate_rad_s"}
             optional = {"kd", "derivative_filter_seconds", "velocity_feedforward_s",
+                        "derivative_motion_scale_rad_s",
                         "error_filter_seconds", "error_deadband_rad", "feedforward_rate_rad_s",
                         "reference_filter_seconds",
                         "reference_smoothing_seconds", "integral_velocity_scale_rad_s",
@@ -57,6 +58,8 @@ class PositionFeedback:
                     or parameters.get("error_filter_seconds", 0) > 0.5
                     or parameters.get("error_deadband_rad", 0) > 0.02
                     or parameters.get("kd", 0) > .5
+                    or (parameters.get("derivative_motion_scale_rad_s", 0)
+                        and not .01 <= parameters["derivative_motion_scale_rad_s"] <= 1)
                     or parameters.get("reference_smoothing_seconds", 0) > .2
                     or parameters.get("integral_velocity_scale_rad_s", 0) > 1
                     or (parameters.get("kd", 0) > 0 and
@@ -103,7 +106,6 @@ class PositionFeedback:
             tau = p.get('derivative_filter_seconds', .05)
             alpha = -math.expm1(-dt/tau) if tau else 1.
             self.measured_velocity[joint] += alpha*(velocity-self.measured_velocity[joint])
-        self.derivative[joint] = -p.get('kd', 0)*self.measured_velocity[joint]
         low, high = self.limits[joint]
         reference = max(low, min(high, reference))
         tau = p.get('reference_smoothing_seconds', 0)
@@ -130,6 +132,16 @@ class PositionFeedback:
             alpha = -math.expm1(-dt / p.get("reference_filter_seconds", .05))
             self.reference_velocity[joint] += alpha * (velocity - self.reference_velocity[joint])
         self.previous_reference[joint] = reference
+        # A second position-loop D term can excite the native servo's holding
+        # resonance. Fade it out at a stationary reference, independently of
+        # measured vibration; retain damping during intentional motion. The
+        # filtered reference velocity gives continuous entry/exit, not a switch.
+        motion_scale = p.get('derivative_motion_scale_rad_s', 0)
+        damping_weight = (self.reference_velocity[joint]**2 /
+                          (self.reference_velocity[joint]**2+motion_scale**2)
+                          if motion_scale else 1.)
+        self.derivative[joint] = (-p.get('kd', 0)*self.measured_velocity[joint]
+                                  * damping_weight)
         self.moving_samples[joint] = (self.moving_samples[joint]+1
                                      if direction and direction == self.reference_direction[joint]
                                      else int(bool(direction)))

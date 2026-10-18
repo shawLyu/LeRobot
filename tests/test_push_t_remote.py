@@ -161,9 +161,11 @@ def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observ
     assert instance.control.command_angles['elbow_flex'] > instance.control.targets['elbow_flex']
     assert set(bus.sync_read('P_Coefficient').values()) == {16}
     assert set(bus.sync_read('Lock').values()) == {1}
-    assert not any(register in ('Lock', 'I_Coefficient', 'D_Coefficient',
+    assert not any(register in ('Lock', 'D_Coefficient',
                                 'Operating_Mode', 'Homing_Offset', 'EEPROM_Lock')
                    for register, _, _ in bus.writes)
+    assert sorted((j, v) for r, j, v in bus.writes if r == 'I_Coefficient') == [
+        ('elbow_flex', 0), ('shoulder_lift', 0)]
     instance.close()
     assert set(bus.sync_read('Acceleration').values()) == {0}
     assert set(bus.sync_read('Goal_Velocity').values()) == {0}

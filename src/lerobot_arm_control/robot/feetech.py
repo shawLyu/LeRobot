@@ -29,6 +29,7 @@ def validate_position_stream(stream, joints):
     """Validate native STS RAM streaming knobs independently of controller gains."""
     if stream is not None and (not {"acceleration", "velocity_ticks_s"} <= set(stream)
                                <= {"acceleration", "velocity_ticks_s", "locked_p_coefficients",
+                                   "locked_i_coefficients",
                                    "transition_acceleration"}
                                or any(type(stream[k]) is not int for k in
                                       ("acceleration", "velocity_ticks_s"))
@@ -44,6 +45,10 @@ def validate_position_stream(stream, joints):
             or any(type(v) is not int or not 16 <= v <= 32
                    for v in coefficients.values())):
         raise ValueError('invalid temporary locked P coefficients')
+    coefficients = stream.get('locked_i_coefficients', {}) if stream else {}
+    if (not isinstance(coefficients, dict) or not set(coefficients) <= (set(joints) - {'gripper'})
+            or any(type(v) is not int or not 0 <= v <= 16 for v in coefficients.values())):
+        raise ValueError('invalid temporary locked I coefficients')
 
 
 def require_sts3215(arm):

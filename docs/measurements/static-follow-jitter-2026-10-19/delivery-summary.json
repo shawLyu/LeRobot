@@ -1,0 +1,124 @@
+{
+  "configuration_sha256": "f82e54c43e874e5a3c5c7430cef5077247e15b107e3ecabebef3f3f180045d6b",
+  "tests": {
+    "local": {
+      "passed": 807,
+      "skipped": 1,
+      "seconds": 103.99
+    },
+    "remote": {
+      "passed": 551,
+      "seconds": 17.04
+    },
+    "ruff": "passed"
+  },
+  "sources": {
+    "d-only-stop": {
+      "source_file": "static-stop-critical-2026-10-19.json",
+      "source_sha256": "acfa18af83a8b1f08e0c644c88fccb5751462705050f2e924cf64be1a3bcfbe8",
+      "archive": "d-only-stop.json.gz"
+    },
+    "d-only-six": {
+      "source_file": "static-stop-six-2026-10-19.json",
+      "source_sha256": "da6e4dd9a847e2acdf138982ce976dd191aaac6248abd7c2695afb2d2be9c3e1",
+      "archive": "d-only-six.json.gz"
+    },
+    "native-search": {
+      "source_file": "native-static-compare-2026-10-19.json",
+      "source_sha256": "e2fb2d30b9f7d3b217e2efef826980563779d8f2e7b39d0e4e6f43f9f9ea41a4",
+      "archive": "native-search.json.gz"
+    },
+    "operator-observation": {
+      "source_file": "native-static-observe-2026-10-19.json",
+      "source_sha256": "3c3552a7746dab507186e4fdcb4e3910ef1c1e26f825b77cf76793e0c9c001c2",
+      "archive": "operator-observation.json.gz"
+    },
+    "final-six": {
+      "source_file": "static-stop-six-final-2026-10-19.json",
+      "source_sha256": "525d41a874fa9aa39f242c396f8684fa20f025d1be22e5e7f8b2748ce51420d1",
+      "archive": "final-six.json.gz"
+    },
+    "final-pan": {
+      "source_file": "static-stop-pan-final-2026-10-19.json",
+      "source_sha256": "321ef32ffcae1fb497096272e1643f4066a283f341e0726c1d29fd34717249e5",
+      "archive": "final-pan.json.gz"
+    },
+    "initial-interrupted": {
+      "source_file": "static-hold-interrupted-2026-10-19.json",
+      "source_sha256": "f0542da5d1cf92df139a0e6a3871e32c40047f53ed5287dada970d1d37da0c67",
+      "archive": "initial-interrupted.json.gz"
+    },
+    "pose-motion": {
+      "source_file": "static-jitter-pose-motion.json",
+      "source_sha256": "418ad9c1c3172f01698f5da4963699ec6c9d1f1b2462908f9cf6bc337e1bf213",
+      "archive": "pose-motion.json.gz"
+    }
+  },
+  "operator_feedback": {
+    "d_only": "仍能看到持续颤动，主要是肩部或肘部，带动整臂颤动",
+    "d_gate_and_native_i0": "停止后已稳定，没有持续颤动"
+  },
+  "final_stationary_metrics": {
+    "shoulder_pan": {
+      "source": "final-pan",
+      "last_4_seconds_peak_to_peak_ticks": 0,
+      "last_4_seconds_std_ticks": 0.0,
+      "mean_position_error_ticks": -1.0,
+      "command_peak_to_peak_ticks": 0
+    },
+    "shoulder_lift": {
+      "source": "final-six",
+      "last_4_seconds_peak_to_peak_ticks": 0,
+      "last_4_seconds_std_ticks": 0.0,
+      "mean_position_error_ticks": 1.0,
+      "command_peak_to_peak_ticks": 0
+    },
+    "elbow_flex": {
+      "source": "final-six",
+      "last_4_seconds_peak_to_peak_ticks": 0,
+      "last_4_seconds_std_ticks": 0.0,
+      "mean_position_error_ticks": 0.0,
+      "command_peak_to_peak_ticks": 0
+    },
+    "wrist_flex": {
+      "source": "final-six",
+      "last_4_seconds_peak_to_peak_ticks": 1,
+      "last_4_seconds_std_ticks": 0.2763853991962833,
+      "mean_position_error_ticks": 0.08333333333348492,
+      "command_peak_to_peak_ticks": 0
+    },
+    "wrist_roll": {
+      "source": "final-six",
+      "last_4_seconds_peak_to_peak_ticks": 0,
+      "last_4_seconds_std_ticks": 0.0,
+      "mean_position_error_ticks": 0.0,
+      "command_peak_to_peak_ticks": 0
+    },
+    "gripper": {
+      "source": "final-six",
+      "last_4_seconds_peak_to_peak_ticks": 0,
+      "last_4_seconds_std_ticks": 0.0,
+      "mean_position_error_ticks": 0.0,
+      "command_peak_to_peak_ticks": 0
+    }
+  },
+  "scope": "Six individual 2-degree outward/return tests at one checked pose; pan separately retested after its deadband change. Not a full-workspace or optical sub-tick accuracy claim.",
+  "native_search": {
+    "p24_elbow": "Rejected: loaded motion stall; original tuning restored",
+    "selected": "Original native P/D retained; shoulder_lift and elbow_flex use I=0 only during shared control"
+  },
+  "final_cleanup": {
+    "processes_exited": true,
+    "both_arms_calibration_and_status_verified": true,
+    "native_tuning_restored_including_rejected_trial": true,
+    "follower_holding": true,
+    "leader_passive": true,
+    "storage_unlock_writes": 0,
+    "eeprom_and_protection_changes": 0
+  },
+  "deployment": {
+    "checked_files": 525,
+    "mismatched_files": [],
+    "verification_document_synced_after_check": true
+  }
+}

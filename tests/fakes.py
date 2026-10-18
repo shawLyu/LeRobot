@@ -19,7 +19,8 @@ class Bus:
                                  "Max_Voltage_Limit": 90, "Acceleration": 0,
                                  "Maximum_Acceleration": 254, "Goal_Time": 0,
                                  "Goal_Velocity": 0, "Maximum_Velocity_Limit": 1000,
-                                 "Velocity_Unit_factor": 1, "Lock": 1, "P_Coefficient": 16}
+                                 "Velocity_Unit_factor": 1, "Lock": 1,
+                                 "P_Coefficient": 16, "I_Coefficient": 0}
                           for name in JOINTS}
         self.writes = []
 

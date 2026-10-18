@@ -12,7 +12,8 @@
 ## 闭环结构
 
 白臂是无主动驱动的输入设备。其独立标定将编码器读数转换为角度，
-主从映射将扳机的 39.08–140.54° 映射至黑臂夹爪的 −11.31–109.25°，启动/恢复对齐阶段使用 0.6 rad/s；对齐后每周期直接采用最新目标。
+主从映射将扳机的 39.08–140.54° 映射至黑臂夹爪的当前命令范围 raw 464–1881
+（标定坐标 −92.73–20.94°，不是独立测量的夹爪开口角），启动/恢复对齐阶段使用 0.6 rad/s；对齐后每周期直接采用最新目标。
 黑臂六个电机各运行一个位置 PID 外环，并由已有舵机内部位置控制执行命令。
 所有内部计算使用标定后的 rad，图表转换为 deg。
 
@@ -27,7 +28,8 @@ omega_f = lowpass((q[k] - q[k-1]) / actual_dt, tau_D)
 v_ref   = lowpass((q_s[k] - q_s[k-1]) / actual_dt, tau_reference)
 w       = 1 / (1 + (max(abs(v_ref), abs(omega_f)) / 0.25)^2)
 I_next  = I + Ki * e_f * w * dt   # 含限幅和抗饱和
-u_pid   = slew(Kp * e_f + I - Kd * omega_f, pid_rate)
+w_D     = v_ref^2 / (v_ref^2 + 0.1^2)
+u_pid   = slew(Kp * e_f + I - Kd * omega_f * w_D, pid_rate)
 q_cmd   = clip(q_s + bounded_correction(u_pid), joint_limits)
 ```
 
@@ -44,6 +46,12 @@ q_cmd   = clip(q_s + bounded_correction(u_pid), joint_limits)
 
 
 `q_ref` 是原始名义目标，`q_s` 是整形后的名义位置。D 对测量微分，目标阶跃不会产生微分冲击。
+2026-10-19 起，默认六轴的 D 项按参考速度连续加权；参数
+`derivative_motion_scale_rad_s=0.1`。参考静止时 D 权重趋于零，避免外层测量微分
+反复激励舵机原生保持振荡；0.5 rad/s 时保留约 96% 阻尼。权重只取参考速度，
+不会因黑臂自行颤动而重新打开 D，也不清空静态负载积分。不增加参考滤波时间。
+缺省或设为 0 保留原有 D 行为；原生舵机内部 D 参数没有修改。
+故障日志、回放与实机验证范围见[静态抖动报告](measurements/static-follow-jitter-2026-10-19/README.md)。
 `I` 的单位为 rad；`Kp` 无量纲，`Ki` 为 1/s，`Kd` 为 s。
 积分在补偿幅值或物理边界饱和且误差继续推向边界时冻结，反向误差允许积分释放。
 输出补偿另有变化率限制。相邻轨迹的正常驻留保留已学到的负载补偿；
@@ -61,7 +69,8 @@ q_cmd   = clip(q_s + bounded_correction(u_pid), joint_limits)
 | gripper | 0.35 | 0.80 | 0.01 | 0.12 | 0.04 |
 
 D 滤波时间常数为 shoulder_lift/wrist_roll 40 ms、其他关节 80 ms；误差滤波为 wrist_roll 40 ms、夹爪 120 ms、其他关节 80 ms。
-死区为 pan/wrist_flex/wrist_roll 0.0015 rad，lift/elbow/gripper 0.003 rad。
+死区为 wrist_flex/wrist_roll 0.0015 rad，pan/lift/elbow/gripper 0.003 rad。
+pan 的死区于 2026-10-19 增至约两编码器 tick，以避免小误差积累后克服静摩擦产生跳动。
 物理编码器边界始终约束最终命令，Push-T 另取 CAD 边界交集。
 
 ## 执行器与实现边界
@@ -73,9 +82,15 @@ D 滤波时间常数为 shoulder_lift/wrist_roll 40 ms、其他关节 80 ms；�
 
 使能前写入并核对当前角度的保持目标，再开启力矩。所有正常运动入口使用 RAM
 Acceleration=254、Goal_Velocity=3000 ticks/s，并在退出/释放时恢复使能前值。
-**原生 P/I/D、EEPROM、工作模式、限位和保护参数不被这套软件 PID 改写。**
+2026-10-19 起，肩、肘运行时使用 `locked_i_coefficients` 临时将原生 I 设为 0，
+避免它与外层积分共同造成停止后回摆；原生 P/D 保持不变，静态负载由现有外环积分补偿。
+仅在 Lock=1 时写入并读回确认，退出/释放恢复启动前 I（本次黑臂分别为 4、8）。
+故障时保留待恢复记录，不对故障电机强行写入。
+**EEPROM、工作模式、限位、标定和保护参数不变，不会解锁存储或关闭支持扭矩。**
 `native_defaults` 中 P=16/I=0/D=32 是上游版本参考值，不能作为现场实际读数。
-本次现场 P 为 32/48/80/48/32/32，测试报告记录实际值。
+本次黑臂现场 P 为 40/32/56/48/48/48，测试报告记录实际值。
+启用含临时原生增益的配置前，相关电机必须已有 Lock=1；若存储未锁定，
+在任何目标或使能写入之前拒绝启动，不自动修改存储锁。
 
 MuJoCo 使用相同的 PID 算法、频率和配置，但内部位置执行器、摩擦、负载和通信延迟
 并不等价于真机。所有仿真场景的内部位置执行器统一为 kp=700、kv=56，
@@ -146,7 +161,9 @@ flowchart LR
     A --> F[双极点参考整形 F：τ=25 ms]
     F --> S((＋ / −))
     S --> PID[误差滤波 / P + 运动加权 I]
-    Q --> D[测量微分与低通：−Kd·ω]
+    Q --> D[测量微分与低通：−Kd·ω·w_D]
+    F --> W[参考速度权重 w_D]
+    W --> D
     D --> C((＋))
     PID --> C
     C --> B[补偿变化率 / 限幅]

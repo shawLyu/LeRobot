@@ -63,6 +63,7 @@ readings and explicit resume. These protection changes are detailed in the
 
 | Report | Purpose |
 | --- | --- |
+| [Stationary follow jitter](measurements/static-follow-jitter-2026-10-19/README.md) | Recorded 8 Hz shoulder oscillation, outer-D gating, temporary native I=0 on shoulder/elbow, operator observation and bounded stop tests |
 | [Initial PID](measurements/pid-2026-10-12/hardware-summary.json) | Original six-channel step baseline |
 | [Latency](measurements/follow-latency-2026-10-12/README.md) | Earlier normal-speed latency captures and definition |
 | [Remote following](measurements/remote-follow-2026-10-12/README.md) | Remote independence, reversal and overshoot comparison |

@@ -1,0 +1,399 @@
+{
+  "historical_interval": {
+    "joint": "shoulder_lift",
+    "seconds": [
+      45.20060685602948,
+      50.1839809208177
+    ],
+    "reference_peak_to_peak_deg": 0.09202453987730816,
+    "actual_peak_to_peak_deg": 2.2222222222222223,
+    "recorded_command_peak_to_peak_deg": 1.5384615384615485
+  },
+  "replay_scope": "Recorded measured positions held fixed; measures generated command changes, not physical vibration improvement",
+  "config_sha256": "f82e54c43e874e5a3c5c7430cef5077247e15b107e3ecabebef3f3f180045d6b",
+  "replay": {
+    "baseline": {
+      "command_step_rms_deg": 0.20795778824842265,
+      "command_peak_to_peak_deg": 1.013971288657416
+    },
+    "fixed": {
+      "command_step_rms_deg": 0.008121663131774247,
+      "command_peak_to_peak_deg": 0.17705790820548373
+    },
+    "command_step_rms_reduction_fraction": 0.9609456168957122
+  },
+  "hardware": {
+    "initial": {
+      "phases": {
+        "native_hold": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        },
+        "baseline": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        },
+        "fixed": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        }
+      },
+      "native_registers_restored": true,
+      "status_rechecks": [
+        {
+          "phase": "native_hold",
+          "t": 3.6040251259692013,
+          "bulk": {
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 1
+          }
+        },
+        {
+          "phase": "baseline",
+          "t": 6.504021835979074,
+          "bulk": {
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 1
+          }
+        }
+      ],
+      "error": null
+    },
+    "raised": {
+      "phases": {
+        "native_hold": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        },
+        "baseline": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        },
+        "fixed": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        }
+      },
+      "native_registers_restored": true,
+      "status_rechecks": [
+        {
+          "phase": "fixed",
+          "t": 3.9204973231535405,
+          "bulk": {
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 1
+          }
+        },
+        {
+          "phase": "fixed",
+          "t": 8.120824211044237,
+          "bulk": {
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 1
+          }
+        }
+      ],
+      "error": null
+    },
+    "critical": {
+      "phases": {
+        "native_hold": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        },
+        "baseline": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        },
+        "fixed": {
+          "shoulder_pan": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "shoulder_lift": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "elbow_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_flex": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "wrist_roll": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          },
+          "gripper": {
+            "peak_to_peak_ticks": 0,
+            "std_ticks": 0.0,
+            "command_peak_to_peak_ticks": 0
+          }
+        }
+      },
+      "native_registers_restored": true,
+      "status_rechecks": [
+        {
+          "phase": "native_hold",
+          "t": 2.8039250990841538,
+          "bulk": {
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 1
+          }
+        }
+      ],
+      "error": null
+    }
+  }
+}

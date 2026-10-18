@@ -38,6 +38,8 @@ def test_shared_configuration_preserves_latest_measured_values():
     assert POSITION_FEEDBACK['name'] == 'shared-joint-pid-v1'
     assert all(gains['kd'] > 0 for gains in POSITION_FEEDBACK['joints'].values())
     assert 'locked_p_coefficients' not in POSITION_FEEDBACK['native_stream']
+    assert POSITION_FEEDBACK['native_stream']['locked_i_coefficients'] == {
+        'shoulder_lift': 0, 'elbow_flex': 0}
     assert TRAJECTORY == {"version": 1, "entry_speed_rad_s": .8, "min_entry_seconds": .35,
                           "ramp_seconds": 1., "control_hz": 60,
                           "reset_speed_rad_s": .5, "period_seconds": 16.,

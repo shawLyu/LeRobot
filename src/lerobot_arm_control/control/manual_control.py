@@ -42,6 +42,8 @@ class ManualControl:
         self.native_velocity = {}
         self.original_p = {}
         self.native_p = {}
+        self.original_i = {}
+        self.native_i = {}
         self.trajectory = None
         self.periods = deque(maxlen=200)
         self.last_fault = None
@@ -96,7 +98,7 @@ class ManualControl:
         stream = self.position_feedback.profile.get('native_stream')
         if stream is None:
             return
-        # Fresh hold goals must already be confirmed. Lock=1 keeps optional P
+        # Fresh hold goals must already be confirmed. Lock=1 keeps optional P/I
         # changes volatile on ST firmware; never unlock storage or drop torque.
         current = {joint: int(self.bus.read("Acceleration", joint, normalize=False))
                    for joint in joints}
@@ -134,18 +136,21 @@ class ManualControl:
             if observed_velocity != requested_velocity:
                 raise RuntimeError(f"{joint}: native velocity could not be confirmed")
             self.native_velocity[joint] = requested_velocity
-        requested_p = {j: value for j, value in stream.get('locked_p_coefficients', {}).items()
-                       if j in joints}
-        if any(int(self.bus.read('Lock', j, normalize=False)) != 1 for j in requested_p):
-            raise RuntimeError('temporary P adjustment requires every storage lock closed')
-        for joint, value in requested_p.items():
-            original = int(self.bus.read('P_Coefficient', joint, normalize=False))
-            self.original_p.setdefault(joint, original)
-            self.bus.write('P_Coefficient', joint, value, normalize=False)
-            if (int(self.bus.read('P_Coefficient', joint, normalize=False)) != value
-                    or int(self.bus.read('Lock', joint, normalize=False)) != 1):
-                raise RuntimeError(f'{joint}: temporary P could not be confirmed')
-            self.native_p[joint] = value
+        for coefficient, originals, active in (('P', self.original_p, self.native_p),
+                                               ('I', self.original_i, self.native_i)):
+            requested = {j: value for j, value in stream.get(
+                f'locked_{coefficient.lower()}_coefficients', {}).items() if j in joints}
+            if any(int(self.bus.read('Lock', j, normalize=False)) != 1 for j in requested):
+                raise RuntimeError(f'temporary {coefficient} adjustment requires '
+                                   'every storage lock closed')
+            for joint, value in requested.items():
+                register = f'{coefficient}_Coefficient'
+                originals.setdefault(joint, int(self.bus.read(register, joint, normalize=False)))
+                self.bus.write(register, joint, value, normalize=False)
+                if (int(self.bus.read(register, joint, normalize=False)) != value
+                        or int(self.bus.read('Lock', joint, normalize=False)) != 1):
+                    raise RuntimeError(f'{joint}: temporary {coefficient} could not be confirmed')
+                active[joint] = value
 
     def schedule_stream_acceleration(self, fraction):
         """Slew the optional circle RAM acceleration between its validated endpoints."""
@@ -177,15 +182,19 @@ class ManualControl:
 
     def restore_position_stream(self, joints):
         for joint in joints:
-            if joint in self.original_p:
+            for coefficient, originals, active in (('P', self.original_p, self.native_p),
+                                                   ('I', self.original_i, self.native_i)):
+                if joint not in originals:
+                    continue
                 if int(self.bus.read('Lock', joint, normalize=False)) != 1:
-                    raise RuntimeError(f'{joint}: refusing P restore with storage unlocked')
-                original = self.original_p[joint]
-                self.bus.write('P_Coefficient', joint, original, normalize=False)
-                if int(self.bus.read('P_Coefficient', joint, normalize=False)) != original:
-                    raise RuntimeError(f'{joint}: temporary P restore failed')
-                self.original_p.pop(joint)
-                self.native_p.pop(joint, None)
+                    raise RuntimeError(f'{joint}: refusing {coefficient} restore '
+                                       'with storage unlocked')
+                register, original = f'{coefficient}_Coefficient', originals[joint]
+                self.bus.write(register, joint, original, normalize=False)
+                if int(self.bus.read(register, joint, normalize=False)) != original:
+                    raise RuntimeError(f'{joint}: temporary {coefficient} restore failed')
+                originals.pop(joint)
+                active.pop(joint, None)
             if joint in self.original_velocity:
                 original = self.original_velocity[joint]
                 self.bus.write("Goal_Velocity", joint, original, normalize=False)
@@ -234,6 +243,11 @@ class ManualControl:
     def preflight(self, joint, *, limits=None):
         if joint not in JOINTS:
             raise ValueError("unknown joint")
+        stream = self.position_feedback.profile.get('native_stream') or {}
+        if (any(joint in stream.get(f'locked_{coefficient}_coefficients', {})
+                for coefficient in ('p', 'i'))
+                and int(self.bus.read('Lock', joint, normalize=False)) != 1):
+            raise RuntimeError('temporary native gain adjustment requires storage lock closed')
         try:
             status = int(self.bus.read("Status", joint, normalize=False))
         except RuntimeError as exc:
@@ -551,12 +565,13 @@ class ManualControl:
                 "faulted_joints": sorted(self.faulted_joints),
                 "pending_native_restore": sorted(self.faulted_joints & (
                     self.original_acceleration.keys() | self.original_velocity.keys()
-                    | self.original_p.keys())),
+                    | self.original_p.keys() | self.original_i.keys())),
                 "command_qpos": dict(self.command_angles),
                 "sent_qpos": {joint: self.angle(joint, raw) for joint, raw in self.sent.items()},
                 "native_acceleration": dict(self.native_acceleration),
                 "native_velocity_ticks_s": dict(self.native_velocity),
                 "native_locked_p_coefficients": dict(self.native_p),
+                "native_locked_i_coefficients": dict(self.native_i),
                 "update_rate_hz": len(self.periods) / sum(self.periods) if self.periods else None,
                 "max_period_ms": max(self.periods, default=0) * 1000,
                 "boundary_entry_qpos": {joint: self.angle(joint, self.bounded_raw(joint, raw))

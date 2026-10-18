@@ -188,6 +188,66 @@ def test_reference_reversal_cancels_old_velocity_lead_in_one_tick():
     assert controller.velocity_feedforward[joint] == 0
 
 
+def test_stationary_reference_does_not_feed_native_holding_vibration_back_as_d():
+    joint = 'shoulder_lift'
+
+    def replay(scale):
+        controller = feedback()
+        controller.profile['joints'][joint].update(
+            kp=0, ki=0, kd=.03, derivative_filter_seconds=.04,
+            derivative_motion_scale_rad_s=scale)
+        commands = [controller.target(joint, 0, .014*math.sin(2*math.pi*8*n/60), 1/60)
+                    for n in range(300)]
+        return max(commands[-120:])-min(commands[-120:])
+
+    assert replay(0) > .001
+    assert replay(.1) == 0
+
+
+def test_motion_gated_d_preserves_fast_motion_damping_and_static_load_bias():
+    controller = feedback()
+    joint = 'shoulder_lift'
+    controller.profile['joints'][joint].update(
+        kp=0, ki=0, kd=.03, derivative_filter_seconds=.04,
+        derivative_motion_scale_rad_s=.1)
+    controller.integral[joint] = .025
+    for n in range(60):
+        controller.target(joint, n/120, n/120, 1/60)
+    # 0.5 rad/s reference keeps 96% of the configured measurement damping.
+    assert controller.derivative[joint] == pytest.approx(-.03*.5*.25/.26, rel=.001)
+    assert controller.integral[joint] == .025
+    for n in range(120):
+        command = controller.target(joint, 59/120, 59/120, 1/60)
+    assert abs(controller.derivative[joint]) < 1e-12
+    assert command == pytest.approx(59/120+.025)
+    controller.reset([joint])
+    assert controller.derivative[joint] == 0
+    assert controller.reference_velocity[joint] == 0
+
+
+def test_recorded_eight_hz_shoulder_vibration_no_longer_generates_large_d_commands():
+    import json
+    from copy import deepcopy
+
+    from lerobot_arm_control.control.control_defaults import POSITION_FEEDBACK
+    from lerobot_arm_control.core.paths import resource_path
+
+    trace = json.loads(resource_path(
+        'docs/measurements/static-follow-jitter-2026-10-19/recorded-shoulder.json').read_text())
+
+    def replay(scale):
+        profile = deepcopy(POSITION_FEEDBACK)
+        profile['joints']['shoulder_lift']['derivative_motion_scale_rad_s'] = scale
+        controller = PositionFeedback(profile, {j: [-3., 3.] for j in JOINTS})
+        commands = [controller.target('shoulder_lift', f['reference_rad'],
+                                     f['measured_rad'], f['dt']) for f in trace['frames']]
+        # Compare after filter initialization, over exactly the same encoder data.
+        tail = commands[-120:]
+        return math.sqrt(sum((b-a)**2 for a, b in zip(tail, tail[1:]))/(len(tail)-1))
+
+    assert replay(.1) < replay(0)*.1
+
+
 def smoothing_controller():
     from copy import deepcopy
 
@@ -247,6 +307,8 @@ def test_motion_weight_reduces_lag_integration_without_erasing_load_bias():
 
 
 @pytest.mark.parametrize('field,value', [('reference_smoothing_seconds', .21),
+                                        ('derivative_motion_scale_rad_s', 1.1),
+                                        ('derivative_motion_scale_rad_s', .001),
                                         ('integral_velocity_scale_rad_s', 1.1)])
 def test_smoothing_configuration_rejects_unbounded_values(field, value):
     c = smoothing_controller()

@@ -7,7 +7,12 @@
 LeRobot/
 ├── src/lerobot_arm_control/
 │   ├── core/             配置、路径、文件、进程命令与延迟加载 API
-│   ├── robot/so101/      LeRobot 总线适配、设备身份与模型元数据
+│   ├── robot/
+│   │   ├── model.py      通用标量关节 MJCF 元数据
+│   │   ├── backends.py   驱动注册、配置与型号身份接口
+│   │   ├── connection.py 串口独占与只读连接生命周期
+│   │   ├── feetech.py    STS3215 驱动和原生流参数校验
+│   │   └── so101/        SO-101 关节表和工具几何选择
 │   ├── control/          共享 PID、限位、保持、接触/受阻检测、轨迹执行
 │   ├── calibration/      独立关节标定及相机、标记、桌面标定
 │   ├── perception/       桌面注册、双臂基座定位、物体检测与跟踪
@@ -35,10 +40,17 @@ LeRobot/
 
 ## 模块边界
 
-`control/position_feedback.py` 实现六通道共享 PID；`ManualControl` 管理真机反馈、
-启用、运行范围、故障锁存、保持和原生 RAM 参数恢复。仿真控制器运行同一 PID 算法。
+`control/position_feedback.py` 按传入关节和限位实现共享 PID，不依赖通信协议或
+六关节名称。`control/factory.py` 定义策略接口和显式注册/创建入口；`ManualControl` 管理真机反馈、
+启用、运行范围、故障锁存、保持和原生 RAM 参数恢复。仿真控制器通过同一工厂选择策略，并允许显式传入其他关节表、控制频率和执行器设置。
 手动、复位、circle、有限轨迹、follow、Push-T 和 pick/place 使用这些控制适配器。
 任务模块负责目标和阶段，不维护另一套电机 PID。
+
+机械模型元数据与电机型号相互独立；`ArmConfig.backend` 默认 `feetech`。
+`robot/connection.py` 按后端验证配置及 ping 型号，不再属于某一个机械臂结构。
+STS 原生寄存器工作台仍明确限定 Feetech STS3215，范围存储归属
+`workbench/ranges.py`，限位与运动检查归属 `workbench/controller.py`。
+接入步骤、控制器契约和当前扩展边界见 [扩展指南](extending.md)。
 
 白臂采样、独立标定、映射、PID 和黑臂写入全部在远端
 `runtime/follow_server.py --standalone` 中完成。本地 simulator 通过只读状态流显示。

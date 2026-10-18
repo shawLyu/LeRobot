@@ -63,7 +63,7 @@ def serve(args):
         last_fault = None
         last_status_warning = None
         from lerobot_arm_control.core.config import load_arms
-        from lerobot_arm_control.robot.so101.driver import connected
+        from lerobot_arm_control.robot.feetech import connected_sts3215 as connected
 
         arm = load_arms()[args.arm]
         bus = stack.enter_context(connected(arm))

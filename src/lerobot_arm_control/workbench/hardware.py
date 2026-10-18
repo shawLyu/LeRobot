@@ -3,7 +3,8 @@
 from contextlib import contextmanager
 from dataclasses import replace
 
-from lerobot_arm_control.robot.so101.driver import make_bus, serial_owner
+from lerobot_arm_control.robot.connection import make_bus, serial_owner
+from lerobot_arm_control.robot.feetech import require_sts3215
 from lerobot_arm_control.workbench.registers import BAUDRATES, install_table
 
 
@@ -44,6 +45,7 @@ class ServoAccess:
 
 @contextmanager
 def open_hardware(arm, ids, baudrate):
+    require_sts3215(arm)
     if baudrate not in BAUDRATES:
         raise ValueError('不支持该波特率')
     if (len(ids) != len(arm.motors) or len(set(ids)) != len(ids)

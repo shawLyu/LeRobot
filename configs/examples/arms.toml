@@ -1,3 +1,4 @@
+# Optional backend = "feetech" is the default; model names the servo, not MJCF geometry.
 # Add a verified device below [arms]. No physical robot is enabled by default.
 # Example (uncomment after verifying the USB identity and motor mapping):
 # [arms.follower]

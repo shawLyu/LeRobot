@@ -1,4 +1,4 @@
-"""Use LeRobot's Feetech bus without configuration or EEPROM writes."""
+"""Exclusive read-only connection lifecycle for LeRobot-compatible motor adapters."""
 
 import fcntl
 import hashlib
@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from lerobot_arm_control.core.config import ArmConfig
+from lerobot_arm_control.robot.backends import get_backend
 
 
 @contextmanager
@@ -27,19 +28,17 @@ def serial_owner(port):
 
 
 def make_bus(arm: ArmConfig):
-    """Load the optional LeRobot driver only when opening a hardware session."""
-    from lerobot.motors import Motor, MotorNormMode
-    from lerobot.motors.feetech import FeetechMotorsBus
-
-    return FeetechMotorsBus(
-        port=arm.port,
-        motors={name: Motor(motor_id, arm.model, MotorNormMode.RANGE_M100_100)
-                for name, motor_id in arm.motors.items()},
-    )
+    """Construct the configured backend without opening or configuring hardware."""
+    backend = get_backend(arm.backend)
+    backend.check(arm)
+    return backend.factory(arm)
 
 
 @contextmanager
 def connected(arm: ArmConfig, *, allow_alarm=False):
+    backend = get_backend(arm.backend)
+    backend.check(arm)
+    expected_model = backend.model_numbers[arm.model]
     with serial_owner(arm.port):
         bus = make_bus(arm)
         try:
@@ -61,8 +60,9 @@ def connected(arm: ArmConfig, *, allow_alarm=False):
                         raise ConnectionError(bus.packet_handler.getTxRxResult(comm)) from exc
                     if not error:
                         raise RuntimeError('inconsistent alarm ping; retry connection') from exc
-                if model != 777:
-                    raise RuntimeError(f"{arm.name}/{name}: expected STS3215 (777), got {model}")
+                if model != expected_model:
+                    raise RuntimeError(f"{arm.name}/{name}: expected {arm.model} "
+                                       f"({expected_model}), got {model}")
             yield bus
         finally:
             # Default disconnect disables torque and unlocks EEPROM; diagnostics must not do that.

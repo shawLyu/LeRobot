@@ -14,7 +14,7 @@ from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.core.processes import interrupt
 from lerobot_arm_control.diagnostics.response_metrics import DEGREES_PER_TICK
 from lerobot_arm_control.diagnostics.response_metrics import native_step_metrics as metrics
-from lerobot_arm_control.robot.so101.driver import connected
+from lerobot_arm_control.robot.feetech import connected_sts3215 as connected
 
 IDENTITY_REGISTERS = ('Homing_Offset', 'Phase', 'Operating_Mode', 'Min_Position_Limit',
                       'Max_Position_Limit', 'Angular_Resolution')

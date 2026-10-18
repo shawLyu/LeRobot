@@ -5,8 +5,8 @@ import math
 
 from lerobot_arm_control.control.control_defaults import CONTROL, CONTROL_HZ
 from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
-from lerobot_arm_control.transport.realtime import JOINTS
 
 
 def load_follow_config(path=None):

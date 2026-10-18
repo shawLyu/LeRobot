@@ -1,6 +1,5 @@
 """All motion, sampling and parameter transactions run beside the physical bus."""
 
-import json
 import math
 import time
 from collections import deque
@@ -9,6 +8,7 @@ from pathlib import Path
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
 from lerobot_arm_control.core.files import atomic_json
 from lerobot_arm_control.diagnostics.response_metrics import native_step_metrics
+from lerobot_arm_control.workbench.ranges import read_ranges, save_range
 from lerobot_arm_control.workbench.registers import BAUDRATES, BY_KEY, REGISTERS
 
 IDENTITY = ('Homing_Offset', 'Phase', 'Operating_Mode', 'Angular_Resolution',
@@ -56,17 +56,9 @@ class Workbench:
         return {'context': self.context, 'id': self.discovery[joint]['id'],
                 'reference': self.identity(joint), 'bounds': bounds}
 
-    def read_bounds_file(self):
-        if self.bounds_path is None or not self.bounds_path.exists():
-            return {'version': 1, 'arms': {}}
-        record = json.loads(self.bounds_path.read_text())
-        if record.get('version') != 1 or not isinstance(record.get('arms'), dict):
-            raise ValueError('无效的范围文件')
-        return record
-
     def load_bounds(self):
         try:
-            saved = self.read_bounds_file()['arms'].get(self.context.get('arm'), {})
+            saved = read_ranges(self.bounds_path)['arms'].get(self.context.get('arm'), {})
             if not isinstance(saved, dict):
                 raise ValueError('无效的机械臂范围记录')
         except (OSError, ValueError, TypeError, AttributeError) as exc:
@@ -147,13 +139,8 @@ class Workbench:
         if type(persist) is not bool:
             raise ValueError('保存范围选项必须是布尔值')
         if persist:
-            if self.bounds_path is None or not self.context.get('arm'):
-                raise ValueError('当前连接未配置范围保存路径')
-            record = self.read_bounds_file()
-            record['arms'].setdefault(self.context['arm'], {})[joint] = self.bounds_record(
-                joint, list(bounds))
-            self.bounds_path.parent.mkdir(parents=True, exist_ok=True)
-            atomic_json(self.bounds_path, record)
+            save_range(self.bounds_path, self.context, joint,
+                       self.bounds_record(joint, list(bounds)))
         self.bounds[joint] = list(bounds)
         self.native_limits[joint] = [low, high]
         self.bounds_info[joint] = {'source': 'saved' if persist else 'session', 'reason': ''}

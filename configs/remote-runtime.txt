@@ -67,7 +67,7 @@ src/lerobot_arm_control/perception/tabletop_tracking.py
 src/lerobot_arm_control/perception/tool_marker.py
 src/lerobot_arm_control/robot/__init__.py
 src/lerobot_arm_control/robot/so101/__init__.py
-src/lerobot_arm_control/robot/so101/driver.py
+src/lerobot_arm_control/robot/connection.py
 src/lerobot_arm_control/robot/so101/joints.py
 src/lerobot_arm_control/robot/so101/model_metadata.py
 src/lerobot_arm_control/runtime/__init__.py
@@ -120,3 +120,11 @@ tests/test_servo_workbench_http.py
 
 src/lerobot_arm_control/diagnostics/near_pose_pid.py
 tests/test_near_pose_pid.py
+
+# Model, driver and controller extension points (no optional SDK import on load).
+src/lerobot_arm_control/robot/backends.py
+src/lerobot_arm_control/robot/feetech.py
+src/lerobot_arm_control/robot/model.py
+src/lerobot_arm_control/control/factory.py
+src/lerobot_arm_control/workbench/ranges.py
+tests/test_extensions.py

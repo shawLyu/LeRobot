@@ -47,7 +47,7 @@ def main():
             parser.error('resample needs distinct existing --poses numbers, e.g. 3 5 7')
         if args.action in ('collect', 'resample'):
             from lerobot_arm_control.core.config import load_arms
-            from lerobot_arm_control.robot.so101.driver import connected
+            from lerobot_arm_control.robot.feetech import connected_sts3215 as connected
             from lerobot_arm_control.runtime.tabletop_robot import calibration_identity
 
             print('Read-only sampling. Support the arm; move only after torque is released.\n'

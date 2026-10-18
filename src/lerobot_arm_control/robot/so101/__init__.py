@@ -3,8 +3,8 @@
 from lerobot_arm_control.core.api import public_symbol
 
 _EXPORTS = {
-    "connected": ("robot.so101.driver", "connected"),
-    "read_state": ("robot.so101.driver", "read_state"),
+    "connected": ("robot.connection", "connected"),
+    "read_state": ("robot.connection", "read_state"),
     "joint_ranges": ("robot.so101.model_metadata", "joint_ranges"),
     "MODEL": ("robot.so101.model_metadata", "MODEL"),
 }

@@ -524,7 +524,7 @@ def test_failed_range_save_does_not_apply_unsaved_bounds(rig, tmp_path, monkeypa
     original = control.bounds[JOINTS[0]][:]
     def fail(*args):
         raise OSError('disk full')
-    monkeypatch.setattr('lerobot_arm_control.workbench.controller.atomic_json', fail)
+    monkeypatch.setattr('lerobot_arm_control.workbench.ranges.atomic_json', fail)
     with pytest.raises(OSError):
         control.configure_bounds(JOINTS[0], [2000, 2200], True)
     assert control.bounds[JOINTS[0]] == original

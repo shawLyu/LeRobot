@@ -6,7 +6,7 @@ import pytest
 
 from lerobot_arm_control.control import motion
 from lerobot_arm_control.core.config import ArmConfig
-from lerobot_arm_control.robot.so101 import driver
+from lerobot_arm_control.robot import connection as driver
 
 
 def test_serial_bus_reserved_before_any_second_connection(tmp_path):

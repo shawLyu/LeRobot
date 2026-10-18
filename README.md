@@ -279,6 +279,8 @@ Normal motion demos share one outer controller. The native servo workbench and
 native PID benchmark measure the motor's built-in position loop directly.
 See [Control design](docs/lerobot-control.md), [Code layout](docs/code-layout.md)
 and [System operation](docs/system.md) for details.
+For other joint models, controller strategies and motor-bus adapters, see
+[Extension interfaces](docs/extending.md). Existing SO-101 commands keep their defaults.
 
 ## 8. Privacy and sharing
 

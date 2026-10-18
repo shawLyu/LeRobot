@@ -7,7 +7,7 @@ import math
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, TRAJECTORY
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.core.files import file_digest
-from lerobot_arm_control.transport.realtime import JOINTS
+from lerobot_arm_control.robot.so101.joints import JOINTS
 
 ACTIVE = JOINTS[:5]
 

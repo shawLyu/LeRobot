@@ -13,7 +13,8 @@ from pathlib import Path
 from lerobot_arm_control.control.motion import execute_motion, plan_motion
 from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.paths import workspace_root
-from lerobot_arm_control.robot.so101.driver import connected, read_state
+from lerobot_arm_control.robot.connection import read_state
+from lerobot_arm_control.robot.feetech import connected_sts3215 as connected
 
 
 def doctor(arms):

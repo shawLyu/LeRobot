@@ -3,6 +3,9 @@
 from lerobot_arm_control.core.api import public_symbol
 
 _EXPORTS = {
+    "JointController": ("control.factory", "JointController"),
+    "create_controller": ("control.factory", "create_controller"),
+    "register_controller": ("control.factory", "register_controller"),
     "ManualControl": ("control.manual_control", "ManualControl"),
     "PositionFeedback": ("control.position_feedback", "PositionFeedback"),
     "JointPath": ("control.joint_path", "JointPath"),

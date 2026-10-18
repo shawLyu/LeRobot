@@ -7,8 +7,7 @@ are restored by ManualControl; torque and protection settings are unchanged.
 
 import math
 from copy import deepcopy
-
-from lerobot_arm_control.transport.realtime import JOINTS
+from numbers import Real
 
 
 class PositionFeedback:
@@ -16,36 +15,30 @@ class PositionFeedback:
         if not isinstance(profile, dict):
             raise ValueError("invalid position feedback profile")
         self.profile = deepcopy(profile)
-        if self.profile.get("version") != 1 or set(self.profile.get("joints", {})) != set(JOINTS):
+        self.joints = tuple(limits)
+        if (not self.joints or any(not isinstance(j, str) or not j for j in self.joints)
+                or any(len(bounds) != 2 or not all(isinstance(v, Real) and not isinstance(v, bool)
+                           and math.isfinite(v) for v in bounds) or bounds[0] >= bounds[1]
+                       for bounds in limits.values())):
+            raise ValueError('invalid joint limits')
+        if (self.profile.get("version") != 1
+                or set(self.profile.get("joints", {})) != set(self.joints)):
             raise ValueError("invalid position feedback profile")
-        stream = self.profile.get("native_stream")
-        if stream is not None and (not {"acceleration", "velocity_ticks_s"} <= set(stream)
-                                   <= {"acceleration", "velocity_ticks_s", "locked_p_coefficients"}
-                                   or any(type(stream[k]) is not int for k in
-                                          ("acceleration", "velocity_ticks_s"))
-                                   or not 1 <= stream["acceleration"] <= 254
-                                   or not 1 <= stream["velocity_ticks_s"] <= 3000):
-            raise ValueError("invalid native streaming profile")
-        coefficients = stream.get('locked_p_coefficients', {}) if stream else {}
-        if (not isinstance(coefficients, dict) or not set(coefficients) <= set(JOINTS[:5])
-                or any(type(v) is not int or not 16 <= v <= 32
-                       for v in coefficients.values())):
-            raise ValueError('invalid temporary locked P coefficients')
         self.limits = limits
-        self.integral = dict.fromkeys(JOINTS, 0.0)
-        self.correction = dict.fromkeys(JOINTS, 0.0)
-        self.feedback_correction = dict.fromkeys(JOINTS, 0.0)
-        self.velocity_feedforward = dict.fromkeys(JOINTS, 0.0)
-        self.reference_direction = dict.fromkeys(JOINTS, 0)
-        self.moving_samples = dict.fromkeys(JOINTS, 0)
-        self.previous_reference = dict.fromkeys(JOINTS)
-        self.reference_velocity = dict.fromkeys(JOINTS, 0.0)
-        self.filtered_error = dict.fromkeys(JOINTS, 0.0)
-        self.previous_measurement = dict.fromkeys(JOINTS)
-        self.measured_velocity = dict.fromkeys(JOINTS, 0.0)
-        self.derivative = dict.fromkeys(JOINTS, 0.0)
-        self.reference_filter_stage = dict.fromkeys(JOINTS)
-        self.shaped_reference = dict.fromkeys(JOINTS)
+        self.integral = dict.fromkeys(self.joints, 0.0)
+        self.correction = dict.fromkeys(self.joints, 0.0)
+        self.feedback_correction = dict.fromkeys(self.joints, 0.0)
+        self.velocity_feedforward = dict.fromkeys(self.joints, 0.0)
+        self.reference_direction = dict.fromkeys(self.joints, 0)
+        self.moving_samples = dict.fromkeys(self.joints, 0)
+        self.previous_reference = dict.fromkeys(self.joints)
+        self.reference_velocity = dict.fromkeys(self.joints, 0.0)
+        self.filtered_error = dict.fromkeys(self.joints, 0.0)
+        self.previous_measurement = dict.fromkeys(self.joints)
+        self.measured_velocity = dict.fromkeys(self.joints, 0.0)
+        self.derivative = dict.fromkeys(self.joints, 0.0)
+        self.reference_filter_stage = dict.fromkeys(self.joints)
+        self.shaped_reference = dict.fromkeys(self.joints)
         for parameters in self.profile["joints"].values():
             required = {"kp", "ki", "max_correction_rad", "correction_rate_rad_s"}
             optional = {"kd", "derivative_filter_seconds", "velocity_feedforward_s",
@@ -73,8 +66,8 @@ class PositionFeedback:
                         and not .01 <= parameters.get("friction_velocity_rad_s", 0) <= .15)):
                 raise ValueError("invalid position correction gains or envelope")
 
-    def reset(self, joints=JOINTS):
-        for joint in joints:
+    def reset(self, joints=None):
+        for joint in self.joints if joints is None else joints:
             self.integral[joint] = self.correction[joint] = 0.0
             self.feedback_correction[joint] = self.velocity_feedforward[joint] = 0.0
             self.reference_direction[joint] = self.moving_samples[joint] = 0

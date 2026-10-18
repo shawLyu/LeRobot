@@ -11,17 +11,19 @@ from lerobot_arm_control.control.control_defaults import (
     POSITION_FEEDBACK,
     READ_RETRIES,
 )
+from lerobot_arm_control.control.factory import create_controller
 from lerobot_arm_control.control.gripper_contact import GripperContact
 from lerobot_arm_control.control.motion_stall import MotionStall
-from lerobot_arm_control.control.position_feedback import PositionFeedback
 from lerobot_arm_control.core.files import file_digest
-from lerobot_arm_control.transport.realtime import JOINTS, WATCHDOG_SECONDS
+from lerobot_arm_control.robot.feetech import validate_position_stream
+from lerobot_arm_control.robot.so101.joints import JOINTS
+from lerobot_arm_control.transport.realtime import WATCHDOG_SECONDS
 from lerobot_arm_control.visualization.ui import motor_fault_text
 
 
 class ManualControl:
     def __init__(self, bus, calibration, raw_limits, clock=time.monotonic,
-                 rest_path=None):
+                 rest_path=None, feedback_profile=None):
         if calibration.count() != 6:
             raise ValueError("real control requires all six calibrated joints")
         self.bus = bus
@@ -60,7 +62,9 @@ class ManualControl:
                     or self.limits[joint][0] >= self.limits[joint][1]):
                 raise ValueError(f"invalid control limits: {joint}")
             self.rest_limits[joint] = self.limits[joint]
-        self.position_feedback = PositionFeedback(POSITION_FEEDBACK, self.limits)
+        self.position_feedback = create_controller(
+            POSITION_FEEDBACK if feedback_profile is None else feedback_profile, self.limits)
+        validate_position_stream(self.position_feedback.profile.get('native_stream'), JOINTS)
         self.gripper_contact = GripperContact(CONTROL['gripper_contact'])
         self.motion_stall = MotionStall(CONTROL['motion_stall'])
         for envelope in CONTROL['hardware_command_envelopes']:

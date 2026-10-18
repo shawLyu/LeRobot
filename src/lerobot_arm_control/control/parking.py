@@ -6,7 +6,7 @@ from collections import deque
 from pathlib import Path
 
 from lerobot_arm_control.control.control_defaults import CONTROL_HZ, TRAJECTORY
-from lerobot_arm_control.transport.realtime import JOINTS
+from lerobot_arm_control.robot.so101.joints import JOINTS
 
 STILL_SECONDS = 2.0
 ARRIVAL_TICKS = 5

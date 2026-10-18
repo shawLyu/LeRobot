@@ -127,7 +127,7 @@ def test_public_domain_exports_use_canonical_implementations():
         (JointPath, "control.joint_path", "JointPath"),
         (Circle, "tasks.circle.circle_trajectory", "Circle"),
         (AngleCalibration, "calibration.angle_calibration", "AngleCalibration"),
-        (connected, "robot.so101.driver", "connected"),
+        (connected, "robot.connection", "connected"),
     ]
     for value, module, attribute in expected:
         assert value is getattr(importlib.import_module("lerobot_arm_control." + module), attribute)

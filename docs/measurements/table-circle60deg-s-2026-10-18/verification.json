@@ -1,0 +1,32 @@
+{
+  "local_full_pytest": {
+    "passed": 752,
+    "skipped": 1,
+    "seconds": 91.39
+  },
+  "subsequent_circle_playback_pytest_including_new_profile_mismatch_guard": {
+    "passed": 13
+  },
+  "remote_full_pytest": {
+    "passed": 501
+  },
+  "ruff_remote_runtime": "passed",
+  "ruff_all_modified_python_files_including_local_analysis": "passed",
+  "git_diff_check": "passed",
+  "deployment": {
+    "checked_files": 128,
+    "mismatched_files": []
+  },
+  "physical_trial": {
+    "completed_laps": 3,
+    "operator_feedback": "起步和停住可以接受",
+    "fault_flags": 0,
+    "evidence": "hardware-report.json"
+  },
+  "limitations": [
+    "Encoder and calibrated CAD, not optical measurement",
+    "Mean speed reached 60 degrees/second; instantaneous ripple remains",
+    "Smoothness selected at cost of temporal tracking error",
+    "Joints 5 and 6 held, not dynamically validated"
+  ]
+}

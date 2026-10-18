@@ -126,6 +126,27 @@ def test_reviewed_circle_path_reaches_remote_worker_without_starting_motion(monk
              circle=True, circle_plan='/tmp/outside-workspace.json')
 
 
+def test_finite_remote_circle_transports_bound_proof_and_lap_count(monkeypatch):
+    process = Mock(stdin=io.StringIO(), stdout=io.StringIO())
+    popen = Mock(return_value=process)
+    monkeypatch.setattr('lerobot_arm_control.runtime.realtime_client.subprocess.Popen', popen)
+    proof = ROOT/'logs/circle validation.json'
+    link = Link('robot-host', '/remote/robot', 'hardware', hardware_control=True,
+                circle=True, circle_validation=proof, circle_laps=3)
+    link.reader.join(timeout=1)
+    command = popen.call_args.args[0][-1]
+    assert "--standalone-circle-validation 'logs/circle validation.json' --circle-laps 3" in command
+    assert process.stdin.getvalue() == ''
+    popen.reset_mock()
+    for kwargs in ({'circle_laps': 0}, {'circle_laps': 6}, {'circle_laps': True},
+                   {'hardware_control': False}, {'circle': False}):
+        arguments = dict(hardware_control=True, circle=True, circle_validation=proof)
+        arguments.update(kwargs)
+        with pytest.raises(ValueError):
+            Link('robot-host', '/remote/robot', 'hardware', **arguments)
+    popen.assert_not_called()
+
+
 @pytest.mark.parametrize("matches", [False, True])
 @pytest.mark.parametrize("observer", [False, True])
 def test_hardware_control_rejects_configuration_drift_before_commands(monkeypatch, matches,

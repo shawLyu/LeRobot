@@ -1,5 +1,6 @@
 import io
 import json
+import math
 from dataclasses import fields
 from unittest.mock import Mock
 
@@ -39,7 +40,10 @@ def test_shared_configuration_preserves_latest_measured_values():
     assert 'locked_p_coefficients' not in POSITION_FEEDBACK['native_stream']
     assert TRAJECTORY == {"version": 1, "entry_speed_rad_s": .8, "min_entry_seconds": .35,
                           "ramp_seconds": 1., "control_hz": 60,
-                          "reset_speed_rad_s": .5, "period_seconds": 16.}
+                          "reset_speed_rad_s": .5, "period_seconds": 16.,
+                          'max_circle_angular_speed_deg_s': 60.,
+                          'max_circle_joint_speed_rad_s': math.radians(60),
+                          'max_circle_joint_acceleration_rad_s2': math.radians(200)}
     assert TRAJECTORY["control_hz"] == CONTROL_HZ
 
 
@@ -63,7 +67,8 @@ def test_manual_reset_circle_and_push_use_shared_defaults_without_overrides():
     assert circle.period == 16
     # The shared enable path restores the previous RAM values.
     manual.enable_all()
-    assert set(bus.sync_read("Acceleration").values()) == {254}
+    assert set(bus.sync_read("Acceleration").values()) == {
+        POSITION_FEEDBACK['native_stream']['acceleration']}
     assert set(bus.sync_read("Goal_Velocity").values()) == {1000}
     assert set(bus.sync_read('P_Coefficient').values()) == {16}
     manual.close()

@@ -42,6 +42,7 @@ def validate_hardware_entry(circle, initial):
     import mujoco
 
     model = collision_model(circle)
+    timing = circle.check_motion_budget(initial)
     if circle.plane == 'XY' and max(abs(a-b) for a, b in zip(
             initial[4:], circle.points[0][4:])) > .003:
         raise ValueError('horizontal circle must hold the observed wrist roll and gripper')
@@ -60,7 +61,7 @@ def validate_hardware_entry(circle, initial):
             raise ValueError('circle samples do not match the requested Cartesian geometry')
     return {"checked": True, "initial_qpos": list(initial),
             "model_sha256": circle.model_hash, "plan_sha256": circle.plan_hash,
-            "control_config_sha256": circle.profile_hash}
+            "control_config_sha256": circle.profile_hash, 'motion_budget': timing}
 
 
 def collision_model(circle):
@@ -127,7 +128,7 @@ def verify(model, path, report_path, *, simulation=False):
     data = mujoco.MjData(model)
     data.qpos[:] = circle.points[0]
     data.ctrl[:] = data.qpos
-    controller = SimulationControl(model, data)
+    controller = SimulationControl(model, data, feedback_profile=circle.feedback_profile)
     circle.start(data.qpos, 0)
     errors = []
     reference = mujoco.MjData(model)

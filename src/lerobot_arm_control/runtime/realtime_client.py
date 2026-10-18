@@ -28,7 +28,8 @@ class Link:
     def __init__(self, host, remote_root, backend, *, allow_gripper=False, hardware_control=False,
                  circle=False, keep_simulation_alive=False,
                  simulation_model=None, control_log=None, arm='follower',
-                 hardware_worker='realtime_server', circle_plan=None):
+                 hardware_worker='realtime_server', circle_plan=None,
+                 circle_validation=None, circle_laps=1):
         if backend not in ("mujoco", "hardware"):
             raise ValueError("unknown backend")
         if keep_simulation_alive and backend != "mujoco":
@@ -59,6 +60,14 @@ class Link:
             relative = Path(circle_plan).resolve().relative_to(ROOT.resolve())
             self.circle_plan = ROOT / relative
             worker_args.extend(('--circle-plan', str(relative)))
+        if circle_validation is not None:
+            if (not circle or not hardware_control or backend != 'hardware'
+                    or hardware_worker != 'realtime_server'
+                    or type(circle_laps) is not int or not 1 <= circle_laps <= 5):
+                raise ValueError('remote circle requires calibrated control and 1..5 laps')
+            relative = Path(circle_validation).resolve().relative_to(ROOT.resolve())
+            worker_args.extend(('--standalone-circle-validation', str(relative),
+                                '--circle-laps', str(circle_laps)))
         if backend == "mujoco":
             if simulation_model is not None:
                 worker_args.extend(("--model", str(Path(simulation_model).resolve())))
@@ -132,7 +141,8 @@ class Link:
                     elif kind == "error":
                         self.error = message["error"]
                 # Fresh incoming simulation state maintains heartbeat even if drawing stalls.
-                # Hardware heartbeat must continue to depend on the operator's control loop.
+                # Interactive hardware needs its operator loop; a validated finite
+                # circle maintains its own heartbeat inside the remote worker.
                 if (kind == "state" and self.keep_simulation_alive
                         and time.monotonic() - last_simulation_ping >= 0.25):
                     self.send("ping")

@@ -150,7 +150,9 @@ def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observ
     action = Push(np.zeros(2), np.ones(2), .004, joints=[[.35]*6], approach_count=0)
     instance.submit(observed, joint_segments([.3]*6, action, np.array([[-1., 1.]]*6)))
     tick(instance, bus)
-    assert set(bus.sync_read('Acceleration').values()) == {254}
+    stream = instance.control.position_feedback.profile['native_stream']
+    expected_acceleration = stream['acceleration']
+    assert set(bus.sync_read('Acceleration').values()) == {expected_acceleration}
     assert set(bus.sync_read('Goal_Velocity').values()) == {1000}
     for index in range(1, 61):
         clock[0] = index/60

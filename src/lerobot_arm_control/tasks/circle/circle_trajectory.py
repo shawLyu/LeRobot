@@ -2,12 +2,14 @@
 
 import json
 import math
-from copy import deepcopy
+from copy import copy, deepcopy
 from pathlib import Path
 
 from lerobot_arm_control.control.control_defaults import (
+    CIRCLE_POSITION_FEEDBACK,
     CONTROL_CONFIG_SHA256,
     CONTROL_HZ,
+    POSITION_FEEDBACK,
     TRAJECTORY,
 )
 from lerobot_arm_control.control.parking import smooth_fraction
@@ -22,7 +24,8 @@ PLAN = resource_path("data/trajectories/circle.json")
 def load_profile():
     profile = deepcopy(TRAJECTORY)
     keys = ("entry_speed_rad_s", "min_entry_seconds", "ramp_seconds",
-            "reset_speed_rad_s", "period_seconds")
+            "reset_speed_rad_s", "period_seconds", 'max_circle_angular_speed_deg_s',
+            'max_circle_joint_speed_rad_s', 'max_circle_joint_acceleration_rad_s2')
     if (profile.get("version") != 1 or profile.get("control_hz") != CONTROL_HZ
             or any(type(profile.get(key)) not in (int, float)
                    or not math.isfinite(profile[key]) or profile[key] <= 0 for key in keys)):
@@ -47,13 +50,16 @@ class Circle:
         self.model_hash = saved["model_sha256"]
         self.points = saved["qpos"]
         self.period = profile["period_seconds"]
-        # A reviewed plan may slow the shared controller; it cannot request a
-        # faster entry, faster lap or shorter acceleration ramp.
+        # Faster circle phase is an explicit, bounded request in the hashed
+        # plan. Entry speed and ramp retain the shared smoothness limits.
         timing = saved.get('execution_profile', {})
         if (not isinstance(timing, dict)
-                or set(timing) - {'entry_speed_rad_s', 'ramp_seconds'}):
+                or set(timing) - {'entry_speed_rad_s', 'ramp_seconds', 'angular_speed_deg_s',
+                                 'controller_profile'}):
             raise ValueError('invalid circle execution profile')
         for key, value in timing.items():
+            if key == 'controller_profile':
+                continue
             if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
                 raise ValueError('invalid circle execution profile')
         if (timing.get('entry_speed_rad_s', self.entry_speed) > self.entry_speed
@@ -61,6 +67,16 @@ class Circle:
             raise ValueError('circle plan may only slow the shared profile')
         self.entry_speed = timing.get('entry_speed_rad_s', self.entry_speed)
         self.ramp_seconds = timing.get('ramp_seconds', self.ramp_seconds)
+        self.requested_angular_speed = timing.get('angular_speed_deg_s')
+        selected = timing.get('controller_profile')
+        if selected is not None and selected != CIRCLE_POSITION_FEEDBACK['name']:
+            raise ValueError('unknown circle controller profile')
+        self.feedback_profile = deepcopy(
+            CIRCLE_POSITION_FEEDBACK if selected else POSITION_FEEDBACK)
+        self.motion_budget = {
+            'max_joint_speed_rad_s': profile['max_circle_joint_speed_rad_s'],
+            'max_joint_acceleration_rad_s2': profile['max_circle_joint_acceleration_rad_s2'],
+        }
         self.plane = saved.get('plane', 'XZ')
         self.table_z = saved.get('table_z_m')
         self.calibration_hash = saved.get('joint_calibration_sha256')
@@ -87,6 +103,13 @@ class Circle:
         if self.points[0] != self.points[-1]:
             raise ValueError("circle must close")
         self.period = max(self.period, saved['period_seconds'])
+        if self.requested_angular_speed is not None:
+            if (self.plane != 'XY'
+                    or self.requested_angular_speed > profile['max_circle_angular_speed_deg_s']
+                    or not math.isclose(saved['period_seconds'],
+                                        360/self.requested_angular_speed, abs_tol=1e-9)):
+                raise ValueError('circle angular speed or period exceeds the reviewed profile')
+            self.period = saved['period_seconds']
         if self.ramp_seconds > self.period:
             raise ValueError('circle ramp cannot exceed the lap period')
         if (self.plane not in ('XY', 'XZ')
@@ -101,6 +124,33 @@ class Circle:
                    for left, right in zip(self.points, self.points[1:])
                    for a, b in zip(left, right))
         self.planned_peak_speed = peak
+        if (self.requested_angular_speed is not None
+                and peak > self.motion_budget['max_joint_speed_rad_s']):
+            raise ValueError('circle exceeds the shared joint speed budget')
+
+    def check_motion_budget(self, initial):
+        """Check the actual sampled entry/ramp/lap commands before any enable."""
+        if self.requested_angular_speed is None:
+            return None
+        trial = copy(self)
+        trial.start(initial, 0, laps=1)
+        duration = trial.entry_seconds + trial.period + trial.ramp_seconds
+        dt = 1/self.control_hz
+        previous = list(initial)
+        velocity = [0.]*len(JOINTS)
+        peak_speed = peak_acceleration = 0.
+        for tick in range(1, math.ceil(duration/dt)+2):
+            target = trial.sample(tick*dt)
+            updated = [(b-a)/dt for a, b in zip(previous, target)]
+            peak_speed = max(peak_speed, *(abs(v) for v in updated))
+            peak_acceleration = max(peak_acceleration, *(abs(b-a)/dt
+                                    for a, b in zip(velocity, updated)))
+            previous, velocity = target, updated
+        if (peak_speed > self.motion_budget['max_joint_speed_rad_s']
+                or peak_acceleration > self.motion_budget['max_joint_acceleration_rad_s2']):
+            raise ValueError('circle entry/ramp exceeds the shared speed/acceleration budget')
+        return {'peak_joint_speed_rad_s': peak_speed,
+                'peak_control_frame_acceleration_rad_s2': peak_acceleration}
 
     @property
     def active(self):
@@ -172,6 +222,9 @@ class Circle:
         if (not isinstance(initial, list) or len(initial) != len(JOINTS)
                 or any(type(v) not in (int, float) or not math.isfinite(v) for v in initial)):
             raise ValueError("invalid local circle entry pose")
+        self.check_motion_budget(initial)
+        if control.position_feedback.profile != self.feedback_profile:
+            raise ValueError('circle controller differs from the reviewed profile')
         for q in self.points:
             for joint, angle in zip(JOINTS, q):
                 low, high = control.limits[joint]
@@ -205,6 +258,9 @@ class Circle:
     def status(self, now=None):
         return {"phase": self.phase, "radius_m": self.radius,
                 "plane": self.plane, "center_m": self.center,
+                'controller_profile': self.feedback_profile['name'],
+                'angular_speed_deg_s': 360/self.period,
+                'motion_budget': self.motion_budget,
                 "period_seconds": self.period, "max_speed_rad_s": None,
                 "entry_planned_speed_rad_s": self.entry_speed,
                 "planned_peak_speed_rad_s": self.planned_peak_speed,

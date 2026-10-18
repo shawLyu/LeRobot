@@ -3,6 +3,7 @@
 import argparse
 import json
 import queue
+import signal
 import threading
 import time
 from contextlib import ExitStack
@@ -19,6 +20,7 @@ from lerobot_arm_control.runtime.common import (
     save_control_trace,
     send,
 )
+from lerobot_arm_control.transport.latest_output import LatestOutput
 from lerobot_arm_control.transport.realtime import (
     JOINTS,
     VERSION,
@@ -39,6 +41,9 @@ def serve(args):
         stack.callback(save_control_events, control_events)
         trace_path = getattr(args, "control_log", None)
         trace_metadata = {}
+        autonomous = getattr(args, 'standalone_circle_validation', None) is not None
+        output_closed = threading.Event() if autonomous else disconnected
+        publish = stack.enter_context(LatestOutput(send, output_closed))
         if trace_path:
             import gc
 
@@ -87,6 +92,12 @@ def serve(args):
                        "homing_offsets": bus.sync_read("Homing_Offset", normalize=False),
                        "phase": bus.sync_read("Phase", normalize=False),
                        "mode": bus.sync_read("Operating_Mode", normalize=False)}
+        if args.circle:
+            from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
+
+            circle = Circle(getattr(args, 'circle_plan', None) or
+                            resource_path('data/trajectories/circle.json'))
+            trace_metadata['plan_sha256'] = circle.plan_hash
         if args.hardware_control:
             from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
             from lerobot_arm_control.control.manual_control import ManualControl
@@ -95,17 +106,15 @@ def serve(args):
             calibration = AngleCalibration(ROOT / "data/calibration/follower_mujoco.json",
                                            identity)
             controller = ManualControl(bus, calibration, limits,
-                                       rest_path=ROOT / "data/calibration/follower_rest.json")
+                                       rest_path=ROOT / "data/calibration/follower_rest.json",
+                                       feedback_profile=circle.feedback_profile if circle else None)
+            trace_metadata['position_feedback_profile'] = controller.position_feedback.profile
+            trace_metadata['joint_calibration_sha256'] = file_digest(calibration.path)
             defer_cyclic_gc(stack)
             stack.callback(controller.close)
-        if args.circle:
-            from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
-
-            circle = Circle(getattr(args, 'circle_plan', None) or
-                            resource_path('data/trajectories/circle.json'))
-            if controller:
-                controller.trajectory = circle
-        send({"type": "hello", "backend": "hardware", "joints": JOINTS,
+        if circle and controller:
+            controller.trajectory = circle
+        publish({"type": "hello", "backend": "hardware", "joints": JOINTS,
               "control_config_sha256": CONTROL_CONFIG_SHA256,
               "units": "radians" if ranges else "encoder_ticks", "ranges": ranges,
               "raw_limits": limits, "hardware_motion_enabled": args.allow_gripper,
@@ -124,8 +133,17 @@ def serve(args):
                                  if controller else None),
               "hz": args.hz, "control_hz": (circle.control_hz if circle else
                                             CONTROL_HZ if controller else None),
-              "circle_available": circle is not None})
-        threading.Thread(target=receive, args=(commands, disconnected), daemon=True).start()
+              "circle_available": circle is not None, 'autonomous_circle': autonomous})
+        input_closed = threading.Event() if autonomous else disconnected
+        threading.Thread(target=receive, args=(commands, input_closed), daemon=True).start()
+        if autonomous:
+            validation = json.loads(Path(args.standalone_circle_validation).read_text())
+            controller.heartbeat()
+            circle.start_hardware(controller, validation, laps=args.circle_laps)
+            autonomous_deadline = (controller.clock()+circle.entry_seconds
+                                   +circle.period*args.circle_laps+circle.ramp_seconds+5)
+            trace_metadata['autonomous_circle'] = True
+            trace_metadata['entry_validation'] = validation
         sequence = 0
         control_cycles = 0
         next_state = next_control = time.monotonic()
@@ -156,13 +174,16 @@ def serve(args):
                       "status": int(telemetry["Status"]["gripper"]),
                       "torque": int(telemetry["Torque_Enable"]["gripper"])}
             feedback.append(sample)
-            send({"type": "state", "seq": sequence, "time_unix_ns": time.time_ns(),
+            publish({"type": "state", "seq": sequence, "time_unix_ns": time.time_ns(),
                   "raw": {name: int(raw[name]) for name in JOINTS},
                   "telemetry": telemetry, "gripper_verification": sample})
             sequence += 1
 
         while not disconnected.is_set():
             now = time.monotonic()
+            if autonomous and now > autonomous_deadline:
+                controller.stop('finite circle deadline: hold')
+                break
             while not commands.empty():
                 received, command = commands.get_nowait()
                 command_id = command.get("id") if isinstance(command, dict) else None
@@ -173,6 +194,8 @@ def serve(args):
                     if now - received > WATCHDOG_SECONDS:
                         raise ValueError("stale command")
                     operation = command.get("op")
+                    if autonomous and operation not in ('ping', 'hold'):
+                        raise ValueError('finite remote circle accepts only hold or ping')
                     result = None
                     if (controller and controller.trajectory and controller.trajectory.active
                             and operation in ('circle_start', 'joint_path_start')):
@@ -267,7 +290,7 @@ def serve(args):
                             result = {"preview": True, **plan}
                     else:
                         raise ValueError("operation unavailable for this backend")
-                    send({"type": "ack", "id": command_id, "op": operation,
+                    publish({"type": "ack", "id": command_id, "op": operation,
                           "ok": True, "result": result})
                 except (ValueError, RuntimeError, TimeoutError) as exc:
                     message = {"type": "ack", "id": command_id,
@@ -283,7 +306,7 @@ def serve(args):
                             diagnostics["final_state_error"] = str(cleanup_error)
                         message["diagnostics"] = diagnostics
                         save_verification(message)
-                    send(message)
+                    publish(message)
             now = time.monotonic()
             if controller and now >= next_control:
                 from lerobot_arm_control.control.servo_feedback import read_control_feedback
@@ -292,6 +315,13 @@ def serve(args):
                 telemetry = read_control_feedback(bus)
                 read_finished = time.monotonic()
                 raw = telemetry.pop("Present_Position")
+                if (autonomous and controller.initialized
+                        and read_finished-controller.last_tick > WATCHDOG_SECONDS):
+                    controller.stop('control feedback deadline: hold')
+                if autonomous and circle.active:
+                    # Only this explicitly accepted finite remote plan owns the
+                    # reference. A slow observer cannot pause its control clock.
+                    controller.heartbeat()
                 controller.step(raw, telemetry)
                 write_finished = time.monotonic()
                 if trace_path:
@@ -323,7 +353,7 @@ def serve(args):
                 next_control = next_deadline(next_control, time.monotonic(), 1 / CONTROL_HZ)
                 if trace_path:
                     trace[-1]["processing_ms"] = (time.monotonic() - read_started) * 1000
-            if now >= next_state:
+            if now >= next_state or autonomous and not circle.active:
                 if controller:
                     # Sync writes have no per-motor ACK. Record the actual RAM goal,
                     # rather than treating the last transmitted value as delivery proof.
@@ -338,12 +368,14 @@ def serve(args):
                         }
                     state = {"raw": {name: int(raw[name]) for name in JOINTS},
                              "telemetry": telemetry}
-                send({"type": "state", "seq": sequence, "time_unix_ns": time.time_ns(),
+                publish({"type": "state", "seq": sequence, "time_unix_ns": time.time_ns(),
                       **state, "circle": circle.status(time.monotonic()) if circle else None,
                       'joint_path': joint_path.status() if joint_path else None,
                       "control_cycles": control_cycles})
                 sequence += 1
                 next_state = next_deadline(next_state, time.monotonic(), 1 / args.hz)
+            if autonomous and not circle.active:
+                break
             time.sleep(0.001)
 
 
@@ -357,9 +389,12 @@ def main():
     parser.add_argument("--hardware-control", action="store_true",
                         help="Calibrated, slow manual control; joints enabled individually")
     parser.add_argument("--circle", action="store_true",
-                        help="Load the validated circle; requires explicit circle_start trigger")
+                        help="Load a circle; start via circle_start or a bound standalone proof")
     parser.add_argument('--circle-plan', type=Path,
                         help='Reviewed circle plan; slower plan timing is retained')
+    parser.add_argument('--standalone-circle-validation', type=Path,
+                        help='Run a finite remotely owned circle using this bound local proof')
+    parser.add_argument('--circle-laps', type=int, default=1)
     parser.add_argument("--control-log", type=Path,
                         help="Retain up to ten minutes of full-rate feedback; write on exit")
     args = parser.parse_args()
@@ -371,9 +406,15 @@ def main():
         parser.error("circle requires calibrated hardware control and local validation")
     if args.circle_plan and not args.circle:
         parser.error('--circle-plan requires --circle')
+    if args.standalone_circle_validation and (not args.circle or not 1 <= args.circle_laps <= 5):
+        parser.error('standalone circle requires --circle and 1..5 finite laps')
     if args.control_log and not args.hardware_control:
         parser.error("--control-log requires hardware control")
     try:
+        from lerobot_arm_control.core.processes import interrupt
+
+        for signum in (signal.SIGTERM, signal.SIGHUP):
+            signal.signal(signum, interrupt)
         serve(args)
     except (BrokenPipeError, KeyboardInterrupt):
         pass

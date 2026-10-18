@@ -243,6 +243,11 @@ The follower terminal accepts `h` + Enter to hold, `e` + Enter to resume and
 `q` + Enter to hold and quit. Use `--start-held` to start without automatic following.
 See [Follow](docs/follow.md) and [Hardware control](docs/real-control.md).
 
+For the reviewed horizontal 8 cm circle, see [circle execution and response plots](docs/circle-trajectory.md).
+Its explicit free-space profile targets 60°/s circle speed with gradual startup
+and braking. The saved absolute scene requires matching device calibration and
+fresh workspace validation; it is not a generic motion test for a new robot.
+
 Tabletop planning uses locally reconstructed camera observations:
 
 ```bash

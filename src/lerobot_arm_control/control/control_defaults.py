@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from copy import deepcopy
 
 from lerobot_arm_control.core.paths import resource_path
 
@@ -13,6 +14,12 @@ if CONTROL.get("version") != 1:
     raise ValueError("invalid shared control configuration")
 DEFAULTS = CONTROL["native_defaults"]
 POSITION_FEEDBACK = CONTROL["position_feedback"]
+CIRCLE_POSITION_FEEDBACK = deepcopy(POSITION_FEEDBACK)
+circle_settings = CONTROL['circle_position_feedback']
+CIRCLE_POSITION_FEEDBACK['name'] = circle_settings['name']
+CIRCLE_POSITION_FEEDBACK['native_stream'].update(circle_settings['native_stream'])
+for joint, settings in circle_settings['joints'].items():
+    CIRCLE_POSITION_FEEDBACK['joints'][joint].update(settings)
 TRAJECTORY = CONTROL["trajectory"]
 SIMULATION_ACTUATOR = CONTROL["simulation_actuator"]
 CONTROL_HZ = DEFAULTS["control_hz"]

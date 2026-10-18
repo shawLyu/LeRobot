@@ -17,7 +17,7 @@
     -0.017,
     0.34
   ],
-  "period_seconds": 60.0,
+  "period_seconds": 6.0,
   "qpos": [
     [
       0.3314721914070658,
@@ -5820,8 +5820,10 @@
   ],
   "scope": "position-only TCP circle; tool inclination is constant relative to base yaw; wrist_roll and gripper fixed",
   "execution_profile": {
-    "entry_speed_rad_s": 0.15,
-    "ramp_seconds": 4
+    "entry_speed_rad_s": 0.1,
+    "ramp_seconds": 6.0,
+    "angular_speed_deg_s": 60.0,
+    "controller_profile": "smooth-circle-v1"
   },
   "scene_clearance_confirmed": true
 }

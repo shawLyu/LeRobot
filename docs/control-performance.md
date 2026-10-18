@@ -1,11 +1,20 @@
 # Control performance and verification
 
 All normal demos use the shared configuration in `configs/control.json`.
-The current controller favors smoothness and reduced overshoot, with no predictive
-velocity lead. The remote computer owns real following; the simulator reads telemetry.
+The default controller favors smoothness and reduced overshoot, with no predictive
+velocity lead. The explicit `smooth-circle-v1` free-space profile adds velocity
+feedforward and reduced acceleration; it uses the same controller implementation.
+The remote computer owns real following; the simulator reads telemetry.
 See [the controller and block diagram](lerobot-control.md).
 
 ## Current evidence and limits
+
+The [8 cm horizontal circle at 60°/s](measurements/table-circle60deg-s-2026-10-18/README.md)
+records real three-lap trials and the operator's accepted start/stop smoothness.
+The selected profile measured 60.06°/s mean phase speed, with remaining instantaneous
+speed ripple, 10.36 mm temporal TCP tracking RMS and 5.53 mm geometric circle RMS.
+These are encoder/CAD estimates. This does not establish optical precision or
+white-to-black arm following performance; joints 5 and 6 were held constant.
 
 The [smoothness report](measurements/follow-smoothing-2026-10-13/README.md) contains
 recorded-input replay, simulated responses and physical six-motor response curves.

@@ -1,64 +1,115 @@
-# Shared circle trajectory
+# Shared circle controller
 
-The absolute joint path is stored in `data/trajectories/circle.json`: a 15 mm Cartesian circle for the SO101 model.
-Path points and model identity come from the accepted trajectory input. The default
-lap takes 16 seconds. A reviewed plan with a longer `period_seconds` keeps that
-slower timing instead of being accelerated to the shared default.
+The six-joint circle, manual control, following and manipulation tasks use the same
+`PositionFeedback` implementation. Parameters live in `configs/control.json`.
+The default `position_feedback` retains the validated contact/following settings.
+`circle_position_feedback` contains overrides for the explicitly selected
+`smooth-circle-v1` profile: bounded PI plus velocity feedforward, reference shaping,
+and reduced native acceleration. High-speed free-space tuning is not silently
+applied to grasping or pushing.
+
+## Horizontal 8 cm circle at 60 degrees/second
+
+The reviewed scene is `data/trajectories/table-circle-8cm.json`: an XY circle with
+radius 0.08 m and center `[0.25, -0.017, 0.34] m` in the follower base frame.
+This is circle phase speed: **60 degrees/second, a six-second steady lap**, and
+8.38 cm/s TCP linear speed. Individual joint velocities are different.
+
+With the matching calibration, empty gripper, inspected clear workspace and
+operator present:
+
+```sh
+./scripts/lerobot-arm verify tracking --execute --from-current --laps 3 \
+  --plan data/trajectories/table-circle-8cm.json
+```
+
+The current plan approaches at no more than 0.1 rad/s, then uses a six-second
+quintic speed ramp at each end. Three complete circles take about **24 seconds**
+after approach: 18 seconds of equivalent full-speed travel plus six seconds of
+ramp overhead. The requested 60 degrees/second applies to the middle portion;
+acceleration and braking deliberately run slower. Native acceleration is 16
+while this profile runs; native PID, origins, EEPROM and protection are unchanged.
+The original native acceleration and goal velocity are restored on close, with
+torque retained for support. Ordinary completion holds at measured position.
+
+The [physical report](measurements/table-circle60deg-s-2026-10-18/README.md)
+records the smoothness/lag tradeoff, including the remaining speed ripple and
+Cartesian tracking errors. This scene requires its own measured robot reference;
+it is not a portable absolute motion command for a differently assembled robot.
+
+## Remote execution and saved responses
+
+`--from-current` reads a fresh remote pose without enabling motion. The local
+computer checks the entire approach, circle geometry, table/self collisions and
+sampled speed/acceleration, then uploads a proof bound to the exact model,
+calibration, plan, configuration and initial pose. The remote computer checks the
+proof, rechecks native limits and timing, and runs **one finite job of 1–5 laps**.
+It generates references, reads encoders and writes motors on its own 60 Hz clock;
+MuJoCo and the simulator are not in the physical control loop.
+
+SSH output runs separately from the control loop. Observer backpressure or input
+EOF does not stall the accepted finite job or its native feedback watchdog. It
+can finish its bounded plan and hold without incoming client pings. A process
+termination signal (including SSH SIGHUP) instead triggers hold and cleanup.
+Local display interruption therefore does not guarantee an immediate stop. The connected client can send `hold`; no additional motion target
+or reset is accepted during this standalone job. Native feedback gaps over the
+watchdog limit, faults, torque loss, motion stalls and the finite execution deadline
+still stop motion. The interactive/manual worker retains its client heartbeat.
+
+After the hardware process closes, the local runner copies its full-rate trace
+and writes:
+
+- `logs/tracking-trial-<stamp>.json`: completion, observed states and report paths.
+- `logs/tracking-trace-<stamp>.json`: every recorded control frame, actual RAM
+  goals, encoder feedback, controller profile and restored native parameters.
+- `logs/circle-response-<stamp>.json/.png`: measured phase speed, TCP errors,
+  vibration residual and trajectory/speed/error plots.
+- `logs/circle-response-<stamp>-joints.png`: six target/encoder curves.
+
+Plotting and scoring happen after motion, locally. TCP values use encoders and
+the calibrated CAD model; they are not independent optical measurements.
+
+## Plan parameters and checks
+
+An optional hashed `execution_profile` can lower `entry_speed_rad_s`, increase
+`ramp_seconds`, explicitly select `controller_profile: "smooth-circle-v1"`, and
+request `angular_speed_deg_s`. An explicit speed requires an XY plan whose
+`period_seconds` equals `360/angular_speed_deg_s`. The shared reviewed maximum
+is 60 degrees/second. Planned joint speed and sampled entry/ramp acceleration
+must also fit the budgets in `configs/control.json`; these checks run on both
+hosts before enable. This budget is not a guarantee of physical tracking accuracy.
+
+An XY plan declares `plane: "XY"`, `table_z_m` in base coordinates and the exact
+`joint_calibration_sha256`. Wrist roll and gripper remain constant during approach
+and playback. Local validation checks the first five CAD joint ranges, self and
+table collisions. Native gripper limits remain authoritative when its measured
+angle exceeds the generic CAD hinge range. `execution_ready: false` prevents a
+candidate from starting. Any model, calibration, plan or control hash change
+requires a new check; entry drift over 0.003 rad also invalidates the proof.
+
+`Link(..., hardware_control=True, circle=True, circle_plan=workspace_plan_path)`
+only loads a plan. Its interactive `circle_start` command requires local collision
+validation. The diagnostic runner additionally supplies `circle_validation` and
+`circle_laps` to launch the remotely owned finite job.
+
+## Original small circle
+
+`data/trajectories/circle.json` retains the 15 mm XZ circle and 16-second default
+lap. Plans without an explicit angular speed keep the slower of their saved period
+and the shared default. Generic simulation and interactive hardware entries:
 
 ```sh
 ./scripts/lerobot-arm view arm --backend mujoco --circle --circle-laps 3
 ./scripts/lerobot-arm view arm --backend hardware --hardware-control --circle --circle-laps 3
 ```
 
-The hardware entry performs Reset first, approaches the original absolute path with quintic interpolation,
-then executes the requested laps and holds. Simulation and hardware share approach speed 0.8 rad/s,
-minimum approach duration 0.35 s, speed ramp 1 s, and 60 Hz updates. Reset retains 0.5 rad/s.
-An optional `execution_profile` in the hashed plan can reduce `entry_speed_rad_s`
-and increase `ramp_seconds`. It cannot accelerate the shared profile.
+The interactive entry uses Reset first; the diagnostic `--from-current` path above
+does not. The stored follower Reset reference predates the current calibration
+and must be retaught before use. Do not bypass its identity rejection.
 
-Locally, the measured remote pose is used to check collisions along the circle and approach segment before sending the result.
-The remote host checks calibrated endpoints, model/trajectory/control hashes, and entry pose.
-A pose change over 0.003 rad requires a new check. Remote playback does not depend on MuJoCo.
-Tracking error and action completion are assessed separately; retired error thresholds do not stop execution.
-Motor faults, lost torque, connection loss, or heartbeat loss still trigger hold.
-Read-only model/unit checks do not cause motion; simulation objects cannot enable hardware control.
-
-See [Control performance](control-performance.md) for the latest physical experiment errors and camera records.
-Physical playback requires separate validation. See [Code layout](code-layout.md) for shared parameters and deployment.
-
-## Reviewed horizontal plans
-
-The programmatic hardware connection accepts `Link(..., hardware_control=True,
-circle=True, circle_plan=workspace_plan_path)`. The same workspace-relative plan
-must be deployed to the remote host. This loads the plan without starting motion;
-an explicit `circle_start` command is still required. This direct path approaches
-the measured current pose without invoking Reset.
-
-The diagnostic runner uses the same path and saves all observed states:
-
-```sh
-PYTHONPATH=src python -m lerobot_arm_control.diagnostics.circle_tracking \
-  --execute --from-current --laps 1 --plan data/trajectories/table-circle-8cm.json
-```
-
-This command requires the matching reviewed plan and calibration on both hosts,
-an empty gripper and an observed, cleared scene. It does not generate a new plan
-or waive any identity, collision, native limit or fault check.
-
-An XY plan declares `plane: "XY"`, `table_z_m` in base coordinates and the exact
-`joint_calibration_sha256`. Wrist roll and gripper remain constant, including
-during approach. Local validation checks the Cartesian radius and plane, the
-first five CAD joint ranges, self collisions and table collisions. Gripper native
-limits remain authoritative when its measured angle exceeds the generic CAD
-hinge range. All six calibrated command limits are checked remotely before enable.
-`execution_ready: false` prevents a candidate from starting on hardware.
-
-`migrate_sts3215_reference` is an explicit software-only reference conversion,
-using the installed LeRobot Feetech identity
-`Present_Position = Actual_Position - Homing_Offset`. It requires confirmation of
-unchanged assembly and rejects device, phase, mode or model changes and encoder
-wrap. It preserves the measured scale and independent third-point error, records
-the old fingerprint and writes no motor registers. The ordinary calibration loader
-still rejects any fingerprint mismatch. Reviewed command envelopes and plans must
-be rebound to the resulting file hash; old rest poses and kinematic corrections
-remain invalid until separately reviewed or retaught.
+`migrate_sts3215_reference` is an explicit software-only reference conversion using
+`Present_Position = Actual_Position - Homing_Offset`. It requires confirmed unchanged
+assembly and rejects device, phase, mode or model changes and encoder wrap. It
+preserves measured scale/third-point error, retains the old fingerprint and writes
+no motor registers. Command envelopes and plans must be rebound to the new hash;
+old rest poses and kinematic corrections remain invalid until separately reviewed.

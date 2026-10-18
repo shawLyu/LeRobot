@@ -1,4 +1,4 @@
-"""Observed hardware trial: Reset first, finite circle, hold, retain every state.
+"""Observed finite hardware circle, hold, retain feedback and response figures.
 
 This script does not change native motor PID or protection settings. Accuracy
 metrics assess the completed experiment; ordinary tracking error never aborts it.
@@ -14,15 +14,45 @@ import mujoco
 import numpy as np
 
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
-from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
-from lerobot_arm_control.core.files import file_digest
-from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
+from lerobot_arm_control.core.files import atomic_json, file_digest
+from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments, remote_runtime
 from lerobot_arm_control.runtime.realtime_client import Link
 from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 from lerobot_arm_control.transport.realtime import JOINTS, checked_command
 
 ROOT = workspace_root()
+
+
+def prepare_remote_entry(remote, plan_path, stamp):
+    """Read without enabling, check the full approach, then upload the bound proof."""
+    from lerobot_arm_control.planning.circle_simulation import validate_hardware_entry
+
+    reader = Link(remote.host, remote.root, 'hardware')
+    try:
+        deadline = time.monotonic()+15
+        while True:
+            hello, state, received, *_ = reader.snapshot()
+            if reader.error or reader.process.poll() is not None:
+                raise RuntimeError(reader.error or 'read-only worker exited')
+            if hello and state and time.monotonic()-received < .5:
+                break
+            if time.monotonic() > deadline:
+                raise TimeoutError('no fresh read-only entry feedback')
+            time.sleep(.01)
+        identity = {**hello['fingerprint'], 'model': 'so101',
+                    'mjcf_sha256': file_digest(resource_path('assets/so101/so101.xml'))}
+        calibration = AngleCalibration(ROOT/'data/calibration/follower_mujoco.json', identity)
+        circle = Circle() if plan_path is None else Circle(plan_path)
+        validation = validate_hardware_entry(circle, calibration.angles(state['raw'], [0.]*6))
+        path = ROOT/'logs'/f'circle-validation-{stamp}.json'
+        atomic_json(path, validation)
+    finally:
+        reader.close()
+    subprocess.run(['scp', str(path), f'{remote.host}:{remote.root}/logs/{path.name}'],
+                   check=True, timeout=20)
+    return path
 
 
 def measure(proof, plan_path=None):
@@ -68,14 +98,19 @@ def measure(proof, plan_path=None):
 def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
     remote = remote_runtime(host, remote_root)
     stamp = time.time_ns()
+    circle = Circle() if plan_path is None else Circle(plan_path)
     proof = {"completed": False, "samples": [], "acks": [], "laps": laps,
-             "profile": POSITION_FEEDBACK, "control_config_sha256": CONTROL_CONFIG_SHA256,
+             "profile": circle.feedback_profile, "control_config_sha256": CONTROL_CONFIG_SHA256,
              'reset_first': reset,
-             'plan_sha256': (Circle().plan_hash if plan_path is None else file_digest(plan_path))}
+             'plan_sha256': circle.plan_hash}
     trace_name = f"tracking-trace-{stamp}.json"
     remote_trace = f"{remote.root}/logs/{trace_name}"
+    autonomous = not reset
+    validation_path = prepare_remote_entry(remote, plan_path, stamp) if autonomous else None
+    proof['autonomous_remote_circle'] = autonomous
     link = Link(remote.host, remote.root, "hardware", hardware_control=True,
-                circle=True, control_log=remote_trace, circle_plan=plan_path)
+                circle=True, control_log=remote_trace, circle_plan=plan_path,
+                circle_validation=validation_path, circle_laps=laps)
     last_seq = None
     last_ping = 0
     last_report = 0
@@ -83,14 +118,21 @@ def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
     def observe():
         nonlocal last_seq, last_ping, last_report
         _, state, received, _, _ = link.snapshot()
+        if autonomous and link.process.poll() is not None:
+            link.reader.join(timeout=1)
+            _, state, received, *_ = link.snapshot()
+            if state and state['circle']['phase'] == 'completed':
+                return state
         if link.error or link.process.poll() is not None:
             raise RuntimeError(link.error or "hardware worker exited")
-        if state is not None and time.monotonic() - last_ping > 0.1:
+        if not autonomous and state is not None and time.monotonic() - last_ping > 0.1:
             link.send("ping")
             last_ping = time.monotonic()
         if state is None:
             return None
         if time.monotonic() - received > 0.5:
+            if autonomous:
+                return None  # Finite remote motion and fault checks own their clock.
             raise RuntimeError("stale remote feedback")
         if state["seq"] != last_seq:
             proof["samples"].append(state)
@@ -135,11 +177,15 @@ def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
                 time.sleep(0.01)
             else:
                 raise TimeoutError("Reset did not settle; circle was not started")
-        result = command("circle_start", laps=laps)
-        print("Circle started", flush=True)
+        result = (link.snapshot()[1]['circle'] if autonomous else
+                  command("circle_start", laps=laps))
+        print('Remote finite circle started' if autonomous else 'Circle started', flush=True)
         deadline = time.monotonic() + result["entry_seconds"] + laps * result["period_seconds"] + 15
         while time.monotonic() < deadline:
             state = observe()
+            if state is None:
+                time.sleep(.01)
+                continue
             if state["circle"]["phase"] == "completed":
                 proof["completed"] = True
                 break
@@ -153,7 +199,8 @@ def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
         proof["error"] = str(exc) or type(exc).__name__
     finally:
         try:
-            if link.process.poll() is None and link.latest is not None:
+            if (link.process.poll() is None and link.latest is not None
+                    and not (autonomous and proof['completed'])):
                 command("hold")
                 proof["final_state"] = link.snapshot()[1]
         except Exception as exc:
@@ -167,10 +214,25 @@ def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
                 proof["control_trace"] = str(ROOT / "logs" / trace_name)
             except Exception as exc:
                 proof["trace_copy_error"] = str(exc)
+            if proof['completed'] and proof.get('control_trace'):
+                try:
+                    from lerobot_arm_control.diagnostics.circle_response import response_report
+                    from lerobot_arm_control.tasks.circle.circle_trajectory import PLAN
+
+                    output = ROOT/'logs'/f'circle-response-{stamp}'
+                    report = response_report(proof['control_trace'], plan_path or PLAN, output)
+                    proof['response_report'] = str(output.with_suffix('.json'))
+                    proof['full_rate_metrics'] = {key: report[key] for key in (
+                        'steady_phase_fit_speed_deg_s', 'circle_rms_mm', 'circle_max_mm',
+                        'tracking_rms_mm', 'tracking_max_mm', 'tcp_hf_error_rms_mm')}
+                except Exception as exc:
+                    proof['response_report_error'] = str(exc)
             path = ROOT / f"logs/tracking-trial-{stamp}.json"
             path.write_text(json.dumps(proof, indent=2) + "\n")
             summary = {k: v for k, v in proof.items()
-                       if k in ("completed", "error", "metrics", "cleanup_error")}
+                       if k in ("completed", "error", "metrics", "cleanup_error",
+                                'full_rate_metrics', 'response_report', 'response_report_error',
+                                'trace_copy_error')}
             print(json.dumps(summary | {"proof": str(path)}), flush=True)
     return proof["completed"]
 

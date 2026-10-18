@@ -32,7 +32,7 @@ def test_shared_pid_enables_unlocked_servos_without_p_or_eeprom_writes():
     control.enable_all()
     assert control.enabled == set(JOINTS)
     assert not control.stopped
-    assert control.status()['controller_profile'] == CONTROL['name']
+    assert control.status()['controller_profile'] == CONTROL['position_feedback']['name']
     assert {register for register, _, _ in bus.writes} == {
         'Goal_Position', 'Torque_Enable', 'Acceleration', 'Goal_Velocity'}
     for index, joint in enumerate(JOINTS):
@@ -56,10 +56,13 @@ def test_shared_pid_enables_unlocked_servos_without_p_or_eeprom_writes():
 
 
 def test_enable_replaces_stale_goal_before_torque_and_only_selected_joint(setup):
+    from lerobot_arm_control.control.control_defaults import POSITION_FEEDBACK
+
     bus, control, _ = setup
     control.enable("gripper")
     assert bus.writes == [("Goal_Position", "gripper", 2200),
-                          ("Acceleration", "gripper", 254),
+                          ("Acceleration", "gripper",
+                           POSITION_FEEDBACK['native_stream']['acceleration']),
                           ("Goal_Velocity", "gripper", 1000), ("Torque_Enable", "gripper", 1)]
     assert control.status()["enabled"] == ["gripper"]
     assert control.status()["error_rad"]["gripper"] == 0

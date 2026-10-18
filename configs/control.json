@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "name": "shared-joint-pid-v1",
+  "name": "shared-joint-pid-v2",
   "native_defaults": {
     "source": "installed lerobot 0.6.1 SOFollowerConfig and TeleoperateConfig",
     "control_hz": 60,
@@ -123,7 +123,10 @@
     "ramp_seconds": 1.0,
     "control_hz": 60,
     "reset_speed_rad_s": 0.5,
-    "period_seconds": 16.0
+    "period_seconds": 16.0,
+    "max_circle_angular_speed_deg_s": 60.0,
+    "max_circle_joint_speed_rad_s": 1.0471975511965976,
+    "max_circle_joint_acceleration_rad_s2": 3.490658503988659
   },
   "gripper_contact": {
     "minimum_load_raw": 100,
@@ -176,5 +179,56 @@
     "kp": 700.0,
     "kv": 56.0,
     "scope": "MuJoCo native position-loop approximation (80 ms effective lag); not hardware register values"
+  },
+  "circle_position_feedback": {
+    "name": "smooth-circle-v1",
+    "native_stream": {
+      "acceleration": 16,
+      "velocity_ticks_s": 3000
+    },
+    "joints": {
+      "shoulder_pan": {
+        "kp": 0.08,
+        "ki": 0.4,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.12,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "shoulder_lift": {
+        "kp": 0.06,
+        "ki": 0.3,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.135,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "elbow_flex": {
+        "kp": 0.08,
+        "ki": 0.4,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.12,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "wrist_flex": {
+        "kp": 0.06,
+        "ki": 0.3,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.115,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      }
+    }
   }
 }

@@ -13,7 +13,8 @@ from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.tasks.circle.circle_trajectory import PLAN, ROOT, Circle, load_profile
 
 
-def check_path(model, points, *, allow_start_tolerance=False, check_joint_limits=True):
+def check_path(model, points, *, allow_start_tolerance=False, check_joint_limits=True,
+               joint_indices=None):
     import mujoco
     import numpy as np
 
@@ -21,7 +22,9 @@ def check_path(model, points, *, allow_start_tolerance=False, check_joint_limits
     for index, q in enumerate(points):
         margin = -math.radians(2) if allow_start_tolerance else math.radians(2)
         low, high = model.jnt_range[:, 0] + margin, model.jnt_range[:, 1] - margin
-        if check_joint_limits and (np.any(np.asarray(q) < low) or np.any(np.asarray(q) > high)):
+        selected = slice(None) if joint_indices is None else list(joint_indices)
+        if check_joint_limits and (np.any(np.asarray(q)[selected] < low[selected])
+                                   or np.any(np.asarray(q)[selected] > high[selected])):
             raise ValueError(f"trajectory joint limit at sample {index}")
         data.qpos[:] = q
         mujoco.mj_forward(model, data)
@@ -38,12 +41,36 @@ def validate_hardware_entry(circle, initial):
     """Return the local collision check result bound to the exact entry and shared files."""
     import mujoco
 
-    model = mujoco.MjModel.from_xml_path(str(resource_path('assets/so101/so101.xml')))
-    check_path(model, circle.points, check_joint_limits=False)
-    check_path(model, entry_points(initial, circle.points[0]), check_joint_limits=False)
+    model = collision_model(circle)
+    if circle.plane == 'XY' and max(abs(a-b) for a, b in zip(
+            initial[4:], circle.points[0][4:])) > .003:
+        raise ValueError('horizontal circle must hold the observed wrist roll and gripper')
+    options = ({'joint_indices': range(5)} if circle.plane == 'XY'
+               else {'check_joint_limits': False})
+    check_path(model, circle.points, **options)
+    check_path(model, entry_points(initial, circle.points[0]), **options)
+    data = mujoco.MjData(model)
+    axes, normal = ((0, 1), 2) if circle.plane == 'XY' else ((0, 2), 1)
+    for q in circle.points:
+        data.qpos[:] = q
+        mujoco.mj_forward(model, data)
+        delta = data.site('gripperframe').xpos - circle.center
+        radial = math.hypot(*(delta[i] for i in axes))
+        if math.hypot(radial-circle.radius, delta[normal]) > .0001:
+            raise ValueError('circle samples do not match the requested Cartesian geometry')
     return {"checked": True, "initial_qpos": list(initial),
             "model_sha256": circle.model_hash, "plan_sha256": circle.plan_hash,
             "control_config_sha256": circle.profile_hash}
+
+
+def collision_model(circle):
+    import mujoco
+
+    scene = 'scene_mujoco.xml' if circle.plane == 'XY' else 'so101.xml'
+    model = mujoco.MjModel.from_xml_path(str(resource_path('assets/so101/'+scene)))
+    if circle.plane == 'XY':
+        model.geom_pos[model.geom('floor').id, 2] = circle.table_z
+    return model
 
 
 def generate(path):
@@ -121,9 +148,10 @@ def verify(model, path, report_path, *, simulation=False):
             position = data.site("gripperframe").xpos
             tracking.append(float(np.linalg.norm(position - reference.site("gripperframe").xpos)))
             joint_tracking.append(float(np.max(np.abs(data.qpos - reference.qpos))))
-            radial = np.linalg.norm((position - circle.center)[[0, 2]])
+            axes, normal = ((0, 1), 2) if circle.plane == 'XY' else ((0, 2), 1)
+            radial = np.linalg.norm((position - circle.center)[list(axes)])
             errors.append(float(np.hypot(radial - circle.radius,
-                                         position[1] - circle.center[1])))
+                                         position[normal] - circle.center[normal])))
             speed.append(float(np.max(np.abs(data.qvel))))
             penetrating += sum(c.dist < -0.001 for c in data.contact)
     result = {"duration_sim_seconds": data.time, "steps": steps,

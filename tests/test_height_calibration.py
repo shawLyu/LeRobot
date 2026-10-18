@@ -252,10 +252,11 @@ def test_offline_simulation_uses_corrected_encoder_limits(measured, tmp_path):
 def test_native_resolution_corrects_real_contact_data_with_independent_validation(tmp_path):
     path = Path(__file__).parent/'fixtures/height-first-round-samples.json'
     samples = json.loads(path.read_text())['samples']
-    # Historical measurements retain their original base, independent of live recalibration.
+    # Historical measurements retain both original references, independent of live changes.
+    angles = ANGLES.parents[1]/'push_t/measured/joint_calibration.json'
     base = tmp_path/BASE.name
     base.write_text(json.dumps(samples[0]['base_calibration'], indent=2)+'\n')
-    candidate = fit_samples(samples, base_path=base, native_pitch_scale=True)
+    candidate = fit_samples(samples, angles_path=angles, base_path=base, native_pitch_scale=True)
     assert candidate['method'] == NATIVE_HEIGHT_METHOD
     assert candidate['source_indices'] == [0, 1, 3, 5, 7, 8, 9]
     assert candidate['sample_count'] == 7
@@ -265,7 +266,7 @@ def test_native_resolution_corrects_real_contact_data_with_independent_validatio
     assert candidate['validation']['training_rmse_m'] < .001
     assert candidate['validation']['held_out_max_m'] < .0015
     with pytest.raises(ValueError, match='7 known'):
-        fit_samples(samples[:6], base_path=base, native_pitch_scale=True)
+        fit_samples(samples[:6], angles_path=angles, base_path=base, native_pitch_scale=True)
 
 
 def test_native_scale_changes_only_pitch_axes_and_keeps_the_motor_inverse_consistent(measured):

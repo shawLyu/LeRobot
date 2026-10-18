@@ -64,6 +64,7 @@ configs/*.local.*
 !/data/trajectories/
 /data/trajectories/*
 !/data/trajectories/circle.json
+!/data/trajectories/table-circle-8cm.json
 !/data/tabletop/
 /data/tabletop/*
 !/data/tabletop/static_map.json

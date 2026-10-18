@@ -59,6 +59,48 @@ def test_backends_share_timing_but_simulation_instance_cannot_enable_hardware():
         assert simulation.sample(now) == hardware.sample(now)
 
 
+def test_reviewed_plan_keeps_slower_timing_and_smooth_finite_stop(tmp_path):
+    source = ROOT / 'data/trajectories/circle.json'
+    saved = json.loads(source.read_text())
+    saved['period_seconds'] = 60
+    saved['execution_profile'] = {'entry_speed_rad_s': .15, 'ramp_seconds': 4}
+    path = tmp_path/'slow.json'
+    path.write_text(json.dumps(saved))
+    circle = Circle(path)
+    assert circle.period == 60 and circle.entry_speed == .15 and circle.ramp_seconds == 4
+    assert circle.planned_peak_speed == pytest.approx(Circle().planned_peak_speed*16/60)
+    initial = list(circle.points[0])
+    initial[0] += .2
+    circle.start(initial, 0, laps=1)
+    end = circle.entry_seconds + circle.period + circle.ramp_seconds
+    assert circle.sample(end) == pytest.approx(circle.points[0], abs=1e-10)
+    assert circle.phase == 'completed'
+
+
+@pytest.mark.parametrize('timing', [
+    {'entry_speed_rad_s': 1}, {'ramp_seconds': .5},
+    {'entry_speed_rad_s': math.nan}, {'ramp_seconds': True}, {'unknown': 1},
+    {'ramp_seconds': 17},
+])
+def test_plan_cannot_accelerate_or_corrupt_shared_timing(tmp_path, timing):
+    saved = json.loads((ROOT/'data/trajectories/circle.json').read_text())
+    saved['execution_profile'] = timing
+    path = tmp_path/'invalid.json'
+    path.write_text(json.dumps(saved))
+    with pytest.raises(ValueError):
+        Circle(path)
+
+
+def test_changed_cartesian_claim_is_rejected_by_local_geometry_validation(tmp_path):
+    saved = json.loads((ROOT/'data/trajectories/circle.json').read_text())
+    saved['radius_m'] = .08
+    path = tmp_path/'incorrect-radius.json'
+    path.write_text(json.dumps(saved))
+    circle = Circle(path)
+    with pytest.raises(ValueError, match='Cartesian geometry'):
+        validate_hardware_entry(circle, circle.points[0])
+
+
 def test_shared_profile_preserves_closed_smooth_path():
     simulation = Circle(simulation=True)
     hardware = Circle()

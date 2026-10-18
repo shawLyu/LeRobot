@@ -47,8 +47,34 @@ class Circle:
         self.model_hash = saved["model_sha256"]
         self.points = saved["qpos"]
         self.period = profile["period_seconds"]
+        # A reviewed plan may slow the shared controller; it cannot request a
+        # faster entry, faster lap or shorter acceleration ramp.
+        timing = saved.get('execution_profile', {})
+        if (not isinstance(timing, dict)
+                or set(timing) - {'entry_speed_rad_s', 'ramp_seconds'}):
+            raise ValueError('invalid circle execution profile')
+        for key, value in timing.items():
+            if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
+                raise ValueError('invalid circle execution profile')
+        if (timing.get('entry_speed_rad_s', self.entry_speed) > self.entry_speed
+                or timing.get('ramp_seconds', self.ramp_seconds) < self.ramp_seconds):
+            raise ValueError('circle plan may only slow the shared profile')
+        self.entry_speed = timing.get('entry_speed_rad_s', self.entry_speed)
+        self.ramp_seconds = timing.get('ramp_seconds', self.ramp_seconds)
+        self.plane = saved.get('plane', 'XZ')
+        self.table_z = saved.get('table_z_m')
+        self.calibration_hash = saved.get('joint_calibration_sha256')
+        self.execution_ready = saved.get('execution_ready', True)
+        if type(self.execution_ready) is not bool:
+            raise ValueError('invalid circle execution readiness')
         self.center = saved["center_m"]
         self.radius = saved["radius_m"]
+        if (not isinstance(self.center, list) or len(self.center) != 3
+                or any(type(v) not in (int, float) or not math.isfinite(v)
+                       for v in self.center)
+                or type(self.radius) not in (int, float)
+                or not math.isfinite(self.radius) or not 0 < self.radius < 1):
+            raise ValueError('invalid circle geometry')
         self.phase = "ready"
         self.started = None
         if (type(saved["period_seconds"]) not in (int, float)
@@ -60,6 +86,17 @@ class Circle:
             raise ValueError("invalid circle samples")
         if self.points[0] != self.points[-1]:
             raise ValueError("circle must close")
+        self.period = max(self.period, saved['period_seconds'])
+        if self.ramp_seconds > self.period:
+            raise ValueError('circle ramp cannot exceed the lap period')
+        if (self.plane not in ('XY', 'XZ')
+                or self.plane == 'XY' and (
+                    type(self.table_z) not in (int, float)
+                    or not math.isfinite(self.table_z) or not -.05 <= self.table_z <= 0
+                    or not isinstance(self.calibration_hash, str)
+                    or len(self.calibration_hash) != 64
+                    or any(q[4:] != self.points[0][4:] for q in self.points))):
+            raise ValueError('horizontal circle requires a table plane in base coordinates')
         peak = max(abs(b - a) * (len(self.points) - 1) / self.period
                    for left, right in zip(self.points, self.points[1:])
                    for a, b in zip(left, right))
@@ -119,8 +156,13 @@ class Circle:
         self.validate_laps(laps)
         if self.simulation:
             raise ValueError("simulation speed profile cannot control hardware")
+        if not self.execution_ready:
+            raise ValueError('candidate circle has not been cleared for hardware execution')
         if control.parking.busy or self.active:
             raise ValueError("another automatic motion is running")
+        if (self.calibration_hash is not None
+                and file_digest(control.calibration.path) != self.calibration_hash):
+            raise ValueError('circle joint calibration changed; replan and validate again')
         if (not isinstance(validation, dict) or validation.get("checked") is not True
                 or validation.get("model_sha256") != self.model_hash
                 or validation.get("plan_sha256") != self.plan_hash
@@ -162,6 +204,7 @@ class Circle:
 
     def status(self, now=None):
         return {"phase": self.phase, "radius_m": self.radius,
+                "plane": self.plane, "center_m": self.center,
                 "period_seconds": self.period, "max_speed_rad_s": None,
                 "entry_planned_speed_rad_s": self.entry_speed,
                 "planned_peak_speed_rad_s": self.planned_peak_speed,

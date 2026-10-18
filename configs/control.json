@@ -142,12 +142,34 @@
   "hardware_command_envelopes": [
     {
       "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
-      "calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+      "calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
       "raw_limits": {
-        "wrist_flex": [862, 2920],
-        "gripper": [1479, 2982]
+        "shoulder_pan": [
+          860,
+          3318
+        ],
+        "shoulder_lift": [
+          857,
+          3209
+        ],
+        "elbow_flex": [
+          905,
+          3079
+        ],
+        "wrist_flex": [
+          931,
+          2868
+        ],
+        "wrist_roll": [
+          353,
+          3924
+        ],
+        "gripper": [
+          464,
+          1881
+        ]
       },
-      "source": "2026-10-13 user confirmed wrist_flex mechanical stop at raw 2951-2953; upper command 2920 retains >=31 ticks clearance. Gripper uses confirmed mapped endpoints. EEPROM unchanged."
+      "source": "2026-10-18 user-guided range capture and bounded hardware tests. Software-only Homing_Offset reference translation after confirmation of unchanged assembly and approximate 34 cm live TCP height. EEPROM unchanged."
     }
   ],
   "simulation_actuator": {

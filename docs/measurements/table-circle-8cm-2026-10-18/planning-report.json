@@ -1,0 +1,47 @@
+{
+  "radius_m": 0.08,
+  "center_base_m": [
+    0.25,
+    -0.017,
+    0.34
+  ],
+  "height_above_table_m": 0.3424000017,
+  "period_seconds": 60.0,
+  "tcp_speed_m_s": 0.008377580409572783,
+  "ik_max_error_m": 4.4606318511831564e-11,
+  "encoder_quantization_max_tcp_error_m": 0.0005286068166477736,
+  "minimum_first5_cad_joint_margin_degrees": 13.720517763637051,
+  "minimum_saved_raw_range_margin_ticks": 106,
+  "conservative_collision_geom_table_clearance_m": 0.015110968704780616,
+  "collision_count": 0,
+  "entry_max_joint_change_degrees": 7.476520729829655,
+  "joint_bounds_degrees": [
+    [
+      -14.276041521999014,
+      30.177418779044885
+    ],
+    [
+      -86.27948498688527,
+      5.6457545690950495
+    ],
+    [
+      4.3322895329954765,
+      64.08618551255611
+    ],
+    [
+      -70.16805448154217,
+      -35.10248003875317
+    ],
+    [
+      108.12688821752265,
+      108.12688821752265
+    ],
+    [
+      -84.22459893048128,
+      -84.22459893048128
+    ]
+  ],
+  "planned_peak_joint_speed_rad_s": 0.09115772587907944,
+  "validation_scope": "offline kinematics, sampled CAD collisions at held measured jaw angle and table bounding spheres; not physical measurement or dynamic/hardware validation",
+  "execution_ready": false
+}

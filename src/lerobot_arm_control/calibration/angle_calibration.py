@@ -3,6 +3,7 @@
 import json
 import math
 import statistics
+from copy import deepcopy
 from pathlib import Path
 
 from lerobot_arm_control.core.files import file_digest
@@ -11,6 +12,54 @@ from lerobot_arm_control.transport.realtime import JOINTS
 TICKS_PER_RADIAN = 4096 / (2 * math.pi)
 PITCH_JOINTS = ('shoulder_lift', 'elbow_flex', 'wrist_flex')
 NATIVE_HEIGHT_METHOD = 'fixed_jaw_height_native_pitch_scale'
+
+
+def migrate_sts3215_reference(saved, fingerprint, *, unchanged_assembly_confirmed=False):
+    """Explicit software-only migration; never called by the calibration loader.
+
+    Feetech/LeRobot: Present_Position = Actual_Position - Homing_Offset.
+    Preserve measured angles by translating every reference by old_offset-new_offset.
+    A limit-only update changes no angle; device, direction and model must match.
+    Kinematic corrections bound to the old file still require separate validation.
+    """
+    old = saved.get('fingerprint', {})
+    mutable = {'homing_offsets', 'raw_limits'}
+    if (unchanged_assembly_confirmed is not True or saved.get('version') != 1
+            or old.get('model') != 'so101' or set(old) != set(fingerprint)
+            or any(old[key] != fingerprint[key] for key in old.keys() - mutable)):
+        raise ValueError('reference migration requires unchanged assembly, device and model')
+    for identity in (old, fingerprint):
+        for field in ('homing_offsets', 'raw_limits', 'phase', 'mode'):
+            if set(identity.get(field, {})) != set(JOINTS):
+                raise ValueError('reference migration requires six complete motor references')
+        for joint in JOINTS:
+            offset = identity['homing_offsets'][joint]
+            bounds = identity['raw_limits'][joint]
+            if (type(offset) is not int or not -2047 <= offset <= 2047
+                    or not isinstance(bounds, (list, tuple)) or len(bounds) != 2
+                    or any(type(v) is not int for v in bounds)
+                    or not 0 <= bounds[0] < bounds[1] <= 4095
+                    or identity['mode'][joint] != 0):
+                raise ValueError('invalid STS3215 position-mode reference')
+    result = deepcopy(saved)
+    shifts = {}
+    for joint in JOINTS:
+        shift = old['homing_offsets'][joint] - fingerprint['homing_offsets'][joint]
+        for point in result.get('points', {}).get(joint, {}).values():
+            raw = point.get('raw')
+            if (type(raw) not in (int, float) or not math.isfinite(raw)
+                    or not 0 <= raw + shift <= 4095):
+                raise ValueError('reference migration crosses the encoder wrap; recalibrate')
+            point['raw'] = raw + shift
+        shifts[joint] = shift
+    result['fingerprint'] = deepcopy(fingerprint)
+    result['reference_migration'] = {
+        'method': 'new_raw = old_raw + old_homing_offset - new_homing_offset',
+        'source_fingerprint': deepcopy(old), 'reference_shift_ticks': shifts,
+        'unchanged_assembly_confirmed': True,
+        'new_physical_measurement': False,
+    }
+    return result
 
 
 def effective_scale(joint, original_scale, correction):

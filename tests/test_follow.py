@@ -62,14 +62,15 @@ def test_recorded_white_maximum_reaches_black_maximum_without_early_saturation()
     assert 0 < math.degrees(target[5]) < config['follower_gripper_degrees'][1]
 
 
-def test_hardware_trigger_maximum_reaches_the_verified_raw_upper_limit():
+def test_recorded_hardware_trigger_maximum_reaches_its_verified_raw_upper_limit():
     import json
     from pathlib import Path
 
     from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 
     root = Path(__file__).resolve().parents[1]
-    path = root/'data/calibration/follower_mujoco.json'
+    # Historical trigger endpoints must use the calibration from that experiment.
+    path = root/'data/push_t/measured/joint_calibration.json'
     saved = json.loads(path.read_text())
     calibration = AngleCalibration(path, saved['fingerprint'])
     fit = calibration.fit('gripper')
@@ -99,7 +100,7 @@ def test_recorded_minimum_and_midpoint_align_both_encoders_without_cad_clipping(
 
     root = Path(__file__).resolve().parents[1]
     evidence = json.loads((root/'docs/measurements/trigger-range-2026-10-13.json').read_text())
-    path = root/'data/calibration/follower_mujoco.json'
+    path = root/'data/push_t/measured/joint_calibration.json'
     saved = json.loads(path.read_text())
     fit = AngleCalibration(path, saved['fingerprint']).fit('gripper')
     encoder = {j: (-3, 3) for j in JOINTS}

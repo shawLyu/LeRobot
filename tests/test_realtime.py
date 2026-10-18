@@ -110,6 +110,22 @@ def test_hardware_keeps_ssh_routing_and_control_flags(monkeypatch):
     assert not process.stdin.getvalue()
 
 
+def test_reviewed_circle_path_reaches_remote_worker_without_starting_motion(monkeypatch):
+    process = Mock(stdin=io.StringIO(), stdout=io.StringIO())
+    popen = Mock(return_value=process)
+    monkeypatch.setattr('lerobot_arm_control.runtime.realtime_client.subprocess.Popen', popen)
+    path = ROOT/'logs/slow horizontal circle.json'
+    link = Link('robot-host', '/remote/robot', 'hardware', hardware_control=True,
+                circle=True, circle_plan=path)
+    link.reader.join(timeout=1)
+    assert link.circle_plan == path
+    assert "--circle-plan 'logs/slow horizontal circle.json'" in popen.call_args.args[0][-1]
+    assert process.stdin.getvalue() == ''
+    with pytest.raises(ValueError):
+        Link('robot-host', '/remote/robot', 'hardware', hardware_control=True,
+             circle=True, circle_plan='/tmp/outside-workspace.json')
+
+
 @pytest.mark.parametrize("matches", [False, True])
 @pytest.mark.parametrize("observer", [False, True])
 def test_hardware_control_rejects_configuration_drift_before_commands(monkeypatch, matches,

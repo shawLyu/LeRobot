@@ -33,12 +33,12 @@
         4095
       ],
       "gripper": [
-        1441,
-        2982
+        452,
+        1893
       ]
     },
     "homing_offsets": {
-      "shoulder_pan": -1214,
+      "shoulder_pan": -1110,
       "shoulder_lift": 1932,
       "elbow_flex": 1070,
       "wrist_flex": -1980,
@@ -67,17 +67,17 @@
   "points": {
     "shoulder_pan": {
       "0": {
-        "raw": 2143,
+        "raw": 2039,
         "sample_count": 9,
         "time_unix_ns": 1791215886680541543
       },
       "30": {
-        "raw": 2498,
+        "raw": 2394,
         "sample_count": 9,
         "time_unix_ns": 1791215937427492580
       },
       "60": {
-        "raw": 2860,
+        "raw": 2756,
         "sample_count": 9,
         "time_unix_ns": 1791215959566291860
       }
@@ -167,5 +167,84 @@
         "time_unix_ns": 1791215396283837206
       }
     }
+  },
+  "reference_migration": {
+    "method": "new_raw = old_raw + old_homing_offset - new_homing_offset",
+    "source_fingerprint": {
+      "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+      "motors": {
+        "shoulder_pan": 1,
+        "shoulder_lift": 2,
+        "elbow_flex": 3,
+        "wrist_flex": 4,
+        "wrist_roll": 5,
+        "gripper": 6
+      },
+      "raw_limits": {
+        "shoulder_pan": [
+          844,
+          3440
+        ],
+        "shoulder_lift": [
+          809,
+          3238
+        ],
+        "elbow_flex": [
+          773,
+          3126
+        ],
+        "wrist_flex": [
+          862,
+          3192
+        ],
+        "wrist_roll": [
+          0,
+          4095
+        ],
+        "gripper": [
+          1441,
+          2982
+        ]
+      },
+      "homing_offsets": {
+        "shoulder_pan": -1214,
+        "shoulder_lift": 1932,
+        "elbow_flex": 1070,
+        "wrist_flex": -1980,
+        "wrist_roll": -1910,
+        "gripper": -1632
+      },
+      "phase": {
+        "shoulder_pan": 12,
+        "shoulder_lift": 12,
+        "elbow_flex": 12,
+        "wrist_flex": 12,
+        "wrist_roll": 12,
+        "gripper": 12
+      },
+      "mode": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "model": "so101",
+      "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+    },
+    "reference_shift_ticks": {
+      "shoulder_pan": -104,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "unchanged_assembly_confirmed": true,
+    "new_physical_measurement": false,
+    "source_calibration_sha256": "05f99370f19191d51429df0a0230ca73760d19a875e9828ead339ad0c7a12ea7",
+    "user_confirmed_current_tcp_height_approximately_m": 0.34,
+    "date": "2026-10-18"
   }
 }

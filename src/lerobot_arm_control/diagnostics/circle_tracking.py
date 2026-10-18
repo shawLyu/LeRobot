@@ -8,12 +8,14 @@ import argparse
 import json
 import subprocess
 import time
+from pathlib import Path
 
 import mujoco
 import numpy as np
 
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256, POSITION_FEEDBACK
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments, remote_runtime
 from lerobot_arm_control.runtime.realtime_client import Link
@@ -23,14 +25,14 @@ from lerobot_arm_control.transport.realtime import JOINTS, checked_command
 ROOT = workspace_root()
 
 
-def measure(proof):
+def measure(proof, plan_path=None):
     samples = [s for s in proof["samples"] if s["circle"]["phase"] == "running"]
     if len(samples) < 2:
         return None
     saved_path = ROOT / "data/calibration/follower_mujoco.json"
     saved = json.loads(saved_path.read_text())
     calibration = AngleCalibration(saved_path, saved["fingerprint"])
-    plan = Circle()
+    plan = Circle() if plan_path is None else Circle(plan_path)
     info = samples[0]["circle"]
     plan.period = info["period_seconds"]
     plan.start(info["initial_qpos"], 0, laps=info["laps"])
@@ -63,15 +65,17 @@ def measure(proof):
             "endpoint_source": "encoder feedback plus calibrated model; not optical measurement"}
 
 
-def trial(laps, *, host=None, remote_root=None):
+def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
     remote = remote_runtime(host, remote_root)
     stamp = time.time_ns()
     proof = {"completed": False, "samples": [], "acks": [], "laps": laps,
-             "profile": POSITION_FEEDBACK, "control_config_sha256": CONTROL_CONFIG_SHA256}
+             "profile": POSITION_FEEDBACK, "control_config_sha256": CONTROL_CONFIG_SHA256,
+             'reset_first': reset,
+             'plan_sha256': (Circle().plan_hash if plan_path is None else file_digest(plan_path))}
     trace_name = f"tracking-trace-{stamp}.json"
     remote_trace = f"{remote.root}/logs/{trace_name}"
     link = Link(remote.host, remote.root, "hardware", hardware_control=True,
-                circle=True, control_log=remote_trace)
+                circle=True, control_log=remote_trace, circle_plan=plan_path)
     last_seq = None
     last_ping = 0
     last_report = 0
@@ -116,20 +120,21 @@ def trial(laps, *, host=None, remote_root=None):
             raise ValueError("remote tracking profile does not match the requested experiment")
         if link.snapshot()[1]["circle"]["profile_sha256"] != CONTROL_CONFIG_SHA256:
             raise ValueError("remote trajectory differs from the shared control configuration")
-        command("reset")
-        print("Reset started", flush=True)
-        deadline = time.monotonic() + 90
-        while time.monotonic() < deadline:
-            state = observe()
-            phase = state["control"]["parking"]["phase"]
-            if phase in ("boundary hold", "unpowered rest"):
-                proof["reset_state"] = state
-                break
-            if phase not in ("moving", "settling", "verifying release", "ready"):
-                raise RuntimeError(state["control"]["parking"]["notice"])
-            time.sleep(0.01)
-        else:
-            raise TimeoutError("Reset did not settle; circle was not started")
+        if reset:
+            command("reset")
+            print("Reset started", flush=True)
+            deadline = time.monotonic() + 90
+            while time.monotonic() < deadline:
+                state = observe()
+                phase = state["control"]["parking"]["phase"]
+                if phase in ("boundary hold", "unpowered rest"):
+                    proof["reset_state"] = state
+                    break
+                if phase not in ("moving", "settling", "verifying release", "ready"):
+                    raise RuntimeError(state["control"]["parking"]["notice"])
+                time.sleep(0.01)
+            else:
+                raise TimeoutError("Reset did not settle; circle was not started")
         result = command("circle_start", laps=laps)
         print("Circle started", flush=True)
         deadline = time.monotonic() + result["entry_seconds"] + laps * result["period_seconds"] + 15
@@ -143,7 +148,7 @@ def trial(laps, *, host=None, remote_root=None):
             time.sleep(0.01)
         else:
             raise TimeoutError("finite circle did not complete")
-        proof["metrics"] = measure(proof)
+        proof["metrics"] = measure(proof, plan_path)
     except (Exception, KeyboardInterrupt) as exc:
         proof["error"] = str(exc) or type(exc).__name__
     finally:
@@ -175,10 +180,14 @@ def main():
     add_remote_arguments(parser)
     parser.add_argument("--laps", type=int, default=1)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument('--plan', type=Path, help='Reviewed workspace-local circle plan')
+    parser.add_argument('--from-current', action='store_true',
+                        help='Approach from the observed pose without invoking Reset')
     args = parser.parse_args()
     if not args.execute or not 1 <= args.laps <= 5:
         parser.error("requires --execute and 1..5 laps with an observed, clear arm")
-    raise SystemExit(0 if trial(args.laps, host=args.host, remote_root=args.remote_root) else 1)
+    raise SystemExit(0 if trial(args.laps, host=args.host, remote_root=args.remote_root,
+                               plan_path=args.plan, reset=not args.from_current) else 1)
 
 
 if __name__ == "__main__":

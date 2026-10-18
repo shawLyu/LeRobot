@@ -44,10 +44,9 @@ def test_shared_hardware_envelope_is_applied_without_writes_and_cannot_be_widene
     calibration = AngleCalibration(path, saved['fingerprint'])
     bus = Bus()
     control = ManualControl(bus, calibration, saved['fingerprint']['raw_limits'])
-    assert control.raw_limits['wrist_flex'] == (862, 2920)
-    assert control.raw_limits['gripper'] == (1479, 2982)
-    assert all(control.raw_limits[j] == tuple(saved['fingerprint']['raw_limits'][j])
-               for j in JOINTS if j not in ('wrist_flex', 'gripper'))
+    assert control.raw_limits == dict(zip(JOINTS, (
+        (860, 3318), (857, 3209), (905, 3079),
+        (931, 2868), (353, 3924), (464, 1881)), strict=True))
     assert not bus.writes
     with pytest.raises(ValueError):
         control.set_command_limits('wrist_flex', control.rest_limits['wrist_flex'])

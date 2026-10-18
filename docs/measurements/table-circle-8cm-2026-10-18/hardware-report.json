@@ -1,0 +1,121 @@
+{
+  "completed": true,
+  "laps": 1,
+  "plane": "XY parallel to user-confirmed flat table",
+  "commanded_radius_m": 0.08,
+  "circle_center_base_m": [
+    0.25,
+    -0.017,
+    0.34
+  ],
+  "tcp_height_above_table_m": 0.3424000017,
+  "period_seconds": 60,
+  "ramp_seconds": 4,
+  "entry_seconds": 1.6311237916142114,
+  "control_hz": 60.00054309890931,
+  "running_control_frames": 3840,
+  "maximum_control_period_ms": 18.857504008337855,
+  "tracking_rms_mm": 2.0043154348057906,
+  "tracking_max_mm": 8.611383830729695,
+  "circle_geometric_rms_mm": 1.7846683161407975,
+  "circle_geometric_max_mm": 8.461077786908282,
+  "fit_radius_encoder_model_mm": 80.4964776447019,
+  "table_plane_max_deviation_mm": 6.308114639672235,
+  "fault_count": 0,
+  "per_joint": {
+    "shoulder_pan": {
+      "rms_degrees": 0.1860297863464251,
+      "max_degrees": 0.5599695142816411,
+      "raw_span_ticks": 532
+    },
+    "shoulder_lift": {
+      "rms_degrees": 0.3191372118378904,
+      "max_degrees": 1.3446925345245184,
+      "raw_span_ticks": 1087
+    },
+    "elbow_flex": {
+      "rms_degrees": 0.17633399037171252,
+      "max_degrees": 0.6015724156315352,
+      "raw_span_ticks": 679
+    },
+    "wrist_flex": {
+      "rms_degrees": 0.17705324654201657,
+      "max_degrees": 0.5964567111542998,
+      "raw_span_ticks": 372
+    },
+    "wrist_roll": {
+      "rms_degrees": 0.03130115677507862,
+      "max_degrees": 0.2719033232628392,
+      "raw_span_ticks": 4
+    },
+    "gripper": {
+      "rms_degrees": 0.0,
+      "max_degrees": 0.0,
+      "raw_span_ticks": 0
+    }
+  },
+  "native_pid_and_storage_lock_unchanged": true,
+  "final_native_parameters": {
+    "P_Coefficient": {
+      "shoulder_pan": 40,
+      "shoulder_lift": 32,
+      "elbow_flex": 56,
+      "wrist_flex": 48,
+      "wrist_roll": 48,
+      "gripper": 48
+    },
+    "I_Coefficient": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 4,
+      "elbow_flex": 8,
+      "wrist_flex": 4,
+      "wrist_roll": 2,
+      "gripper": 4
+    },
+    "D_Coefficient": {
+      "shoulder_pan": 64,
+      "shoulder_lift": 80,
+      "elbow_flex": 128,
+      "wrist_flex": 96,
+      "wrist_roll": 96,
+      "gripper": 64
+    },
+    "Lock": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1,
+      "gripper": 1
+    },
+    "Acceleration": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Goal_Velocity": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Torque_Enable": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1,
+      "gripper": 1
+    }
+  },
+  "plan_sha256": "fadfcc54205f6076d0f3f4b35757e79ab3d89ac7aff25f052e1c8ae92c4bfcc8",
+  "joint_calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+  "control_config_sha256": "b5fc309e658da70bae76bbff861a8bae28575d1468206b0c006fa86eb1d3b7dc",
+  "measurement_source": "calibrated model with encoder feedback; no independent optical or ruler trajectory measurement",
+  "jaw_note": "Held at observed raw=570; native measured range used without inventing a new jaw zero. CAD joint-6 constraint expanded only in offline dynamics; canonical model unchanged."
+}

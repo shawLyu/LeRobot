@@ -28,7 +28,7 @@ class Link:
     def __init__(self, host, remote_root, backend, *, allow_gripper=False, hardware_control=False,
                  circle=False, keep_simulation_alive=False,
                  simulation_model=None, control_log=None, arm='follower',
-                 hardware_worker='realtime_server'):
+                 hardware_worker='realtime_server', circle_plan=None):
         if backend not in ("mujoco", "hardware"):
             raise ValueError("unknown backend")
         if keep_simulation_alive and backend != "mujoco":
@@ -52,6 +52,13 @@ class Link:
             worker_args.extend(("--control-log", str(control_log)))
         if circle:
             worker_args.append("--circle")
+        self.circle_plan = circle_plan
+        if circle_plan is not None:
+            if not circle or backend != 'hardware' or hardware_worker != 'realtime_server':
+                raise ValueError('custom circle plan requires the hardware circle worker')
+            relative = Path(circle_plan).resolve().relative_to(ROOT.resolve())
+            self.circle_plan = ROOT / relative
+            worker_args.extend(('--circle-plan', str(relative)))
         if backend == "mujoco":
             if simulation_model is not None:
                 worker_args.extend(("--model", str(Path(simulation_model).resolve())))
@@ -145,7 +152,7 @@ class Link:
             if (not hello or not state or time.monotonic() - received > .5
                     or not state.get("qpos")):
                 raise ValueError("fresh calibrated feedback required for local circle validation")
-            circle = Circle()
+            circle = Circle() if self.circle_plan is None else Circle(self.circle_plan)
             circle.validate_laps(payload.get("laps"))
             payload["validation"] = validate_hardware_entry(circle, state["qpos"])
         with self.lock:

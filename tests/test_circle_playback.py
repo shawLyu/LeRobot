@@ -1,6 +1,7 @@
 """The remote circle player requires a local validation result before any motor writes."""
 
 import copy
+import json
 
 import pytest
 from fakes import Bus, Calibration
@@ -30,6 +31,20 @@ def test_invalid_local_validation_never_enables_motors(playback, field):
     validation[field] = [float('nan')]*6 if field == 'initial_qpos' else False
     with pytest.raises(ValueError):
         circle.start_hardware(control, validation)
+    assert bus.writes == []
+
+
+def test_uncleared_candidate_cannot_write_to_motors(playback, tmp_path):
+    from lerobot_arm_control.tasks.circle.circle_trajectory import PLAN
+
+    saved = json.loads(PLAN.read_text())
+    saved['execution_ready'] = False
+    path = tmp_path/'candidate.json'
+    path.write_text(json.dumps(saved))
+    bus, control, _, validation = playback
+    circle = Circle(path)
+    with pytest.raises(ValueError, match='not been cleared'):
+        circle.start_hardware(control, validation, laps=1)
     assert bus.writes == []
 
 

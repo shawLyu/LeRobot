@@ -101,7 +101,8 @@ def serve(args):
         if args.circle:
             from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 
-            circle = Circle()
+            circle = Circle(getattr(args, 'circle_plan', None) or
+                            resource_path('data/trajectories/circle.json'))
             if controller:
                 controller.trajectory = circle
         send({"type": "hello", "backend": "hardware", "joints": JOINTS,
@@ -357,6 +358,8 @@ def main():
                         help="Calibrated, slow manual control; joints enabled individually")
     parser.add_argument("--circle", action="store_true",
                         help="Load the validated circle; requires explicit circle_start trigger")
+    parser.add_argument('--circle-plan', type=Path,
+                        help='Reviewed circle plan; slower plan timing is retained')
     parser.add_argument("--control-log", type=Path,
                         help="Retain up to ten minutes of full-rate feedback; write on exit")
     args = parser.parse_args()
@@ -366,6 +369,8 @@ def main():
         parser.error("hardware control requires launch without --allow-gripper")
     if args.circle and (args.allow_gripper or not args.hardware_control):
         parser.error("circle requires calibrated hardware control and local validation")
+    if args.circle_plan and not args.circle:
+        parser.error('--circle-plan requires --circle')
     if args.control_log and not args.hardware_control:
         parser.error("--control-log requires hardware control")
     try:

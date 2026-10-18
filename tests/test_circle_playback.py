@@ -73,7 +73,37 @@ def test_explicit_sixty_degree_circle_keeps_six_second_period_and_checks_ramps(t
 
 def test_faster_than_reviewed_circle_is_rejected(tmp_path):
     with pytest.raises(ValueError, match='angular speed'):
-        Circle(fast_plan(tmp_path, 91))
+        Circle(fast_plan(tmp_path, 121))
+
+
+def test_120_degree_circle_retains_joint_budgets_and_smooth_transitions(tmp_path):
+    from lerobot_arm_control.core.paths import resource_path
+
+    circle = Circle(resource_path('data/trajectories/table-circle120-h38cm.json'))
+    assert circle.period == 3 and circle.ramp_seconds == 8
+    assert circle.feedback_profile['name'] == 'smooth-circle120-v1'
+    assert circle.feedback_profile['native_stream']['acceleration'] == 48
+    assert circle.feedback_profile['native_stream']['transition_acceleration'] == 16
+    budget = circle.check_motion_budget(circle.points[0])
+    assert budget['peak_joint_speed_rad_s'] < 1.571
+    assert budget['peak_control_frame_acceleration_rad_s2'] < 5.236
+    with pytest.raises(ValueError, match='overlapping'):
+        circle.start(circle.points[0], 0, laps=1)
+    circle.start(circle.points[0], 0, laps=4)
+    for elapsed, fraction in [(0, 0), (4, .5), (8, 1), (12, 1), (16, .5), (20, 0)]:
+        assert circle.speed_fraction(circle.entry_seconds+elapsed) == pytest.approx(fraction)
+    assert circle.sample(circle.entry_seconds+20) == pytest.approx(circle.points[0], abs=1e-9)
+    assert circle.phase == 'completed'
+
+    for height in (34, 36):
+        saved = json.loads(resource_path(
+            f'data/trajectories/table-circle90-h{height}cm.json').read_text())
+        saved['period_seconds'] = 3
+        saved['execution_profile'].update(angular_speed_deg_s=120)
+        path = tmp_path/f'too-fast-h{height}.json'
+        path.write_text(json.dumps(saved))
+        with pytest.raises(ValueError, match='joint speed budget'):
+            Circle(path)
 
 
 def test_ninety_degree_circle_retains_six_second_ramps_and_rejects_overlap(tmp_path):

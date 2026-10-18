@@ -9,6 +9,14 @@ See [the controller and block diagram](lerobot-control.md).
 
 ## Current evidence and limits
 
+The [120°/s experiment at 38 cm](measurements/circle120-2026-10-18/README.md)
+uses an explicit profile with native acceleration 16→48→16 and eight-second
+ramps. The operator accepted start/stop smoothness after rejecting six-second
+ramps. The final mean was 120.61°/s, temporal TCP RMS 13.49 mm and maximum error
+35.69 mm. Instantaneous speed ripple remains substantial; neither this nor visual
+acceptance establishes precision tracking. The original joint budgets remain;
+34/36 cm paths exceed them at this circle speed and were not executed.
+
 The [90°/s start/stop follow-up](measurements/circle90-transitions-2026-10-18/README.md)
 records accepted start/stop smoothness at all three heights, 34/36/38 cm. The
 `smooth-circle90-v2` profile schedules native RAM acceleration from 16 at low speed

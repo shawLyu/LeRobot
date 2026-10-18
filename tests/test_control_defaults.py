@@ -41,7 +41,7 @@ def test_shared_configuration_preserves_latest_measured_values():
     assert TRAJECTORY == {"version": 1, "entry_speed_rad_s": .8, "min_entry_seconds": .35,
                           "ramp_seconds": 1., "control_hz": 60,
                           "reset_speed_rad_s": .5, "period_seconds": 16.,
-                          'max_circle_angular_speed_deg_s': 90.,
+                          'max_circle_angular_speed_deg_s': 120.,
                           'max_circle_joint_speed_rad_s': math.radians(90),
                           'max_circle_joint_acceleration_rad_s2': math.radians(300)}
     assert TRAJECTORY["control_hz"] == CONTROL_HZ

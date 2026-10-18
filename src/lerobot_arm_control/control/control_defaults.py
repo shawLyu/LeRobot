@@ -24,8 +24,12 @@ CIRCLE90_POSITION_FEEDBACK = deepcopy(CIRCLE_POSITION_FEEDBACK)
 CIRCLE90_POSITION_FEEDBACK['name'] = CONTROL['circle90_position_feedback']['name']
 CIRCLE90_POSITION_FEEDBACK['native_stream'].update(
     CONTROL['circle90_position_feedback']['native_stream'])
+CIRCLE120_POSITION_FEEDBACK = deepcopy(CIRCLE_POSITION_FEEDBACK)
+CIRCLE120_POSITION_FEEDBACK['name'] = CONTROL['circle120_position_feedback']['name']
+CIRCLE120_POSITION_FEEDBACK['native_stream'].update(
+    CONTROL['circle120_position_feedback']['native_stream'])
 CIRCLE_FEEDBACK_PROFILES = {p['name']: p for p in (
-    CIRCLE_POSITION_FEEDBACK, CIRCLE90_POSITION_FEEDBACK)}
+    CIRCLE_POSITION_FEEDBACK, CIRCLE90_POSITION_FEEDBACK, CIRCLE120_POSITION_FEEDBACK)}
 TRAJECTORY = CONTROL["trajectory"]
 SIMULATION_ACTUATOR = CONTROL["simulation_actuator"]
 CONTROL_HZ = DEFAULTS["control_hz"]

@@ -124,7 +124,7 @@
     "control_hz": 60,
     "reset_speed_rad_s": 0.5,
     "period_seconds": 16.0,
-    "max_circle_angular_speed_deg_s": 90.0,
+    "max_circle_angular_speed_deg_s": 120.0,
     "max_circle_joint_speed_rad_s": 1.5707963267948966,
     "max_circle_joint_acceleration_rad_s2": 5.235987755982989
   },
@@ -235,6 +235,13 @@
     "name": "smooth-circle90-v2",
     "native_stream": {
       "acceleration": 32,
+      "transition_acceleration": 16
+    }
+  },
+  "circle120_position_feedback": {
+    "name": "smooth-circle120-v1",
+    "native_stream": {
+      "acceleration": 48,
       "transition_acceleration": 16
     }
   }

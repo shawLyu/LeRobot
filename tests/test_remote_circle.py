@@ -19,7 +19,8 @@ from lerobot_arm_control.transport.realtime import JOINTS
 
 @pytest.mark.parametrize('case', ['completed', 'feedback_deadline', 'invalid_proof'])
 @pytest.mark.parametrize('plan_name,laps', [('table-circle-8cm.json', 1),
-                                          ('table-circle90-h34cm.json', 3)])
+                                          ('table-circle90-h34cm.json', 3),
+                                          ('table-circle120-h38cm.json', 4)])
 def test_finite_circle_is_independent_but_keeps_hardware_guards(monkeypatch, tmp_path, case,
                                                             plan_name, laps):
     path = resource_path('data/calibration/follower_mujoco.json')
@@ -95,9 +96,11 @@ def test_finite_circle_is_independent_but_keeps_hardware_guards(monkeypatch, tmp
     assert record['frames'][-1]['circle']['phase'] == (
         'completed' if case == 'completed' else 'stopped: control feedback deadline: hold')
     assert record['metadata']['autonomous_circle'] is True
-    if case == 'completed' and plan_name.startswith('table-circle90'):
+    if (case == 'completed'
+            and 'transition_acceleration' in circle.feedback_profile['native_stream']):
         acceleration = [f['telemetry']['Acceleration']['shoulder_pan'] for f in record['frames']]
-        assert min(acceleration) == 16 and max(acceleration) == 32
+        assert min(acceleration) == 16
+        assert max(acceleration) == circle.feedback_profile['native_stream']['acceleration']
         assert acceleration[-1] == 16
     assert all(r['Torque_Enable'] == 1 and r['Acceleration'] == 0 for r in bus.registers.values())
     assert all(r['Goal_Position'] == r['Present_Position'] for r in bus.registers.values())

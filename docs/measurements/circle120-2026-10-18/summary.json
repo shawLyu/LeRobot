@@ -1,0 +1,28 @@
+[
+  {
+    "trial": "baseline-r6",
+    "operator_feedback": "启停仍有明显顿挫",
+    "steady_phase_fit_speed_deg_s": 118.08936335436864,
+    "tracking_rms_mm": 13.310578299836584,
+    "tracking_max_mm": 35.58946176575373,
+    "circle_rms_mm": 8.028550433747958,
+    "tcp_hf_error_rms_mm": 0.6762049879562184,
+    "status_flags": 0,
+    "trace_sha256": "835fb7ee1ff5bf0bf788c0e9f7d77962758828396f3853aeaf7debd87ff8ee4c",
+    "plan_sha256": "b3e5fc8a03595a09161941f4442707d36bcdada3030437389eb56d3c680e7559",
+    "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650"
+  },
+  {
+    "trial": "h38",
+    "operator_feedback": "启停已平顺，可以接受",
+    "steady_phase_fit_speed_deg_s": 120.61112099926844,
+    "tracking_rms_mm": 13.493925747618176,
+    "tracking_max_mm": 35.69487616759655,
+    "circle_rms_mm": 8.082031134520612,
+    "tcp_hf_error_rms_mm": 0.7092099686678066,
+    "status_flags": 0,
+    "trace_sha256": "9754d05d04269b2ebdf7cb4923734c453c6f497f793f349eed6322a38598b770",
+    "plan_sha256": "918ca3da7632e75e19d1c9da8215997832029eee38409fac82f7a0d9e20996d3",
+    "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650"
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "height_above_table_cm": 38,
+  "geometry_and_budget": {
+    "checked": true,
+    "initial_qpos": [
+      0.33147219140706524,
+      -1.264925279035206,
+      0.7754139705629219,
+      -0.5104886914250597,
+      1.887170209331633,
+      -1.469996562508593
+    ],
+    "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+    "plan_sha256": "918ca3da7632e75e19d1c9da8215997832029eee38409fac82f7a0d9e20996d3",
+    "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650",
+    "motion_budget": {
+      "peak_joint_speed_rad_s": 1.4870218833490823,
+      "peak_control_frame_acceleration_rad_s2": 4.6868859843278265
+    }
+  },
+  "approximate_dynamics": {
+    "failed": "circle simulation failed: {'duration_sim_seconds': 14.350000000000843, 'steps': 2870, 'circle_radius_m': 0.08, 'period_seconds': 3.0, 'max_circle_error_m': 0.008634408368411822, 'max_joint_speed_rad_s': 1.8780981683648021, 'max_cartesian_tracking_error_m': 0.01003671147116536, 'max_joint_tracking_error_rad': 0.042527020098074964, 'penetrating_contacts': 0, 'profile': 'hardware', 'passed': False}"
+  }
+}

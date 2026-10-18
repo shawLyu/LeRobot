@@ -12,6 +12,9 @@ local; `configs/remote-runtime.txt` selects the remote hardware runtime.
 | `calibration/follower_table_base.json`, `arm1_table_base.json` | Independent fixed mounting records |
 | `calibration/two_arm_bases.json` | Pair geometry and measurement provenance |
 | `trajectories/circle.json` | Reproducible circle input |
+| `trajectories/table-circle-8cm.json` | Reviewed 60°/s horizontal 8 cm circle |
+| `trajectories/table-circle90-h{34,36,38}cm.json` | 90°/s circles at three table-relative heights |
+| `trajectories/table-circle120-h38cm.json` | Explicit 120°/s circle at 38 cm; original joint budgets retained |
 | `tabletop/static_map.json` | Persistent current table registration |
 | `tabletop/current-scene/` | Current saved scene, images, textures, meshes and configuration copies |
 | `push_t/measured/` | Small local offline/test observation with calibration and textures |

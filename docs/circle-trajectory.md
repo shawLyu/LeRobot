@@ -68,6 +68,28 @@ for the original fixed-acceleration trials, remaining errors and rejected low-ac
 The [transition follow-up](measurements/circle90-transitions-2026-10-18/README.md)
 records the subsequent start/stop repair. Emergency/fault holds remain immediate.
 
+## 120 degrees/second at 38 cm
+
+`data/trajectories/table-circle120-h38cm.json` retains the 8 cm radius, center,
+tool inclination of the accepted 38 cm scene, with eight-second ramps. Its explicit
+`smooth-circle120-v1` profile uses the same controller gains and schedules native
+RAM acceleration from 16 to 48 and back to 16. It does not alter the 60/90-degree
+profiles or native PID. The steady lap is three seconds; four laps with ramps
+take about 20 seconds after approach, including a four-second steady segment.
+
+```sh
+./scripts/lerobot-arm verify tracking --execute --from-current --laps 4 \
+  --plan data/trajectories/table-circle120-h38cm.json
+```
+
+This selection retains the existing 90-degree/second joint-speed and
+300-degree/second-squared command budgets. The 38 cm path requires about 85.2
+degrees/second peak joint speed and 268.6 degrees/second-squared sampled
+acceleration. At 120-degree circle speed, the 34/36 cm paths exceed those budgets
+and are excluded. The circle phase speed is distinct from each joint's speed.
+See [the 120-degree experiment](measurements/circle120-2026-10-18/README.md) for
+physical results and remaining accuracy limits.
+
 ## Remote execution and saved responses
 
 `--from-current` reads a fresh remote pose without enabling motion. The local
@@ -103,10 +125,11 @@ the calibrated CAD model; they are not independent optical measurements.
 ## Plan parameters and checks
 
 An optional hashed `execution_profile` can lower `entry_speed_rad_s`, increase
-`ramp_seconds`, explicitly select `controller_profile: "smooth-circle-v1"` or `"smooth-circle90-v2"`, and
+`ramp_seconds`, explicitly select `controller_profile: "smooth-circle-v1"`,
+`"smooth-circle90-v2"` or `"smooth-circle120-v1"`, and
 request `angular_speed_deg_s`. An explicit speed requires an XY plan whose
 `period_seconds` equals `360/angular_speed_deg_s`. The shared experimental maximum
-is 90 degrees/second; the default reviewed 8 cm plan remains at 60 degrees/second. Planned joint speed and sampled entry/ramp acceleration
+is 120 degrees/second; the default reviewed 8 cm plan remains at 60 degrees/second. Planned joint speed and sampled entry/ramp acceleration
 must also fit the budgets in `configs/control.json`; these checks run on both
 hosts before enable. This budget is not a guarantee of physical tracking accuracy.
 

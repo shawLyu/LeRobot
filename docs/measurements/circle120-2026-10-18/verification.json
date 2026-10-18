@@ -1,0 +1,52 @@
+{
+  "local_pytest": {
+    "passed": 769,
+    "skipped": 1,
+    "seconds": 93.23
+  },
+  "remote_pytest": {
+    "passed": 517,
+    "seconds": 12.99
+  },
+  "ruff_remote_runtime": "passed",
+  "ruff_modified_files": "passed",
+  "git_diff_check": "passed",
+  "physical_tests": {
+    "height_above_table_cm": 38,
+    "radius_m": 0.08,
+    "target_circle_speed_deg_s": 120,
+    "baseline": {
+      "laps": 3,
+      "ramp_seconds": 6,
+      "visual_feedback": "启停仍有明显顿挫",
+      "visual_accepted": false
+    },
+    "final": {
+      "laps": 4,
+      "ramp_seconds": 8,
+      "visual_feedback": "启停已平顺，可以接受",
+      "visual_start_stop_accepted": true,
+      "steady_mean_deg_s": 120.61112099926844,
+      "tracking_rms_mm": 13.493925747618176,
+      "tracking_max_mm": 35.69487616759655
+    },
+    "operator_confirmed_empty_gripper_and_clear_scene": true,
+    "all_status_flags": 0,
+    "native_ram_restored": true,
+    "native_pid_origins_limits_unchanged": true,
+    "plan_trace_config_hashes_checked": true,
+    "local_remote_parameter_hashes_match": true
+  },
+  "known_limits": [
+    "Instantaneous speed ripple remains despite near-target average",
+    "Encoder/CAD TCP error exceeds 5 mm dynamic target; independent optical precision unverified",
+    "Joints 5/6 held; their dynamics were not tested",
+    "34/36 cm at 120 deg/s exceed retained joint command budgets and were not executed",
+    "Approximate MuJoCo dynamics failed the original accuracy threshold and remains reported as failed"
+  ],
+  "deployment": {
+    "checked_files": 459,
+    "mismatched_files": [],
+    "verification_document_synced_after_check": true
+  }
+}

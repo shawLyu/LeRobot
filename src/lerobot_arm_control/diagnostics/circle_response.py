@@ -10,6 +10,7 @@ from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.core.files import atomic_json, file_digest
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.robot.so101.joints import JOINTS
+from lerobot_arm_control.tasks.circle.geometry import circle_frame
 
 
 def response_report(trace_path, plan_path, output, *, plots=True):
@@ -51,12 +52,15 @@ def response_report(trace_path, plan_path, output, *, plots=True):
         return np.array(result)
 
     xyz, desired = forward(actual), forward(reference)
-    axes, normal = ((0, 1), 2) if plan['plane'] == 'XY' else ((0, 2), 1)
+    u, v, normal = circle_frame(plan['plane'], plan.get('plane_basis'))
     offset = xyz-np.array(plan['center_m'])
-    radial = np.linalg.norm(offset[:, axes], axis=1)
-    geometric = np.hypot(radial-plan['radius_m'], offset[:, normal])
+    planar = offset @ np.array((u, v)).T
+    desired_planar = (desired-np.array(plan['center_m'])) @ np.array((u, v)).T
+    deviation = offset @ normal
+    radial = np.linalg.norm(planar, axis=1)
+    geometric = np.hypot(radial-plan['radius_m'], deviation)
     tracking = np.linalg.norm(xyz-desired, axis=1)
-    phase = np.rad2deg(np.unwrap(np.arctan2(offset[:, axes[1]], offset[:, axes[0]])))
+    phase = np.rad2deg(np.unwrap(np.arctan2(planar[:, 1], planar[:, 0])))
     # Resample the small clock jitter before spectral scoring. Do not score the
     # planned startup/braking as physical vibration or hide it from the plots.
     ts = time[steady]
@@ -125,12 +129,18 @@ def response_report(trace_path, plan_path, output, *, plots=True):
     output.parent.mkdir(parents=True, exist_ok=True)
     atomic_json(output.with_suffix('.json'), result)
     if plots:
-        _plots(output, time, xyz, desired, offset, normal, axes, speed_time, speed,
-               actual, reference, result)
+        if plan['plane'] in ('XY', 'XZ'):
+            axes = (0, 1) if plan['plane'] == 'XY' else (0, 2)
+            planar, desired_planar = xyz[:, axes], desired[:, axes]
+            labels = ('Base X', 'Base Y' if plan['plane'] == 'XY' else 'Base Z')
+        else:
+            labels = ('Plane U from center', 'Plane V from center')
+        _plots(output, time, xyz, desired, planar, desired_planar, deviation, labels,
+               speed_time, speed, actual, reference, result)
     return result
 
 
-def _plots(output, time, xyz, desired, offset, normal, axes, speed_time, speed,
+def _plots(output, time, xyz, desired, planar, desired_planar, deviation, labels, speed_time, speed,
            actual, reference, result):
     import matplotlib
 
@@ -139,10 +149,10 @@ def _plots(output, time, xyz, desired, offset, normal, axes, speed_time, speed,
 
     fig, panels = plt.subplots(2, 2, figsize=(12, 8))
     ax = panels[0, 0]
-    ax.plot(*desired[:, axes].T*100, '--', color='#ed7137', label='Target')
-    ax.plot(*xyz[:, axes].T*100, color='#129d8b', lw=.8, label='Encoder + model')
+    ax.plot(*desired_planar.T*100, '--', color='#ed7137', label='Target')
+    ax.plot(*planar.T*100, color='#129d8b', lw=.8, label='Encoder + model')
     ax.set_aspect('equal')
-    ax.set(xlabel='Base X (cm)', ylabel=f'Base {"Y" if normal == 2 else "Z"} (cm)',
+    ax.set(xlabel=f'{labels[0]} (cm)', ylabel=f'{labels[1]} (cm)',
            title='TCP circle')
     ax.legend()
     panels[0, 1].plot(speed_time, speed, color='#129d8b', lw=.9)
@@ -154,7 +164,7 @@ def _plots(output, time, xyz, desired, offset, normal, axes, speed_time, speed,
     panels[1, 0].plot(time, np.linalg.norm(xyz-desired, axis=1)*1000, color='#ed7137', lw=.8)
     panels[1, 0].set(xlabel='Time on circle (s)', ylabel='TCP tracking error (mm)',
                      title=f'RMS {result["tracking_rms_mm"]:.2f} mm')
-    panels[1, 1].plot(time, offset[:, normal]*1000, color='#5263bd', lw=.8)
+    panels[1, 1].plot(time, deviation*1000, color='#5263bd', lw=.8)
     jitter = result['tcp_hf_error_rms_mm']
     jitter_label = f'{jitter:.2f} mm RMS' if jitter is not None else 'no steady segment'
     panels[1, 1].set(xlabel='Time on circle (s)', ylabel='Plane deviation (mm)',

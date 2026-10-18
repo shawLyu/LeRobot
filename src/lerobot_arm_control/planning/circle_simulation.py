@@ -43,21 +43,20 @@ def validate_hardware_entry(circle, initial):
 
     model = collision_model(circle)
     timing = circle.check_motion_budget(initial)
-    if circle.plane == 'XY' and max(abs(a-b) for a, b in zip(
+    if circle.table_bound and max(abs(a-b) for a, b in zip(
             initial[4:], circle.points[0][4:])) > .003:
-        raise ValueError('horizontal circle must hold the observed wrist roll and gripper')
-    options = ({'joint_indices': range(5)} if circle.plane == 'XY'
+        raise ValueError('table-referenced circle must hold the observed wrist roll and gripper')
+    options = ({'joint_indices': range(5)} if circle.table_bound
                else {'check_joint_limits': False})
     check_path(model, circle.points, **options)
     check_path(model, entry_points(initial, circle.points[0]), **options)
     data = mujoco.MjData(model)
-    axes, normal = ((0, 1), 2) if circle.plane == 'XY' else ((0, 2), 1)
     for q in circle.points:
         data.qpos[:] = q
         mujoco.mj_forward(model, data)
         delta = data.site('gripperframe').xpos - circle.center
-        radial = math.hypot(*(delta[i] for i in axes))
-        if math.hypot(radial-circle.radius, delta[normal]) > .0001:
+        radial = math.hypot(delta @ circle.basis_u, delta @ circle.basis_v)
+        if math.hypot(radial-circle.radius, delta @ circle.normal) > .0001:
             raise ValueError('circle samples do not match the requested Cartesian geometry')
     return {"checked": True, "initial_qpos": list(initial),
             "model_sha256": circle.model_hash, "plan_sha256": circle.plan_hash,
@@ -67,9 +66,9 @@ def validate_hardware_entry(circle, initial):
 def collision_model(circle):
     import mujoco
 
-    scene = 'scene_mujoco.xml' if circle.plane == 'XY' else 'so101.xml'
+    scene = 'scene_mujoco.xml' if circle.table_bound else 'so101.xml'
     model = mujoco.MjModel.from_xml_path(str(resource_path('assets/so101/'+scene)))
-    if circle.plane == 'XY':
+    if circle.table_bound:
         model.geom_pos[model.geom('floor').id, 2] = circle.table_z
     return model
 
@@ -149,10 +148,10 @@ def verify(model, path, report_path, *, simulation=False):
             position = data.site("gripperframe").xpos
             tracking.append(float(np.linalg.norm(position - reference.site("gripperframe").xpos)))
             joint_tracking.append(float(np.max(np.abs(data.qpos - reference.qpos))))
-            axes, normal = ((0, 1), 2) if circle.plane == 'XY' else ((0, 2), 1)
-            radial = np.linalg.norm((position - circle.center)[list(axes)])
+            delta = position-circle.center
+            radial = np.hypot(delta @ circle.basis_u, delta @ circle.basis_v)
             errors.append(float(np.hypot(radial - circle.radius,
-                                         position[normal] - circle.center[normal])))
+                                         delta @ circle.normal)))
             speed.append(float(np.max(np.abs(data.qvel))))
             penetrating += sum(c.dist < -0.001 for c in data.contact)
     result = {"duration_sim_seconds": data.time, "steps": steps,

@@ -20,7 +20,9 @@ from lerobot_arm_control.transport.realtime import JOINTS
 @pytest.mark.parametrize('case', ['completed', 'feedback_deadline', 'invalid_proof'])
 @pytest.mark.parametrize('plan_name,laps', [('table-circle-8cm.json', 1),
                                           ('table-circle90-h34cm.json', 3),
-                                          ('table-circle120-h38cm.json', 4)])
+                                          ('table-circle120-h38cm.json', 4),
+                                          ('table-circle120-tilt15.json', 4),
+                                          ('table-circle120-tilt30.json', 4)])
 def test_finite_circle_is_independent_but_keeps_hardware_guards(monkeypatch, tmp_path, case,
                                                             plan_name, laps):
     path = resource_path('data/calibration/follower_mujoco.json')

@@ -101,6 +101,22 @@ def test_changed_cartesian_claim_is_rejected_by_local_geometry_validation(tmp_pa
         validate_hardware_entry(circle, circle.points[0])
 
 
+@pytest.mark.parametrize('angle', [15, 30])
+def test_inclined_circle_geometry_matches_and_wrong_plane_is_rejected(tmp_path, angle):
+    from lerobot_arm_control.core.paths import resource_path
+
+    path = resource_path(f'data/trajectories/table-circle120-tilt{angle}.json')
+    circle = Circle(path)
+    assert validate_hardware_entry(circle, circle.points[0])['checked']
+    saved = json.loads(path.read_text())
+    saved['plane_basis'] = [[1, 0, 0], [0, 1, 0]]
+    wrong = tmp_path/'wrong-plane.json'
+    wrong.write_text(json.dumps(saved))
+    invalid = Circle(wrong)
+    with pytest.raises(ValueError, match='Cartesian geometry'):
+        validate_hardware_entry(invalid, invalid.points[0])
+
+
 def test_shared_profile_preserves_closed_smooth_path():
     simulation = Circle(simulation=True)
     hardware = Circle()

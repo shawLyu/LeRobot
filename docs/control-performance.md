@@ -9,6 +9,14 @@ See [the controller and block diagram](lerobot-control.md).
 
 ## Current evidence and limits
 
+The [0/15/30-degree plane-tilt comparison](measurements/circle-tilt-2026-10-18/README.md)
+keeps the 38 cm center, 8 cm radius, 120°/s profile and eight-second ramps.
+Mean speeds were 120.60/120.52/120.69°/s; temporal RMS was 13.42/10.83/8.16 mm.
+The operator accepted the two inclined cases' motion and starts/stops. Remaining
+speed ripple and the lack of independent optical precision are reported explicitly.
+No PID change was made; geometric validation and response scoring now share the
+validated 3D circle frame instead of treating a tilted path as an axis-aligned circle.
+
 The [120°/s experiment at 38 cm](measurements/circle120-2026-10-18/README.md)
 uses an explicit profile with native acceleration 16→48→16 and eight-second
 ramps. The operator accepted start/stop smoothness after rejecting six-second

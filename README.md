@@ -249,6 +249,7 @@ and braking. The saved absolute scene requires matching device calibration and
 fresh workspace validation; it is not a generic motion test for a new robot.
 The same guide includes measured 90°/s multi-height plans and a separate 120°/s
 plan at 38 cm with eight-second startup/braking ramps.
+That scene also has measured 15°/30° circle-plane tilts using the same controller.
 
 Tabletop planning uses locally reconstructed camera observations:
 

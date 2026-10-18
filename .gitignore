@@ -69,6 +69,8 @@ configs/*.local.*
 !/data/trajectories/table-circle90-h36cm.json
 !/data/trajectories/table-circle90-h38cm.json
 !/data/trajectories/table-circle120-h38cm.json
+!/data/trajectories/table-circle120-tilt15.json
+!/data/trajectories/table-circle120-tilt30.json
 !/data/tabletop/
 /data/tabletop/*
 !/data/tabletop/static_map.json

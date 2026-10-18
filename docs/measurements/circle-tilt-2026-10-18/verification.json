@@ -1,0 +1,46 @@
+{
+  "local_pytest": {
+    "passed": 793,
+    "skipped": 1,
+    "seconds": 101.63
+  },
+  "remote_pytest": {
+    "passed": 537,
+    "seconds": 17.09
+  },
+  "ruff_remote_runtime": "passed",
+  "ruff_modified_files": "passed",
+  "git_diff_check": "passed",
+  "physical_tests": {
+    "tilts_deg": [
+      0,
+      15,
+      30
+    ],
+    "tilt_axis": "base Y; positive base-X side lower",
+    "center_above_table_cm": 38,
+    "radius_m": 0.08,
+    "target_circle_speed_deg_s": 120,
+    "completed_laps_per_tilt": 4,
+    "ramp_seconds": 8,
+    "operator_visual_feedback_inclined_cases": "两种倾角都平顺，可以接受",
+    "inclined_visual_motion_and_transitions_accepted": true,
+    "final_status_flags": 0,
+    "native_ram_restored": true,
+    "native_pid_origins_limits_unchanged": true,
+    "raw_trace_plan_config_hashes_checked": true,
+    "local_remote_parameter_hashes_match": true
+  },
+  "known_limits": [
+    "Encoder/CAD TCP errors remain above 5 mm dynamic target; optical validation pending",
+    "Near-target average speed does not remove substantial instantaneous speed ripple",
+    "30-degree temporal error is lower here, but high-frequency residual is not improved",
+    "Joints 5/6 held; their dynamics were not tested",
+    "Approximate MuJoCo dynamics accuracy checks remain failed; no precision pass claimed"
+  ],
+  "deployment": {
+    "checked_files": 487,
+    "mismatched_files": [],
+    "verification_document_synced_after_check": true
+  }
+}

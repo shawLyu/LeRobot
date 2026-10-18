@@ -1,0 +1,62 @@
+[
+  {
+    "tilt_deg": 0,
+    "steady_phase_fit_speed_deg_s": 120.60071071340275,
+    "tracking_rms_mm": 13.416763325806825,
+    "tracking_max_mm": 35.03266843779738,
+    "circle_rms_mm": 7.975203463249755,
+    "circle_max_mm": 19.35012790965049,
+    "tcp_hf_error_rms_mm": 0.6488761081765269,
+    "speed_7sample_p05_p50_p95_deg_s": [
+      79.427188629195,
+      113.45609475293168,
+      175.85114650796496
+    ],
+    "control_hz": 59.99827507120882,
+    "max_running_control_period_ms": 18.53586407378316,
+    "status_flags": 0,
+    "plan_sha256": "918ca3da7632e75e19d1c9da8215997832029eee38409fac82f7a0d9e20996d3",
+    "trace_sha256": "9161802f5e935c0644bcbea508d9aafc6ce4c71259738d7ea3b80ae80de581d2",
+    "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650"
+  },
+  {
+    "tilt_deg": 15,
+    "steady_phase_fit_speed_deg_s": 120.5227271435077,
+    "tracking_rms_mm": 10.827886441902802,
+    "tracking_max_mm": 26.555230604233923,
+    "circle_rms_mm": 5.984637115554797,
+    "circle_max_mm": 12.104910768457287,
+    "tcp_hf_error_rms_mm": 0.5420067064254332,
+    "speed_7sample_p05_p50_p95_deg_s": [
+      91.20754815886721,
+      112.99894108788794,
+      166.89889491228178
+    ],
+    "control_hz": 60.00340938269762,
+    "max_running_control_period_ms": 17.983766039833426,
+    "status_flags": 0,
+    "plan_sha256": "8fcf92f2f1ad311f81c69d03462ce0f86b6f8ad51f5a106a8f2901b8751b0341",
+    "trace_sha256": "aefd7d71113e9a688dda1ad4593b8faffb6f007d105ce7fa7e670b1bf335aa64",
+    "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650"
+  },
+  {
+    "tilt_deg": 30,
+    "steady_phase_fit_speed_deg_s": 120.68794424750132,
+    "tracking_rms_mm": 8.158123468353912,
+    "tracking_max_mm": 18.326803650159466,
+    "circle_rms_mm": 5.419500930803195,
+    "circle_max_mm": 15.157496845729437,
+    "tcp_hf_error_rms_mm": 0.7967442548307656,
+    "speed_7sample_p05_p50_p95_deg_s": [
+      96.83512712073143,
+      114.41041913534173,
+      144.62056072869035
+    ],
+    "control_hz": 60.002266273097106,
+    "max_running_control_period_ms": 18.15636712126434,
+    "status_flags": 0,
+    "plan_sha256": "c165871c0d0374e29bf6d239f8a7d395cdec9ebfb6dc85f3c7621dea8b45a37b",
+    "trace_sha256": "8f967df1b81361b5a6fb90406720481f93e0a741b588fc172d6191ece8cb8641",
+    "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650"
+  }
+]

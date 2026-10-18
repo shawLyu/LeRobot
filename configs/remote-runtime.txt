@@ -38,6 +38,8 @@ data/trajectories/table-circle90-h34cm.json
 data/trajectories/table-circle90-h36cm.json
 data/trajectories/table-circle90-h38cm.json
 data/trajectories/table-circle120-h38cm.json
+data/trajectories/table-circle120-tilt15.json
+data/trajectories/table-circle120-tilt30.json
 data/push_t/measured/joint_calibration.json
 data/README.md
 
@@ -87,6 +89,8 @@ src/lerobot_arm_control/runtime/tabletop_server.py
 src/lerobot_arm_control/tasks/__init__.py
 src/lerobot_arm_control/tasks/circle/__init__.py
 src/lerobot_arm_control/tasks/circle/circle_trajectory.py
+src/lerobot_arm_control/tasks/circle/geometry.py
+tests/test_circle_geometry.py
 src/lerobot_arm_control/tasks/push_t/__init__.py
 src/lerobot_arm_control/tasks/push_t/push_t_motor.py
 src/lerobot_arm_control/tasks/push_t/push_t_receiver.py

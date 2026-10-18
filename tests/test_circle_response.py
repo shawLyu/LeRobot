@@ -13,8 +13,9 @@ from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
 
 
-def recorded_circle(tmp_path, vibration, *, laps=3, ramp=2):
-    source = resource_path('data/trajectories/table-circle-8cm.json')
+def recorded_circle(tmp_path, vibration, *, laps=3, ramp=2, tilt=None):
+    source = resource_path('data/trajectories/'+(
+        'table-circle-8cm.json' if tilt is None else f'table-circle120-tilt{tilt}.json'))
     plan = json.loads(source.read_text())
     plan['period_seconds'] = 6
     plan['execution_profile'].update(angular_speed_deg_s=60, ramp_seconds=ramp)
@@ -57,6 +58,16 @@ def test_high_frequency_score_detects_injected_six_hz_vibration(tmp_path):
     result = response_report(trace, plan, tmp_path/'vibrating', plots=False)
     assert result['per_joint']['shoulder_lift']['hf_error_rms_degrees'] > .14
     assert result['tcp_hf_error_rms_mm'] > .4
+
+
+@pytest.mark.parametrize('tilt', [15, 30])
+def test_inclined_response_measures_speed_in_its_plane_without_fake_geometric_error(tmp_path, tilt):
+    trace, plan = recorded_circle(tmp_path, 0, tilt=tilt)
+    result = response_report(trace, plan, tmp_path/'inclined-response', plots=True)
+    assert result['steady_phase_fit_speed_deg_s'] == pytest.approx(60, abs=.03)
+    assert result['circle_max_mm'] < 1
+    assert result['tracking_max_mm'] < 1
+    assert (tmp_path/'inclined-response.png').exists()
 
 
 def test_one_lap_with_long_ramps_keeps_curves_without_claiming_steady_speed(tmp_path):

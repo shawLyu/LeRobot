@@ -1,0 +1,50 @@
+[
+  {
+    "tilt_deg": 15,
+    "geometry_and_command_budget": {
+      "checked": true,
+      "initial_qpos": [
+        0.32523768255771446,
+        -1.142982834251022,
+        0.5773504136563232,
+        -0.43436757930542164,
+        1.887170209331633,
+        -1.469996562508593
+      ],
+      "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+      "plan_sha256": "8fcf92f2f1ad311f81c69d03462ce0f86b6f8ad51f5a106a8f2901b8751b0341",
+      "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650",
+      "motion_budget": {
+        "peak_joint_speed_rad_s": 1.3243799478426155,
+        "peak_control_frame_acceleration_rad_s2": 3.838238796793103
+      }
+    },
+    "approximate_dynamics": {
+      "failed": "circle simulation failed: {'duration_sim_seconds': 14.350000000000843, 'steps': 2870, 'circle_radius_m': 0.08, 'period_seconds': 3.0, 'max_circle_error_m': 0.00853068114097072, 'max_joint_speed_rad_s': 1.7574170883437774, 'max_cartesian_tracking_error_m': 0.008533952604634985, 'max_joint_tracking_error_rad': 0.032894554296992284, 'penetrating_contacts': 0, 'profile': 'hardware', 'passed': False}"
+    }
+  },
+  {
+    "tilt_deg": 30,
+    "geometry_and_command_budget": {
+      "checked": true,
+      "initial_qpos": [
+        0.30821462843837905,
+        -0.9909595877759877,
+        0.3706838710755589,
+        -0.37972428319691515,
+        1.887170209331633,
+        -1.469996562508593
+      ],
+      "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+      "plan_sha256": "c165871c0d0374e29bf6d239f8a7d395cdec9ebfb6dc85f3c7621dea8b45a37b",
+      "control_config_sha256": "94f28f9da29a44ad5c060fc76b608fd8fc1072ae4ad37ddd26c155360ebcc650",
+      "motion_budget": {
+        "peak_joint_speed_rad_s": 1.1761674196429461,
+        "peak_control_frame_acceleration_rad_s2": 3.5410528567250132
+      }
+    },
+    "approximate_dynamics": {
+      "failed": "circle simulation failed: {'duration_sim_seconds': 14.350000000000843, 'steps': 2870, 'circle_radius_m': 0.08, 'period_seconds': 3.0, 'max_circle_error_m': 0.008453868498641638, 'max_joint_speed_rad_s': 1.6206855109113112, 'max_cartesian_tracking_error_m': 0.00862259776201716, 'max_joint_tracking_error_rad': 0.03084775420434499, 'penetrating_contacts': 0, 'profile': 'hardware', 'passed': False}"
+    }
+  }
+]

@@ -90,6 +90,31 @@ and are excluded. The circle phase speed is distinct from each joint's speed.
 See [the 120-degree experiment](measurements/circle120-2026-10-18/README.md) for
 physical results and remaining accuracy limits.
 
+## Circle-plane tilt at 120 degrees/second
+
+`table-circle120-tilt15.json` and `table-circle120-tilt30.json` retain the 38 cm
+center height, 8 cm radius, 120-degree speed profile and eight-second ramps.
+They rotate the plane about base Y: the side farther along base X is lower.
+TCP heights above the table span 35.93–40.07 cm at 15 degrees and 34–42 cm at
+30 degrees. Tool inclination relative to base yaw, wrist roll and gripper remain
+as in the baseline; the tool does not rotate to align with the circle normal.
+
+```sh
+./scripts/lerobot-arm verify tracking --execute --from-current --laps 4 \
+  --plan data/trajectories/table-circle120-tilt15.json
+```
+
+Use `tilt30` for the 30-degree case; `table-circle120-h38cm.json` is the horizontal
+baseline. Each case needs a fresh approach check. See the
+[tilt experiment](measurements/circle-tilt-2026-10-18/README.md) for results.
+
+Tilted plans declare `plane: "inclined"` and `plane_basis: [u, v]` as two finite,
+orthonormal 3D vectors in base coordinates. The normal is `u × v`. For this test,
+`u=[cos(angle), 0, -sin(angle)]`, `v=[0, 1, 0]`. Both geometry validation and
+response scoring project into that exact frame. Cartesian timing error remains
+3D; vertical motion along the tilted plane is not an out-of-plane error.
+Malformed or contradictory bases are rejected before hardware enable.
+
 ## Remote execution and saved responses
 
 `--from-current` reads a fresh remote pose without enabling motion. The local
@@ -127,13 +152,13 @@ the calibrated CAD model; they are not independent optical measurements.
 An optional hashed `execution_profile` can lower `entry_speed_rad_s`, increase
 `ramp_seconds`, explicitly select `controller_profile: "smooth-circle-v1"`,
 `"smooth-circle90-v2"` or `"smooth-circle120-v1"`, and
-request `angular_speed_deg_s`. An explicit speed requires an XY plan whose
+request `angular_speed_deg_s`. An explicit speed requires an XY or inclined plan whose
 `period_seconds` equals `360/angular_speed_deg_s`. The shared experimental maximum
 is 120 degrees/second; the default reviewed 8 cm plan remains at 60 degrees/second. Planned joint speed and sampled entry/ramp acceleration
 must also fit the budgets in `configs/control.json`; these checks run on both
 hosts before enable. This budget is not a guarantee of physical tracking accuracy.
 
-An XY plan declares `plane: "XY"`, `table_z_m` in base coordinates and the exact
+An XY or inclined plan declares `table_z_m` in base coordinates and the exact
 `joint_calibration_sha256`. Wrist roll and gripper remain constant during approach
 and playback. Local validation checks the first five CAD joint ranges, self and
 table collisions. Native gripper limits remain authoritative when its measured

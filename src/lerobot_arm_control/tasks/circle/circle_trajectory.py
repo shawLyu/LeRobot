@@ -15,6 +15,7 @@ from lerobot_arm_control.control.control_defaults import (
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
+from lerobot_arm_control.tasks.circle.geometry import circle_frame
 from lerobot_arm_control.transport.realtime import JOINTS
 
 ROOT = workspace_root()
@@ -79,6 +80,9 @@ class Circle:
             'max_joint_acceleration_rad_s2': profile['max_circle_joint_acceleration_rad_s2'],
         }
         self.plane = saved.get('plane', 'XZ')
+        self.basis_u, self.basis_v, self.normal = circle_frame(
+            self.plane, saved.get('plane_basis'))
+        self.table_bound = self.plane in ('XY', 'inclined')
         self.table_z = saved.get('table_z_m')
         self.calibration_hash = saved.get('joint_calibration_sha256')
         self.execution_ready = saved.get('execution_ready', True)
@@ -105,7 +109,7 @@ class Circle:
             raise ValueError("circle must close")
         self.period = max(self.period, saved['period_seconds'])
         if self.requested_angular_speed is not None:
-            if (self.plane != 'XY'
+            if (not self.table_bound
                     or self.requested_angular_speed > profile['max_circle_angular_speed_deg_s']
                     or not math.isclose(saved['period_seconds'],
                                         360/self.requested_angular_speed, abs_tol=1e-9)):
@@ -113,14 +117,13 @@ class Circle:
             self.period = saved['period_seconds']
         if self.ramp_seconds > self.period and self.requested_angular_speed is None:
             raise ValueError('circle ramp cannot exceed the lap period')
-        if (self.plane not in ('XY', 'XZ')
-                or self.plane == 'XY' and (
+        if (self.table_bound and (
                     type(self.table_z) not in (int, float)
                     or not math.isfinite(self.table_z) or not -.05 <= self.table_z <= 0
                     or not isinstance(self.calibration_hash, str)
                     or len(self.calibration_hash) != 64
                     or any(q[4:] != self.points[0][4:] for q in self.points))):
-            raise ValueError('horizontal circle requires a table plane in base coordinates')
+            raise ValueError('table-referenced circle requires a table plane and held joints')
         peak = max(abs(b - a) * (len(self.points) - 1) / self.period
                    for left, right in zip(self.points, self.points[1:])
                    for a, b in zip(left, right))
@@ -274,6 +277,7 @@ class Circle:
     def status(self, now=None):
         return {"phase": self.phase, "radius_m": self.radius,
                 "plane": self.plane, "center_m": self.center,
+                'plane_basis': [self.basis_u, self.basis_v],
                 'controller_profile': self.feedback_profile['name'],
                 'angular_speed_deg_s': 360/self.period,
                 'motion_budget': self.motion_budget,

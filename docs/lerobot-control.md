@@ -1,6 +1,6 @@
 # 统一关节 PID 控制器
 
-所有正常运动入口使用 `configs/control.json` 的 `shared-joint-pid-v1`，频率 60 Hz。
+所有正常运动入口使用 `configs/robot.json` 的 `shared-joint-pid-v1`，频率 60 Hz。
 主从跟随、手动、回零、圆轨迹、有限关节轨迹、Push-T 和抓取共用 `PositionFeedback`。
 真机由 `ManualControl` 执行，MuJoCo 由 `SimulationControl` 执行。
 场景、路径规划、主从角度映射负责生成目标，不再选择另一套电机控制器。
@@ -126,7 +126,7 @@ MuJoCo 使用相同的 PID 算法、频率和配置，但内部位置执行器�
 
 修改唯一参数源后运行 `./scripts/deploy_code.sh`，然后重启两端进程。
 握手校验配置 SHA-256；旧进程或旧参数不能静默混用。
-`configs/follow.json` 仅保留角色、标定、扳机映射和初始化参数；旧的控制器/频率覆盖字段会被拒绝。
+`configs/robot.json.follow` 仅保留角色、标定、扳机映射和初始化参数；旧的控制器/频率覆盖字段会被拒绝。
 
 参考：上游 [SO follower](https://github.com/huggingface/lerobot/blob/main/src/lerobot/robots/so_follower/so_follower.py)、
 [Feetech 寄存器表](https://github.com/huggingface/lerobot/blob/main/src/lerobot/motors/feetech/tables.py)、
@@ -191,7 +191,7 @@ flowchart LR
 达到 0.03 rad、`abs(Present_Load) >= 100`，且连续 150 ms 的位置变化不超过
 0.0042 rad 时，保持检测瞬间的位置，清空该关节的 PID 状态，禁止继续闭合。
 其他关节照常跟随。只有张开目标超过保持位置 0.02 rad，或显式暂停/重启，
-才重置接触状态。参数来自 `configs/control.json.gripper_contact`；这是一组
+才重置接触状态。参数来自 `configs/robot.json → control.gripper_contact`；这是一组
 待真实物体验证的初始阈值，负载原始值没有换算成夹持力，位置保持不能保证恒定夹持力。
 
 所有共享真机控制入口对黑臂夹爪最终编码器指令也施加已确认的映射端点 [1479, 2982]，

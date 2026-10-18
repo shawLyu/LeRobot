@@ -4,18 +4,17 @@ import json
 import math
 
 from lerobot_arm_control.control.control_defaults import CONTROL, CONTROL_HZ
-from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.core.config import load_robot_config
 from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
 
 
 def load_follow_config(path=None):
-    path = path or workspace_root()/'configs/follow.json'
-    config = json.loads(path.read_text())
+    config = json.loads(path.read_text()) if path else load_robot_config()['follow']
     if config.get('version') != 1 or config['leader'] == config['follower']:
         raise ValueError('follow requires two different configured arms')
     if 'controller_profile' in config or 'hz' in config:
-        raise ValueError('controller and frequency are shared in configs/control.json')
+        raise ValueError('controller and frequency are shared in configs/robot.json.control')
     config.update(controller_profile=CONTROL['name'], hz=CONTROL_HZ)
     for name, low, high in (('hz', 1, 60), ('entry_speed_rad_s', 0, 2),
                             ('alignment_tolerance_degrees', 0, 2),

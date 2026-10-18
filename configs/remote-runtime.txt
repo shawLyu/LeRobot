@@ -139,3 +139,10 @@ src/lerobot_arm_control/robot/model.py
 src/lerobot_arm_control/control/factory.py
 src/lerobot_arm_control/workbench/ranges.py
 tests/test_extensions.py
+
+# Managed hardware baseline and power-up guard.
+src/lerobot_arm_control/robot/arm.py
+src/lerobot_arm_control/robot/parameters.py
+src/lerobot_arm_control/robot/config_cli.py
+scripts/install_config_guard.sh
+tests/test_robot_config.py

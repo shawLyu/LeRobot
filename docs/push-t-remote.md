@@ -108,7 +108,7 @@ Stopping/disconnection retains loaded-joint support and restores prior RAM accel
 
 ## Shared circle controller
 
-Physical Push-T uses the shared ManualControl and `configs/control.json`: 60 Hz,
+Physical Push-T uses the shared ManualControl and `configs/robot.json`: 60 Hz,
 RAM acceleration 254, velocity 3000 ticks/s, reference shaping and bounded PI-D.
 Predictive velocity lead is disabled. Native P/I/D, EEPROM protections and measured
 angle calibration remain unchanged. There are no task-specific PID/native-gain

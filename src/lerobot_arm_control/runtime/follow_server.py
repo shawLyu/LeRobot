@@ -114,7 +114,7 @@ def serve(args):
     arms = load_arms()
     leader, follower = arms[config['leader']], arms[config['follower']]
     if leader.role != 'leader' or follower.role != 'follower':
-        raise ValueError('follow roles must match configs/arms.toml')
+        raise ValueError('follow roles must match configs/robot.json')
     commands, disconnected = queue.Queue(maxsize=16), threading.Event()
     with ExitStack() as stack:
         trace = deque(maxlen=36000)

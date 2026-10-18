@@ -115,7 +115,7 @@ control = SimulationControl(
 
 ## 其他电机总线
 
-`configs/arms.toml` 中新增可选 `backend` 字段。省略时仍为 `feetech`；`model`
+`configs/robot.json` 中新增可选 `backend` 字段。省略时仍为 `feetech`；`model`
 继续表示电机型号，不是机器人 MJCF 型号。内置驱动仍只接受已经验证的 STS3215、
 1 Mbps、稳定 USB 路径和 1–253 ID。其他硬件需要自己的验证及身份表。
 

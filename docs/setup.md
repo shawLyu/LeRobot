@@ -38,14 +38,17 @@ Do not install the optional `simulation` extra remotely: simulation is a local r
 
 ## Device configuration
 
-Remote `configs/arms.toml` stores roles, stable USB paths, IDs, baud rate, and model.
-Assign a verified port and role for each installed arm; use the unassigned template
-in `configs/examples/arms.toml` when configuring a new host.
+Remote `configs/robot.json` stores roles, stable USB paths, IDs, baud rate, and model.
+Configure each installed arm under `arms`, or use private `robot.local.json` USB
+port overrides. The recorded hardware baseline is installation-specific; verify
+motor identity and calibration before using it on different hardware.
 Check actual `/dev/serial/by-id/` paths rather than historical ttyACM numbering.
-The template uses IDs 1–6 and STS3215; verify mappings on each new installation.
 
-`doctor`/`read` connect read-only through FeetechMotorsBus and disconnect with `disable_torque=False`.
-They do not invoke high-level automatic robot configuration, change PID/EEPROM, or calibrate automatically.
+`doctor` checks environment/device access. `read` uses the same checked connection
+as motion functions: saved parameter drift is restored only while torque is off
+and the arm is stationary. Disconnect always uses `disable_torque=False`.
+No automatic motion targets or torque-enable commands are sent.
+See [Robot configuration](robot-config.md) for the power-up guard and capture workflow.
 Raw encoder ticks are not model radians or gripper opening percentages.
 
 Check dialout for serial permissions and video for cameras; log in again after membership changes.

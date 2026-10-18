@@ -1,6 +1,6 @@
 # Control performance and verification
 
-All normal demos use the shared configuration in `configs/control.json`.
+All normal demos use the shared configuration in `configs/robot.json`.
 The default controller favors smoothness and reduced overshoot, with no predictive
 velocity lead. The explicit `smooth-circle-v1` free-space profile adds velocity
 feedforward and reduced acceleration; it uses the same controller implementation.

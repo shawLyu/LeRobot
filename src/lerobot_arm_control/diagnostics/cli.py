@@ -56,12 +56,13 @@ def doctor(arms):
 
 def parser():
     command = argparse.ArgumentParser(description=__doc__)
-    command.add_argument("--config", type=Path, default=workspace_root() / "configs/arms.toml")
+    command.add_argument("--config", type=Path, default=workspace_root() / "configs/robot.json")
     command.add_argument("--output", type=Path, help="Save a JSON result (UTC timestamps)")
     sub = command.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor", help="Verify package imports and configured USB permissions")
     sub.add_parser("list", help="Show configured arms and stable ports")
-    read = sub.add_parser("read", help="Read motor states without modifying registers")
+    read = sub.add_parser("read",
+                          help="Read motor states after checking/restoring the saved baseline")
     read.add_argument("--arm", default="all")
     read.add_argument("--samples", type=int, default=3)
     read.add_argument("--interval", type=float, default=0.1)

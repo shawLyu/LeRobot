@@ -51,8 +51,13 @@ def open_hardware(arm, ids, baudrate):
     if (len(ids) != len(arm.motors) or len(set(ids)) != len(ids)
             or any(type(i) is not int or not 1 <= i <= 253 for i in ids)):
         raise ValueError('需要六个互不重复的舵机 ID（1..253）')
+    configured = arm
     arm = replace(arm, motors=dict(zip(arm.motors, ids, strict=True)))
-    with serial_owner(arm.port):
+    if configured.parameters is not None and (arm.motors != configured.motors
+                                               or baudrate != configured.baudrate):
+        raise ValueError('Saved robot config uses different IDs/baudrate; '
+                         'update it before connecting')
+    with serial_owner(arm.port, timeout=3 if arm.parameters is not None else 0):
         bus = make_bus(arm)
         try:
             bus.connect(handshake=False)
@@ -71,6 +76,9 @@ def open_hardware(arm, ids, baudrate):
                     online[joint] = motor
             bus.motors = online
             install_table(bus)
+            from lerobot_arm_control.robot.arm import RobotArm
+
+            RobotArm(arm).attach(bus, allow_unverified=True)
             yield access, discovery
         finally:
             if bus.is_connected:

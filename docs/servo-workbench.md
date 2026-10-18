@@ -52,7 +52,7 @@ the new ID/baud for independent readback. If the firmware needs a restart or doe
 not respond at the new settings, the transaction reports the communication error;
 disconnect, power-cycle as specified by the manufacturer and reconnect using the
 new values. The connection form exposes both settings. These edits do not silently
-rewrite `configs/arms.toml`; update that machine configuration before using normal
+rewrite `configs/robot.json`; update that machine configuration before using normal
 demos with a permanently changed bus assignment.
 
 Changing zero, phase, scale, mode or EEPROM position limits invalidates the current

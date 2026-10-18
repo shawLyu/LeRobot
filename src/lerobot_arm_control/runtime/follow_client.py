@@ -78,7 +78,7 @@ def run(args):
             hello = link.snapshot()[0]
             if hello['config'] != config:
                 raise ValueError('Local/remote follow parameters differ; '
-                                 'deploy configs/follow.json')
+                                 'deploy configs/robot.json')
             packet = link.snapshot()[1]
             leader_qpos = list(packet['leader_qpos'])
             follower_qpos = list(packet['qpos'])

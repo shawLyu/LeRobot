@@ -329,7 +329,7 @@ def test_follow_derives_pid_and_frequency_from_shared_config(tmp_path):
     config.pop('hz')
     path = tmp_path/'follow.json'
     path.write_text(json.dumps(config))
-    with pytest.raises(ValueError, match='control.json'):
+    with pytest.raises(ValueError, match='robot.json'):
         load_follow_config(path)
 
 

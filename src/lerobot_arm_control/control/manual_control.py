@@ -82,6 +82,8 @@ class ManualControl:
         from lerobot_arm_control.control.parking import Parking
 
         self.parking = Parking(self, rest_path)
+        if getattr(bus, "robot_arm", None) is not None:
+            bus.robot_arm.controller = self
 
     def angle(self, joint, raw):
         fit = self.calibration.fit(joint)

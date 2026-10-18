@@ -10,7 +10,10 @@ LeRobot/
 │   ├── robot/
 │   │   ├── model.py      通用标量关节 MJCF 元数据
 │   │   ├── backends.py   驱动注册、配置与型号身份接口
-│   │   ├── connection.py 串口独占与只读连接生命周期
+│   │   ├── arm.py        RobotArm：配置、连接、控制器归属
+│   │   ├── parameters.py 保存基准、差异恢复与 EEPROM 事务
+│   │   ├── config_cli.py 参数核对、保存与上电守护
+│   │   ├── connection.py 串口独占与统一配置核对
 │   │   ├── feetech.py    STS3215 驱动和原生流参数校验
 │   │   └── so101/        SO-101 关节表和工具几何选择
 │   ├── control/          共享 PID、限位、保持、接触/受阻检测、轨迹执行
@@ -68,9 +71,8 @@ STS 原生寄存器工作台仍明确限定 Feetech STS3215，范围存储归属
 | --- | --- | --- |
 | `configs/runtime.json` | 通用连接默认值，不包含个人账户和环境路径 | 共享示例 |
 | `configs/runtime.local.json` | 当前账户的 SSH、远端目录与可选本地环境 | Git 忽略、部署排除；每台机器独立维护 |
-| `configs/arms.toml` | 两臂角色、USB 设备、波特率、电机 ID | 每台设备单独配置；部署保留已有文件 |
-| `configs/control.json` | 唯一电机控制频率、PID、参考整形、轨迹速度、接触/受阻阈值及绑定设备的指令范围 | 修改后部署并重启；控制连接核对 SHA256 |
-| `configs/follow.json` | 主从映射、扳机端点、初始化策略及验收速度范围 | 实测确认后保存；不重复定义 PID |
+| `configs/robot.json` | 两臂连接、舵机基准、标定/模型指纹、共享控制器与主从映射 | 唯一机械臂配置；部署同步，上电与每次连接检查 |
+| `configs/robot.local.json` | 机器私有 USB 端口覆盖 | Git 忽略、部署排除 |
 | `configs/camera.toml`、`camera_intrinsics.json` | 摄像头选择、采集设置、内参 | 设备配置与内参标定分别维护 |
 | `configs/tabletop.json` | 标记尺寸、高度、桌面与视觉处理参数 | 按实测值更新；常规部署保留远端已有文件 |
 | `configs/scenes/tabletop-current.json` | 当前场景参数及配置/标定来源哈希 | 场景更新时保存 |

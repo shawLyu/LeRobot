@@ -4,12 +4,14 @@ import hashlib
 import json
 from copy import deepcopy
 
+from lerobot_arm_control.core.config import load_robot_config
 from lerobot_arm_control.core.paths import resource_path
 
-CONTROL_CONFIG = resource_path("configs/control.json")
-CONFIG_BYTES = CONTROL_CONFIG.read_bytes()
+CONTROL_CONFIG = resource_path("configs/robot.json")
+CONTROL = load_robot_config()["control"]
+# Preserve the measured controller fingerprint when unrelated hardware settings change.
+CONFIG_BYTES = (json.dumps(CONTROL, indent=2)+"\n").encode()
 CONTROL_CONFIG_SHA256 = hashlib.sha256(CONFIG_BYTES).hexdigest()
-CONTROL = json.loads(CONFIG_BYTES)
 if CONTROL.get("version") != 1:
     raise ValueError("invalid shared control configuration")
 DEFAULTS = CONTROL["native_defaults"]

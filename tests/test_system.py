@@ -54,12 +54,14 @@ baudrate = 1000000
 [arms.test.motors]
 gripper = 6
 ''')
-    assert load_arms()["test"].port == "/dev/serial/by-id/test-device"
-    shared = tmp_path / "configs/control.json"
-    with pytest.raises(FileNotFoundError, match="control.json"):
-        resource_path("configs/control.json")
+    assert load_arms(path)["test"].port == "/dev/serial/by-id/test-device"
+    with pytest.raises(FileNotFoundError, match="robot.json"):
+        load_arms()
+    shared = tmp_path / "configs/robot.json"
+    with pytest.raises(FileNotFoundError, match="robot.json"):
+        resource_path("configs/robot.json")
     shared.write_text("custom-shared-config")
-    assert resource_path("configs/control.json") == shared
+    assert resource_path("configs/robot.json") == shared
     with pytest.raises(FileNotFoundError, match="so101.xml"):
         resource_path("assets/so101/so101.xml")
     assert resource_path("configs") == tmp_path / "configs"

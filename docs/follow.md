@@ -95,7 +95,7 @@ input uses 1–6 and Up/Down; E resumes and Space holds only that local virtual 
 
 ## Shared controller and deployment
 
-Every normal motion demo uses `configs/control.json`; `configs/follow.json` holds
+Every normal motion demo uses `configs/robot.json.control`; its `follow` section holds
 roles, mapping and initialization only. Independent PID/frequency overrides are rejected.
 See [controller design](lerobot-control.md) and [current response evidence](measurements/remote-follow-2026-10-12/README.md).
 

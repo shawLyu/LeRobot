@@ -1,9 +1,10 @@
-"""Exclusive read-only connection lifecycle for LeRobot-compatible motor adapters."""
+"""Exclusive checked connection lifecycle for LeRobot-compatible motor adapters."""
 
 import fcntl
 import hashlib
 import os
 import tempfile
+import time
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -12,16 +13,22 @@ from lerobot_arm_control.robot.backends import get_backend
 
 
 @contextmanager
-def serial_owner(port):
+def serial_owner(port, *, timeout=0):
     """Reserve the device before open/baudrate/ping can disturb another worker."""
     identity = hashlib.sha256(str(Path(port).resolve()).encode()).hexdigest()[:20]
     path = Path(tempfile.gettempdir())/f'lerobot-serial-{os.getuid()}-{identity}.lock'
     descriptor = os.open(path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     try:
-        try:
-            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            raise RuntimeError(f'Motor bus {port} is already owned by another worker') from exc
+        deadline = time.monotonic()+timeout
+        while True:
+            try:
+                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError as exc:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError(
+                        f'Motor bus {port} is already owned by another worker') from exc
+                time.sleep(.05)
         yield
     finally:
         os.close(descriptor)
@@ -35,11 +42,12 @@ def make_bus(arm: ArmConfig):
 
 
 @contextmanager
-def connected(arm: ArmConfig, *, allow_alarm=False):
+def connected(arm: ArmConfig, *, allow_alarm=False, robot=None, lock_timeout=None):
     backend = get_backend(arm.backend)
     backend.check(arm)
     expected_model = backend.model_numbers[arm.model]
-    with serial_owner(arm.port):
+    timeout = (3 if arm.parameters is not None else 0) if lock_timeout is None else lock_timeout
+    with serial_owner(arm.port, timeout=timeout):
         bus = make_bus(arm)
         try:
             # The high-level SO robot connect() also configures motors; use only the bus here.
@@ -63,6 +71,9 @@ def connected(arm: ArmConfig, *, allow_alarm=False):
                 if model != expected_model:
                     raise RuntimeError(f"{arm.name}/{name}: expected {arm.model} "
                                        f"({expected_model}), got {model}")
+            from lerobot_arm_control.robot.arm import RobotArm
+
+            (robot or RobotArm(arm)).attach(bus)
             yield bus
         finally:
             # Default disconnect disables torque and unlocks EEPROM; diagnostics must not do that.

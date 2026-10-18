@@ -163,13 +163,31 @@ ls -l /dev/serial/by-id/
 ls -l /dev/v4l/by-id/
 ```
 
-A fresh deployment seeds an unassigned arm template. Edit remote
-`configs/arms.toml` using [configs/examples/arms.toml](configs/examples/arms.toml):
-assign each arm's verified USB path, role, model, baud rate and motor IDs.
-Use `follower` for the controlled arm and, for a two-arm installation, `arm1`
-with role `leader` for the acquisition arm. Copy the same verified arm configuration
-to the local workspace used by viewers. Match channel names and IDs to your wiring;
-the template's ID order is only an example.
+`configs/robot.json` is the single robot configuration: `arms` contains the two
+verified device connections, complete servo baselines and calibration/model
+fingerprints; `control` and `follow` contain the shared controller and mapping.
+The included measured snapshot belongs to this installation. **For other hardware,
+configure and calibrate your own arms before connecting; do not apply this snapshot
+to an unverified robot.** USB paths may be overridden privately in ignored
+`configs/robot.local.json`, for example:
+
+```json
+{"arms": {"follower": {"port": "/dev/serial/by-id/YOUR_FOLLOWER"},
+          "arm1": {"port": "/dev/serial/by-id/YOUR_LEADER"}}}
+```
+
+Every motor connection checks the saved baseline before exposing the bus.
+On the Linux motor host, install the background power-up/reconnect guard:
+
+```bash
+sh scripts/install_config_guard.sh
+PYTHONPATH=src .venv/bin/python -m lerobot_arm_control config check
+```
+
+The guard skips buses owned by a controller. Restoration never enables torque or
+writes a motion target; EEPROM differences require a released, stationary arm.
+See [Robot configuration](docs/robot-config.md) for saving intentional parameter
+changes and the `RobotArm` API.
 
 After configuration, these commands inspect devices without sending motion targets:
 
@@ -268,9 +286,8 @@ calibrations. See [Live Push-T](docs/push-t-remote.md) and [T pick/place](docs/p
 | --- | --- |
 | `configs/runtime.json` | Generic connection defaults; no personal account or environment |
 | `configs/runtime.local.json` | Per-account connection/environment override; ignored and never deployed |
-| `configs/arms.toml` | Device roles, ports and motor IDs for the selected workspace |
-| `configs/control.json` | Shared outer controller, reference shaping and protection parameters |
-| `configs/follow.json` | Leader/follower mapping and initialization settings |
+| `configs/robot.json` | Connections, measured servo baselines, calibration/model references, shared controller and follow mapping |
+| `configs/robot.local.json` | Optional private USB port overrides, ignored by Git/deployment |
 | `configs/camera.toml`, `camera_intrinsics.json`, `tabletop.json` | Capture, intrinsics and scene geometry |
 | `data/calibration/` | Device-bound measurements and resting poses |
 | `data/push_t/measured/` | Included offline demo snapshot |

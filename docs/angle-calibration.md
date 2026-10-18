@@ -75,7 +75,7 @@ retain 0/30/60° references; joint 6 uses measured 0/15/30° reference points.
 These points fit the encoder scale; they do not define maximum trigger travel.
 The current user-defined minimum/maximum endpoints were captured at raw 1940/3002,
 corresponding to 39.08–140.54° under this independent mapping. They are stored in
-`configs/follow.json` and are distinct from the calibration reference points.
+`configs/robot.json` and are distinct from the calibration reference points.
 The saved calibration file preserves the reference-point convention independently.
 Additional arms use this entry for read-only alignment; physical-control and gripper-test
 flags are rejected. After 6/6 valid mappings and transfer to the remote host, the

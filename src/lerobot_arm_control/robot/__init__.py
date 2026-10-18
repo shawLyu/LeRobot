@@ -3,6 +3,7 @@
 from lerobot_arm_control.core.api import public_symbol
 
 _EXPORTS = {
+    'RobotArm': ('robot.arm', 'RobotArm'),
     'RobotModel': ('robot.model', 'RobotModel'),
     'MotorBackend': ('robot.backends', 'MotorBackend'),
     'register_backend': ('robot.backends', 'register_backend'),

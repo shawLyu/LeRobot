@@ -1,7 +1,7 @@
 # Shared circle controller
 
 The six-joint circle, manual control, following and manipulation tasks use the same
-`PositionFeedback` implementation. Parameters live in `configs/control.json`.
+`PositionFeedback` implementation. Parameters live in `configs/robot.json`.
 The default `position_feedback` retains the validated contact/following settings.
 `circle_position_feedback` contains overrides for the explicitly selected
 `smooth-circle-v1` profile: bounded PI plus velocity feedforward, reference shaping,
@@ -155,7 +155,7 @@ An optional hashed `execution_profile` can lower `entry_speed_rad_s`, increase
 request `angular_speed_deg_s`. An explicit speed requires an XY or inclined plan whose
 `period_seconds` equals `360/angular_speed_deg_s`. The shared experimental maximum
 is 120 degrees/second; the default reviewed 8 cm plan remains at 60 degrees/second. Planned joint speed and sampled entry/ramp acceleration
-must also fit the budgets in `configs/control.json`; these checks run on both
+must also fit the budgets in `configs/robot.json`; these checks run on both
 hosts before enable. This budget is not a guarantee of physical tracking accuracy.
 
 An XY or inclined plan declares `table_z_m` in base coordinates and the exact

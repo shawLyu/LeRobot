@@ -11,6 +11,7 @@ class MotorBackend:
     factory: Callable
     validate: Callable
     model_numbers: Mapping[str, int]
+    ensure_parameters: Callable | None = None
 
     def check(self, arm):
         if arm.model not in self.model_numbers:
@@ -26,7 +27,14 @@ class MotorBackend:
         self.validate(arm)
 
 
-_BACKENDS = {'feetech': MotorBackend(feetech.make_bus, feetech.validate_arm, {'sts3215': 777})}
+def _ensure_feetech(bus, arm):
+    from lerobot_arm_control.robot.parameters import ensure_parameters
+
+    return ensure_parameters(bus, arm)
+
+
+_BACKENDS = {'feetech': MotorBackend(feetech.make_bus, feetech.validate_arm,
+                                     {'sts3215': 777}, _ensure_feetech)}
 
 
 def register_backend(name, backend):

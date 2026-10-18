@@ -12,6 +12,7 @@ import numpy as np
 from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
 from lerobot_arm_control.control.control_defaults import CONTROL_CONFIG_SHA256
 from lerobot_arm_control.control.joint_path import ACTIVE, plan_digest
+from lerobot_arm_control.core.config import load_robot_config
 from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
@@ -119,7 +120,7 @@ def trial(args):
     saved = json.loads(angle_path.read_text())
     calibration = AngleCalibration(angle_path, saved['fingerprint'])
     proof = {'completed': False, 'control_config_sha256': CONTROL_CONFIG_SHA256,
-             'config': json.loads((ROOT/'configs/control.json').read_text()),
+             'config': load_robot_config()['control'],
              'samples': [], 'acks': [], 'max_camera_age_s': 0.,
              'measurement_scope': 'encoder response benchmark; camera is recorded separately'}
     remote_trace = args.remote_root+'/logs/'+args.output.name+'-control.json'

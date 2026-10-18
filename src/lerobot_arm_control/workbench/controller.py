@@ -30,7 +30,8 @@ class Workbench:
         self.history = deque(maxlen=12000)
         self.frame = None
         self.enabled, self.bounds, self.last_goal = set(), {}, {}
-        self.fault = None
+        robot = getattr(bus, "robot_arm", None)
+        self.fault = (robot.startup_report or {}).get("error") if robot else None
         self.job = self.last_result = self.move_job = None
         self.last_activity = clock()
         self.temperature_at = -math.inf
@@ -51,6 +52,8 @@ class Workbench:
                            f'当前位置 {current} 不在 EEPROM 限位 {low}—{high} 内，请检查限位参数'),
             }
         self.load_bounds()
+        if getattr(bus, "robot_arm", None) is not None:
+            bus.robot_arm.controller = self
 
     def bounds_record(self, joint, bounds):
         return {'context': self.context, 'id': self.discovery[joint]['id'],
@@ -212,6 +215,17 @@ class Workbench:
                 if self.read('Torque_Enable', joint) != 0:
                     raise ValueError('请先释放扭矩，再恢复 EEPROM 写入锁')
                 self.checked_write('Lock', joint, 1)
+        robot = getattr(self.bus, "robot_arm", None)
+        if robot and robot.startup_report and robot.startup_report.get("error"):
+            references = {j: self.identity(j) for j in self.online}
+            robot.check_parameters()
+            # Restored reference limits may change the valid software envelope.
+            for joint in self.online:
+                self.native_limits[joint] = self.position_limits(joint)
+                if references[joint] != self.identity(joint):
+                    self.bounds[joint] = None
+                    self.bounds_info[joint] = {"source": "invalid",
+                                               "reason": "保存参考参数已恢复，请重新设置动作范围"}
         self.fault = None
         self.stall_samples.clear()
         return {'fault': None}
@@ -290,7 +304,8 @@ class Workbench:
                     raise ValueError('新 EEPROM 位置限位必须包含当前位置，请先手动移入拟定范围')
         audit = {'joint': joint, 'id': self.discovery[joint]['id'], 'before': before,
                  'requested': changes, 'persist': persist, 'unix_ns': time.time_ns(),
-                 'device_context': self.context.copy(), 'reference': self.identity(joint),
+                 'device_context': self.context.copy(),
+                 'reference': self.identity(joint),
                  'completed': False, 'rollback_errors': []}
         if any(BY_KEY[key].effect == 'reference' for key in changes):
             self.bounds[joint] = None
@@ -416,6 +431,8 @@ class Workbench:
         self.job = {'id': str(time.time_ns()), 'plan': plan, 'index': 0, 'dwell': dwell,
                     'amplitude_deg': amplitude_deg, 'segments': [], 'active': None,
                     'device_context': self.context.copy(),
+                'parameter_check': (self.bus.robot_arm.startup_report
+                                    if getattr(self.bus, 'robot_arm', None) else None),
                     'motor_identities': {j: {'id': self.discovery[j]['id'], **self.identity(j)}
                                          for j in joints},
                     'native_parameters': native, 'started_unix_ns': time.time_ns()}
@@ -550,6 +567,8 @@ class Workbench:
     def state(self):
         return {'frame': self.frame, 'discovery': self.discovery, 'enabled': sorted(self.enabled),
                 'device_context': self.context.copy(),
+                'parameter_check': (self.bus.robot_arm.startup_report
+                                    if getattr(self.bus, 'robot_arm', None) else None),
                 'bounds': self.bounds, 'bounds_info': self.bounds_info,
                 'native_limits': self.native_limits, 'fault': self.fault,
                 'sample_retries': self.sample_retries,

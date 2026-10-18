@@ -43,15 +43,16 @@ def run_deploy(commands, *arguments):
     return result, calls
 
 
-def test_dry_run_only_previews_transfers_and_uses_unassigned_device_template(commands):
+def test_dry_run_transfers_robot_baseline_and_preserves_private_overrides(commands):
     result, calls = run_deploy(commands, "--dry-run")
     assert result.returncode == 0, result.stderr
     assert calls
     assert all(name == "rsync" and "--dry-run" in arguments for name, arguments in calls)
-    arms = [args for _, args in calls if args[-1].endswith("/configs/arms.toml")]
-    assert len(arms) == 1
-    assert arms[0][-2] == str(ROOT / "configs/examples/arms.toml")
-    assert "--ignore-existing" in arms[0]
+    assert not any(args[-1].endswith('/configs/arms.toml') for _, args in calls)
+    configs = [args for _, args in calls if args[-2] == str(ROOT/'configs')+'/']
+    assert len(configs) == 1
+    assert '--exclude=*.local.*' in configs[0]
+    assert '--exclude=/robot.json' not in configs[0]
 
 
 def test_success_prepares_destination_and_transfers_without_archiving_old_code(commands):
@@ -61,7 +62,7 @@ def test_success_prepares_destination_and_transfers_without_archiving_old_code(c
     assert all(name == "rsync" for name, _ in calls[1:])
     for _, args in calls[1:]:
         assert "--delete" not in args
-    configuration = [args for _, args in calls if "--exclude=/arms.toml" in args]
+    configuration = [args for _, args in calls if "--exclude=/camera.toml" in args]
     assert len(configuration) == 2
     assert all("--exclude=/camera.toml" in args and "--exclude=/tabletop.json" in args
                for args in configuration)

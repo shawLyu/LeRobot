@@ -41,7 +41,9 @@ def run(arm, ids, baudrate, *, hz=100):
             try:
                 publish({'type': 'hello', 'arm': arm.name, 'port': arm.port,
                          'baudrate': baudrate, 'schema': schema(), 'state': controller.state(),
-                         'sample_hz': hz, 'log_directory': str(directory)})
+                         'sample_hz': hz, 'log_directory': str(directory),
+                         'parameter_check': (bus.robot_arm.startup_report
+                                             if getattr(bus, 'robot_arm', None) else None)})
                 deadline = previous_publish = time.monotonic()
                 while not disconnected.is_set():
                     # Stop/heartbeat can be acknowledged without waiting for an HTTP round trip.

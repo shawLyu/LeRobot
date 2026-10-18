@@ -218,7 +218,8 @@ def test_feedback_worker_has_only_reads_and_saves_every_sample(monkeypatch, hard
         assert bus.torque_samples == [1, 2, 3]
         assert gc.isenabled() == previously_enabled
         assert feedback.metadata['control_hz'] == 60
-        expected = json.loads((ROOT/'configs/control.json').read_text())['position_feedback']
+        expected = json.loads((ROOT/'configs/robot.json').read_text())['control'][
+            'position_feedback']
         assert feedback.motor.control.position_feedback.profile == expected
     feedback.sampled_at -= 1
     assert feedback.snapshot()["status"] == "stale"

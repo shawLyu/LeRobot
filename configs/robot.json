@@ -1,0 +1,980 @@
+{
+  "version": 1,
+  "captured_unix_ns": 1792341700464178103,
+  "arms": {
+    "follower": {
+      "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+      "role": "follower",
+      "model": "sts3215",
+      "baudrate": 1000000,
+      "motors": {
+        "shoulder_pan": 1,
+        "shoulder_lift": 2,
+        "elbow_flex": 3,
+        "wrist_flex": 4,
+        "wrist_roll": 5,
+        "gripper": 6
+      },
+      "resources": {
+        "calibration": {
+          "path": "data/calibration/follower_mujoco.json",
+          "sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652"
+        },
+        "model": {
+          "path": "assets/so101/so101.xml",
+          "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+        }
+      },
+      "parameters": {
+        "shoulder_pan": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 844,
+            "Max_Position_Limit": 3440,
+            "Max_Temperature_Limit": 70,
+            "Max_Voltage_Limit": 80,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 12,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 40,
+            "D_Coefficient": 64,
+            "I_Coefficient": 0,
+            "Minimum_Startup_Force": 16,
+            "Integral_Limit": 8,
+            "CW_Dead_Zone": 2,
+            "CCW_Dead_Zone": 2,
+            "Protection_Current": 500,
+            "Angular_Resolution": 1,
+            "Homing_Offset": -1110,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 200,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 1,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 20,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 68,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 1
+          }
+        },
+        "shoulder_lift": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 809,
+            "Max_Position_Limit": 3238,
+            "Max_Temperature_Limit": 70,
+            "Max_Voltage_Limit": 80,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 12,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 32,
+            "D_Coefficient": 80,
+            "I_Coefficient": 4,
+            "Minimum_Startup_Force": 12,
+            "Integral_Limit": 8,
+            "CW_Dead_Zone": 0,
+            "CCW_Dead_Zone": 0,
+            "Protection_Current": 500,
+            "Angular_Resolution": 1,
+            "Homing_Offset": 1932,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 200,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 2,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 20,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 68,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 1
+          }
+        },
+        "elbow_flex": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 773,
+            "Max_Position_Limit": 3126,
+            "Max_Temperature_Limit": 70,
+            "Max_Voltage_Limit": 80,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 12,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 56,
+            "D_Coefficient": 128,
+            "I_Coefficient": 8,
+            "Minimum_Startup_Force": 4,
+            "Integral_Limit": 48,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 500,
+            "Angular_Resolution": 1,
+            "Homing_Offset": 1070,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 200,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 3,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 20,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 68,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 1
+          }
+        },
+        "wrist_flex": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 862,
+            "Max_Position_Limit": 3192,
+            "Max_Temperature_Limit": 70,
+            "Max_Voltage_Limit": 80,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 12,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 48,
+            "D_Coefficient": 96,
+            "I_Coefficient": 4,
+            "Minimum_Startup_Force": 8,
+            "Integral_Limit": 16,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 500,
+            "Angular_Resolution": 1,
+            "Homing_Offset": -1980,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 200,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 4,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 20,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 68,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 1
+          }
+        },
+        "wrist_roll": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 0,
+            "Max_Position_Limit": 4095,
+            "Max_Temperature_Limit": 70,
+            "Max_Voltage_Limit": 80,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 12,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 48,
+            "D_Coefficient": 96,
+            "I_Coefficient": 2,
+            "Minimum_Startup_Force": 16,
+            "Integral_Limit": 8,
+            "CW_Dead_Zone": 0,
+            "CCW_Dead_Zone": 0,
+            "Protection_Current": 500,
+            "Angular_Resolution": 1,
+            "Homing_Offset": -1910,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 200,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 5,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 20,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 68,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 1
+          }
+        },
+        "gripper": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 452,
+            "Max_Position_Limit": 1893,
+            "Max_Temperature_Limit": 70,
+            "Max_Voltage_Limit": 80,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 500,
+            "Phase": 12,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 48,
+            "D_Coefficient": 64,
+            "I_Coefficient": 4,
+            "Minimum_Startup_Force": 16,
+            "Integral_Limit": 16,
+            "CW_Dead_Zone": 0,
+            "CCW_Dead_Zone": 0,
+            "Protection_Current": 250,
+            "Angular_Resolution": 1,
+            "Homing_Offset": -1632,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 25,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 200,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 500
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 6,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 20,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 68,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 1
+          }
+        }
+      }
+    },
+    "arm1": {
+      "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+      "role": "leader",
+      "model": "sts3215",
+      "baudrate": 1000000,
+      "motors": {
+        "shoulder_pan": 1,
+        "shoulder_lift": 2,
+        "elbow_flex": 3,
+        "wrist_flex": 4,
+        "wrist_roll": 5,
+        "gripper": 6
+      },
+      "resources": {
+        "calibration": {
+          "path": "data/calibration/arm1_mujoco.json",
+          "sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963"
+        },
+        "model": {
+          "path": "assets/so101/so101.xml",
+          "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+        }
+      },
+      "parameters": {
+        "shoulder_pan": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 699,
+            "Max_Position_Limit": 3416,
+            "Max_Temperature_Limit": 80,
+            "Max_Voltage_Limit": 120,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 76,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 16,
+            "D_Coefficient": 32,
+            "I_Coefficient": 0,
+            "Minimum_Startup_Force": 0,
+            "Integral_Limit": 0,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 300,
+            "Angular_Resolution": 1,
+            "Homing_Offset": -2030,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 250,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 1,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 10,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 250,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 100
+          }
+        },
+        "shoulder_lift": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 795,
+            "Max_Position_Limit": 3280,
+            "Max_Temperature_Limit": 70,
+            "Max_Voltage_Limit": 80,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 12,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 16,
+            "D_Coefficient": 32,
+            "I_Coefficient": 0,
+            "Minimum_Startup_Force": 16,
+            "Integral_Limit": 0,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 500,
+            "Angular_Resolution": 1,
+            "Homing_Offset": 1084,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 200,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 2,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 20,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 68,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 1
+          }
+        },
+        "elbow_flex": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 807,
+            "Max_Position_Limit": 3094,
+            "Max_Temperature_Limit": 80,
+            "Max_Voltage_Limit": 120,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 76,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 16,
+            "D_Coefficient": 32,
+            "I_Coefficient": 0,
+            "Minimum_Startup_Force": 0,
+            "Integral_Limit": 0,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 300,
+            "Angular_Resolution": 1,
+            "Homing_Offset": 924,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 250,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 3,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 10,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 250,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 100
+          }
+        },
+        "wrist_flex": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 794,
+            "Max_Position_Limit": 3200,
+            "Max_Temperature_Limit": 80,
+            "Max_Voltage_Limit": 120,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 76,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 16,
+            "D_Coefficient": 32,
+            "I_Coefficient": 0,
+            "Minimum_Startup_Force": 0,
+            "Integral_Limit": 0,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 300,
+            "Angular_Resolution": 1,
+            "Homing_Offset": -1986,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 250,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 4,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 10,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 250,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 100
+          }
+        },
+        "wrist_roll": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 0,
+            "Max_Position_Limit": 4095,
+            "Max_Temperature_Limit": 80,
+            "Max_Voltage_Limit": 120,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 1000,
+            "Phase": 76,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 16,
+            "D_Coefficient": 32,
+            "I_Coefficient": 0,
+            "Minimum_Startup_Force": 0,
+            "Integral_Limit": 0,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 300,
+            "Angular_Resolution": 1,
+            "Homing_Offset": 1818,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 80,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 250,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 1000
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 5,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 10,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 250,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 100
+          }
+        },
+        "gripper": {
+          "persistent": {
+            "Response_Status_Level": 1,
+            "Min_Position_Limit": 1512,
+            "Max_Position_Limit": 2759,
+            "Max_Temperature_Limit": 80,
+            "Max_Voltage_Limit": 120,
+            "Min_Voltage_Limit": 40,
+            "Max_Torque_Limit": 500,
+            "Phase": 76,
+            "Unloading_Condition": 44,
+            "LED_Alarm_Condition": 47,
+            "P_Coefficient": 16,
+            "D_Coefficient": 32,
+            "I_Coefficient": 0,
+            "Minimum_Startup_Force": 0,
+            "Integral_Limit": 0,
+            "CW_Dead_Zone": 1,
+            "CCW_Dead_Zone": 1,
+            "Protection_Current": 250,
+            "Angular_Resolution": 1,
+            "Homing_Offset": 1844,
+            "Operating_Mode": 0,
+            "Protective_Torque": 20,
+            "Protection_Time": 200,
+            "Overload_Torque": 25,
+            "Velocity_closed_loop_P_proportional_coefficient": 10,
+            "Over_Current_Protection_Time": 250,
+            "Velocity_closed_loop_I_integral_coefficient": 200
+          },
+          "startup": {
+            "Acceleration": 0,
+            "Goal_Time": 0,
+            "Goal_Velocity": 0,
+            "Torque_Limit": 500
+          },
+          "identity": {
+            "Firmware_Major_Version": 3,
+            "Firmware_Minor_Version": 10,
+            "Endianness": 0,
+            "Model_Number": 777,
+            "ID": 6,
+            "Baud_Rate": 0,
+            "Return_Delay_Time": 0,
+            "Moving_Velocity_Threshold": 1,
+            "DTs": 10,
+            "Velocity_Unit_factor": 50,
+            "Hts": 1,
+            "Maximum_Velocity_Limit": 250,
+            "Maximum_Acceleration": 254,
+            "Acceleration_Multiplier": 100
+          }
+        }
+      }
+    }
+  },
+  "control": {
+    "version": 1,
+    "name": "shared-joint-pid-v2",
+    "native_defaults": {
+      "source": "installed lerobot 0.6.1 SOFollowerConfig and TeleoperateConfig",
+      "control_hz": 60,
+      "max_relative_target": null,
+      "num_read_retries": 2,
+      "position_p_coefficient": 16,
+      "position_i_coefficient": 0,
+      "position_d_coefficient": 32,
+      "return_delay_time": 0,
+      "maximum_acceleration": 254,
+      "operating_mode": 0,
+      "gripper_max_torque_limit": 500,
+      "gripper_protection_current": 250,
+      "gripper_overload_torque": 25
+    },
+    "position_feedback": {
+      "version": 1,
+      "joints": {
+        "shoulder_pan": {
+          "kp": 0.12,
+          "ki": 1.2,
+          "max_correction_rad": 0.2,
+          "correction_rate_rad_s": 0.24,
+          "error_filter_seconds": 0.08,
+          "error_deadband_rad": 0.003,
+          "kd": 0.02,
+          "derivative_filter_seconds": 0.08,
+          "velocity_feedforward_s": 0.0,
+          "feedforward_rate_rad_s": 4.0,
+          "reference_filter_seconds": 0.015,
+          "reference_smoothing_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.25,
+          "derivative_motion_scale_rad_s": 0.1
+        },
+        "shoulder_lift": {
+          "kp": 0.1,
+          "ki": 0.8,
+          "max_correction_rad": 0.16,
+          "correction_rate_rad_s": 0.24,
+          "error_filter_seconds": 0.08,
+          "error_deadband_rad": 0.003,
+          "kd": 0.03,
+          "derivative_filter_seconds": 0.04,
+          "velocity_feedforward_s": 0.0,
+          "feedforward_rate_rad_s": 4.0,
+          "reference_filter_seconds": 0.015,
+          "reference_smoothing_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.25,
+          "derivative_motion_scale_rad_s": 0.1
+        },
+        "elbow_flex": {
+          "kp": 0.25,
+          "ki": 1.5,
+          "max_correction_rad": 0.16,
+          "correction_rate_rad_s": 0.24,
+          "error_filter_seconds": 0.08,
+          "error_deadband_rad": 0.003,
+          "kd": 0.02,
+          "derivative_filter_seconds": 0.08,
+          "velocity_feedforward_s": 0.0,
+          "feedforward_rate_rad_s": 4.0,
+          "reference_filter_seconds": 0.015,
+          "reference_smoothing_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.25,
+          "derivative_motion_scale_rad_s": 0.1
+        },
+        "wrist_flex": {
+          "kp": 0.1,
+          "ki": 0.8,
+          "max_correction_rad": 0.16,
+          "correction_rate_rad_s": 0.24,
+          "error_filter_seconds": 0.08,
+          "error_deadband_rad": 0.0015,
+          "kd": 0.02,
+          "derivative_filter_seconds": 0.08,
+          "velocity_feedforward_s": 0.0,
+          "feedforward_rate_rad_s": 4.0,
+          "reference_filter_seconds": 0.015,
+          "reference_smoothing_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.25,
+          "derivative_motion_scale_rad_s": 0.1
+        },
+        "wrist_roll": {
+          "kp": 0.2,
+          "ki": 0.8,
+          "max_correction_rad": 0.2,
+          "correction_rate_rad_s": 0.3,
+          "error_filter_seconds": 0.04,
+          "error_deadband_rad": 0.0015,
+          "kd": 0.015,
+          "derivative_filter_seconds": 0.04,
+          "velocity_feedforward_s": 0.0,
+          "feedforward_rate_rad_s": 6.0,
+          "reference_filter_seconds": 0.01,
+          "reference_smoothing_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.25,
+          "derivative_motion_scale_rad_s": 0.1
+        },
+        "gripper": {
+          "kp": 0.35,
+          "ki": 0.8,
+          "max_correction_rad": 0.12,
+          "correction_rate_rad_s": 0.04,
+          "error_filter_seconds": 0.12,
+          "error_deadband_rad": 0.003,
+          "kd": 0.01,
+          "derivative_filter_seconds": 0.08,
+          "velocity_feedforward_s": 0.0,
+          "feedforward_rate_rad_s": 4.0,
+          "reference_filter_seconds": 0.015,
+          "reference_smoothing_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.25,
+          "derivative_motion_scale_rad_s": 0.1
+        }
+      },
+      "native_stream": {
+        "acceleration": 254,
+        "velocity_ticks_s": 3000,
+        "locked_i_coefficients": {
+          "shoulder_lift": 0,
+          "elbow_flex": 0
+        }
+      },
+      "name": "shared-joint-pid-v1"
+    },
+    "trajectory": {
+      "version": 1,
+      "entry_speed_rad_s": 0.8,
+      "min_entry_seconds": 0.35,
+      "ramp_seconds": 1.0,
+      "control_hz": 60,
+      "reset_speed_rad_s": 0.5,
+      "period_seconds": 16.0,
+      "max_circle_angular_speed_deg_s": 120.0,
+      "max_circle_joint_speed_rad_s": 1.5707963267948966,
+      "max_circle_joint_acceleration_rad_s2": 5.235987755982989
+    },
+    "gripper_contact": {
+      "minimum_load_raw": 100,
+      "stall_seconds": 0.15,
+      "tracking_error_rad": 0.03,
+      "motion_tolerance_rad": 0.0042,
+      "release_margin_rad": 0.02
+    },
+    "motion_stall": {
+      "minimum_load_raw": 150,
+      "stall_seconds": 0.25,
+      "command_error_rad": 0.06,
+      "reference_error_rad": 0.015,
+      "motion_tolerance_rad": 0.0042
+    },
+    "hardware_command_envelopes": [
+      {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+        "calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+        "raw_limits": {
+          "shoulder_pan": [
+            860,
+            3318
+          ],
+          "shoulder_lift": [
+            857,
+            3209
+          ],
+          "elbow_flex": [
+            905,
+            3079
+          ],
+          "wrist_flex": [
+            931,
+            2868
+          ],
+          "wrist_roll": [
+            353,
+            3924
+          ],
+          "gripper": [
+            464,
+            1881
+          ]
+        },
+        "source": "2026-10-18 user-guided range capture and bounded hardware tests. Software-only Homing_Offset reference translation after confirmation of unchanged assembly and approximate 34 cm live TCP height. EEPROM unchanged."
+      }
+    ],
+    "simulation_actuator": {
+      "kp": 700.0,
+      "kv": 56.0,
+      "scope": "MuJoCo native position-loop approximation (80 ms effective lag); not hardware register values"
+    },
+    "circle_position_feedback": {
+      "name": "smooth-circle-v1",
+      "native_stream": {
+        "acceleration": 16,
+        "velocity_ticks_s": 3000
+      },
+      "joints": {
+        "shoulder_pan": {
+          "kp": 0.08,
+          "ki": 0.4,
+          "correction_rate_rad_s": 0.12,
+          "error_filter_seconds": 0.1,
+          "error_deadband_rad": 0.003,
+          "kd": 0.0,
+          "velocity_feedforward_s": 0.12,
+          "reference_filter_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.15
+        },
+        "shoulder_lift": {
+          "kp": 0.06,
+          "ki": 0.3,
+          "correction_rate_rad_s": 0.12,
+          "error_filter_seconds": 0.1,
+          "kd": 0.0,
+          "velocity_feedforward_s": 0.135,
+          "reference_filter_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.15
+        },
+        "elbow_flex": {
+          "kp": 0.08,
+          "ki": 0.4,
+          "correction_rate_rad_s": 0.12,
+          "error_filter_seconds": 0.1,
+          "kd": 0.0,
+          "velocity_feedforward_s": 0.12,
+          "reference_filter_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.15
+        },
+        "wrist_flex": {
+          "kp": 0.06,
+          "ki": 0.3,
+          "correction_rate_rad_s": 0.12,
+          "error_filter_seconds": 0.1,
+          "error_deadband_rad": 0.003,
+          "kd": 0.0,
+          "velocity_feedforward_s": 0.115,
+          "reference_filter_seconds": 0.025,
+          "integral_velocity_scale_rad_s": 0.15
+        }
+      }
+    },
+    "circle90_position_feedback": {
+      "name": "smooth-circle90-v2",
+      "native_stream": {
+        "acceleration": 32,
+        "transition_acceleration": 16
+      }
+    },
+    "circle120_position_feedback": {
+      "name": "smooth-circle120-v1",
+      "native_stream": {
+        "acceleration": 48,
+        "transition_acceleration": 16
+      }
+    }
+  },
+  "follow": {
+    "version": 1,
+    "leader": "arm1",
+    "follower": "follower",
+    "max_sample_age_seconds": 0.25,
+    "leader_trigger_degrees": [
+      39.07643312101911,
+      140.54140127388533
+    ],
+    "follower_gripper_degrees": [
+      -92.72727272727272,
+      20.935828877005346
+    ],
+    "trigger_range_measured": true,
+    "trigger_range_source": "User-defined endpoints captured on 2026-10-13: white arm1 minimum raw=1940, maximum raw=3002; converted using unchanged independent six-joint calibration",
+    "simulation_shared_calibration": false,
+    "initialization": {
+      "max_correction_degrees": 2,
+      "max_closed_gripper_recovery_degrees": 5,
+      "margin_degrees": 0.5,
+      "target_tolerance_degrees": 0.25,
+      "timeout_seconds": 5,
+      "auto_start": true
+    },
+    "entry_speed_rad_s": 0.6,
+    "alignment_tolerance_degrees": 2,
+    "follower_gripper_range_source": "2026-10-18 user-guided gripper travel: native raw 452..1893, shared command envelope raw 464..1881. Converted with current follower calibration acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652; supersedes 2026-10-13 raw 1479..2982."
+  }
+}

@@ -74,7 +74,7 @@ rsync -az robot-host:lerobot/logs/native-pid-baseline/ logs/native-pid-baseline/
 The report creates PNG/SVG/PDF response curves, a CSV of measured metrics and JSON
 zero-return results. Comparing multiple reports requires matching zero identities.
 Candidate settings measured with this simple load need verification after assembling
-additional links or changing the load. Normal demos keep using `configs/control.json`.
+additional links or changing the load. Normal demos keep using `configs/robot.json`.
 
 ## Measured results
 

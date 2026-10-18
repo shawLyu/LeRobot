@@ -64,7 +64,7 @@ The sequence is `prepare`, `approach`, `descend`, `close`, `lift`, `transfer`,
 `lower`, `open`, and `retreat`. Jaw stages hold the first five joints; arm stages
 keep the jaw target constant. Contact and carrying moves are capped at 0.3 rad/s;
 approach uses the shared trajectory setting. The policy uses the same
-[`configs/control.json`](../configs/control.json) as manual control, Reset,
+[`configs/robot.json`](../configs/robot.json) as manual control, Reset,
 circles, and Push-T. The remote host receives bounded joint segments and checks
 stage order, fresh feedback, model/config hashes, reference consistency, speed,
 joint bounds, and the digest of the locally checked segments. It does not install

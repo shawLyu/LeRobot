@@ -12,6 +12,7 @@ from .core.paths import WORKSPACE_ENV
 
 # Leaves pass their arguments directly to existing parsers, preserving execution gates.
 COMMANDS = {
+    ("config",): ("robot.config_cli", ()),
     ("hardware",): ("diagnostics.cli", ()),
     ("view", "arm"): ("runtime.realtime_client", ("--backend", "mujoco")),
     ("view", "motors"): ("workbench.server", ()),

@@ -68,7 +68,7 @@ def acquire(args):
     output.mkdir(parents=True, exist_ok=False)
     plan = json.loads(args.plan.read_text())
     provenance = {}
-    inputs = {'control': ROOT/'configs/control.json',
+    inputs = {'control': ROOT/'configs/robot.json',
                        'tabletop': ROOT/'configs/tabletop.json',
                        'angles': ROOT/'data/calibration/follower_mujoco.json',
                        'model': MODEL}

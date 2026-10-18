@@ -35,7 +35,7 @@ for directory in docs configs; do
   rsync -az $DRY_RUN --itemize-changes \
     --exclude='__pycache__/' --exclude='*.pyc' --exclude='._*' --exclude='.DS_Store' \
     --exclude='*.local.*' \
-    --exclude='/arms.toml' --exclude='/camera.toml' --exclude='/tabletop.json' \
+    --exclude='/camera.toml' --exclude='/tabletop.json' \
     "$ROOT/$directory/" "$HOST:$REMOTE_ROOT/$directory/"
 done
 rsync -az $DRY_RUN --itemize-changes "$ROOT/README.md" "$ROOT/pyproject.toml" \
@@ -44,8 +44,6 @@ rsync -az $DRY_RUN --itemize-changes "$ROOT/README.md" "$ROOT/pyproject.toml" \
 rsync -az $DRY_RUN --ignore-existing --itemize-changes \
   "$ROOT/configs/camera.toml" "$ROOT/configs/tabletop.json" \
   "$HOST:$REMOTE_ROOT/configs/"
-rsync -az $DRY_RUN --ignore-existing --itemize-changes \
-  "$ROOT/configs/examples/arms.toml" "$HOST:$REMOTE_ROOT/configs/arms.toml"
 if [ "$WITH_CONFIG" = true ]; then
   rsync -az $DRY_RUN --itemize-changes "$ROOT/configs/tabletop.json" \
     "$HOST:$REMOTE_ROOT/configs/"

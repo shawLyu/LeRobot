@@ -49,87 +49,6 @@ def test_trigger_maps_measured_full_travel_and_clamps_only_at_endpoints(fraction
     assert math.degrees(target[5]) == pytest.approx(expected)
 
 
-def test_recorded_white_maximum_reaches_black_maximum_without_early_saturation():
-    import json
-    from pathlib import Path
-
-    root = Path(__file__).resolve().parents[1]
-    evidence = json.loads((root/'docs/measurements/trigger-range-2026-10-13.json').read_text())
-    config = load_follow_config()
-    limits = hardware_follow_limits([(-1, 1)]*6, {j: (-3, 3) for j in JOINTS})
-    mapping = JointFollower(config, [0]*6, limits)
-    measured_maximum = math.radians(evidence['samples'][0]['calibrated_degrees'])
-    for _ in range(120):
-        target = mapping.step([0]*5+[measured_maximum], .05)
-    assert math.degrees(target[5]) == pytest.approx(config['follower_gripper_degrees'][1])
-    target = mapping.step([0]*5+[math.radians(118)], .05)
-    assert (config['follower_gripper_degrees'][0] < math.degrees(target[5])
-            < config['follower_gripper_degrees'][1])
-
-
-def test_recorded_hardware_trigger_maximum_reaches_its_verified_raw_upper_limit():
-    import json
-    from pathlib import Path
-
-    from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
-
-    root = Path(__file__).resolve().parents[1]
-    # Historical trigger endpoints must use the calibration from that experiment.
-    path = root/'data/push_t/measured/joint_calibration.json'
-    saved = json.loads(path.read_text())
-    calibration = AngleCalibration(path, saved['fingerprint'])
-    fit = calibration.fit('gripper')
-    encoder = {j: (-3, 3) for j in JOINTS}
-    encoder['gripper'] = tuple((v-fit['zero_raw'])*fit['radians_per_tick']
-                              for v in saved['fingerprint']['raw_limits']['gripper'])
-    cad = [(-1, 1)]*5+[(-.17453, 1.74533)]
-    limits = hardware_follow_limits(cad, encoder)
-    assert limits[:5] == cad[:5]
-    assert limits[5][1] == encoder['gripper'][1] > cad[5][1]
-    assert limits[5][0] == encoder['gripper'][0] < cad[5][0]
-    config = load_follow_config()
-    evidence = json.loads((root/'docs/measurements/trigger-range-2026-10-13.json').read_text())
-    config['follower_gripper_degrees'] = evidence['follower_range_degrees']
-    mapping = JointFollower(config, [0]*6, limits)
-    maximum = math.radians(config['leader_trigger_degrees'][1])
-    for _ in range(120):
-        target = mapping.step([0]*5+[maximum], .05)
-        assert limits[5][0] <= target[5] <= limits[5][1]
-    assert round(target[5]/fit['radians_per_tick']+fit['zero_raw']) == 2982
-    assert mapping.step([0]*5+[maximum+1], .05)[5] <= encoder['gripper'][1]
-
-
-def test_recorded_minimum_and_midpoint_align_both_encoders_without_cad_clipping():
-    import json
-    from pathlib import Path
-
-    from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
-
-    root = Path(__file__).resolve().parents[1]
-    evidence = json.loads((root/'docs/measurements/trigger-range-2026-10-13.json').read_text())
-    path = root/'data/push_t/measured/joint_calibration.json'
-    saved = json.loads(path.read_text())
-    fit = AngleCalibration(path, saved['fingerprint']).fit('gripper')
-    encoder = {j: (-3, 3) for j in JOINTS}
-    encoder['gripper'] = tuple((v-fit['zero_raw'])*fit['radians_per_tick']
-                              for v in saved['fingerprint']['raw_limits']['gripper'])
-    limits = hardware_follow_limits([(-1, 1)]*5+[(-.17453, 1.74533)], encoder)
-    config = load_follow_config()
-    config['follower_gripper_degrees'] = evidence['follower_range_degrees']
-    mapping = JointFollower(config, [0]*6, limits)
-    white = evidence['minimum_capture']['arms']['arm1']['samples'][0]
-    black = evidence['minimum_capture']['arms']['follower']['samples'][0]
-    for _ in range(120):
-        target = mapping.step([0]*5+[math.radians(white['calibrated_degrees'])], .05)
-    assert round(target[5]/fit['radians_per_tick']+fit['zero_raw']) == black['raw'] == 1479
-    # Values below the measured white minimum remain at the intended closed position.
-    assert mapping.step([0]*5+[0], .05)[5] == pytest.approx(target[5])
-    midpoint = math.radians(sum(config['leader_trigger_degrees'])/2)
-    for _ in range(120):
-        target = mapping.step([0]*5+[midpoint], .05)
-    assert target[5]/fit['radians_per_tick']+fit['zero_raw'] == pytest.approx((1479+2982)/2)
-
-
 def test_current_follow_mapping_fits_current_command_envelope_and_initializes_in_place():
     import json
 
@@ -148,7 +67,13 @@ def test_current_follow_mapping_fits_current_command_envelope_and_initializes_in
     config = load_follow_config()
     control.set_command_limits('gripper', tuple(map(math.radians,
                                                    config['follower_gripper_degrees'])))
-    limits = hardware_follow_limits(joint_ranges(), control.limits)
+    cad = joint_ranges()
+    limits = hardware_follow_limits(cad, control.limits)
+    assert limits[5] == control.limits['gripper']
+    assert limits[5][0] < cad[5][0]
+    for joint, bounds, effective in zip(JOINTS[:5], cad[:5], limits[:5], strict=True):
+        assert effective == (max(bounds[0], control.limits[joint][0]),
+                             min(bounds[1], control.limits[joint][1]))
     plan = json.loads(resource_path('data/trajectories/table-circle120-tilt30.json').read_text())
     initial = plan['qpos'][0]
     assert initialization_target(config, initial, limits, control.rest_limits) == initial

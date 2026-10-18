@@ -185,10 +185,3 @@ and the shared default. Generic simulation and interactive hardware entries:
 The interactive entry uses Reset first; the diagnostic `--from-current` path above
 does not. The stored follower Reset reference predates the current calibration
 and must be retaught before use. Do not bypass its identity rejection.
-
-`migrate_sts3215_reference` is an explicit software-only reference conversion using
-`Present_Position = Actual_Position - Homing_Offset`. It requires confirmed unchanged
-assembly and rejects device, phase, mode or model changes and encoder wrap. It
-preserves measured scale/third-point error, retains the old fingerprint and writes
-no motor registers. Command envelopes and plans must be rebound to the new hash;
-old rest poses and kinematic corrections remain invalid until separately reviewed.

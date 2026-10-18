@@ -328,62 +328,60 @@ def test_failed_scheduled_acceleration_readback_holds_instead_of_moving(setup):
     assert bus.sync_read('Goal_Position') == bus.sync_read('Present_Position')
 
 
-def test_temporary_p_keeps_lock_and_restores_while_holding(setup):
+@pytest.mark.parametrize('coefficient,joint,original,requested', [
+    ('P', 'shoulder_pan', 16, 32), ('I', 'shoulder_lift', 4, 0)])
+def test_temporary_gain_restores_after_reenable_without_dropping_support(
+        setup, coefficient, joint, original, requested):
     bus, control, _ = setup
-    control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {
-        "shoulder_pan": 32}
-    control.enable('shoulder_pan')
-    assert bus.registers['shoulder_pan']['P_Coefficient'] == 32
-    assert control.status()['native_locked_p_coefficients'] == {'shoulder_pan': 32}
+    register = f'{coefficient}_Coefficient'
+    key = coefficient.lower()
+    bus.registers[joint][register] = original
+    control.position_feedback.profile['native_stream'][f'locked_{key}_coefficients'] = {
+        joint: requested}
+    control.enable(joint)
+    control.stop()
+    control.enable(joint)
+    assert control.status()[f'native_locked_{key}_coefficients'] == {joint: requested}
+    assert bus.registers[joint][register] == requested
     control.close()
-    assert bus.registers['shoulder_pan']['P_Coefficient'] == 16
-    assert bus.registers['shoulder_pan']['Lock'] == 1
-    assert bus.registers['shoulder_pan']['Torque_Enable'] == 1
-    assert not any(register == 'Lock' for register, _, _ in bus.writes)
-
-
-def test_temporary_i_restores_original_after_reenable_without_dropping_support(setup):
-    bus, control, _ = setup
-    bus.registers['shoulder_lift']['I_Coefficient'] = 4
-    control.position_feedback.profile['native_stream']['locked_i_coefficients'] = {
-        'shoulder_lift': 0}
-    control.enable('shoulder_lift')
-    control.enable('shoulder_lift')
-    assert control.status()['native_locked_i_coefficients'] == {'shoulder_lift': 0}
-    assert bus.registers['shoulder_lift']['I_Coefficient'] == 0
-    control.close()
-    assert bus.registers['shoulder_lift']['I_Coefficient'] == 4
-    assert bus.registers['shoulder_lift']['Lock'] == 1
-    assert bus.registers['shoulder_lift']['Torque_Enable'] == 1
+    assert bus.registers[joint][register] == original
+    assert bus.registers[joint]['Lock'] == 1
+    assert bus.registers[joint]['Torque_Enable'] == 1
     assert not any(r == 'Lock' or (r == 'Torque_Enable' and v == 0)
                    for r, _, v in bus.writes)
 
 
+@pytest.mark.parametrize('coefficient,joint,original,requested', [
+    ('P', 'shoulder_pan', 16, 32), ('I', 'shoulder_lift', 4, 0)])
 @pytest.mark.parametrize('unlocked', [False, True])
-def test_unconfirmed_or_unlocked_temporary_i_is_not_silently_accepted(setup, unlocked):
+def test_unconfirmed_or_unlocked_temporary_gain_is_not_silently_accepted(
+        setup, coefficient, joint, original, requested, unlocked):
     bus, control, _ = setup
-    bus.registers['shoulder_lift']['I_Coefficient'] = 4
-    control.position_feedback.profile['native_stream']['locked_i_coefficients'] = {
-        'shoulder_lift': 0}
-    original = bus.write
+    register = f'{coefficient}_Coefficient'
+    bus.registers[joint][register] = original
+    control.position_feedback.profile['native_stream'][
+        f'locked_{coefficient.lower()}_coefficients'] = {joint: requested}
+    write = bus.write
 
-    def drop_i(register, joint, value, normalize=False):
-        if not (register == 'I_Coefficient' and value == 0):
-            original(register, joint, value, normalize)
+    def drop_gain(field, name, value, normalize=False):
+        if not (field == register and value == requested):
+            write(field, name, value, normalize)
 
     if unlocked:
-        bus.registers['shoulder_lift']['Lock'] = 0
+        bus.registers[joint]['Lock'] = 0
     else:
-        bus.write = drop_i
-    with pytest.raises(RuntimeError, match='storage lock|temporary I'):
-        control.enable('shoulder_lift')
-    assert bus.registers['shoulder_lift']['I_Coefficient'] == 4
+        bus.write = drop_gain
+    with pytest.raises(RuntimeError, match=f'storage lock|temporary {coefficient}'):
+        control.enable(joint)
+    assert bus.registers[joint][register] == original
     if unlocked:
         assert not control.enabled
         assert not bus.writes
     else:
-        assert 'shoulder_lift' in control.stopped
+        assert joint in control.stopped
         control.close()
+        assert bus.registers[joint][register] == original
+        assert bus.registers[joint]['Torque_Enable'] == 1
 
 
 def test_unlocked_native_i_in_any_joint_blocks_enable_all_before_goal_writes(setup):
@@ -393,35 +391,6 @@ def test_unlocked_native_i_in_any_joint_blocks_enable_all_before_goal_writes(set
         control.enable_all()
     assert not bus.writes
     assert not control.enabled
-
-
-def test_unlocked_storage_cannot_receive_temporary_p(setup):
-    bus, control, _ = setup
-    control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {
-        "shoulder_pan": 32}
-    bus.registers['shoulder_pan']['Lock'] = 0
-    with pytest.raises(RuntimeError, match='storage lock'):
-        control.enable('shoulder_pan')
-    assert not control.enabled
-    assert not bus.writes
-
-
-def test_dropped_temporary_p_is_held_and_restored_on_close(setup):
-    bus, control, _ = setup
-    control.position_feedback.profile["native_stream"]["locked_p_coefficients"] = {
-        "shoulder_pan": 32}
-    original = bus.write
-
-    def drop_trial(register, joint, value, normalize=False):
-        if not (register == 'P_Coefficient' and value == 32):
-            original(register, joint, value, normalize)
-
-    bus.write = drop_trial
-    with pytest.raises(RuntimeError, match='temporary P could not be confirmed'):
-        control.enable('shoulder_pan')
-    control.close()
-    assert bus.registers['shoulder_pan']['P_Coefficient'] == 16
-    assert bus.registers['shoulder_pan']['Torque_Enable'] == 1
 
 
 def test_reenable_keeps_original_native_setting_for_rollback(setup):
@@ -484,17 +453,11 @@ def test_lost_torque_never_reactivates_joint_via_goal_write(setup):
     assert "lost torque" in control.stopped["gripper"]
 
 
-@pytest.mark.parametrize("cause", ["fault"])
-def test_bad_feedback_latches_hold_instead_of_continuing_target(setup, cause):
+def test_bad_feedback_latches_hold_instead_of_continuing_target(setup):
     bus, control, now = setup
     control.enable("gripper")
     control.target("gripper", 0.4)
-    if cause == "fault":
-        bus.registers["gripper"]["Status"] = 1
-    elif cause == "tracking":
-        bus.registers["gripper"]["Present_Position"] = 2300
-    else:
-        bus.registers["gripper"]["Present_Position"] = 2800
+    bus.registers["gripper"]["Status"] = 1
     step(bus, control, now, 0.05)
     writes = list(bus.writes)
     assert "gripper" in control.stopped

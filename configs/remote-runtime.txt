@@ -8,7 +8,6 @@ scripts/test_hardware.sh
 scripts/uv
 tests/fakes.py
 tests/test_angle_calibration.py
-tests/test_encoder_reference_migration.py
 tests/test_camera_runtime_calibration.py
 tests/test_circle_playback.py
 tests/test_remote_circle.py

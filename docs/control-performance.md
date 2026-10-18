@@ -9,6 +9,12 @@ See [the controller and block diagram](lerobot-control.md).
 
 ## Current evidence and limits
 
+The [90°/s multi-height experiment](measurements/table-circle90-height-2026-10-18/README.md)
+records 34/36/38 cm circles at mean speeds 89.79/89.70/89.63°/s.
+The separate high-speed profile uses native acceleration 32. Temporal TCP RMS
+was 12.74/10.49/9.64 mm, with substantial instantaneous speed ripple; average
+speed alone is not a tracking-accuracy pass. The default 60°/s plan remains unchanged.
+
 The [8 cm horizontal circle at 60°/s](measurements/table-circle60deg-s-2026-10-18/README.md)
 records real three-lap trials and the operator's accepted start/stop smoothness.
 The selected profile measured 60.06°/s mean phase speed, with remaining instantaneous

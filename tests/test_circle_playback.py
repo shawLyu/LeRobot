@@ -73,7 +73,26 @@ def test_explicit_sixty_degree_circle_keeps_six_second_period_and_checks_ramps(t
 
 def test_faster_than_reviewed_circle_is_rejected(tmp_path):
     with pytest.raises(ValueError, match='angular speed'):
-        Circle(fast_plan(tmp_path, 61))
+        Circle(fast_plan(tmp_path, 91))
+
+
+def test_ninety_degree_circle_retains_six_second_ramps_and_rejects_overlap(tmp_path):
+    path = fast_plan(tmp_path, 90)
+    saved = json.loads(path.read_text())
+    saved['execution_profile']['ramp_seconds'] = 6
+    path.write_text(json.dumps(saved))
+    circle = Circle(path)
+    assert circle.period == 4 and circle.ramp_seconds == 6
+    with pytest.raises(ValueError, match='overlapping'):
+        circle.start(circle.points[0], 0, laps=1)
+    circle.start(circle.points[0], 0, laps=3)
+    # At 6 s acceleration ends at 0.75 lap; braking begins at 12 s, at 2.25 laps.
+    assert circle.cycles(6) == pytest.approx(.75)
+    assert circle.cycles(12) == pytest.approx(2.25)
+    end = circle.entry_seconds+18
+    assert circle.sample(end) == pytest.approx(circle.points[0], abs=1e-9)
+    assert circle.phase == 'completed'
+    assert circle.check_motion_budget(circle.points[0])['peak_joint_speed_rad_s'] < 1.571
 
 
 def test_fast_plan_explicitly_selects_shared_controller_with_circle_tuning(tmp_path):
@@ -94,6 +113,18 @@ def test_fast_plan_explicitly_selects_shared_controller_with_circle_tuning(tmp_p
     path.write_text(json.dumps(saved))
     with pytest.raises(ValueError, match='unknown circle controller'):
         Circle(path)
+
+
+def test_ninety_degree_profile_has_adequate_acceleration_without_changing_sixty():
+    from lerobot_arm_control.control.control_defaults import CIRCLE_POSITION_FEEDBACK
+    from lerobot_arm_control.core.paths import resource_path
+
+    for height in (34, 36, 38):
+        circle = Circle(resource_path(f'data/trajectories/table-circle90-h{height}cm.json'))
+        assert circle.feedback_profile['name'] == 'smooth-circle90-v1'
+        assert circle.feedback_profile['native_stream']['acceleration'] == 32
+        assert circle.period == 4 and circle.ramp_seconds == 6
+    assert CIRCLE_POSITION_FEEDBACK['native_stream']['acceleration'] == 16
 
 
 def test_fast_circle_remote_budget_is_rechecked_before_any_motor_write(tmp_path):

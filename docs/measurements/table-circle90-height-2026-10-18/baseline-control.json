@@ -1,0 +1,234 @@
+{
+  "version": 1,
+  "name": "shared-joint-pid-v2",
+  "native_defaults": {
+    "source": "installed lerobot 0.6.1 SOFollowerConfig and TeleoperateConfig",
+    "control_hz": 60,
+    "max_relative_target": null,
+    "num_read_retries": 2,
+    "position_p_coefficient": 16,
+    "position_i_coefficient": 0,
+    "position_d_coefficient": 32,
+    "return_delay_time": 0,
+    "maximum_acceleration": 254,
+    "operating_mode": 0,
+    "gripper_max_torque_limit": 500,
+    "gripper_protection_current": 250,
+    "gripper_overload_torque": 25
+  },
+  "position_feedback": {
+    "version": 1,
+    "joints": {
+      "shoulder_pan": {
+        "kp": 0.12,
+        "ki": 1.2,
+        "max_correction_rad": 0.2,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.0015,
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "shoulder_lift": {
+        "kp": 0.1,
+        "ki": 0.8,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.003,
+        "kd": 0.03,
+        "derivative_filter_seconds": 0.04,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "elbow_flex": {
+        "kp": 0.25,
+        "ki": 1.5,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.003,
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "wrist_flex": {
+        "kp": 0.1,
+        "ki": 0.8,
+        "max_correction_rad": 0.16,
+        "correction_rate_rad_s": 0.24,
+        "error_filter_seconds": 0.08,
+        "error_deadband_rad": 0.0015,
+        "kd": 0.02,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "wrist_roll": {
+        "kp": 0.2,
+        "ki": 0.8,
+        "max_correction_rad": 0.2,
+        "correction_rate_rad_s": 0.3,
+        "error_filter_seconds": 0.04,
+        "error_deadband_rad": 0.0015,
+        "kd": 0.015,
+        "derivative_filter_seconds": 0.04,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 6.0,
+        "reference_filter_seconds": 0.01,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      },
+      "gripper": {
+        "kp": 0.35,
+        "ki": 0.8,
+        "max_correction_rad": 0.12,
+        "correction_rate_rad_s": 0.04,
+        "error_filter_seconds": 0.12,
+        "error_deadband_rad": 0.003,
+        "kd": 0.01,
+        "derivative_filter_seconds": 0.08,
+        "velocity_feedforward_s": 0.0,
+        "feedforward_rate_rad_s": 4.0,
+        "reference_filter_seconds": 0.015,
+        "reference_smoothing_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.25
+      }
+    },
+    "native_stream": {
+      "acceleration": 254,
+      "velocity_ticks_s": 3000
+    },
+    "name": "shared-joint-pid-v1"
+  },
+  "trajectory": {
+    "version": 1,
+    "entry_speed_rad_s": 0.8,
+    "min_entry_seconds": 0.35,
+    "ramp_seconds": 1.0,
+    "control_hz": 60,
+    "reset_speed_rad_s": 0.5,
+    "period_seconds": 16.0,
+    "max_circle_angular_speed_deg_s": 90.0,
+    "max_circle_joint_speed_rad_s": 1.5707963267948966,
+    "max_circle_joint_acceleration_rad_s2": 5.235987755982989
+  },
+  "gripper_contact": {
+    "minimum_load_raw": 100,
+    "stall_seconds": 0.15,
+    "tracking_error_rad": 0.03,
+    "motion_tolerance_rad": 0.0042,
+    "release_margin_rad": 0.02
+  },
+  "motion_stall": {
+    "minimum_load_raw": 150,
+    "stall_seconds": 0.25,
+    "command_error_rad": 0.06,
+    "reference_error_rad": 0.015,
+    "motion_tolerance_rad": 0.0042
+  },
+  "hardware_command_envelopes": [
+    {
+      "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+      "calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+      "raw_limits": {
+        "shoulder_pan": [
+          860,
+          3318
+        ],
+        "shoulder_lift": [
+          857,
+          3209
+        ],
+        "elbow_flex": [
+          905,
+          3079
+        ],
+        "wrist_flex": [
+          931,
+          2868
+        ],
+        "wrist_roll": [
+          353,
+          3924
+        ],
+        "gripper": [
+          464,
+          1881
+        ]
+      },
+      "source": "2026-10-18 user-guided range capture and bounded hardware tests. Software-only Homing_Offset reference translation after confirmation of unchanged assembly and approximate 34 cm live TCP height. EEPROM unchanged."
+    }
+  ],
+  "simulation_actuator": {
+    "kp": 700.0,
+    "kv": 56.0,
+    "scope": "MuJoCo native position-loop approximation (80 ms effective lag); not hardware register values"
+  },
+  "circle_position_feedback": {
+    "name": "smooth-circle-v1",
+    "native_stream": {
+      "acceleration": 16,
+      "velocity_ticks_s": 3000
+    },
+    "joints": {
+      "shoulder_pan": {
+        "kp": 0.08,
+        "ki": 0.4,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.12,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "shoulder_lift": {
+        "kp": 0.06,
+        "ki": 0.3,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.135,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "elbow_flex": {
+        "kp": 0.08,
+        "ki": 0.4,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.12,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      },
+      "wrist_flex": {
+        "kp": 0.06,
+        "ki": 0.3,
+        "correction_rate_rad_s": 0.12,
+        "error_filter_seconds": 0.1,
+        "error_deadband_rad": 0.003,
+        "kd": 0.0,
+        "velocity_feedforward_s": 0.115,
+        "reference_filter_seconds": 0.025,
+        "integral_velocity_scale_rad_s": 0.15
+      }
+    }
+  }
+}

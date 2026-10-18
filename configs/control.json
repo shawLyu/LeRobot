@@ -124,9 +124,9 @@
     "control_hz": 60,
     "reset_speed_rad_s": 0.5,
     "period_seconds": 16.0,
-    "max_circle_angular_speed_deg_s": 60.0,
-    "max_circle_joint_speed_rad_s": 1.0471975511965976,
-    "max_circle_joint_acceleration_rad_s2": 3.490658503988659
+    "max_circle_angular_speed_deg_s": 90.0,
+    "max_circle_joint_speed_rad_s": 1.5707963267948966,
+    "max_circle_joint_acceleration_rad_s2": 5.235987755982989
   },
   "gripper_contact": {
     "minimum_load_raw": 100,
@@ -229,6 +229,12 @@
         "reference_filter_seconds": 0.025,
         "integral_velocity_scale_rad_s": 0.15
       }
+    }
+  },
+  "circle90_position_feedback": {
+    "name": "smooth-circle90-v1",
+    "native_stream": {
+      "acceleration": 32
     }
   }
 }

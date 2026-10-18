@@ -1,0 +1,170 @@
+{
+  "time_unix_ns": 1792331476905089151,
+  "registers": {
+    "Homing_Offset": {
+      "shoulder_pan": -1110,
+      "shoulder_lift": 1932,
+      "elbow_flex": 1070,
+      "wrist_flex": -1980,
+      "wrist_roll": -1910,
+      "gripper": -1632
+    },
+    "Min_Position_Limit": {
+      "shoulder_pan": 844,
+      "shoulder_lift": 809,
+      "elbow_flex": 773,
+      "wrist_flex": 862,
+      "wrist_roll": 0,
+      "gripper": 452
+    },
+    "Max_Position_Limit": {
+      "shoulder_pan": 3440,
+      "shoulder_lift": 3238,
+      "elbow_flex": 3126,
+      "wrist_flex": 3192,
+      "wrist_roll": 4095,
+      "gripper": 1893
+    },
+    "Phase": {
+      "shoulder_pan": 12,
+      "shoulder_lift": 12,
+      "elbow_flex": 12,
+      "wrist_flex": 12,
+      "wrist_roll": 12,
+      "gripper": 12
+    },
+    "Operating_Mode": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "P_Coefficient": {
+      "shoulder_pan": 40,
+      "shoulder_lift": 32,
+      "elbow_flex": 56,
+      "wrist_flex": 48,
+      "wrist_roll": 48,
+      "gripper": 48
+    },
+    "I_Coefficient": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 4,
+      "elbow_flex": 8,
+      "wrist_flex": 4,
+      "wrist_roll": 2,
+      "gripper": 4
+    },
+    "D_Coefficient": {
+      "shoulder_pan": 64,
+      "shoulder_lift": 80,
+      "elbow_flex": 128,
+      "wrist_flex": 96,
+      "wrist_roll": 96,
+      "gripper": 64
+    },
+    "CW_Dead_Zone": {
+      "shoulder_pan": 2,
+      "shoulder_lift": 0,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "CCW_Dead_Zone": {
+      "shoulder_pan": 2,
+      "shoulder_lift": 0,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Minimum_Startup_Force": {
+      "shoulder_pan": 16,
+      "shoulder_lift": 12,
+      "elbow_flex": 4,
+      "wrist_flex": 8,
+      "wrist_roll": 16,
+      "gripper": 16
+    },
+    "Integral_Limit": {
+      "shoulder_pan": 8,
+      "shoulder_lift": 8,
+      "elbow_flex": 48,
+      "wrist_flex": 16,
+      "wrist_roll": 8,
+      "gripper": 16
+    },
+    "Acceleration": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Goal_Velocity": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Lock": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1,
+      "gripper": 1
+    },
+    "Torque_Enable": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1,
+      "gripper": 1
+    },
+    "Status": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Present_Temperature": {
+      "shoulder_pan": 25,
+      "shoulder_lift": 26,
+      "elbow_flex": 28,
+      "wrist_flex": 27,
+      "wrist_roll": 26,
+      "gripper": 27
+    }
+  },
+  "hashes": {
+    "configs/control.json": "693842606faad3a30530714bd4cca5125f36e4cc14c23f453d693c40619e6f54",
+    "data/calibration/follower_mujoco.json": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+    "data/trajectories/table-circle90-h34cm.json": "a20d21a3f7597c72ce9f5a270282858164825c384f2feed2ff287b82d84b8f31",
+    "data/trajectories/table-circle90-h36cm.json": "c522d137776180fef82f58a56290c912ab5a989f8f407fea81f545074d7ffa82",
+    "data/trajectories/table-circle90-h38cm.json": "01a3f41a0f4a058f78236cbc3c0e8ae3419f97cc2521006d0e4f85ab60109118"
+  },
+  "unchanged_identity_and_native_tuning_registers": [
+    "Homing_Offset",
+    "Min_Position_Limit",
+    "Max_Position_Limit",
+    "Phase",
+    "Operating_Mode",
+    "P_Coefficient",
+    "I_Coefficient",
+    "D_Coefficient",
+    "CW_Dead_Zone",
+    "CCW_Dead_Zone",
+    "Minimum_Startup_Force",
+    "Integral_Limit"
+  ]
+}

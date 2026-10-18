@@ -18,12 +18,16 @@ from lerobot_arm_control.transport.realtime import JOINTS
 
 
 @pytest.mark.parametrize('case', ['completed', 'feedback_deadline', 'invalid_proof'])
-def test_finite_circle_is_independent_but_keeps_hardware_guards(monkeypatch, tmp_path, case):
+@pytest.mark.parametrize('plan_name,laps', [('table-circle-8cm.json', 1),
+                                          ('table-circle90-h34cm.json', 3)])
+def test_finite_circle_is_independent_but_keeps_hardware_guards(monkeypatch, tmp_path, case,
+                                                            plan_name, laps):
     path = resource_path('data/calibration/follower_mujoco.json')
     saved = json.loads(path.read_text())
     identity = saved['fingerprint']
     cal = AngleCalibration(path, identity)
-    circle = Circle(resource_path('data/trajectories/table-circle-8cm.json'))
+    plan_path = resource_path('data/trajectories/'+plan_name)
+    circle = Circle(plan_path)
     proof = {'checked': True, 'initial_qpos': circle.points[0],
              'model_sha256': circle.model_hash, 'plan_sha256': circle.plan_hash,
              'control_config_sha256': CONTROL_CONFIG_SHA256}
@@ -72,9 +76,9 @@ def test_finite_circle_is_independent_but_keeps_hardware_guards(monkeypatch, tmp
     trace = tmp_path/'trace.json'
     args = SimpleNamespace(arm='follower', hardware_control=True, allow_gripper=False,
                            circle=True,
-                           circle_plan=resource_path('data/trajectories/table-circle-8cm.json'),
+                           circle_plan=plan_path,
                            model=resource_path('assets/so101/so101.xml'), hz=20,
-                           standalone_circle_validation=validation, circle_laps=1,
+                           standalone_circle_validation=validation, circle_laps=laps,
                            control_log=trace)
     try:
         if case == 'invalid_proof':

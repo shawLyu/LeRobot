@@ -34,6 +34,9 @@ tests/test_tool_marker.py
 assets/so101/so101.xml
 data/trajectories/circle.json
 data/trajectories/table-circle-8cm.json
+data/trajectories/table-circle90-h34cm.json
+data/trajectories/table-circle90-h36cm.json
+data/trajectories/table-circle90-h38cm.json
 data/push_t/measured/joint_calibration.json
 data/README.md
 

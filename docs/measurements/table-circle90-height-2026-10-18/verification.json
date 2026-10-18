@@ -1,0 +1,38 @@
+{
+  "local_pytest": {
+    "passed": 758,
+    "skipped": 1,
+    "seconds": 90.91
+  },
+  "remote_pytest": {
+    "passed": 506,
+    "seconds": 10.75
+  },
+  "ruff_remote_runtime": "passed",
+  "ruff_modified_files": "passed",
+  "git_diff_check": "passed",
+  "deployment": {
+    "checked_files": 132,
+    "mismatched_files": []
+  },
+  "physical_tests": {
+    "completed_laps_per_height": 3,
+    "heights_above_table_cm": [
+      34,
+      36,
+      38
+    ],
+    "operator_confirmed_empty_gripper_and_clear_scene": true,
+    "visual_performance_feedback": "not yet received",
+    "final_status_flags": 0,
+    "raw_trace_and_parameter_hashes_checked": true,
+    "native_ram_restored": true,
+    "native_pid_origins_limits_unchanged": true
+  },
+  "known_limits": [
+    "Mean speed near 90 deg/s; significant instantaneous speed ripple remains",
+    "Encoder/CAD TCP errors exceed 5 mm dynamic target",
+    "5/6 held; their dynamics were not tested",
+    "Approximate dynamics accuracy check failed and remains reported as failed"
+  ]
+}

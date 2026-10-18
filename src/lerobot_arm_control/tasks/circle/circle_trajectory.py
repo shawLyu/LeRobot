@@ -6,7 +6,7 @@ from copy import copy, deepcopy
 from pathlib import Path
 
 from lerobot_arm_control.control.control_defaults import (
-    CIRCLE_POSITION_FEEDBACK,
+    CIRCLE_FEEDBACK_PROFILES,
     CONTROL_CONFIG_SHA256,
     CONTROL_HZ,
     POSITION_FEEDBACK,
@@ -69,10 +69,11 @@ class Circle:
         self.ramp_seconds = timing.get('ramp_seconds', self.ramp_seconds)
         self.requested_angular_speed = timing.get('angular_speed_deg_s')
         selected = timing.get('controller_profile')
-        if selected is not None and selected != CIRCLE_POSITION_FEEDBACK['name']:
+        if selected is not None and (not isinstance(selected, str)
+                                     or selected not in CIRCLE_FEEDBACK_PROFILES):
             raise ValueError('unknown circle controller profile')
         self.feedback_profile = deepcopy(
-            CIRCLE_POSITION_FEEDBACK if selected else POSITION_FEEDBACK)
+            CIRCLE_FEEDBACK_PROFILES[selected] if selected else POSITION_FEEDBACK)
         self.motion_budget = {
             'max_joint_speed_rad_s': profile['max_circle_joint_speed_rad_s'],
             'max_joint_acceleration_rad_s2': profile['max_circle_joint_acceleration_rad_s2'],
@@ -110,7 +111,7 @@ class Circle:
                                         360/self.requested_angular_speed, abs_tol=1e-9)):
                 raise ValueError('circle angular speed or period exceeds the reviewed profile')
             self.period = saved['period_seconds']
-        if self.ramp_seconds > self.period:
+        if self.ramp_seconds > self.period and self.requested_angular_speed is None:
             raise ValueError('circle ramp cannot exceed the lap period')
         if (self.plane not in ('XY', 'XZ')
                 or self.plane == 'XY' and (
@@ -133,8 +134,11 @@ class Circle:
         if self.requested_angular_speed is None:
             return None
         trial = copy(self)
-        trial.start(initial, 0, laps=1)
-        duration = trial.entry_seconds + trial.period + trial.ramp_seconds
+        # Include a complete constant-speed lap even when the gentle ramp lasts
+        # longer than one revolution. Finite execution checks overlap separately.
+        laps = math.ceil(self.ramp_seconds/self.period)+1
+        trial.start(initial, 0, laps=laps)
+        duration = trial.entry_seconds + laps*trial.period + trial.ramp_seconds
         dt = 1/self.control_hz
         previous = list(initial)
         velocity = [0.]*len(JOINTS)
@@ -156,10 +160,11 @@ class Circle:
     def active(self):
         return self.phase in ("entering", "running")
 
-    @staticmethod
-    def validate_laps(laps):
+    def validate_laps(self, laps):
         if laps is not None and (type(laps) is not int or laps <= 0):
             raise ValueError("laps must be a positive integer")
+        if laps is not None and self.ramp_seconds > laps*self.period:
+            raise ValueError('finite circle is too short for non-overlapping speed ramps')
 
     def start(self, initial, now, *, laps=None):
         self.validate_laps(laps)

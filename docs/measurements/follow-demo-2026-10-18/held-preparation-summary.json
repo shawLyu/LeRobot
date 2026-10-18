@@ -1,0 +1,11 @@
+{
+  "frames": 13012,
+  "observed_stages": [
+    "held"
+  ],
+  "leader_fault_events": 5,
+  "follower_fault_events": 0,
+  "physical_follow_started": false,
+  "raw_source_sha256": "3663242a56c56af217a4a078d12ab6afbc54cfd1d17549fdeab20126fe4bc6bb",
+  "published_copy": "Calibration path strings normalized; control frames unchanged"
+}

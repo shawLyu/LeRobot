@@ -19,7 +19,11 @@ from lerobot_arm_control.transport.realtime import JOINTS
 def test_mirror_slew_limit_joint_bounds_and_trigger_normalization():
     config = load_follow_config()
     config['entry_speed_rad_s'] = 2
-    mapping = JointFollower(config, [0]*6)
+    from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
+
+    limits = joint_ranges()
+    limits[5] = tuple(map(math.radians, config['follower_gripper_degrees']))
+    mapping = JointFollower(config, [0]*6, limits)
     midpoint = math.radians(sum(config['leader_trigger_degrees'])/2)
     for _ in range(80):
         target = mapping.step([10, 0, 0, 0, 0, midpoint], .05)
@@ -59,7 +63,8 @@ def test_recorded_white_maximum_reaches_black_maximum_without_early_saturation()
         target = mapping.step([0]*5+[measured_maximum], .05)
     assert math.degrees(target[5]) == pytest.approx(config['follower_gripper_degrees'][1])
     target = mapping.step([0]*5+[math.radians(118)], .05)
-    assert 0 < math.degrees(target[5]) < config['follower_gripper_degrees'][1]
+    assert (config['follower_gripper_degrees'][0] < math.degrees(target[5])
+            < config['follower_gripper_degrees'][1])
 
 
 def test_recorded_hardware_trigger_maximum_reaches_its_verified_raw_upper_limit():
@@ -83,6 +88,8 @@ def test_recorded_hardware_trigger_maximum_reaches_its_verified_raw_upper_limit(
     assert limits[5][1] == encoder['gripper'][1] > cad[5][1]
     assert limits[5][0] == encoder['gripper'][0] < cad[5][0]
     config = load_follow_config()
+    evidence = json.loads((root/'docs/measurements/trigger-range-2026-10-13.json').read_text())
+    config['follower_gripper_degrees'] = evidence['follower_range_degrees']
     mapping = JointFollower(config, [0]*6, limits)
     maximum = math.radians(config['leader_trigger_degrees'][1])
     for _ in range(120):
@@ -108,6 +115,7 @@ def test_recorded_minimum_and_midpoint_align_both_encoders_without_cad_clipping(
                               for v in saved['fingerprint']['raw_limits']['gripper'])
     limits = hardware_follow_limits([(-1, 1)]*5+[(-.17453, 1.74533)], encoder)
     config = load_follow_config()
+    config['follower_gripper_degrees'] = evidence['follower_range_degrees']
     mapping = JointFollower(config, [0]*6, limits)
     white = evidence['minimum_capture']['arms']['arm1']['samples'][0]
     black = evidence['minimum_capture']['arms']['follower']['samples'][0]
@@ -120,6 +128,42 @@ def test_recorded_minimum_and_midpoint_align_both_encoders_without_cad_clipping(
     for _ in range(120):
         target = mapping.step([0]*5+[midpoint], .05)
     assert target[5]/fit['radians_per_tick']+fit['zero_raw'] == pytest.approx((1479+2982)/2)
+
+
+def test_current_follow_mapping_fits_current_command_envelope_and_initializes_in_place():
+    import json
+
+    from fakes import Bus
+
+    from lerobot_arm_control.calibration.angle_calibration import AngleCalibration
+    from lerobot_arm_control.control.manual_control import ManualControl
+    from lerobot_arm_control.core.paths import resource_path
+    from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
+
+    path = resource_path('data/calibration/follower_mujoco.json')
+    saved = json.loads(path.read_text())
+    calibration = AngleCalibration(path, saved['fingerprint'])
+    bus = Bus()
+    control = ManualControl(bus, calibration, saved['fingerprint']['raw_limits'])
+    config = load_follow_config()
+    control.set_command_limits('gripper', tuple(map(math.radians,
+                                                   config['follower_gripper_degrees'])))
+    limits = hardware_follow_limits(joint_ranges(), control.limits)
+    plan = json.loads(resource_path('data/trajectories/table-circle120-tilt30.json').read_text())
+    initial = plan['qpos'][0]
+    assert initialization_target(config, initial, limits, control.rest_limits) == initial
+    assert control.raw_limits['gripper'] == (464, 1881)
+    for fraction in (0, .5, 1):
+        mapping = JointFollower(config, initial, limits)
+        low, high = config['leader_trigger_degrees']
+        leader = initial[:5]+[math.radians(low+fraction*(high-low))]
+        for _ in range(300):
+            target = mapping.step(leader, 1/60)
+        fit = calibration.fit('gripper')
+        mapped_raw = target[5]/fit['radians_per_tick']+fit['zero_raw']
+        assert mapped_raw == pytest.approx(464+fraction*(1881-464), abs=1e-9)
+        assert abs(control.raw('gripper', target[5])-mapped_raw) <= .5+1e-9
+    assert not bus.writes
 
 
 def test_stale_samples_latch_hold_until_explicit_resume():

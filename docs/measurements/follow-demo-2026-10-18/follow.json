@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "leader": "arm1",
+  "follower": "follower",
+  "max_sample_age_seconds": 0.25,
+  "leader_trigger_degrees": [
+    39.07643312101911,
+    140.54140127388533
+  ],
+  "follower_gripper_degrees": [
+    -92.72727272727272,
+    20.935828877005346
+  ],
+  "trigger_range_measured": true,
+  "trigger_range_source": "User-defined endpoints captured on 2026-10-13: white arm1 minimum raw=1940, maximum raw=3002; converted using unchanged independent six-joint calibration",
+  "simulation_shared_calibration": false,
+  "initialization": {
+    "max_correction_degrees": 2,
+    "max_closed_gripper_recovery_degrees": 5,
+    "margin_degrees": 0.5,
+    "target_tolerance_degrees": 0.25,
+    "timeout_seconds": 5,
+    "auto_start": true
+  },
+  "entry_speed_rad_s": 0.6,
+  "alignment_tolerance_degrees": 2,
+  "follower_gripper_range_source": "2026-10-18 user-guided gripper travel: native raw 452..1893, shared command envelope raw 464..1881. Converted with current follower calibration acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652; supersedes 2026-10-13 raw 1479..2982."
+}

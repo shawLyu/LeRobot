@@ -1,0 +1,29 @@
+{
+  "purpose": "Restore follow compatibility with the current user-taught follower command envelope",
+  "leader_trigger_raw": [
+    1940,
+    3002
+  ],
+  "follower_command_raw": [
+    464,
+    1881
+  ],
+  "follower_native_limits_raw": [
+    452,
+    1893
+  ],
+  "leader_trigger_degrees": [
+    39.07643312101911,
+    140.54140127388533
+  ],
+  "follower_gripper_degrees": [
+    -92.72727272727272,
+    20.935828877005346
+  ],
+  "follower_calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+  "leader_calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+  "follower_native_pid_changed": false,
+  "leader_eeprom_restored_with_user_authorization": true,
+  "physical_follow_verified": true,
+  "verification_scope": "User confirmed black arm and gripper movement; not an uninterrupted reliability or latency acceptance"
+}

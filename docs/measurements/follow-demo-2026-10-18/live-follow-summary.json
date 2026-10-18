@@ -1,0 +1,57 @@
+{
+  "frames": 10796,
+  "stage_frame_counts": {
+    "held": 7717,
+    "aligning": 150,
+    "following": 2929
+  },
+  "following_segment_seconds": [
+    48.80005699512549
+  ],
+  "leader_fault_events": 3,
+  "follower_fault_events": 0,
+  "operator_feedback": "黑臂和夹爪都能跟随",
+  "physical_follow_started": true,
+  "uninterrupted_fault_free_run": false,
+  "physical_response_latency_validated": false,
+  "per_joint_following_span_degrees": {
+    "shoulder_pan": {
+      "leader": 36.373937677053824,
+      "reference": 36.373937677053824,
+      "actual": 34.98591549295774
+    },
+    "shoulder_lift": {
+      "leader": 84.01840490797545,
+      "reference": 84.01840490797545,
+      "actual": 82.30769230769229
+    },
+    "elbow_flex": {
+      "leader": 82.47813411078715,
+      "reference": 82.47813411078715,
+      "actual": 82.56637168141592
+    },
+    "wrist_flex": {
+      "leader": 83.19488817891373,
+      "reference": 83.19488817891373,
+      "actual": 81.14285714285714
+    },
+    "wrist_roll": {
+      "leader": 8.02941176470587,
+      "reference": 8.02941176470587,
+      "actual": 6.978851963746209
+    },
+    "gripper": {
+      "leader": 119.71337579617833,
+      "reference": 113.66310160427807,
+      "actual": 113.50267379679144
+    }
+  },
+  "sensor_read_to_command_ms": {
+    "median": 5.881917895749211,
+    "p95": 6.065372610464692
+  },
+  "timing_scope": "Host acquisition-to-command timing only; excludes actuator motion response and input sampling interval",
+  "raw_source_sha256": "a051ff7b3e96e806795c1d090b1caa434fcc681318f0ad8f49a6fc7b779c4216",
+  "published_json_sha256": "96fcb6e55db554eb4be33c2f9ce2eb7b22dff1b3c26da9e69f42dd53fe537c39",
+  "privacy": "Only calibration metadata path strings normalized; all recorded control frames unchanged"
+}

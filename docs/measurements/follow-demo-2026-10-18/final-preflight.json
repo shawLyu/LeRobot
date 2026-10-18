@@ -1,0 +1,147 @@
+{
+  "time_unix_ns": 1792338230076694713,
+  "arms": {
+    "arm1": {
+      "calibration_matched": true,
+      "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "raw": {
+        "shoulder_pan": 1303,
+        "shoulder_lift": 1716,
+        "elbow_flex": 2260,
+        "wrist_flex": 2094,
+        "wrist_roll": 2176,
+        "gripper": 1870
+      },
+      "degrees": {
+        "shoulder_pan": -58.47025495750708,
+        "shoulder_lift": -29.999999999999996,
+        "elbow_flex": 15.131195335276965,
+        "wrist_flex": 10.543130990415333,
+        "wrist_roll": 13.147058823529411,
+        "gripper": 32.38853503184713
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 27,
+          "shoulder_lift": 25,
+          "elbow_flex": 27,
+          "wrist_flex": 27,
+          "wrist_roll": 26,
+          "gripper": 26
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 53,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 53,
+          "gripper": 52
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        }
+      }
+    },
+    "follower": {
+      "calibration_matched": true,
+      "calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+      "raw": {
+        "shoulder_pan": 1518,
+        "shoulder_lift": 2000,
+        "elbow_flex": 2161,
+        "wrist_flex": 2170,
+        "wrist_roll": 2898,
+        "gripper": 464
+      },
+      "degrees": {
+        "shoulder_pan": -44.028169014084504,
+        "shoulder_lift": -0.5982905982905983,
+        "elbow_flex": 1.5929203539823007,
+        "wrist_flex": 9.904761904761905,
+        "wrist_roll": 80.4833836858006,
+        "gripper": -92.72727272727272
+      },
+      "registers": {
+        "Status": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "Present_Temperature": {
+          "shoulder_pan": 25,
+          "shoulder_lift": 26,
+          "elbow_flex": 29,
+          "wrist_flex": 27,
+          "wrist_roll": 26,
+          "gripper": 27
+        },
+        "Present_Voltage": {
+          "shoulder_pan": 52,
+          "shoulder_lift": 51,
+          "elbow_flex": 52,
+          "wrist_flex": 52,
+          "wrist_roll": 52,
+          "gripper": 51
+        },
+        "Torque_Enable": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 1,
+          "elbow_flex": 1,
+          "wrist_flex": 1,
+          "wrist_roll": 1,
+          "gripper": 1
+        }
+      }
+    }
+  },
+  "follower_follow_limits_degrees": {
+    "shoulder_pan": [
+      -99.63380281690141,
+      108.08450704225352
+    ],
+    "shoulder_lift": [
+      -98.29059829059828,
+      100.00000275052231
+    ],
+    "elbow_flex": [
+      -96.82986737710912,
+      82.83185840707964
+    ],
+    "wrist_flex": [
+      -95.00001206679983,
+      76.38095238095238
+    ],
+    "wrist_roll": [
+      -150.1812688821752,
+      162.78912971598044
+    ],
+    "gripper": [
+      -92.72727272727272,
+      20.935828877005346
+    ]
+  },
+  "initialization_target_degrees": [
+    -44.028169014084504,
+    -0.5982905982905983,
+    1.5929203539823007,
+    9.904761904761905,
+    80.4833836858006,
+    -92.72727272727272
+  ]
+}

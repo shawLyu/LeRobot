@@ -2,17 +2,24 @@
 
 White `arm1` is the passive acquisition handle/trigger; black `follower` carries the gripper.
 Both independent six-joint calibrations are required. The measured white trigger range
-39.08–140.54° maps to black gripper −11.31–109.25°; the 0/15/30° reference marks are calibration points. The upper endpoint was sampled at raw=3002
+39.08–140.54° now maps to the black gripper's current command range
+**raw 464–1881** (−92.73–20.94° in its calibrated coordinate system).
+Those calibrated coordinates are not an independent jaw-opening angle measurement.
+The 0/15/30° reference marks are calibration points. The white upper endpoint was sampled at raw=3002
 on 2026-10-13 while the user held the white trigger at maximum; 140.54° is the
 existing encoder-calibration conversion, not a new independent mechanical angle measurement.
 
-The minimum pair was captured with both arms stationary: white raw=1940 maps
-to black raw=1479. They are endpoint positions, distinct from angle-calibration zero.
-The black maximum is its calibrated encoder upper limit raw=2982 (109.25°),
-not the former fixed 90° target. Physical following uses the verified physical
-encoder range for the jaw; arm joints retain their existing CAD/encoder limit intersection.
-The canonical CAD model is unchanged; its synthetic actuator range still ends at
-100°. [Endpoint capture and calibration identities](measurements/trigger-range-2026-10-13.json).
+The white minimum is raw=1940. The black travel was redefined with the operator
+on 2026-10-18: native limits raw 452–1893, with a 12-tick interior margin giving
+the shared command envelope 464–1881. White minimum/maximum map to those current
+command endpoints; the midpoint maps to 1172.5 raw before integer quantization.
+The former black raw 1479–2982 endpoints are historical and must not be used with
+the current native travel. The old configuration was rejected before movement
+because its upper target exceeded the current range; the follow configuration
+now matches the shared envelope and current calibration.
+Physical following uses verified jaw command travel; arm joints retain their
+existing CAD/encoder limit intersection. The canonical CAD model is unchanged.
+[Historical endpoint capture and calibration identities](measurements/trigger-range-2026-10-13.json).
 
 ## Start real following
 
@@ -23,6 +30,11 @@ From the local checkout:
 # Optional manual start, then type e and Enter in the controlling terminal:
 ./scripts/lerobot-arm demo follow --start-held
 ```
+
+Both USB adapters must be connected to the same robot computer and both servo
+chains powered. A powered arm without an enumerated USB data adapter cannot
+be read. Missing ports or mismatched calibration identities stop startup before
+following is enabled; do not substitute the other arm's USB port.
 
 This opens an SSH terminal running the controller on the robot computer. No simulator
 is started or used. Encoder acquisition, angle calibration, trigger mapping, startup

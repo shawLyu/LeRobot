@@ -1,0 +1,46 @@
+{
+  "seq": 5790,
+  "qpos": [
+    -0.7684365129203202,
+    -0.010442140823897697,
+    0.027801704899024716,
+    0.17287070686420025,
+    1.4047000384631099,
+    -1.6183962154856508
+  ],
+  "leader_qpos": [
+    -0.8528875239915632,
+    -0.41277572186737055,
+    0.5403905730664659,
+    0.29107407972557187,
+    1.1411373315245277,
+    0.5652865762032588
+  ],
+  "target_qpos": [
+    -0.7684365129203202,
+    -0.010442140823897697,
+    0.027801704899024716,
+    0.17287070686420025,
+    1.4047000384631099,
+    -1.6183962154856508
+  ],
+  "stage": "held",
+  "notice": "WARNING: leader voltage alarm cleared; process online; follower held; joints=['gripper']; remote e + Enter resumes",
+  "leader_status": {
+    "shoulder_pan": 0,
+    "shoulder_lift": 0,
+    "elbow_flex": 0,
+    "wrist_flex": 0,
+    "wrist_roll": 0,
+    "gripper": 0
+  },
+  "follower_status": {
+    "shoulder_pan": 0,
+    "shoulder_lift": 0,
+    "elbow_flex": 0,
+    "wrist_flex": 0,
+    "wrist_roll": 0,
+    "gripper": 0
+  },
+  "sample_age_ms": 5.297571886330843
+}

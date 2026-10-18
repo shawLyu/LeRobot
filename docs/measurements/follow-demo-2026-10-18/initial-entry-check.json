@@ -1,0 +1,25 @@
+{
+  "initial_degrees": [
+    17.32394366197183,
+    -56.495726495726494,
+    21.327433628318584,
+    -21.714285714285715,
+    108.12688821752265,
+    -84.22459893048128
+  ],
+  "mapped_target_degrees": [
+    76.06232294617563,
+    -54.20245398773006,
+    82.83185840707964,
+    19.45686900958466,
+    90.08823529411765,
+    -92.72727272727272
+  ],
+  "sampled_joint_line_geometry_checked": true,
+  "target_tcp_base_m": [
+    0.09444196139890262,
+    -0.17508014100572242,
+    0.027117375396472854
+  ],
+  "scope": "Nominal initial joint interpolation only; not a continuous follow collision guarantee"
+}

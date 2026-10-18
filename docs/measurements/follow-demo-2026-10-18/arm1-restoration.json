@@ -1,0 +1,257 @@
+{
+  "user_authorized_restore": true,
+  "started_unix_ns": 1792336974292519741,
+  "calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+  "writes": [
+    [
+      "Homing_Offset",
+      "shoulder_pan",
+      -2030
+    ],
+    [
+      "Min_Position_Limit",
+      "shoulder_pan",
+      699
+    ],
+    [
+      "Max_Position_Limit",
+      "shoulder_pan",
+      3416
+    ],
+    [
+      "Homing_Offset",
+      "shoulder_lift",
+      1084
+    ],
+    [
+      "Min_Position_Limit",
+      "shoulder_lift",
+      795
+    ],
+    [
+      "Max_Position_Limit",
+      "shoulder_lift",
+      3280
+    ],
+    [
+      "Homing_Offset",
+      "elbow_flex",
+      924
+    ],
+    [
+      "Min_Position_Limit",
+      "elbow_flex",
+      807
+    ],
+    [
+      "Max_Position_Limit",
+      "elbow_flex",
+      3094
+    ],
+    [
+      "Homing_Offset",
+      "wrist_flex",
+      -1986
+    ],
+    [
+      "Min_Position_Limit",
+      "wrist_flex",
+      794
+    ],
+    [
+      "Max_Position_Limit",
+      "wrist_flex",
+      3200
+    ],
+    [
+      "Homing_Offset",
+      "wrist_roll",
+      1818
+    ],
+    [
+      "Homing_Offset",
+      "gripper",
+      1844
+    ],
+    [
+      "Min_Position_Limit",
+      "gripper",
+      1512
+    ],
+    [
+      "Max_Position_Limit",
+      "gripper",
+      2759
+    ]
+  ],
+  "completed": true,
+  "before_identity": {
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+    "motors": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 2,
+      "elbow_flex": 3,
+      "wrist_flex": 4,
+      "wrist_roll": 5,
+      "gripper": 6
+    },
+    "raw_limits": {
+      "shoulder_pan": [
+        743,
+        3266
+      ],
+      "shoulder_lift": [
+        946,
+        3399
+      ],
+      "elbow_flex": [
+        718,
+        3051
+      ],
+      "wrist_flex": [
+        743,
+        3153
+      ],
+      "wrist_roll": [
+        0,
+        4095
+      ],
+      "gripper": [
+        1230,
+        2481
+      ]
+    },
+    "homing_offsets": {
+      "shoulder_pan": -2044,
+      "shoulder_lift": 926,
+      "elbow_flex": 1000,
+      "wrist_flex": -1929,
+      "wrist_roll": 1816,
+      "gripper": -1647
+    },
+    "phase": {
+      "shoulder_pan": 76,
+      "shoulder_lift": 12,
+      "elbow_flex": 76,
+      "wrist_flex": 76,
+      "wrist_roll": 76,
+      "gripper": 76
+    },
+    "mode": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "model": "so101",
+    "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+  },
+  "before_position": {
+    "shoulder_pan": 2899,
+    "shoulder_lift": 1611,
+    "elbow_flex": 2997,
+    "wrist_flex": 2130,
+    "wrist_roll": 3050,
+    "gripper": 1270
+  },
+  "after_identity": {
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+    "motors": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 2,
+      "elbow_flex": 3,
+      "wrist_flex": 4,
+      "wrist_roll": 5,
+      "gripper": 6
+    },
+    "raw_limits": {
+      "shoulder_pan": [
+        699,
+        3416
+      ],
+      "shoulder_lift": [
+        795,
+        3280
+      ],
+      "elbow_flex": [
+        807,
+        3094
+      ],
+      "wrist_flex": [
+        794,
+        3200
+      ],
+      "wrist_roll": [
+        0,
+        4095
+      ],
+      "gripper": [
+        1512,
+        2759
+      ]
+    },
+    "homing_offsets": {
+      "shoulder_pan": -2030,
+      "shoulder_lift": 1084,
+      "elbow_flex": 924,
+      "wrist_flex": -1986,
+      "wrist_roll": 1818,
+      "gripper": 1844
+    },
+    "phase": {
+      "shoulder_pan": 76,
+      "shoulder_lift": 12,
+      "elbow_flex": 76,
+      "wrist_flex": 76,
+      "wrist_roll": 76,
+      "gripper": 76
+    },
+    "mode": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "model": "so101",
+    "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+  },
+  "after_position": {
+    "shoulder_pan": 2886,
+    "shoulder_lift": 1453,
+    "elbow_flex": 3073,
+    "wrist_flex": 2188,
+    "wrist_roll": 3048,
+    "gripper": 1875
+  },
+  "final_registers": {
+    "Torque_Enable": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Status": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0,
+      "gripper": 0
+    },
+    "Lock": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1,
+      "gripper": 1
+    }
+  },
+  "finished_unix_ns": 1792336976381147872
+}

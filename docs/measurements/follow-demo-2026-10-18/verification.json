@@ -1,0 +1,76 @@
+{
+  "local_pytest": {
+    "passed": 794,
+    "skipped": 1,
+    "seconds": 100.63
+  },
+  "remote_pytest": {
+    "passed": 538,
+    "seconds": 16.88
+  },
+  "ruff_remote_runtime": "passed",
+  "git_diff_check": "passed",
+  "configuration": {
+    "follower_gripper_command_raw": [
+      464,
+      1881
+    ],
+    "follower_calibration_matches_current_command_envelope": true,
+    "leader_restored_with_explicit_user_confirmation": true,
+    "leader_restored_identity_matches_saved_calibration": true,
+    "leader_torque_after_restore": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "leader_status_after_restore": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "leader_lock_after_restore": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "physical_demo": {
+    "connected_both_six_motor_buses": true,
+    "calibration_preflight_passed_after_restore": true,
+    "controller_ran_remote_standalone_held": true,
+    "live_follow_motion_started": true,
+    "reason": "Both calibrated arms followed after checked raised-pose alignment; operator confirmed black arm and gripper follow",
+    "leader_voltage_alarm_events_observed": true,
+    "alarm_protection_bypassed": false,
+    "follower_faults_in_preparation": 0,
+    "operator_feedback": "黑臂和夹爪都能跟随",
+    "following_seconds": [
+      48.80005699512549
+    ],
+    "leader_fault_events_final_run": 3,
+    "follower_fault_events_final_run": 0,
+    "uninterrupted_fault_free_run": false,
+    "physical_response_latency_validated": false,
+    "controller_exited": true,
+    "final_both_arms_status_zero": true,
+    "final_follower_native_pid_unchanged": true,
+    "final_follower_acceleration_and_goal_velocity_restored_zero": true,
+    "final_leader_torque_disabled": true,
+    "final_follower_holding_torque_enabled": true,
+    "temporary_readonly_displays_closed": true
+  },
+  "deployment": {
+    "checked_files": 502,
+    "mismatched_files": [],
+    "verification_document_synced_after_check": true
+  }
+}

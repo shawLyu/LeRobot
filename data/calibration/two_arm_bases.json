@@ -5,74 +5,74 @@
     "id": 1,
     "marker_size_m": 0.15
   },
-  "source": "data/tabletop/current-scene",
-  "captured_unix_ns": 1791689399037224416,
+  "source": "logs/table-calibration-20261019-152215-679234",
+  "captured_unix_ns": 1792394570476829425,
   "units": "m",
   "arms": {
     "follower": {
       "file": "data/calibration/follower_table_base.json",
-      "sha256": "ed3034c884707ee09adaf285406420b1e7a2e2fccb94b2365ce3e0116e538c93",
-      "signature": "b2976d4472096817739c8c98efc7cf948e265035b66c308fd304a25154c2360f",
+      "sha256": "49223aae32e8fe0d416b289083ed298a4220e871b17fa782ba8602c7787f9df9",
+      "signature": "2124ebbc836bebfa9003a835a57cc271e322f23e33f1e42347f1fb8845e1408a",
       "pose": {
         "status": "fixed",
         "markers": [],
-        "marker_size_m": 0.042,
+        "marker_size_m": 0.05,
         "reference": "primary tabletop anchor",
         "calibrated": true,
-        "reprojection_error_px": 0.16972777869175226,
+        "reprojection_error_px": 0.37696355639339857,
         "max_reprojection_error_px": 1.5,
         "constraint": "base_flat_on_table",
         "position": [
-          -0.4693182947632566,
-          -0.05728449061302131,
+          -0.42740378910082466,
+          -0.05762126124832299,
           0.002400001698325327
         ],
         "quaternion": [
-          0.706085521402854,
+          0.7035103417090003,
           0,
           0,
-          0.7081265681114216
+          0.7106850210244238
         ],
         "pose_source": "fixed_marker_calibration",
         "fixed_calibration_samples": 20,
         "fixed_calibration_required": 20,
         "fixed_to_table": true,
-        "calibrated_unix_ns": 1791689384797157944,
-        "calibration_position_spread_m": 0.0002542149876749605,
-        "calibration_yaw_spread_rad": 0.0006551030531696256
+        "calibrated_unix_ns": 1792394542320763324,
+        "calibration_position_spread_m": 0.0008571168993509109,
+        "calibration_yaw_spread_rad": 0.002716563143730033
       }
     },
     "arm1": {
       "file": "data/calibration/arm1_table_base.json",
-      "sha256": "f957767b5c394e1a4a2e0ffa9ec5e2b17a65391cfab58927f8bee0c7b8f0105c",
-      "signature": "27aa7142d12c04c5c806579a8062e28db8cd06152b002aab85fb117bcb213f8b",
+      "sha256": "df741388bc57ebe5aa3499d856d48c74f9794a3bcef7e44a35b5406296b15613",
+      "signature": "a69bc6507fc37d1d1e0bff8aa5ff5ea87980812f080cd9f19a9f50973c0f3736",
       "pose": {
         "status": "fixed",
         "markers": [],
-        "marker_size_m": 0.042,
+        "marker_size_m": 0.05,
         "reference": "primary tabletop anchor",
         "calibrated": true,
-        "reprojection_error_px": 0.147268913211,
+        "reprojection_error_px": 0.2663283941371758,
         "max_reprojection_error_px": 1.5,
         "constraint": "base_flat_on_table",
         "position": [
-          -0.17588661221718044,
-          -0.0599132971415117,
-          0.002400001698325327
+          -0.1759387225110158,
+          -0.06112038258120873,
+          0.0024000016983253825
         ],
         "quaternion": [
-          0.7181765750215744,
+          0.7185528050011226,
           0,
           0,
-          0.6958609107359609
+          0.6954724052218165
         ],
         "pose_source": "fixed_marker_calibration",
         "fixed_calibration_samples": 20,
         "fixed_calibration_required": 20,
         "fixed_to_table": true,
-        "calibrated_unix_ns": 1791689384849461546,
-        "calibration_position_spread_m": 0.0002545087086934618,
-        "calibration_yaw_spread_rad": 0.0011957311821417793
+        "calibrated_unix_ns": 1792394542374904848,
+        "calibration_position_spread_m": 0.0008112736532112066,
+        "calibration_yaw_spread_rad": 0.0064371075084159735
       }
     }
   },
@@ -83,14 +83,16 @@
         "arm1"
       ],
       "relative_position_m": [
-        0.29343168254607616,
-        -0.0026288065284903947,
-        0.0
+        0.25146506658980883,
+        -0.0034991213328857407,
+        5.551115123125783e-17
       ],
-      "center_distance_m": 0.2934434578340186,
-      "planar_distance_m": 0.2934434578340186,
+      "center_distance_m": 0.25148941044330125,
+      "planar_distance_m": 0.25148941044330125,
       "both_fixed": true
     }
   ],
-  "physical_precision_validated": false
+  "physical_precision_validated": false,
+  "orientation_source": "User confirmed both base fronts toward T; native replacement marker orientation checked on 2026-10-19",
+  "motor_writes_performed": false
 }

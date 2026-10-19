@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "signature": "b2976d4472096817739c8c98efc7cf948e265035b66c308fd304a25154c2360f",
+  "signature": "2124ebbc836bebfa9003a835a57cc271e322f23e33f1e42347f1fb8845e1408a",
   "reference": {
     "dictionary": "DICT_APRILTAG_36h10",
     "id": 1,
@@ -9,30 +9,30 @@
   "pose": {
     "status": "fixed",
     "markers": [],
-    "marker_size_m": 0.042,
+    "marker_size_m": 0.05,
     "reference": "primary tabletop anchor",
     "calibrated": true,
-    "reprojection_error_px": 0.16972777869175226,
+    "reprojection_error_px": 0.37696355639339857,
     "max_reprojection_error_px": 1.5,
     "constraint": "base_flat_on_table",
     "position": [
-      -0.4693182947632566,
-      -0.05728449061302131,
+      -0.42740378910082466,
+      -0.05762126124832299,
       0.002400001698325327
     ],
     "quaternion": [
-      0.706085521402854,
+      0.7035103417090003,
       0,
       0,
-      0.7081265681114216
+      0.7106850210244238
     ],
     "pose_source": "fixed_marker_calibration",
     "fixed_calibration_samples": 20,
     "fixed_calibration_required": 20,
     "fixed_to_table": true,
-    "calibrated_unix_ns": 1791689384797157944,
-    "calibration_position_spread_m": 0.0002542149876749605,
-    "calibration_yaw_spread_rad": 0.0006551030531696256
+    "calibrated_unix_ns": 1792394542320763324,
+    "calibration_position_spread_m": 0.0008571168993509109,
+    "calibration_yaw_spread_rad": 0.002716563143730033
   },
   "camera_matrix": [
     [
@@ -64,32 +64,32 @@
       "dictionary": "DICT_4X4_50",
       "id": 7,
       "mount": "base_parallel_to_table",
-      "marker_size_m": 0.042,
+      "marker_size_m": 0.05,
       "corners_base_m": [
         [
-          0.01813499778157824,
-          -0.021,
+          -0.027865002218421763,
+          0.025,
           0.06759999830167472
         ],
         [
-          -0.023865002218421763,
-          -0.021,
+          0.02213499778157824,
+          0.025,
           0.06759999830167472
         ],
         [
-          -0.023865002218421763,
-          0.021,
+          0.02213499778157824,
+          -0.025,
           0.06759999830167472
         ],
         [
-          0.01813499778157824,
-          0.021,
+          -0.027865002218421763,
+          -0.025,
           0.06759999830167472
         ]
       ],
       "mount_calibration": {
         "source": "user_confirmed_measurements_20261009",
-        "black_edge_m": 0.042,
+        "black_edge_m": 0.05,
         "center_height_over_table_m": 0.07,
         "center_to_base_foot_rear_m": 0.0195,
         "on_base_centerline": true,
@@ -104,26 +104,9 @@
           0,
           0.06759999830167472
         ],
-        "corner_order_source": "live decoded 4x4 marker orientation relative to observed arm extension"
+        "corner_order_source": "2026-10-19 native image and user-confirmed base fronts toward T; replacement tag orientation differs from previous print",
+        "black_edge_source": "user_confirmed_replacement_20261019; center and mounting unchanged"
       },
-      "border_seed_native": [
-        [
-          627,
-          874
-        ],
-        [
-          723,
-          875
-        ],
-        [
-          719,
-          977
-        ],
-        [
-          622,
-          975
-        ]
-      ],
       "prefer_observed_border": true
     }
   ]

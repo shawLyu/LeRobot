@@ -4,10 +4,11 @@ As of 2026-10-11, the actual visible right marker is
 `DICT_APRILTAG_36h10` / ID 1, with left `DICT_APRILTAG_16h5` / ID 0 as auxiliary.
 Both black borders are 150 mm. The October 9 ID 3 installation is archived.
 The user-selected second October 8 camera calibration remains active.
-The saved October 11 records each contain 20 accepted observations; recorded separation is **293.443 mm**.
 On 2026-10-19 both base markers were replaced with **50 mm** black borders, with centers and
-mounting unchanged. The active geometry is updated; new base observations are required.
-The old 42 mm records and scene snapshot describe the previous installation.
+mounting heights unchanged. Their new printed rotations required updated decoded corner
+correspondence. Both bases now have new 20-observation records; separation is **251.489 mm**,
+with yaw **90.581°** for follower and **88.130°** for arm1, both facing toward the T objects.
+The previous October 11, 42 mm scene had 293.443 mm separation and is superseded.
 See [current scene](current-scene.md) for poses, independent table validation and complete saved parameters.
 The measurements in the historical section below remain historical. Simulation remains local.
 
@@ -73,9 +74,9 @@ separate `fixed_base.file`; duplicate names, markers or file paths are rejected.
 - `data/calibration/arm1_table_base.json`: white arm fixed pose and mount signature.
 - `data/calibration/two_arm_bases.json`: both measured poses, separation, quality and provenance.
 
-These three records contain accepted October 11 measurements in the ID 1 frame,
-using the previous 42 mm marker geometry. They must be recollected for the 50 mm markers;
-the per-arm runtime rejects their old geometry signatures.
+These three records contain accepted October 19 measurements in the ID 1 frame,
+using the current 50 mm marker geometry and corrected print orientation.
+The per-arm runtime rejects records whose geometry signature does not match.
 Their prior versions are archived independently of the active records.
 The live stream contains `base_registrations`, indexed by arm name, and
 `base_distances`, containing pairwise displacement and separation in meters.
@@ -118,10 +119,9 @@ the two base files back locally and refresh the pair summary. Saved mounting
 poses load on restart without requiring the robot markers to remain visible.
 Moving a base or the primary tabletop marker requires new registration.
 
-Current `border_seed_native` regions were measured from October 11 source frames.
-Inspect fresh source corners after changing the viewpoint; the previous regions
-are not valid for another installation. Preserve the user-confirmed marker size,
-height and CAD mount until a new physical measurement establishes a change.
+Border checks use observed candidate quads from the current frame, not historical
+pixel search regions. Preserve the user-confirmed marker size, height and CAD center;
+after replacing a print, verify decoded corner order against the physical base front.
 
 ## Height calibration dependency
 

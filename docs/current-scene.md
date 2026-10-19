@@ -1,146 +1,85 @@
-# Current two-arm tabletop scene — 2026-10-11
+# Current two-arm tabletop scene — 2026-10-19
 
-Installation update, 2026-10-19: both base markers now have 50 mm black borders,
-with their centers and mounting unchanged. This preserved scene uses the previous
-42 mm markers; obtain new base calibration and a new scene capture for the live installation.
+Both base markers have **50 mm black borders**, excluding white margins:
+black follower is ArUco `DICT_4X4_50` / ID 7; white arm1 is ID 6.
+Both base fronts point toward the T objects. The replacement prints have different
+orientations from the previous stickers; `corners_base_m` now matches their observed
+code axes. Marker centers and heights remain unchanged.
 
-The observed desktop uses right AprilTag `DICT_APRILTAG_36h10` / ID 1 as origin,
-with left `DICT_APRILTAG_16h5` / ID 0 as auxiliary. Both black borders are 150 mm.
-The black follower base is ArUco 4x4 ID 7; the white arm1 base is ID 6.
+The table origin is right AprilTag `DICT_APRILTAG_36h10` / ID 1;
+left `DICT_APRILTAG_16h5` / ID 0 is auxiliary. Both table borders remain 150 mm.
+The selected camera intrinsics and fixed focus 68 are preserved.
+Native capture is 1920×1080; processing is 640×360.
+
+## Accepted base calibration
+
+A 35-second camera-only session recorded 158 states. Both bases independently
+passed 20-observation calibration, with the primary anchor visible.
+No motor bus was opened and no torque, goal or EEPROM writes were sent.
+
+| Arm | Base XYZ in table frame (mm) | Yaw | Stored fit error (processing px) | Maximum position spread |
+| --- | --- | ---: | ---: | ---: |
+| follower | −427.404, −57.621, 2.400 | 90.581° | 0.377 | 0.857 mm |
+| arm1 | −175.939, −61.120, 2.400 | 88.130° | 0.266 | 0.811 mm |
+
+Base separation is **251.489 mm**. Maximum yaw spreads are 0.156° and 0.369°.
+The unchanged acceptance limits are 2 mm position spread, 0.025 rad yaw spread,
+1.5 processing pixels of base reprojection error, and at least one second of sampling.
+These describe observation consistency; absolute physical precision remains unvalidated.
+
+The final camera position in the table frame is approximately
+`[−315.523, −108.443, 634.114]` mm. The scene records its full rotation and provenance.
+The table mesh is the observed workspace patch; its physical perimeter is unmeasured.
+
+## Saved parameters
+
+- `configs/tabletop.json`: 50 mm marker geometry and corrected decoded corner order.
+- `data/calibration/follower_table_base.json` and `arm1_table_base.json`: accepted records,
+  including current geometry signatures and camera identity.
+- `data/calibration/two_arm_bases.json`: both records, hashes, separation and measurement scope.
+- `configs/scenes/tabletop-current.json`: current camera/table/base parameters, configuration
+  and calibration hashes, and the current controller fingerprint.
+- `data/tabletop/current-scene/`: current recorded state, generated scene, source images,
+  copied meshes, configuration and calibration records; also synchronized remotely.
+- `logs/table-calibration-20261019-152215-679234/`: original local capture.
+
+This session sampled **base poses only**. Joint poses in its saved scene are explicitly
+`unmeasured_preview`, and joint feedback is disabled. They must not be presented as
+current encoder measurements. Existing independent joint-angle files remain unchanged.
+The old 42 mm scene is superseded by this capture.
+
+## View and recalibrate
 
 ```sh
+# Camera/table/base preview without opening motor buses.
+./scripts/lerobot-arm view tabletop --camera-only --fps 5
+
+# Include each arm's independent read-only encoder feedback.
 ./scripts/lerobot-arm view tabletop --fps 5
+
+# Recollect bases after moving a base or replacing/rotating its marker.
+./scripts/lerobot-arm calibrate table
 ```
 
-Camera capture/perception and both arms' read-only encoder feedback run remotely;
-the local MuJoCo view updates the table, Ts and independently registered bases.
-The current view shows both arms with separate encoder streams and independent
-six-joint angle mappings. White arm1 alignment was completed on 2026-10-11;
-temporary sharing of the black follower mapping is disabled.
-Each base keeps its own accepted marker registration. No motors were driven during this capture.
-The table is the observed workspace patch; its full physical perimeter is unmeasured.
+Saved base records reload only when their geometry and camera signatures match.
+Changing the printed orientation requires checking its decoded corner correspondence;
+small fit residuals alone cannot establish the correct physical base heading.
+See [the three calibration workflows](calibration.md) and [base geometry](two-arm-calibration.md).
 
-Run offline Push-T from this preserved desktop observation with:
+## White-arm six-joint alignment
+
+The white leader retains its independently measured acquisition handle/trigger geometry;
+the black follower retains its gripper. Select each arm explicitly for angle calibration:
 
 ```sh
-./scripts/lerobot-arm task push-t --snapshot data/tabletop/current-scene
+./scripts/lerobot-arm calibrate angles --arm follower
+./scripts/lerobot-arm calibrate angles --arm arm1
 ```
 
-This uses a frozen observation. It does not mirror subsequent physical changes.
-Only the black follower executes simulated pushes; the additional white model remains
-fixed in its recorded posture. Both recorded joint sources are `live_encoders`,
-using their own accepted mappings. Startup from this two-arm snapshot was checked;
-that check does not establish completion of the pushing task.
+Both mappings remain device-bound and are never copied between arms.
+See [angle calibration](angle-calibration.md) for references and resource-hash updates.
 
-## Preserved parameters
-
-- `configs/scenes/tabletop-current.json`: complete versioned parameters, calibration
-  hashes, independent measurement sources and both arm identities.
-- `data/tabletop/current-scene/`: final `state.json`, `scene_parameters.json`,
-  `scene.xml` recorded keyframe, config copies, camera/annotated/native images,
-  textures and the shared CAD meshes. The same directory is saved remotely.
-- `data/calibration/table_reference.json`: accepted current table layout.
-- `data/calibration/follower_table_base.json` and `arm1_table_base.json`:
-  independent fixed mounting records, each with 20 accepted observations.
-- `data/calibration/two_arm_bases.json`: both records, hashes and separation.
-
-Focus remains locked at 68 with autofocus off, native capture is 1920x1080,
-processing is 640x360, and the selected October 8 camera calibration is preserved.
-Marker sizes remain 42 mm; heights remain 70 mm for follower and 69 mm for arm1.
-All task and follow control now uses `shared-joint-pid-v1` at 60 Hz. Follow uses the shared reference shaper and motion-weighted PI-D. Native P/I/D
-are preserved; RAM acceleration/velocity are temporarily 254/3000 and restored
-on exit. See [the controller](lerobot-control.md) for current protection settings. Current controller and role/mapping
-parameters, with their hashes, are saved in the scene manifest and snapshot configs.
-
-The accepted table fit uses 51 training and 12 independent validation frames.
-For the stationary camera, training-frame median primary corners determine the shared
-extrinsic pose; all primary observations must stay within 2 native pixels of it.
-Auxiliary spread must remain below 2 mm / 0.025 rad and held-out joint reprojection
-below 2 native pixels. Current maximum held-out RMS is 1.25 px; maximum center spread
-is 0.20 mm. These measure image registration stability, not absolute physical accuracy.
-
-| Arm | Base XYZ (mm) | Yaw (degrees) | Stored fit error (processing px) |
-| --- | --- | ---: | ---: |
-| follower | -469.318, -57.284, 2.400 | 90.165 | 0.170 |
-| arm1 | -175.887, -59.913, 2.400 | 88.192 | 0.147 |
-
-Base separation is 293.443 mm. Both 20-observation base records have maximum
-position spread about 0.255 mm. Camera movement, tag movement or a changed robot
-installation requires checking the marker search regions and new registration.
-
-## Independent six-joint alignment interfaces
-
-Close the tabletop viewer before opening a calibration window. Each arm has its
-own `--arm` selector and output file; no mapping or EEPROM identity is overwritten.
-
-```sh
-./scripts/lerobot-arm view arm --backend hardware --arm follower \
-  --log logs/follower-angle-calibration.json
-./scripts/lerobot-arm view arm --backend hardware --arm arm1 \
-  --log logs/arm1-angle-calibration.json
-```
-
-These commands are separate sessions, not simultaneous readers on the same serial bus.
-Keep the existing follower result unless intentionally recalibrating it.
-
-### White-arm six-joint alignment
-
-The new entry selects the white USB identity ending `5B91028324-if00`, preserves
-all EEPROM registers, and saves to its own `data/calibration/arm1_mujoco.json`.
-The readiness check received about 20 samples/s, with all six torques off and no faults.
-Read-only additional-arm calibration does not enable gripper tests or physical control.
-
-```sh
-./scripts/lerobot-arm view arm --backend hardware --arm arm1 \
-  --log logs/arm1-angle-calibration.json
-```
-
-Support the white arm. Press **B**, select joints with **1–6**, and measure each
-of joints 1–5 relative to its parent at **0°, +30°, +60°**. Joint 6 is the acquisition
-trigger and uses **0°, +15°, +30°**, following the on-screen handle reference.
-Press **C** after holding still for at least half a second; **R** advances the reference.
-The current pose is not automatically zero. Nine consecutive stable samples are
-required; the third reference must pass its independent check before a joint is accepted.
-See [angle calibration](angle-calibration.md) for directions and the complete procedure.
-
-After **6/6 aligned**, close the calibration window and copy its accepted software mapping:
-
-```sh
-rsync -az data/calibration/arm1_mujoco.json lerobot:/home/xy/Research/lerobot/data/calibration/
-./scripts/lerobot-arm view tabletop --fps 5
-```
-
-The remote feedback worker verifies the white arm's identity and six fits, then the
-viewer updates its prefixed joints independently of the black arm. A stale or invalid
-white mapping cannot become live joint feedback. Ordinary deployment preserves this file.
-The current snapshot was refreshed after alignment with 39 observed camera frames;
-both robot feedback streams were live and independently calibrated. The accepted
-white file has SHA-256 `87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963`.
-All six third-reference checks are below 2 degrees; the largest is 1.91 degrees.
-The current complete snapshot remains available.
-
-## Independent mappings
-
-`additional_robots[].joint_calibration` stays `data/calibration/arm1_mujoco.json`.
-Both buses retain their own fingerprints and accepted files. Missing, invalid or
-incomplete white calibration reports an error instead of borrowing black-arm fits.
-The follow demo also has `simulation_shared_calibration: false`.
-
-## Leader geometry and follow demo
-
-White arm1 now has the official SO-101 acquisition handle/trigger geometry in
-both calibration and tabletop views. Black follower retains its gripper. Existing
-base and black joint calibration reference hashes are preserved. Model sources,
-independent mappings and the captured 39.08–140.54-degree trigger endpoints are saved
-with the scene. The leader joint and actuator limits use the same measured range.
-Run `./scripts/lerobot-arm demo follow` for remote-only physical following.
-An optional `./scripts/lerobot-arm view follow` reads both encoder poses and the
-saved tabletop scene. The viewer never participates in control; its closure or
-focus changes do not hold the motors. For offline input use
-`./scripts/lerobot-arm view follow --source synthetic --auto`.
-
-Initialization starts automatically on the remote controller. `--start-held`
-requires `e` + Enter in the owning terminal; `h` + Enter holds and `q` + Enter
-holds/exits. Range recovery and startup alignment remain bounded. Freshness is
-checked in the remote acquisition loop; faults hold and require explicit resume.
-See [follow operation](follow.md) and [current tuning evidence](measurements/remote-follow-2026-10-12/README.md).
+Physical following runs entirely on the remote computer with
+`./scripts/lerobot-arm demo follow`. The optional `view follow` observer reads telemetry;
+it does not participate in the controller. See [follow operation](follow.md)
+and [the shared robot configuration](robot-config.md) for the current parameters.

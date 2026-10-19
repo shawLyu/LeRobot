@@ -732,3 +732,50 @@ def test_native_stream_is_ram_only_verified_and_restored_before_release(setup):
     assert all(bus.registers[j]["Torque_Enable"] == 1 for j in JOINTS if j != "gripper")
     assert not any(reg in ("P_Coefficient", "I_Coefficient", "D_Coefficient", "Lock")
                    for reg, _, _ in bus.writes)
+
+
+@pytest.mark.parametrize('all_joints', [False, True])
+def test_startup_readbacks_retry_without_replaying_goal_writes(setup, all_joints):
+    from lerobot_arm_control.control.control_defaults import READ_RETRIES
+
+    bus, control, _ = setup
+    original = bus.read
+    checked = set()
+    startup = {'Lock', 'Status', 'Operating_Mode', 'Present_Voltage',
+               'Min_Voltage_Limit', 'Max_Voltage_Limit', 'Present_Position',
+               'Goal_Position', 'Torque_Enable'}
+
+    def read(register, joint, normalize=False, num_retry=0):
+        if register in startup:
+            checked.add(register)
+            if num_retry < READ_RETRIES:
+                raise RuntimeError('[RxPacketError] Input voltage error!')
+        return original(register, joint, normalize, num_retry)
+
+    bus.read = read
+    control.enable_all() if all_joints else control.enable('shoulder_lift')
+    expected = set(JOINTS) if all_joints else {'shoulder_lift'}
+    assert control.enabled == expected
+    assert checked >= startup - ({'Goal_Position', 'Torque_Enable'} if all_joints else set())
+    goals = [(joint, value) for register, joint, value in bus.writes
+             if register == 'Goal_Position']
+    assert sorted(goals) == sorted((joint, 2200) for joint in expected)
+
+
+def test_persistent_startup_position_read_failure_blocks_all_goal_writes(setup):
+    from lerobot_arm_control.control.control_defaults import READ_RETRIES
+
+    bus, control, _ = setup
+    original = bus.read
+
+    def read(register, joint, normalize=False, num_retry=0):
+        if register == 'Present_Position' and joint == 'gripper':
+            assert num_retry == READ_RETRIES
+            raise RuntimeError('[RxPacketError] Input voltage error!')
+        return original(register, joint, normalize, num_retry)
+
+    bus.read = read
+    with pytest.raises(RuntimeError, match='Input voltage'):
+        control.enable_all()
+    assert bus.writes == []
+    assert not control.enabled

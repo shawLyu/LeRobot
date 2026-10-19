@@ -19,6 +19,29 @@ from lerobot_arm_control.perception.tabletop_perception import (
 ROOT = workspace_root()
 
 
+def stationary_camera_fit(perception, primary, auxiliary, initial):
+    """Fit one camera and one rigid auxiliary square using training medians only."""
+    source = perception.tag_points[:, :2]
+    camera, previous = initial, None
+    for _ in range(500):
+        measured = pixels_on_plane(auxiliary, perception.matrix, perception.distortion,
+                                   camera[1], camera[2])[:, :2]
+        center = measured.mean(axis=0)
+        left, _, right = np.linalg.svd(source.T@(measured-center))
+        rotation = left@right
+        if np.linalg.det(rotation) <= 0:
+            raise ValueError('Auxiliary marker orientation is inconsistent with the table plane')
+        layout = np.column_stack((source@rotation+center, np.zeros(4)))
+        camera = perception.estimate_pose(np.vstack((perception.tag_points, layout)),
+                                          np.vstack((primary, auxiliary)))
+        if camera is None:
+            raise ValueError('Stationary joint table-marker pose could not be estimated')
+        if previous is not None and np.max(np.abs(layout-previous)) < 1e-9:
+            break
+        previous = layout
+    return camera
+
+
 def fit_capture(directory, config):
     directory = Path(directory)
     metadata = json.loads((directory/'calibration.json').read_text())
@@ -81,12 +104,14 @@ def fit_capture(directory, config):
     validation = [s for index, s in enumerate(samples) if index % 5 == 4]
     if len(training) < 20 or len(validation) < 5:
         raise ValueError('Need at least 20 training frames and five held-out frames with both tags')
-    # A fixed camera has one extrinsic pose. Estimating its tilt separately from
-    # four noisy corners in every frame amplifies errors at the distant auxiliary.
+    # Start from the primary, then use both rigid squares to avoid amplifying
+    # primary-only tilt error at a distant auxiliary. Validation never enters the fit.
     primary = np.median([sample['primary'] for sample in training], axis=0)
     fixed_camera = perception.estimate_pose(perception.tag_points, primary, square=True)
     if fixed_camera is None:
         raise ValueError('Stationary camera reference could not be estimated')
+    auxiliary_pixels = np.median([sample['auxiliary'] for sample in training], axis=0)
+    fixed_camera = stationary_camera_fit(perception, primary, auxiliary_pixels, fixed_camera)
     mapping = np.asarray(config['low_to_capture_affine'], dtype=float)
     primary_motion = []
     for sample in samples:
@@ -131,7 +156,7 @@ def fit_capture(directory, config):
             'auxiliary': {**auxiliary, 'black_border_side_m': perception.scale,
                           'center_m': [*center.tolist(), 0.], 'yaw_rad': yaw,
                           'center_distance_m': float(np.linalg.norm(center))},
-            'quality': {'method': 'stationary_camera_median_primary_corners',
+            'quality': {'method': 'stationary_joint_marker_training_medians',
                         'max_primary_corner_motion_native_px': max(primary_motion),
                         'training_frames': len(training), 'held_out_frames': len(validation),
                         'position_std_xy_m': centers.std(axis=0).tolist(),

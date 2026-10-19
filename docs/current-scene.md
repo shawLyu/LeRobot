@@ -6,7 +6,7 @@ Both base fronts point toward the T objects. The replacement prints have differe
 orientations from the previous stickers; `corners_base_m` now matches their observed
 code axes. Marker centers and heights remain unchanged.
 
-The table origin is right AprilTag `DICT_APRILTAG_36h10` / ID 1;
+The table origin is right AprilTag `DICT_APRILTAG_36h11` / ID 3;
 left `DICT_APRILTAG_16h5` / ID 0 is auxiliary. Both table borders remain 150 mm.
 The selected camera intrinsics and fixed focus 68 are preserved.
 Native capture is 1920×1080; processing is 640×360.
@@ -19,16 +19,16 @@ No motor bus was opened and no torque, goal or EEPROM writes were sent.
 
 | Arm | Base XYZ in table frame (mm) | Yaw | Stored fit error (processing px) | Maximum position spread |
 | --- | --- | ---: | ---: | ---: |
-| follower | −427.404, −57.621, 2.400 | 90.581° | 0.377 | 0.857 mm |
-| arm1 | −175.939, −61.120, 2.400 | 88.130° | 0.266 | 0.811 mm |
+| follower | 303.724, −402.234, 2.400 | 179.968° | 0.471 | 1.330 mm |
+| arm1 | 309.764, −150.550, 2.400 | 177.629° | 1.246 | 1.324 mm |
 
-Base separation is **251.489 mm**. Maximum yaw spreads are 0.156° and 0.369°.
+Base separation is **251.757 mm**. Maximum yaw spreads are 0.611° and 0.300°.
 The unchanged acceptance limits are 2 mm position spread, 0.025 rad yaw spread,
 1.5 processing pixels of base reprojection error, and at least one second of sampling.
 These describe observation consistency; absolute physical precision remains unvalidated.
 
 At the end of base calibration, the camera position in the table frame was approximately
-`[−315.523, −108.443, 634.114]` mm. The scene records its full rotation and provenance.
+`[356.258, −289.545, 637.379]` mm. The scene records its full rotation and provenance.
 The table mesh is the observed workspace patch; its physical perimeter is unmeasured.
 
 ## Saved parameters
@@ -41,8 +41,8 @@ The table mesh is the observed workspace patch; its physical perimeter is unmeas
   and calibration hashes, and the current controller fingerprint.
 - `data/tabletop/current-scene/`: current recorded state, generated scene, source images,
   copied meshes, configuration and calibration records; also synchronized remotely.
-- `logs/table-calibration-20261019-152215-679234/`: original local base-calibration capture.
-- `logs/world-mirror-validation/`: subsequent 18-second live mirror validation, with 97 camera states,
+- `logs/table-calibration-20261019-155743-874251/`: original local base-calibration capture.
+- `logs/world-mirror-id3-validation/`: subsequent 18-second live mirror validation, with 77 camera states,
   independent joint feedback, observed textures and a rendered screenshot.
 
 The base-calibration session sampled base poses only. The current scene was subsequently
@@ -54,7 +54,14 @@ motion commands. Existing independent joint-angle files remain unchanged.
 Run `./scripts/lerobot-arm view tabletop --fps 10` for ongoing synchronization;
 the saved scene is one recorded observation. On stale or failed feedback the viewer marks
 the affected arm as unavailable rather than treating a preview as live feedback.
-The old 42 mm scene and intermediate camera-only joint previews are superseded by this capture.
+The previous ID 1 frame, old 42 mm scene and intermediate camera-only joint previews
+are superseded by this capture. The physical arms and 50 mm marker mounts did not change;
+new coordinates and headings reflect the relocated/replaced table reference.
+
+The new table layout fit uses 148 training and 37 held-out frames. Training-only joint
+fitting estimates one stationary camera pose and a rigid 150 mm auxiliary square.
+Maximum held-out RMS is 1.409 native pixels; maximum auxiliary position spread is 0.667 mm.
+The 2-pixel validation limit and all stability limits remain unchanged.
 
 ## View and recalibrate
 

@@ -18,13 +18,13 @@ Keep markers fully visible with a white margin outside the black border. Run one
 `configs/tabletop.json` contains the calibrated 640x360 processing intrinsics, five distortion coefficients, and geometry.
 Both tabletop markers have **150 mm** outer black borders:
 
-- AprilTag 36h10 / ID 1: fixed world anchor, right side of the current image.
+- AprilTag 36h11 / ID 3: fixed world anchor, right side of the current image.
 - AprilTag 16h5 / ID 0: auxiliary localization marker.
 
-The world origin is ID 1's center; +X points right in its decoded orientation, +Y upward, and +Z away from the table.
-Seeing both markers learns ID 0 relative to ID 1. Later localization can combine them or use registered ID 0 if ID 1 is occluded,
-while retaining the ID 1 origin. An unregistered ID 0 alone at startup waits for ID 1.
-When fusion error is excessive but ID 1 remains visible, the system falls back to `pose_source=anchor_fallback`.
+The world origin is ID 3's center; +X points right in its decoded orientation, +Y upward, and +Z away from the table.
+Seeing both markers learns ID 0 relative to ID 3. Later localization can combine them or use registered ID 0 if ID 3 is occluded,
+while retaining the ID 3 origin. An unregistered ID 0 alone at startup waits for ID 3.
+When fusion error is excessive but ID 3 remains visible, the system falls back to `pose_source=anchor_fallback`.
 Keep their relative layout fixed; restart and relearn after moving markers.
 
 The confirmed T dimensions are **48 mm width, 60 mm length, 12 mm cap depth, 12 mm stem width**.
@@ -75,7 +75,7 @@ Wood is assumed to rest on the table; its height cannot be estimated directly wh
 Invalid marker localization or SSH state older than 0.5 s invalidates the view.
 GUI frame age measures time since local receipt; data separately records remote capture-to-send age.
 No one-way delay is inferred from unsynchronized host clocks.
-Early sessions used ID 0 as origin; current sessions use ID 1. Compare their calibration files before comparing records.
+Early sessions used ID 0 as origin; current sessions use AprilTag 36h11 / ID 3. Compare their calibration files before comparing records.
 
 ## Verification
 

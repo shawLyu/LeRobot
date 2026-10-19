@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "signature": "2124ebbc836bebfa9003a835a57cc271e322f23e33f1e42347f1fb8845e1408a",
+  "signature": "c33fbf8402e1aaa8aa35ea9769a352ff7e1f029e7b08922fc2888d46690f1a7d",
   "reference": {
-    "dictionary": "DICT_APRILTAG_36h10",
-    "id": 1,
+    "dictionary": "DICT_APRILTAG_36h11",
+    "id": 3,
     "marker_size_m": 0.15
   },
   "pose": {
@@ -12,27 +12,27 @@
     "marker_size_m": 0.05,
     "reference": "primary tabletop anchor",
     "calibrated": true,
-    "reprojection_error_px": 0.37696355639339857,
+    "reprojection_error_px": 0.4705864114485248,
     "max_reprojection_error_px": 1.5,
     "constraint": "base_flat_on_table",
     "position": [
-      -0.42740378910082466,
-      -0.05762126124832299,
+      0.3037241789194237,
+      -0.4022339450384877,
       0.002400001698325327
     ],
     "quaternion": [
-      0.7035103417090003,
+      0.0002811273021124467,
       0,
       0,
-      0.7106850210244238
+      0.9999999604837192
     ],
     "pose_source": "fixed_marker_calibration",
     "fixed_calibration_samples": 20,
     "fixed_calibration_required": 20,
     "fixed_to_table": true,
-    "calibrated_unix_ns": 1792394542320763324,
-    "calibration_position_spread_m": 0.0008571168993509109,
-    "calibration_yaw_spread_rad": 0.002716563143730033
+    "calibrated_unix_ns": 1792396671158245749,
+    "calibration_position_spread_m": 0.0013298667960901299,
+    "calibration_yaw_spread_rad": 0.010664982004865653
   },
   "camera_matrix": [
     [

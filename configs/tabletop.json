@@ -27,8 +27,8 @@
     640,
     360
   ],
-  "dictionary": "DICT_APRILTAG_36h10",
-  "marker_id": 1,
+  "dictionary": "DICT_APRILTAG_36h11",
+  "marker_id": 3,
   "marker_size_m": 0.15,
   "wood_height_m": 0.006,
   "fps": 10,
@@ -142,8 +142,8 @@
       "file": "data/calibration/follower_table_base.json",
       "sample_count": 20,
       "reference": {
-        "dictionary": "DICT_APRILTAG_36h10",
-        "id": 1,
+        "dictionary": "DICT_APRILTAG_36h11",
+        "id": 3,
         "marker_size_m": 0.15
       },
       "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
@@ -358,8 +358,8 @@
         "file": "data/calibration/arm1_table_base.json",
         "sample_count": 20,
         "reference": {
-          "dictionary": "DICT_APRILTAG_36h10",
-          "id": 1,
+          "dictionary": "DICT_APRILTAG_36h11",
+          "id": 3,
           "marker_size_m": 0.15
         },
         "model_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
@@ -406,7 +406,7 @@
     "reported_validation_rms_px": 0.6797530945389286,
     "focus_during_calibration": "not recorded in the supplied calibration",
     "physical_precision_validated": false,
-    "dependent_base_calibration": "Both bases registered against current ID 1 tabletop reference on 2026-10-11",
-    "table_frame": "ID 1 (DICT_APRILTAG_36h10) center; +X decoded right, +Y decoded up, +Z above table; ID 0 is the stationary auxiliary. Rebuilt from current observations on 2026-10-11."
+    "dependent_base_calibration": "Both 50 mm bases independently registered in new AprilTag36h11 ID3 frame on 2026-10-19",
+    "table_frame": "ID 3 (DICT_APRILTAG_36h11) center; +X decoded right, +Y decoded up, +Z above table; ID 0 (DICT_APRILTAG_16h5) auxiliary. Rebuilt on 2026-10-19 after moving/replacing table markers."
   }
 }

@@ -101,6 +101,21 @@ def test_moving_camera_cannot_pass_stationary_table_calibration(tmp_path):
         fit_capture(tmp_path, config)
 
 
+def test_joint_training_fit_does_not_turn_primary_corner_bias_into_auxiliary_shift(tmp_path):
+    config, center, _ = capture(tmp_path)
+    path = tmp_path/'states.jsonl'
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    for row in rows:
+        corners = np.asarray(row['detected_markers'][0]['corners'])
+        corners[1] += [1., -.5]
+        row['detected_markers'][0]['corners'] = corners.tolist()
+    path.write_text(''.join(json.dumps(row)+'\n' for row in rows))
+    result = fit_capture(tmp_path, config)
+    np.testing.assert_allclose(result['auxiliary']['center_m'], center, atol=.0005)
+    assert result['quality']['method'] == 'stationary_joint_marker_training_medians'
+    assert max(result['quality']['held_out_native_rms_px']) < 2
+
+
 def test_duplicate_capture_timestamps_are_rejected(tmp_path):
     config, _, _ = capture(tmp_path)
     path = tmp_path/'states.jsonl'

@@ -138,3 +138,12 @@ def test_receiver_uses_physical_gripper_coordinates_and_start_only_tolerance(rec
     invalid[0]['end'][5] = math.radians(40)
     with pytest.raises(ValueError, match='joint limits'):
         validate_segments(invalid, ranges=ranges, entry_tolerance=math.radians(5))
+
+
+def test_remote_hold_preserves_the_actual_client_stop_reason(receiver):
+    endpoint, command, (motor, bus, clock, state, _) = receiver
+    endpoint.handle({**command, 'op': 'push_stop', 'reason': 'joint feedback lost or stale'})
+    motor.tick(bus.sync_read('Present_Position'),
+               {key: bus.sync_read(key) for key in ('Status', 'Torque_Enable')})
+    assert motor.status()['reason'] == 'joint feedback lost or stale'
+    assert bus.writes == []

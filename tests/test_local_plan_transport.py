@@ -171,3 +171,25 @@ def test_local_texture_worker_does_not_block_feedback_and_delivers_textures_once
     finally:
         release.set()
         worker.close()
+
+
+def test_push_stream_rate_is_independent_of_display_and_omits_bulk_native_images(
+        tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from lerobot_arm_control.runtime.tabletop_client import run
+
+    captured = []
+
+    def link(*args, server_args):
+        captured.extend(server_args)
+        raise RuntimeError('stop before connecting')
+
+    monkeypatch.setattr('lerobot_arm_control.runtime.tabletop_client.TableLink', link)
+    args = SimpleNamespace(output=tmp_path, push_t=True, fps=5, hardware_control=True,
+                           recalibrate_base=False, recalibrate_table=False, camera_only=False,
+                           host='unused', remote_root='/unused')
+    with pytest.raises(RuntimeError, match='stop before connecting'):
+        run(args)
+    assert float(captured[captured.index('--stream-fps')+1]) >= 10
+    assert '--omit-native-images' in captured and '--hardware-control' in captured

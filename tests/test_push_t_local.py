@@ -261,3 +261,55 @@ def test_small_measured_start_tolerance_does_not_expand_commanded_waypoints():
     assert joint_limit_issue(seed, limits, tolerance=tolerance)
     with pytest.raises(ValueError, match='seed violates'):
         joint_segments(seed, action, limits, entry_tolerance=tolerance)
+
+
+def test_remote_running_job_survives_display_age_but_still_stops_on_stream_loss(
+        observed, tmp_path, monkeypatch):
+    from lerobot_arm_control.tasks.push_t.push_t_local import LocalPush
+
+    cancelled, submitted = [], []
+    progress = {'phase': 'idle'}
+    action = Push(np.zeros(2), np.ones(2), .002, joints=[[.32]*6], approach_count=0)
+    sim = SimpleNamespace(arm=SimpleNamespace(limits=np.array([[-1., 1.]]*6)),
+                          initial=np.zeros(3), valid_pose=lambda pose: True, plan=lambda: action)
+    monkeypatch.setattr(LocalPush, '_prepare', lambda self, state: setattr(self, 'sim', sim))
+    monkeypatch.setattr(LocalPush, '_update_model', lambda self, state: None)
+
+    def submit(*args):
+        submitted.append(args)
+        progress['phase'] = 'running'
+
+    motor = SimpleNamespace(cancel=cancelled.append, status=lambda: dict(progress), submit=submit)
+    observed.update(sequence=1, captured_unix_ns=1, appearance_pngs={})
+    observed['robot']['registration'].update(status='fixed', calibrated=True,
+                                            fixed_to_table=True,
+                                            pose_source='fixed_marker_calibration')
+    coordinator = LocalPush({}, SimpleNamespace(motor=motor), tmp_path/'local', b'', execute=True)
+    coordinator._recover = lambda *args: False
+    try:
+        coordinator.observe(observed)
+        coordinator.command('push_start')
+        deadline = time.monotonic()+3
+        while not submitted:
+            assert time.monotonic() < deadline, coordinator.status()
+            coordinator.observe(observed)
+            time.sleep(.01)
+        # 420 ms at transmission + 100..150 ms between display frames used to cancel
+        # every trajectory, despite the remote owner still reporting running.
+        observed['capture_age_at_send_ms'] = 420
+        for _ in range(6):
+            coordinator.observe(observed)
+            time.sleep(.15)
+            assert not cancelled, coordinator.status()
+            assert coordinator.status()['start_requested']
+            assert coordinator.status()['phase'] == 'executing real push'
+        # Loss of the actual stream must still hold, even if the cached status says running.
+        deadline = time.monotonic()+2
+        while not cancelled:
+            assert time.monotonic() < deadline, coordinator.status()
+            time.sleep(.02)
+        assert not coordinator.status()['start_requested']
+        assert 'camera older than 500 ms' in cancelled[-1]
+        assert len(submitted) == 1
+    finally:
+        coordinator.close()

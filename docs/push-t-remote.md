@@ -10,11 +10,14 @@ The local host receives images/poses, extracts CAD-masked materials with local M
 solves IK, and plans short pushes. The remote host has no MuJoCo; it receives validated joint segments or preview results.
 Local outputs: `data/tabletop/<session>/push_t/`.
 Remote received records: `data/push_t/remote-<session>/plans.jsonl` and local-results.jsonl.
-Default display/observation stream is 5 fps; remote perception is about 10 Hz, motor control targets 60 Hz with exclusive serial access.
+Default local display is 5 fps. Push-T requests a 10 Hz observation stream (or the higher display rate), independently of rendering; actual delivery is bounded by perception throughput. Motor control targets 60 Hz with exclusive serial access.
+Push-T omits native JPEG transmission while retaining native-resolution marker detection remotely; ordinary tabletop/calibration captures still retain native images.
 Local material extraction runs in its own thread without blocking feedback reception.
 
 Display transmission uses a separate thread and one latest-state slot, so slow rendering/backlogs do not block perception.
-Camera/motor age over 500 ms, local heartbeat gap over 750 ms, or SSH loss stops progression and holds loaded joints.
+The remote motor owner holds on camera/motor age over 500 ms, local heartbeat gap over 750 ms, or SSH loss.
+During an active trajectory, local display-frame age does not override fresh remote control observations.
+Local stream loss still cancels execution and stops heartbeats; planning/submission still require fresh observations.
 Execution remains unavailable during initial material extraction.
 Remote `data/tabletop/static_map.json` retains the auxiliary marker's measured relative pose,
 allowing the same frame when the primary marker is occluded. Reobserve both after moving markers.
@@ -246,3 +249,15 @@ passed the revised seed check and produced 11 strictly bounded segments. A subse
 reached `preview ready` with a 4 mm next-push plan; both arms reported live independent
 encoders and follower torque stayed off on all six joints. This validates observation
 and planning; no physical push was executed in this check.
+
+2026-10-19 execution interruption fix: hardware sessions at 16:35 and 16:38 reached
+`running`, then local display-age checks cancelled their slow entry within about 0.5 s.
+The worker now uses remote execution status while display packets continue arriving;
+remote camera/encoder watchdogs remain at 500 ms. Stop commands preserve their actual
+reason rather than replacing camera faults or rejected plans with `operator stop`.
+
+The subsequent 25-second read-only validation (`logs/push-t-stream-validation/`)
+received 136 states, with mean capture age at transmission about 184 ms. After texture
+initialization it planned once and retained `preview ready`, without camera-age holds
+or repeated planning. Native images were not transmitted. Physical execution was
+not requested during this validation.

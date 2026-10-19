@@ -134,7 +134,7 @@ class LocalPush:
                 self.last_visible = (frozen, received)
         self.changed.set()
 
-    def command(self, op):
+    def command(self, op, *, reason='operator stop: hold'):
         if op not in ('push_start', 'push_stop'):
             raise ValueError('unknown push command')
         with self.lock:
@@ -145,7 +145,7 @@ class LocalPush:
             if self.requested:
                 self.pushes, self.success_frames = 0, 0
         if op == 'push_stop' and self.robot.motor:
-            self.robot.motor.cancel('operator stop: hold')
+            self.robot.motor.cancel(reason)
         self.changed.set()
 
     def status(self):
@@ -246,6 +246,16 @@ class LocalPush:
                     self.changed.wait(.1)
                     self.changed.clear()
                     state, received, requested, generation = self._latest()
+                    # Remote control checks its unthrottled camera/encoder samples every tick.
+                    # A 5 FPS display frame can expire locally between arrivals even while
+                    # those authoritative samples stay fresh. Stream loss still cancels below
+                    # and also stops the independent client heartbeat.
+                    if active and self.robot.motor and time.monotonic()-received < .5:
+                        motor = self.robot.motor.status()
+                        if motor['phase'] in ('pending', 'running'):
+                            self._status('clearing camera occlusion' if recovering else
+                                         'executing real push', reason=None)
+                            continue
                     issue = (recovery_issue(state, received, time.monotonic()) if recovering else
                              observation_issue(state, received, time.monotonic(),
                                                initialized=self.sim is not None))

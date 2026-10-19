@@ -94,7 +94,10 @@ class PushReceiver:
             raise ValueError("unsupported remote operation")
         if operation == "push_stop":
             if self.robot.motor:
-                self.robot.motor.cancel("operator stop: hold")
+                reason = command.get('reason', 'operator stop: hold')
+                if not isinstance(reason, str) or not reason or len(reason) > 512:
+                    raise ValueError('invalid stop reason')
+                self.robot.motor.cancel(reason)
         elif operation == "push_execute":
             if not self.robot.motor:
                 raise ValueError("hardware execution disabled")

@@ -135,7 +135,8 @@ class TableLink:
                         if self.motor:
                             self.motor.acknowledge(message)
                         if not message["ok"] and self.planner:
-                            self.planner.command("push_stop")
+                            self.planner.command("push_stop", reason=message.get(
+                                'error', 'remote command rejected: hold'))
                         continue
                     if message["type"] != "state" or self.hello is None:
                         raise ValueError("Unexpected tabletop message")
@@ -289,9 +290,9 @@ def run(args):
     import mujoco
 
     output = args.output or ROOT / "data/tabletop" / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-    server_args = ['--stream-fps', str(args.fps)]
+    server_args = ['--stream-fps', str(max(10, args.fps) if args.push_t else args.fps)]
     if args.push_t:
-        server_args.append('--push-t')
+        server_args.extend(('--push-t', '--omit-native-images'))
     if args.hardware_control:
         server_args.append('--hardware-control')
     if args.recalibrate_base:

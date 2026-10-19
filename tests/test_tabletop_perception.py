@@ -1,5 +1,6 @@
 """Geometry and loss/recovery tests; run on the remote OpenCV environment."""
 
+import json
 import math
 import time
 
@@ -42,6 +43,28 @@ def test_static_map_restores_occluded_print_without_resetting_age(tmp_path):
     other_reference = Perception(config)
     other_reference.restore_static_map(path)
     assert other_reference.trackers["black_t"].last is None
+
+
+def test_partial_arm_occlusion_cannot_overwrite_saved_full_target_or_refresh_its_age(tmp_path):
+    perception = Perception(perception_config())
+    path = tmp_path/'static_map.json'
+    pose = {'xy': [.1, .2], 'yaw': .3, 'iou': .9,
+            'observed': True, 'tracking_status': 'observed'}
+    stamp = time.time_ns()-int(60e9)
+    perception.save_static_map(path, {'objects': {'black_t': pose}, 'captured_unix_ns': stamp})
+    partial = {**pose, 'xy': [.1, .22], 'tracking_status': 'partial'}
+    perception.save_static_map(path, {'objects': {'black_t': partial},
+                                     'captured_unix_ns': time.time_ns()})
+    restored = Perception(perception_config())
+    restored.restore_static_map(path)
+    assert restored.trackers['black_t'].last['xy'] == pose['xy']
+    assert time.monotonic()-restored.trackers['black_t'].last_observed >= 60
+    saved = json.loads(path.read_text())
+    saved['black_t'] = partial
+    path.write_text(json.dumps(saved))
+    rejected = Perception(perception_config())
+    rejected.restore_static_map(path)
+    assert rejected.trackers['black_t'].last is None
 
 
 
@@ -88,6 +111,20 @@ def test_t_orientation_and_concave_dimensions():
 def test_rectangle_is_not_a_t():
     fitted = fit_t(np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]))
     assert fitted is None or fitted["iou"] < .78
+
+
+def test_oversized_contour_is_rejected_before_orientation_search(monkeypatch):
+    config = perception_config()
+    config['dist_coeffs'] = [0., 0., 0., 0., 0.]
+    frame, _, _ = tag_image(config)
+    frame[330:450, 390:540] = 0
+
+    def forbidden(points):
+        raise AssertionError('Oversized contours cannot pass the existing T size guards')
+
+    monkeypatch.setattr('lerobot_arm_control.perception.tabletop_perception.fit_t', forbidden)
+    measured = Perception(config).process(frame, 1, 0, observe_tool=False)
+    assert measured['marker_visible'] and measured['objects'] == {}
 
 
 def tag_image(config, *, anchor=True, secondary=True):
@@ -184,6 +221,24 @@ def test_marker_only_retains_table_pose_and_tool_measurement_without_base_or_obj
     assert 'base_registrations' not in measured
     assert 'robot_registration' not in measured
     assert 'no base registration' in measured['observation_scope']
+
+
+def test_push_observation_can_skip_unused_tool_scan_without_claiming_a_measurement(monkeypatch):
+    config = perception_config()
+    config['robot']['tool_marker'] = {'enabled': True, 'dictionary': 'DICT_4X4_50',
+                                     'id': 8, 'marker_size_m': .020}
+    config['dist_coeffs'] = [0., 0., 0., 0., 0.]
+    frame, _, _ = tag_image(config)
+    perception = Perception(config)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError('Push-T does not consume a tool-marker measurement')
+
+    monkeypatch.setattr(perception.tool_marker, 'process', forbidden)
+    measured = perception.process(frame, 1, 0, observe_tool=False)
+    assert measured['marker_visible']
+    assert measured['tool_marker'] == {'status': 'not_requested', 'position_valid': False,
+                                      'orientation_valid': False, 'id': 8}
 
 
 def test_saved_secondary_layout_localizes_after_restart_with_anchor_hidden(tmp_path):

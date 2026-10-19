@@ -16,6 +16,7 @@ from lerobot_arm_control.tasks.push_t.push_t_motor import (
     joint_segments,
     observation_issue,
     recovery_issue,
+    refresh_camera_observations,
     same_scene,
 )
 from lerobot_arm_control.transport.tabletop_stream import DisplayStream
@@ -84,6 +85,35 @@ def test_preview_constructs_no_torque_or_goal_writes(motor):
     assert bus.writes == []
 
 
+def test_secondary_table_reference_never_refreshes_an_old_primary_object(observed):
+    observed['capture_age_at_send_ms'] = 600
+    observed['control_table_observation'] = {
+        'source': 'side', 'captured_unix_ns': 1_000_000_000,
+        'capture_age_at_send_ms': 50, 'marker_visible': True}
+    assert 'wood_t primary camera observation older' in observation_issue(observed, 0, 0)
+    for obj in observed['objects'].values():
+        obj.update(observation_source='side', observation_age_s=.05)
+    assert observation_issue(observed, 0, 0) is None
+    assert 'table localization lost' in observation_issue(observed, 0, .451)
+
+
+def test_secondary_evidence_can_take_over_when_primary_expires_between_publications(observed):
+    observed.update(captured_unix_ns=1_000_000_000, capture_age_at_send_ms=420)
+    observed['control_table_observation'] = {'marker_visible': True,
+                                            'capture_age_at_send_ms': 200}
+    for obj in observed['objects'].values():
+        obj['camera_observations'] = {'side': {'xy': [obj['xy'][0]+.002, .2], 'yaw': 0,
+            'captured_unix_ns': 1_220_000_000, 'tracking_status': 'observed', 'observed': True}}
+    before = copy.deepcopy(observed)
+    refreshed = refresh_camera_observations(observed, 0, .1)
+    assert refreshed['objects']['wood_t']['observation_source'] == 'side'
+    assert refreshed['objects']['wood_t']['observation_age_s'] == pytest.approx(.2)
+    assert refreshed['objects']['wood_t']['xy'] == [-.398, .2]
+    assert observation_issue(observed, 0, .1) is None
+    assert observed == before
+    assert observation_issue(observed, 0, .31) is not None
+
+
 def test_controller_fault_reason_is_preserved_in_remote_push_status(motor, monkeypatch):
     instance, bus, _, state, segments = motor
     reason = 'shoulder_lift: loaded motion stall: hold'
@@ -93,6 +123,27 @@ def test_controller_fault_reason_is_preserved_in_remote_push_status(motor, monke
     assert instance.status()['phase'] == 'stopped'
     assert instance.status()['reason'] == reason
     assert set(instance.control.stopped.values()) == {reason}
+
+
+def test_exhausted_enable_readbacks_hold_without_killing_feedback_or_retrying_motion(motor):
+    instance, bus, _, state, segments = motor
+    original = bus.read
+
+    def read(register, joint, normalize=False, num_retry=0):
+        if register == 'Acceleration':
+            raise RuntimeError('Acceleration: There is no status packet!')
+        return original(register, joint, normalize, num_retry)
+
+    bus.read = read
+    instance.submit(state, segments)
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'stopped'
+    assert 'motor enable failed: Acceleration:' in instance.status()['reason']
+    assert instance.job is None and instance.pending is None
+    assert bus.sync_read('Goal_Position') == bus.sync_read('Present_Position')
+    before = list(bus.writes)
+    tick(instance, bus)
+    assert bus.writes == before
 
 
 @pytest.mark.parametrize('valid', [True, False])
@@ -141,6 +192,84 @@ def test_pre_enable_telemetry_cannot_falsely_trip_the_newly_enabled_stream(motor
     instance.tick(bus.sync_read('Present_Position'), before_enable)
     assert instance.status()['phase'] == 'running'
     assert all(bus.sync_read('Torque_Enable').values())
+
+
+def test_completed_pose_keeps_preload_between_segments_and_on_clean_close(motor, monkeypatch):
+    instance, bus, clock, state, segments = motor
+    instance.submit(state, segments)
+    tick(instance, bus)
+    for values in bus.registers.values():
+        values['Present_Position'] = 2210  # Small persistent gravity-loaded error.
+    for index in range(1, 61):
+        clock[0] = index / 60
+        instance.observe(state, clock[0])
+        tick(instance, bus)
+    assert instance.status()['phase'] == 'completed'
+    nominal = dict(instance.control.targets)
+    correction = dict(instance.control.position_feedback.correction)
+    assert abs(correction['elbow_flex']) > .0001
+    clock[0] += .02
+    tick(instance, bus)
+    assert instance.status()['holding_closed_loop']
+    assert instance.control.targets == nominal
+    assert abs(instance.control.position_feedback.correction['elbow_flex']) > .0001
+
+    def unexpected_enable():
+        pytest.fail('next segment must not reset the supported equilibrium')
+
+    monkeypatch.setattr(instance.control, 'enable_all', unexpected_enable)
+    # Current measured pose is within the next segment's initial-pose tolerance.
+    instance.observe(state, clock[0])
+    instance.submit(state, segments)
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'running'
+    clock[0] += 1
+    instance.observe(state, clock[0])
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'completed'
+    goals = bus.sync_read('Goal_Position')
+    instance.close()
+    assert bus.sync_read('Goal_Position') == goals
+    assert all(bus.sync_read('Torque_Enable').values())
+
+
+def test_fault_while_holding_completed_pose_still_latches_stop(motor):
+    instance, bus, clock, state, segments = motor
+    instance.submit(state, segments)
+    tick(instance, bus)
+    for values in bus.registers.values():
+        values['Present_Position'] = 2210
+    clock[0] = 1
+    instance.observe(state, clock[0])
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'completed'
+    bus.registers['shoulder_lift']['Torque_Enable'] = 0
+    clock[0] += .02
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'stopped'
+    assert 'lost torque' in instance.status()['reason']
+
+
+@pytest.mark.parametrize('movement,baseline', [(0, True), (.004, True), (0, False)])
+def test_camera_switch_uses_same_camera_target_baseline_without_widening_limit(
+        motor, movement, baseline):
+    instance, bus, clock, state, segments = motor
+    target = state['objects']['black_t']
+    if baseline:
+        target['camera_observations'] = {'side': {'xy': [target['xy'][0]+.004,
+                                                         target['xy'][1]], 'yaw': 0}}
+    reference = copy.deepcopy(state)
+    instance.submit(reference, segments)
+    tick(instance, bus)
+    target.update(observation_source='side', observation_age_s=0)
+    target['xy'][0] += .004+movement
+    instance.observe(state, .02)
+    clock[0] = .02
+    tick(instance, bus)
+    assert (instance.status()['phase'] == 'running') is (baseline and movement == 0)
+    assert same_scene(reference, state) is (baseline and movement == 0)
+    if movement:
+        assert instance.status()['reason'] == 'target moved during push'
 
 
 def test_push_uses_shared_compensation_and_restores_native_ram_after_hold(observed):

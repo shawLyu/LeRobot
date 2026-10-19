@@ -26,14 +26,40 @@ def current_object(state, name, age):
 
 def fuse_objects(primary, views):
     """Use a fresh calibrated second view during occlusion; disagreement holds motion."""
+    reference = primary.get('table_reference')
+    references = [('primary', primary)]
+    references.extend((name, view) for name, view in views.items()
+                      if reference is not None and view.get('table_reference') == reference
+                      and view.get('calibrated') is True)
+    localized = [(name, view) for name, view in references
+                 if view.get('marker_visible') and view.get('units') == 'm'
+                 and type(view.get('captured_unix_ns')) is int
+                 and 0 <= view.get('capture_age_at_send_ms', np.inf) <= 500]
+    primary.pop('control_table_observation', None)
+    if localized:
+        name, view = min(localized, key=lambda item: item[1]['capture_age_at_send_ms'])
+        primary['control_table_observation'] = {
+            'source': name, 'captured_unix_ns': view['captured_unix_ns'],
+            'capture_age_at_send_ms': view['capture_age_at_send_ms'], 'marker_visible': True}
     primary['observation_sources'] = {}
     primary['camera_disagreements'] = {}
     for name in ('wood_t', 'black_t'):
-        own = current_object(primary, name, primary.get('capture_age_at_send_ms', np.inf)/1000)
         a = primary.get('objects', {}).get(name, {})
+        source = a.get('observation_source')
+        primary_source = source in (None, 'primary', 'primary_previous_frame')
+        own = primary_source and current_object(
+            primary, name, primary.get('capture_age_at_send_ms', np.inf)/1000)
         stamp = a.get('observation_captured_unix_ns')
-        if (not own and type(stamp) is int and a.get('pose_valid')
-                and a.get('tracking_status') in ('held', 'static_cached')):
+        if type(stamp) is int:
+            age = max(0., (primary['captured_unix_ns']-stamp)/1e9+primary.get(
+                'capture_age_at_send_ms', np.inf)/1000)
+            a['observation_age_s'] = age
+            if age > .5 and a.get('tracking_status') != 'static_cached':
+                a.update(observed=False, tracking_status='held')
+                own = False
+        if (not own and primary_source and type(stamp) is int and a.get('pose_valid')
+                and not (name == 'black_t' and a.get('tracking_status') == 'static_cached')
+                and a.get('tracking_status') in ('held', 'static_cached', 'recent')):
             age = (primary['captured_unix_ns']-stamp)/1e9+primary.get(
                 'capture_age_at_send_ms', np.inf)/1000
             if 0 <= age <= .5:
@@ -43,9 +69,19 @@ def fuse_objects(primary, views):
                 own = True
         candidates = []
         for camera, view in views.items():
+            if reference is not None and view.get('table_reference') != reference:
+                continue
             age = view.get('capture_age_at_send_ms', np.inf)/1000
             if view.get('calibrated') and current_object(view, name, age):
                 candidates.append((camera, view, age))
+        primary_measurement = own
+        if name == 'black_t' and own and a.get('tracking_status') == 'partial':
+            complete = [item for item in candidates
+                        if item[1]['objects'][name]['tracking_status'] == 'observed']
+            if complete:
+                # Dark arm geometry can pull a partially visible paper-template fit.
+                # A current complete silhouette is stronger evidence of its pose.
+                own, candidates = False, complete
         if own:
             primary['observation_sources'][name] = a.get('observation_source', 'primary')
             a = primary['objects'][name]
@@ -75,6 +111,30 @@ def fuse_objects(primary, views):
                        observation_age_s=age+obj.get('observation_age_s', 0.))
             primary['objects'][name] = obj
             primary['observation_sources'][name] = camera
+        # Movement checks compare a camera to its own initial measurement, rather
+        # than treating the fixed bias between two cameras as object motion.
+        measurements = {}
+        cached_reference = (name == 'black_t' and primary_source
+                            and a.get('tracking_status') == 'static_cached'
+                            and a.get('pose_valid'))
+        if primary_measurement or cached_reference:
+            measurements['primary'] = {'xy': list(a['xy']), 'yaw': a['yaw'],
+                'observed': a.get('observed', False),
+                'tracking_status': a.get('tracking_status'),
+                'captured_unix_ns': a.get('observation_captured_unix_ns',
+                                         primary['captured_unix_ns'])}
+            if cached_reference:
+                measurements['primary']['static_cached'] = True
+        rejected = primary['camera_disagreements'].get(name, {}).get('rejected_source')
+        for camera, view, _ in candidates:
+            if camera != rejected:
+                obj = view['objects'][name]
+                measurements[camera] = {'xy': list(obj['xy']), 'yaw': obj['yaw'],
+                                        'observed': obj['observed'],
+                                        'tracking_status': obj['tracking_status'],
+                                        'captured_unix_ns': view['captured_unix_ns']}
+        if name in primary.get('objects', {}):
+            primary['objects'][name]['camera_observations'] = measurements
     return primary
 
 

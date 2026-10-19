@@ -268,3 +268,36 @@ def test_ik_continues_cartesian_motion_when_wrist_reaches_software_bound(tmp_pat
         assert np.max(np.abs(q-previous)) < .1
         assert np.all(q >= arm.limits[:, 0]) and np.all(q <= arm.limits[:, 1])
         previous = q
+
+
+def test_low_rotated_tool_departs_before_roll_or_jaw_alignment(tmp_path):
+    sim = PushSimulation(output=tmp_path/'model')
+    seed = np.array([-.0840707893, .0372933601, .5931030378,
+                     .5435453956, 1.5723781962, .3])
+    sim.data.qpos[sim.qadr] = seed
+    mujoco.mj_forward(sim.model, sim.data)
+    start = sim.data.site('push_contact').xpos.copy()
+    assert start[2] < .01
+    departure = sim.tool_alignment_departure(seed)
+    assert departure
+    previous = seed
+    heights = [start[2]]
+    for q in departure:
+        np.testing.assert_array_equal(q[4:], seed[4:])
+        assert sim.arm.path_clear(previous, q, avoid_wood=True)
+        for fraction in np.linspace(0, 1, 15):
+            sim.arm.data.qpos[sim.qadr] = previous+(q-previous)*fraction
+            mujoco.mj_forward(sim.model, sim.arm.data)
+            point = sim.arm.data.site('push_contact').xpos.copy()
+            assert np.linalg.norm(point[:2]-start[:2]) < .001
+            heights.append(point[2])
+        previous = q
+    assert min(np.diff(heights)) > -.0001
+    assert heights[-1] > .038
+    # No temporary departure computation changes the measured model state.
+    np.testing.assert_array_equal(sim.data.qpos[sim.qadr], seed)
+
+
+def test_explicit_tool_angles_reject_out_of_range_before_ik(sim):
+    with pytest.raises(ValueError, match='tool joints'):
+        sim.arm.solve([0, 0, .05], sim.state['robot']['qpos'], tool_joints=[10, 0])

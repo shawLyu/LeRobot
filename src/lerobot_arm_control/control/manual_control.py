@@ -104,15 +104,18 @@ class ManualControl:
     def heartbeat(self):
         self.last_heartbeat = self.clock()
 
+    def _read_stream_register(self, register, joint):
+        return int(self.bus.read(register, joint, normalize=False, num_retry=READ_RETRIES))
+
     def prepare_position_stream(self, joints):
         stream = self.position_feedback.profile.get('native_stream')
         if stream is None:
             return
         # Fresh hold goals must already be confirmed. Lock=1 keeps optional P/I
         # changes volatile on ST firmware; never unlock storage or drop torque.
-        current = {joint: int(self.bus.read("Acceleration", joint, normalize=False))
+        current = {joint: self._read_stream_register("Acceleration", joint)
                    for joint in joints}
-        maximum = {joint: int(self.bus.read("Maximum_Acceleration", joint, normalize=False))
+        maximum = {joint: self._read_stream_register("Maximum_Acceleration", joint)
                    for joint in joints}
         if any(not 0 <= current[joint] <= 254 or not 1 <= maximum[joint] <= 254
                for joint in joints):
@@ -127,22 +130,22 @@ class ManualControl:
         changed = {joint: value for joint, value in requested.items() if current[joint] != value}
         if changed:
             self.bus.sync_write("Acceleration", changed, normalize=False)
-        if any(int(self.bus.read("Acceleration", joint, normalize=False)) != value
+        if any(self._read_stream_register("Acceleration", joint) != value
                for joint, value in requested.items()):
             raise RuntimeError("native acceleration could not be confirmed")
         self.native_acceleration.update(requested)
         for joint in joints:
-            if int(self.bus.read("Goal_Time", joint, normalize=False)) != 0:
+            if self._read_stream_register("Goal_Time", joint) != 0:
                 raise ValueError("native velocity profile requires Goal_Time=0")
-            velocity = int(self.bus.read("Goal_Velocity", joint, normalize=False))
-            maximum = int(self.bus.read("Maximum_Velocity_Limit", joint, normalize=False))
-            factor = int(self.bus.read("Velocity_Unit_factor", joint, normalize=False))
+            velocity = self._read_stream_register("Goal_Velocity", joint)
+            maximum = self._read_stream_register("Maximum_Velocity_Limit", joint)
+            factor = self._read_stream_register("Velocity_Unit_factor", joint)
             if not 0 <= velocity <= 32767 or maximum <= 0 or factor <= 0:
                 raise ValueError("invalid native velocity configuration")
             self.original_velocity.setdefault(joint, velocity)
             requested_velocity = min(stream["velocity_ticks_s"], maximum * factor)
             self.bus.write("Goal_Velocity", joint, requested_velocity, normalize=False)
-            observed_velocity = int(self.bus.read("Goal_Velocity", joint, normalize=False))
+            observed_velocity = self._read_stream_register("Goal_Velocity", joint)
             if observed_velocity != requested_velocity:
                 raise RuntimeError(f"{joint}: native velocity could not be confirmed")
             self.native_velocity[joint] = requested_velocity
@@ -150,15 +153,15 @@ class ManualControl:
                                                ('I', self.original_i, self.native_i)):
             requested = {j: value for j, value in stream.get(
                 f'locked_{coefficient.lower()}_coefficients', {}).items() if j in joints}
-            if any(int(self.bus.read('Lock', j, normalize=False)) != 1 for j in requested):
+            if any(self._read_stream_register('Lock', j) != 1 for j in requested):
                 raise RuntimeError(f'temporary {coefficient} adjustment requires '
                                    'every storage lock closed')
             for joint, value in requested.items():
                 register = f'{coefficient}_Coefficient'
-                originals.setdefault(joint, int(self.bus.read(register, joint, normalize=False)))
+                originals.setdefault(joint, self._read_stream_register(register, joint))
                 self.bus.write(register, joint, value, normalize=False)
-                if (int(self.bus.read(register, joint, normalize=False)) != value
-                        or int(self.bus.read('Lock', joint, normalize=False)) != 1):
+                if (self._read_stream_register(register, joint) != value
+                        or self._read_stream_register('Lock', joint) != 1):
                     raise RuntimeError(f'{joint}: temporary {coefficient} could not be confirmed')
                 active[joint] = value
 
@@ -196,26 +199,26 @@ class ManualControl:
                                                    ('I', self.original_i, self.native_i)):
                 if joint not in originals:
                     continue
-                if int(self.bus.read('Lock', joint, normalize=False)) != 1:
+                if self._read_stream_register('Lock', joint) != 1:
                     raise RuntimeError(f'{joint}: refusing {coefficient} restore '
                                        'with storage unlocked')
                 register, original = f'{coefficient}_Coefficient', originals[joint]
                 self.bus.write(register, joint, original, normalize=False)
-                if int(self.bus.read(register, joint, normalize=False)) != original:
+                if self._read_stream_register(register, joint) != original:
                     raise RuntimeError(f'{joint}: temporary {coefficient} restore failed')
                 originals.pop(joint)
                 active.pop(joint, None)
             if joint in self.original_velocity:
                 original = self.original_velocity[joint]
                 self.bus.write("Goal_Velocity", joint, original, normalize=False)
-                if int(self.bus.read("Goal_Velocity", joint, normalize=False)) != original:
+                if self._read_stream_register("Goal_Velocity", joint) != original:
                     raise RuntimeError(f"{joint}: native velocity restore failed")
                 self.original_velocity.pop(joint)
                 self.native_velocity.pop(joint, None)
             if joint in self.original_acceleration:
                 original = self.original_acceleration[joint]
                 self.bus.write("Acceleration", joint, original, normalize=False)
-                if int(self.bus.read("Acceleration", joint, normalize=False)) != original:
+                if self._read_stream_register("Acceleration", joint) != original:
                     raise RuntimeError(f"{joint}: native acceleration restore failed")
                 self.original_acceleration.pop(joint)
                 self.native_acceleration.pop(joint, None)
@@ -588,8 +591,8 @@ class ManualControl:
                                         for joint, raw in self.measured.items()},
                 "last_fault": self.last_fault, "parking": self.parking.status()}
 
-    def close(self):
-        if self.enabled:
+    def close(self, *, preserve_targets=False):
+        if self.enabled and (not preserve_targets or self.stopped or self.faulted_joints):
             # Preserve support for gravity-loaded joints; explicit X releases torque.
             self.stop("connection closed: hold")
         self.restore_position_stream([joint for joint in self.original_acceleration

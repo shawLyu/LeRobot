@@ -39,6 +39,7 @@ def fit_t(points):
     points = np.asarray(points, dtype=np.float32).reshape(-1, 2)
     origin = points.mean(axis=0)
     best = None
+    caps = np.arange(10, 38)
 
     def evaluate(degrees):
         nonlocal best
@@ -63,18 +64,18 @@ def fit_t(points):
             return
         integral = cv2.integral(raster)
         area = int(raster.sum())
-        for cap in range(10, 38):
-            intersection = (integral[cap, 80]
-                            + integral[80, right] - integral[cap, right]
-                            - integral[80, left] + integral[cap, left])
-            template_area = cap * 80 + (80 - cap) * (right - left)
-            score = float(intersection / max(1, area + template_area - intersection))
-            if best is None or score > best["iou"]:
-                center = origin + rotation @ ((lower + upper) / 2)
-                best = {"iou": score, "xy": center.tolist(), "yaw": angle,
-                        "width": float(extent[0]), "length": float(extent[1]),
-                        "cap_depth": float(extent[1] * cap / 80),
-                        "stem_width": float(extent[0] * (right - left) / 80)}
+        intersections = (integral[caps, 80]+integral[80, right]-integral[caps, right]
+                         - integral[80, left]+integral[caps, left])
+        areas = caps*80+(80-caps)*(right-left)
+        scores = intersections/np.maximum(1, area+areas-intersections)
+        index = int(np.argmax(scores))
+        score, cap = float(scores[index]), int(caps[index])
+        if best is None or score > best["iou"]:
+            center = origin + rotation @ ((lower + upper) / 2)
+            best = {"iou": score, "xy": center.tolist(), "yaw": angle,
+                    "width": float(extent[0]), "length": float(extent[1]),
+                    "cap_depth": float(extent[1] * cap / 80),
+                    "stem_width": float(extent[0] * (right - left) / 80)}
 
     for degrees in range(0, 360, 5):
         evaluate(degrees)
@@ -172,22 +173,31 @@ class Perception:
                     self.secondary_layouts[key] = points.tolist()
         pose = saved.get("black_t")
         tracker = self.trackers.get("black_t")
-        if tracker and pose and np.isfinite([*pose["xy"], pose["yaw"]]).all():
+        if (tracker and pose and pose.get('tracking_status') != 'partial'
+                and np.isfinite([*pose["xy"], pose["yaw"]]).all()):
             tracker.last = {key: pose[key] for key in ("xy", "yaw", "iou")}
             age = max(0, (time.time_ns()-saved["observed_unix_ns"])/1e9)
             tracker.last_observed = time.monotonic()-age
 
     def save_static_map(self, path, state):
         pose = state.get("objects", {}).get("black_t")
-        if not pose or not pose.get("observed"):
+        if (not pose or not pose.get("observed")
+                or pose.get('tracking_status') == 'partial'):
             pose = None
+        path = Path(path)
+        observed_ns = state['captured_unix_ns']
+        if pose is None and path.exists():
+            previous = json.loads(path.read_text())
+            saved_pose = previous.get('black_t')
+            if (previous.get('reference') == self.static_reference() and saved_pose
+                    and saved_pose.get('tracking_status') != 'partial'):
+                pose, observed_ns = saved_pose, previous['observed_unix_ns']
         if pose is None and not self.secondary_layouts:
             return
-        path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         saved = {"reference": self.static_reference(), "black_t": pose,
                  'secondary_layouts': state.get('secondary_layouts', self.secondary_layouts),
-                 "observed_unix_ns": state["captured_unix_ns"]}
+                 "observed_unix_ns": observed_ns}
         temporary = path.with_suffix(".tmp")
         temporary.write_text(json.dumps(saved, allow_nan=False))
         temporary.replace(path)
@@ -212,7 +222,7 @@ class Perception:
         return min(solutions, key=lambda x: x[0]) if solutions else None
 
     def process(self, frame, sequence, captured_ns, native_frame=None, low_to_native=None,
-                *, marker_only=False, observe_objects=True):
+                *, marker_only=False, observe_objects=True, observe_tool=True):
         started = time.monotonic()
         if list(frame.shape[1::-1]) != self.config["image_size"]:
             raise ValueError("Camera resolution differs from calibrated image_size")
@@ -252,6 +262,8 @@ class Perception:
         state = {"type": "state", "version": 1, "sequence": sequence,
                  "captured_unix_ns": captured_ns, "units": self.units,
                  "marker_visible": False, "objects": {}, "models": self.models,
+                 "table_reference": {key: self.config[key] for key in (
+                     'dictionary', 'marker_id', 'marker_size_m')},
                  "detected_markers": detected_markers,
                  "wood_height_measured": self.config["wood_height_m"] is not None}
         if marker_only:
@@ -327,6 +339,9 @@ class Perception:
                         for detected in all_corners:
                             cv2.fillConvexPoly(mask, np.int32(detected[0]), 0)
                         detections = []
+                        extruded = (name == 'wood_t'
+                                    and self.config.get('extruded_wood_observation'))
+                        dimensions = self.models.get(name)
                         for contour in cv2.findContours(mask, cv2.RETR_EXTERNAL,
                                                         cv2.CHAIN_APPROX_SIMPLE)[0]:
                             x, y, width, length = cv2.boundingRect(contour)
@@ -342,10 +357,17 @@ class Perception:
                             area = cv2.contourArea(points.astype(np.float32)) / self.scale**2
                             if not .01 < area < 1.5:
                                 continue
+                            if dimensions:
+                                # Reject only contours that cannot fit any bounding box
+                                # accepted by the existing full-observation scale guards.
+                                scale = 1.5 if extruded else 1.2 if name in self.trackers else 1.3
+                                width, length = (dimensions[k]*scale for k in ('width', 'length'))
+                                span = np.max(np.ptp(points, axis=0))
+                                if (area*self.scale**2 > width*length
+                                        or span > math.hypot(width, length)):
+                                    continue
                             fitted = fit_t(points)
-                            if (fitted and name == 'wood_t'
-                                    and self.config.get('extruded_wood_observation')):
-                                dimensions = self.models.get(name)
+                            if fitted and extruded:
                                 if (not dimensions or any(not .7 < fitted[key]/dimensions[key] < 1.5
                                         for key in ('width', 'length'))):
                                     continue
@@ -417,13 +439,17 @@ class Perception:
             state['base_distances'] = base_distances(poses)
             if self.robot_registration:
                 state['robot_registration'] = poses[self.config['robot']['arm']]
-        if self.tool_marker:
+        if self.tool_marker and observe_tool:
             measured = self.tool_marker.process(frame, state, native_frame, low_to_native)
             state['tool_marker'] = measured
             if measured.get('corners'):
                 cv2.polylines(annotated, [np.int32(measured['corners'])], True, (180, 0, 255), 1)
             cv2.putText(annotated, 'tool marker: '+measured['status'], (10, 88),
                         cv2.FONT_HERSHEY_SIMPLEX, .4, (180, 0, 255), 1)
+        elif self.tool_marker:
+            state['tool_marker'] = {'status': 'not_requested', 'position_valid': False,
+                                    'orientation_valid': False,
+                                    'id': self.tool_marker.config['id']}
         state["processing_ms"] = (time.monotonic() - started) * 1000
         cv2.putText(annotated, f'AprilTag world: {"OK" if state["marker_visible"] else "LOST"}'
                     f' | {self.units}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, .5,

@@ -179,6 +179,13 @@ class TTracker:
                                             (214, 214), flags=cv2.INTER_NEAREST)
             match = match_partial(rectified, origin, resolution, self.dimensions, self.last)
             if match is not None:
+                if self.static:
+                    # A dark occluding arm can satisfy a partial paper template.
+                    # Keep its diagnostic fit, but only a full outline can move
+                    # the fixed target or refresh its measurement timestamp.
+                    state = self.cached(now)
+                    state['partial_candidate'] = match
+                    return state
                 self._record(match, now)
                 state = self._state("partial", now, True)
                 state.update(edge_support=match["edge_support"],

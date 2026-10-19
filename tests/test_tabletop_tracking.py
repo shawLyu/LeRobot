@@ -87,7 +87,7 @@ def test_static_print_keeps_full_cached_outline_with_age():
     assert len(state["complete_outline_xy"]) == 8
 
 
-def test_fresh_partial_observation_updates_a_displaced_static_target():
+def test_partial_static_template_cannot_move_fixed_target_or_refresh_capture_age():
     xy, yaw = [.006, -.004], .78
     mask, origin, resolution = render_mask(xy, yaw, 'partial')
     tracker = TTracker({**DIMENSIONS, 'height': 0}, static=True)
@@ -97,9 +97,11 @@ def test_fresh_partial_observation_updates_a_displaced_static_target():
                         [0, 1/resolution, -origin[1]/resolution], [0, 0, 1.]])
     state = tracker.update([], mask, matrix, np.zeros(5), np.eye(3),
                             np.array([0., 0., 1.]), 2.)
-    assert state['tracking_status'] == 'partial' and state['observed']
-    np.testing.assert_allclose(state['xy'], xy, atol=.003)
-    assert state['yaw'] == pytest.approx(yaw, abs=.06)
+    assert state['tracking_status'] == 'static_cached' and not state['observed']
+    assert state['xy'] == [0., 0.] and state['yaw'] == .7
+    assert state['observation_age_s'] == 1.
+    np.testing.assert_allclose(state['partial_candidate']['xy'], xy, atol=.003)
+    assert state['partial_candidate']['yaw'] == pytest.approx(yaw, abs=.06)
 
 
 def test_missing_first_observation_does_not_invent_a_pose():

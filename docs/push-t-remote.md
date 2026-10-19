@@ -11,11 +11,36 @@ solves IK, and plans short pushes. The remote host has no MuJoCo; it receives va
 Local outputs: `data/tabletop/<session>/push_t/`.
 Remote received records: `data/push_t/remote-<session>/plans.jsonl` and local-results.jsonl.
 Default local display is 5 fps. Push-T requests a 10 Hz observation stream (or the higher display rate), independently of rendering; actual delivery is bounded by perception throughput. Motor control targets 60 Hz with exclusive serial access.
-Push-T omits native JPEG transmission while retaining native-resolution marker detection remotely; ordinary tabletop/calibration captures still retain native images.
+Push-T measures both T silhouettes on every primary frame. With a side camera,
+primary marker scans alternate one native-resolution scan with two scans using
+the calibrated processing-image rays; table and joint freshness limits are unchanged.
+Push-T omits native JPEG transmission; ordinary tabletop/calibration captures still retain native images.
 Local material extraction runs in its own thread without blocking feedback reception.
 
 Display transmission uses a separate thread and one latest-state slot, so slow rendering/backlogs do not block perception.
 The remote motor owner holds on camera/motor age over 500 ms, local heartbeat gap over 750 ms, or SSH loss.
+Repeated side-camera updates retain an unexpired primary measurement using its
+original capture time. A fused secondary pose remains secondary evidence: newer
+secondary measurements replace it, and refreshes never reset its observation age.
+The static paper target uses a fresh complete secondary silhouette in preference
+to an occluded primary partial-template fit. Each fused object also retains its
+current per-camera measurements. Scene/movement checks compare the active camera
+with its own initial measurement, so fixed inter-camera bias does not masquerade
+as target movement. A new source without an initial measurement requires replanning;
+the 3 mm target-movement threshold remains unchanged.
+Execution preflight and each motor tick re-evaluate the age of these validated
+per-camera measurements. If the selected primary expires between publications,
+an already received fresh secondary pose can take over with its original timestamp.
+Both stale sources still stop execution; no timeout is extended.
+Partial fits of the fixed paper target are diagnostic candidates only. They do
+not move its cached pose or refresh its observation timestamp; a complete outline
+can reacquire a moved target. Only complete observations replace its persistent
+cache. A previously measured static primary pose may serve as that camera's
+movement baseline, explicitly labelled cached, while a fresh side view supplies
+the current target observation. Moving wood still requires current visual evidence.
+Push-T omits the independent end-effector-marker scan, which its control policy
+does not consume. Table/base markers and both T observations remain active;
+ordinary tabletop views and tool-mount inspection still measure that marker.
 During an active trajectory, local display-frame age does not override fresh remote control observations.
 Local stream loss still cancels execution and stops heartbeats; planning/submission still require fresh observations.
 Photographic material extraction is optional for planning/execution. If the
@@ -37,6 +62,16 @@ The window shows the live scene and next locally planned push.
 P starts or replans from hold; Space stops progression and holds; Esc closes and ends remote execution.
 --hardware-control permits execution but launch itself does not move motors.
 Without it, feedback/planning remain read-only and P cannot initiate physical motion.
+
+A low tool whose wrist roll or jaw opening differs from the pushing posture first
+lifts with both angles held at their measured values. The planner checks vertical
+waypoints at no more than 5 mm spacing up to a 38.5 mm contact-reference height,
+including the complete gripper geometry, wood, table and calibrated joint limits.
+Only after this departure may it rotate the wrist or close the jaw for approach.
+Height compensation preserves these tool angles; it cannot turn the departure
+back into a low wrist rotation. An unreachable or colliding departure rejects the
+plan. This protects the transition and does not validate the physical fingertip's
+absolute height or replace low-height calibration.
 
 Hardware startup requires verified motor identity, model hash, and an available executor.
 Serial open failure, missing motor packets, or feedback initialization failure are returned with the actual error.
@@ -62,7 +97,7 @@ Each arm independently saves `calibrated=true`, `fixed_to_table=true`, `status=f
 follower joints update from encoders. Tabletop and T observations remain live.
 The white arm registration does not enable joint control.
 
-Both markers have a 42 mm black border, lie parallel to the table, and are centered laterally.
+Both markers have a 50 mm black border, lie parallel to the table, and are centered laterally.
 The follower marker center is 70 mm above the table; arm1's configured height is 69 mm.
 Both centers are 19.5 mm forward of the base rear edge.
 CAD rear edge X=-22.365 mm and table-contact Z=-2.400 mm give marker centers
@@ -72,7 +107,7 @@ Known corner height and a flat-base constraint solve planar position/yaw while r
 Old MIP ID 4/5/6 installation geometry has been removed from the active configuration.
 See [Two-arm calibration](two-arm-calibration.md) for measurements and saved poses.
 
-Initial registration requires visible primary ID 1 and 20 valid observations with distinct capture times spanning at least 1 s.
+Initial registration requires visible primary ID 3 and 20 valid observations with distinct capture times spanning at least 1 s.
 Position deviations from the median must be below 2 mm and yaw deviations below 0.025 rad.
 Results are atomically saved remotely as `data/calibration/follower_table_base.json` and
 `data/calibration/arm1_table_base.json`, then copied locally. Each arm requires its own 20 accepted observations.
@@ -110,14 +145,20 @@ Success requires center error <2 mm and yaw error <3 degrees in three distinct c
 
 Enabling first writes current actual positions as hold targets, then enables torque/RAM acceleration streaming without EEPROM writes.
 Joint tracking error over 0.12 rad, faults, or lost torque cancel subsequent targets.
-Stopping/disconnection retains loaded-joint support and restores prior RAM acceleration/velocity.
+After a successful waypoint sequence, the remote loop continues holding its nominal
+target with the learned load compensation while the next observation/plan arrives.
+The next sequence reuses that controller state instead of enabling again and
+discarding the preload. A clean close after completion retains the last compensated
+servo goals and restores prior RAM acceleration/velocity. Explicit stop, interrupted
+motion and faults retain the measured-position hold and latched-stop behavior.
 
 ## Shared circle controller
 
 Physical Push-T uses the shared ManualControl and `configs/robot.json`: 60 Hz,
 RAM acceleration 254, velocity 3000 ticks/s, reference shaping and bounded PI-D.
-Predictive velocity lead is disabled. Native P/I/D, EEPROM protections and measured
-angle calibration remain unchanged. There are no task-specific PID/native-gain
+Predictive velocity lead is disabled. The shared RAM profile holds shoulder/elbow
+native I at zero while running, then restores the prior values. EEPROM protections
+and measured angle calibration remain unchanged. There are no task-specific PID/native-gain
 profiles. See [the controller](lerobot-control.md) and
 [current response evidence](control-performance.md). Physical contact behavior
 and independent 1 mm Cartesian validation remain pending.

@@ -28,6 +28,7 @@ from lerobot_arm_control.tasks.push_t.push_t_motor import (
     joint_segments,
     observation_issue,
     recovery_issue,
+    refresh_camera_observations,
     same_scene,
 )
 from lerobot_arm_control.visualization.tabletop_scene import ROOT
@@ -177,7 +178,8 @@ class LocalPush:
 
     def _latest(self):
         with self.lock:
-            return self.state, self.received, self.requested, self.generation
+            state = refresh_camera_observations(self.state, self.received, time.monotonic())
+            return state, self.received, self.requested, self.generation
 
     def _prepare(self, state):
         source = self.output/'initial_observation'
@@ -233,7 +235,9 @@ class LocalPush:
             mujoco.mj_forward(sim.model, nominal)
             target = nominal.site('push_contact').xpos.copy()
             target[2] += self.height_compensation
-            q = arm.solve(target, previous, attempts=8 if index == 0 else 1)
+            q = arm.solve(target, previous, attempts=8 if index == 0 else 1,
+                          tool_joints=joints[4:],
+                          posture_axis=nominal.site('gripperframe').xmat.reshape(3, 3)[:, 0])
             if q is None or not arm.path_clear(previous, q,
                                                avoid_wood=index < action.approach_count):
                 raise ValueError('height-compensated trajectory unreachable or in collision')
@@ -448,7 +452,7 @@ class LocalPush:
     def close(self):
         self.stopped.set()
         self.changed.set()
-        if self.robot.motor:
+        if self.robot.motor and self.robot.motor.status()['phase'] != 'completed':
             self.robot.motor.cancel('local planner closed: hold')
         self.worker.join(timeout=3)
         self.observation_log.close()

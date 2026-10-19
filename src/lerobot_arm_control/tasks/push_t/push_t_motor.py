@@ -24,11 +24,61 @@ def calibrated_base(base):
             and base.get('pose_source') == 'fixed_marker_calibration'))
 
 
+def refresh_camera_observations(state, received, now):
+    """Re-select still-fresh, already validated camera evidence between publications."""
+    if state is None:
+        return state
+    elapsed = max(0., now-received)
+    updates = {}
+    for name, obj in state.get('objects', {}).items():
+        if obj.get('tracking_status') == 'static_cached':
+            continue
+        age = (obj.get('observation_age_s', math.inf) if obj.get('observation_source')
+               else state.get('capture_age_at_send_ms', math.inf)/1000)
+        stamp = obj.get('observation_captured_unix_ns')
+        if not obj.get('observation_source') and type(stamp) is int:
+            age += (state['captured_unix_ns']-stamp)/1e9
+        if age+elapsed <= .5:
+            continue
+        candidates = []
+        for camera, pose in obj.get('camera_observations', {}).items():
+            stamp = pose.get('captured_unix_ns')
+            if type(stamp) is not int or pose.get('static_cached'):
+                continue
+            age = (state.get('capture_age_at_send_ms', math.inf)/1000
+                   +(state['captured_unix_ns']-stamp)/1e9)
+            if (0 <= age+elapsed <= .5 and pose.get('tracking_status') in
+                    ('observed', 'partial', 'recent') and np.isfinite(
+                        [*pose.get('xy', [math.inf]*2), pose.get('yaw', math.inf)]).all()):
+                candidates.append((age, camera, pose))
+        if candidates:
+            age, camera, pose = min(candidates, key=lambda item: item[0])
+            source = ('primary_previous_frame' if camera == 'primary'
+                      and pose['tracking_status'] == 'recent' else camera)
+            updates[name] = {**obj, **{k: pose[k] for k in ('xy', 'yaw', 'tracking_status',
+                                                          'observed')},
+                'observation_source': source, 'observation_age_s': age,
+                'observation_captured_unix_ns': pose['captured_unix_ns']}
+            # Raw contours belong to the old camera measurement. The complete
+            # outline is a fixed-shape template, so transform it with the new pose.
+            updates[name].pop('contour_xy', None)
+            if 'complete_outline_xy' in obj:
+                turn = pose['yaw']-obj['yaw']
+                rotation = np.array([[math.cos(turn), -math.sin(turn)],
+                                     [math.sin(turn), math.cos(turn)]])
+                updates[name]['complete_outline_xy'] = (
+                    (np.asarray(obj['complete_outline_xy'])-obj['xy'])@rotation.T
+                    +pose['xy']).tolist()
+    return {**state, 'objects': {**state['objects'], **updates}} if updates else state
+
+
 def observation_issue(state, received, now, *, require_base=False, initialized=False):
+    state = refresh_camera_observations(state, received, now)
     if state is None:
         return 'waiting for a camera observation'
-    camera_age = now-received+state.get('capture_age_at_send_ms', math.inf)/1000
-    if (state.get('units') != 'm' or not state.get('marker_visible')
+    table = state.get('control_table_observation', state)
+    camera_age = now-received+table.get('capture_age_at_send_ms', math.inf)/1000
+    if (state.get('units') != 'm' or not table.get('marker_visible')
             or not math.isfinite(camera_age) or camera_age > .5):
         return 'table localization lost or camera older than 500 ms'
     for name in ('wood_t', 'black_t'):
@@ -41,11 +91,18 @@ def observation_issue(state, received, now, *, require_base=False, initialized=F
                   and type(obj.get('observation_captured_unix_ns')) is int)
         if not obj.get('pose_valid') or not (cached_target or visible or recent):
             return f'{name} has no current valid observation'
-        if obj.get('observation_source') and (
+        if not cached_target and obj.get('observation_source') and (
                 obj.get('observation_age_s', math.inf)+now-received > .5):
             camera = ('primary' if obj['observation_source'] == 'primary_previous_frame'
                       else 'secondary')
             return f'{name} {camera} camera observation older than 500 ms'
+        if not obj.get('observation_source') and not cached_target:
+            age = state.get('capture_age_at_send_ms', math.inf)/1000
+            stamp = obj.get('observation_captured_unix_ns')
+            if type(stamp) is int:
+                age += (state['captured_unix_ns']-stamp)/1e9
+            if age+now-received > .5:
+                return f'{name} primary camera observation older than 500 ms'
         if not np.isfinite([*obj.get('xy', [math.inf]*2), obj.get('yaw', math.inf)]).all():
             return f'{name} pose is not finite'
     robot = state.get('robot', {})
@@ -70,6 +127,18 @@ def observation_issue(state, received, now, *, require_base=False, initialized=F
     return None
 
 
+def camera_reference(reference, current):
+    """Use a real initial measurement from the camera supplying the current pose."""
+    def source(obj):
+        value = obj.get('observation_source', 'primary')
+        return 'primary' if value in (None, 'primary_previous_frame') else value
+
+    camera = source(current)
+    if camera == source(reference):
+        return reference
+    return reference.get('camera_observations', {}).get(camera)
+
+
 def same_scene(reference, current, *, wood_tolerance=.003, joint_tolerance=.035):
     a, b = reference['robot']['registration'], current['robot']['registration']
     if (np.linalg.norm(np.subtract(a['position'], b['position'])) > .002
@@ -79,7 +148,10 @@ def same_scene(reference, current, *, wood_tolerance=.003, joint_tolerance=.035)
             joint_tolerance):
         return False
     for name in ('wood_t', 'black_t'):
-        a, b = reference['objects'][name], current['objects'][name]
+        b = current['objects'][name]
+        a = camera_reference(reference['objects'][name], b)
+        if a is None:
+            return False
         yaw = math.atan2(math.sin(a['yaw']-b['yaw']), math.cos(a['yaw']-b['yaw']))
         if np.linalg.norm(np.subtract(a['xy'], b['xy'])) > wood_tolerance or abs(yaw) > .1:
             return False
@@ -90,7 +162,8 @@ def recovery_issue(state, received, now):
     """Visual landmarks may be hidden during retreat; fresh images and encoders are required."""
     if state is None:
         return 'no camera frame during visibility recovery'
-    age = now-received+state.get('capture_age_at_send_ms', math.inf)/1000
+    frame = state.get('control_table_observation', state)
+    age = now-received+frame.get('capture_age_at_send_ms', math.inf)/1000
     robot = state.get('robot', {})
     motor_age = now-received+robot.get('sample_age_at_send_ms', math.inf)/1000
     if not math.isfinite(age) or age > .5:
@@ -208,7 +281,15 @@ class PushMotor:
         if stop:
             self._hold(stop)
             return
+        observation = refresh_camera_observations(observation, received, self.clock())
         if not self.job and not pending:
+            if self.control.enabled and not self.control.stopped:
+                # Completed waypoints retain their nominal reference and gravity preload
+                # while the camera/planner prepares the next segment.
+                self.control.heartbeat()
+                self.control.step(positions, telemetry)
+                if self.control.stopped:
+                    self._hold('; '.join(dict.fromkeys(self.control.stopped.values())))
             return
         recovery = pending[2] if pending else self.job.get('recovery', False)
         stage = pending[3] if pending else self.job.get('stage')
@@ -262,7 +343,12 @@ class PushMotor:
                     if not math.isfinite(value) or not low <= value <= high:
                         self._hold(f'{joint}: motor waypoint outside encoder limits')
                         return
-            self.control.enable_all()
+            try:
+                if self.control.enabled != set(JOINTS) or self.control.stopped:
+                    self.control.enable_all()
+            except Exception as exc:
+                self._hold(f'motor enable failed: {exc}')
+                return
             segments[0]['start'] = [self.control.targets[j] for j in JOINTS]
             segments[0]['seconds'] = max(segments[0]['seconds'], 1.875*max(
                 abs(a-b) for a, b in zip(segments[0]['start'], segments[0]['end']))
@@ -284,7 +370,10 @@ class PushMotor:
             self._hold('robot base moved during push')
             return
         target_now = observation.get('objects', {}).get('black_t', {})
-        target_start = job['reference']['objects']['black_t']
+        target_start = camera_reference(job['reference']['objects']['black_t'], target_now)
+        if target_now.get('observed') and target_start is None:
+            self._hold('target observation source has no initial measurement: replan')
+            return
         if target_now.get('observed') and np.linalg.norm(np.subtract(
                 target_now['xy'], target_start['xy'])) > .003:
             self._hold('target moved during push')
@@ -340,10 +429,15 @@ class PushMotor:
             job['index'] += 1
             job['started'] = self.clock()
             if job['index'] == len(job['segments']):
-                self.control.stop('push completed: hold at contact height')
                 self.job = None
-                self._status('completed')
+                self._status('completed', holding_closed_loop=True)
 
     def close(self):
-        self._hold('remote session closed: hold')
-        self.control.close()
+        if self.status()['phase'] == 'completed' and not self.control.stopped:
+            # Keep the last supported equilibrium; replacing its preload with the
+            # measured angle makes I=0 gravity-loaded joints sag after disconnection.
+            self.control.close(preserve_targets=True)
+            self._status('stopped', reason='remote session closed: retain completed targets')
+        else:
+            self._hold('remote session closed: hold')
+            self.control.close()

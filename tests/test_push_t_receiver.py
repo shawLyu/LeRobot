@@ -50,6 +50,10 @@ def test_received_local_plan_runs_on_bus_owner_and_ends_holding(receiver):
     assert motor.status()['phase'] == 'completed'
     assert bus.sync_read('Goal_Position') == bus.sync_read('Present_Position')
     assert all(bus.sync_read('Torque_Enable').values())
+    endpoint.close()
+    assert motor.stop_reason is None
+    motor.close()
+    assert all(bus.sync_read('Torque_Enable').values())
 
 
 @pytest.mark.parametrize('change', ['config', 'model', 'scene', 'stale', 'nan', 'speed',

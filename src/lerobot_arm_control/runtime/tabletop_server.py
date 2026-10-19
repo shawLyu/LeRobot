@@ -285,15 +285,17 @@ def main():
                 native_frame = frame
                 frame = cv2.warpAffine(frame, cv2.invertAffineTransform(np.array(mapping)),
                                        tuple(config["image_size"]), flags=cv2.INTER_AREA)
-            observe_objects = not observers or sequence % 3 == 1
+            native_cycle = not observers or sequence % 3 == 1
+            observe_objects = args.push_t or native_cycle
             # Full-resolution corners govern calibration and complete measurements.
             # Intervening localization uses the calibrated low-resolution rays, avoiding
             # repeated native-resolution marker scans while the side camera tracks T.
-            native_detection = native_frame if observe_objects else None
+            native_detection = native_frame if native_cycle else None
             state = perception.process(frame, sequence, captured_ns, native_detection,
                                        mapping if native_detection is not None else None,
                                        marker_only=args.marker_only,
-                                       observe_objects=observe_objects)
+                                       observe_objects=observe_objects,
+                                       observe_tool=not args.push_t)
             state['marker_detection_size'] = list((native_detection
                 if native_detection is not None else frame).shape[1::-1])
             if not args.marker_only and time.monotonic()-last_map_save > 1:

@@ -139,6 +139,7 @@ def test_height_compensation_raises_command_path_once_and_keeps_nominal_predicti
     nominal = mujoco.MjData(sim.model)
     actual = mujoco.MjData(sim.model)
     for before, after in zip(action.joints, raised.joints):
+        np.testing.assert_array_equal(after[4:], before[4:])
         nominal.qpos[sim.qadr], actual.qpos[sim.qadr] = before, after
         mujoco.mj_forward(sim.model, nominal)
         mujoco.mj_forward(sim.model, actual)

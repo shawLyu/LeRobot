@@ -12,6 +12,7 @@ from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
 from lerobot_arm_control.tasks.push_t.push_t_motor import (
     observation_issue,
     recovery_issue,
+    refresh_camera_observations,
     same_scene,
 )
 from lerobot_arm_control.transport.pick_t_protocol import (
@@ -114,6 +115,7 @@ class PushReceiver:
             with self.lock:
                 state, received = self.state, self.received
             now = self.clock()
+            state = refresh_camera_observations(state, received, now)
             stage = command.get('stage')
             if self.task == 'pick_t':
                 progress = self.robot.motor.status()
@@ -175,5 +177,5 @@ class PushReceiver:
                 "output": str(self.output)}
 
     def close(self):
-        if self.robot.motor:
+        if self.robot.motor and self.robot.motor.status()['phase'] != 'completed':
             self.robot.motor.cancel("local session closed: hold")

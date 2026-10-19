@@ -205,21 +205,30 @@ class Arm:
         self.jr = np.zeros((3, model.nv))
         self.rng = np.random.default_rng(42)
 
-    def solve(self, xyz, seed, *, attempts=1, clearance=True):
+    def solve(self, xyz, seed, *, attempts=1, clearance=True, tool_joints=None,
+              posture_axis=None):
         m, d = self.model, self.data
+        tool = np.asarray([0, self.jaw_closed] if tool_joints is None else tool_joints)
+        if (tool.shape != (2,) or not np.isfinite(tool).all()
+                or np.any(tool < self.limits[4:, 0])
+                or np.any(tool > self.limits[4:, 1])):
+            raise ValueError('tool joints must lie within calibrated limits')
+        posture = np.asarray([0, 0, -1] if posture_axis is None else posture_axis)
+        if posture.shape != (3,) or not np.isfinite(posture).all():
+            raise ValueError('posture axis must be a finite three-vector')
         best = None
         for attempt in range(attempts):
             q = np.array(seed).copy() if attempt == 0 else self.rng.uniform(
                 self.limits[:, 0]+.015, self.limits[:, 1]-.015)
             q[:4] = np.clip(q[:4], self.limits[:4, 0]+.015, self.limits[:4, 1]-.015)
-            q[4], q[5] = 0, self.jaw_closed
+            q[4:] = tool
             d.qpos[self.qadr] = q
             for _ in range(100):
                 mujoco.mj_forward(m, d)
                 error = np.asarray(xyz)-d.site_xpos[self.site]
                 axis = d.site_xmat[self.frame].reshape(3, 3)[:, 0]
                 # Position is strict; downward finger posture is a soft preference.
-                residual = np.r_[error, .0005*(np.array([0, 0, -1])-axis)]
+                residual = np.r_[error, .0005*(posture-axis)]
                 mujoco.mj_jacSite(m, d, self.jp, self.jr, self.site)
                 skew = np.array([[0, -axis[2], axis[1]], [axis[2], 0, -axis[0]],
                                  [-axis[1], axis[0], 0]])
@@ -416,8 +425,36 @@ class PushSimulation:
                     candidates.append(Push(start, direction, float(stroke+CONTACT_CLEARANCE)))
         return candidates
 
+    def tool_alignment_departure(self, seed):
+        """Lift a low, rotated/open tool before changing its roll or opening."""
+        seed = np.asarray(seed, float)
+        self.arm.data.qpos[self.qadr] = seed
+        mujoco.mj_forward(self.model, self.arm.data)
+        site = self.arm.data.site('push_contact').xpos.copy()
+        posture = self.arm.data.site('gripperframe').xmat.reshape(3, 3)[:, 0].copy()
+        height = CONTACT_HEIGHT+.035
+        if (site[2] >= height
+                or np.allclose(seed[4:], [0, self.arm.jaw_closed], atol=.02, rtol=0)):
+            return []
+        joints = []
+        steps = max(1, math.ceil((height-site[2])/.005))
+        previous = seed
+        for z in np.linspace(site[2], height, steps+1)[1:]:
+            target = np.r_[site[:2], z]
+            q = self.arm.solve(target, previous, tool_joints=seed[4:], posture_axis=posture)
+            if q is None or not self.arm.path_clear(previous, q, avoid_wood=True):
+                return None
+            joints.append(q)
+            previous = q
+        return joints
+
     def trajectory(self, action, *, lift=False):
         seed = self.data.qpos[self.qadr].copy()
+        departure = self.tool_alignment_departure(seed)
+        if departure is None:
+            return False
+        if departure:
+            seed = departure[-1]
         start = np.r_[action.start, CONTACT_HEIGHT]
         finish = start+np.r_[action.direction, 0]*action.distance
         if action.transition == 'contact continuation' and not lift:
@@ -442,7 +479,7 @@ class PushSimulation:
                                 'lift to change side') for release in releases)
         pushing = [start+(finish-start)*f for f in np.linspace(.1, 1, 10)]
         for approach, transition in options:
-            joints = []
+            joints = list(departure)
             points = approach+pushing
             for index, xyz in enumerate(points):
                 previous = seed if not joints else joints[-1]
@@ -451,9 +488,9 @@ class PushSimulation:
                                                        avoid_wood=index < len(approach)):
                     break
                 joints.append(q)
-            if len(joints) == len(points):
+            if len(joints) == len(departure)+len(points):
                 action.joints = joints
-                action.approach_count = len(approach)
+                action.approach_count = len(departure)+len(approach)
                 action.transition = transition
                 return True
         return False

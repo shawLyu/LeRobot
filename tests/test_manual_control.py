@@ -275,6 +275,29 @@ def test_native_acceleration_readback_failure_cannot_start_motion(setup):
     assert not any(register == "Torque_Enable" for register, _, _ in bus.writes)
 
 
+def test_stream_readbacks_use_configured_retry_budget_during_enable_and_restore(setup):
+    from lerobot_arm_control.control.control_defaults import READ_RETRIES
+
+    bus, control, _ = setup
+    original = bus.read
+    reads = []
+    registers = {'Acceleration', 'Maximum_Acceleration', 'Goal_Time', 'Goal_Velocity',
+                 'Maximum_Velocity_Limit', 'Velocity_Unit_factor', 'I_Coefficient'}
+
+    def read(register, joint, normalize=False, num_retry=0):
+        if register in registers:
+            reads.append((register, num_retry))
+            if num_retry < READ_RETRIES:
+                raise RuntimeError('There is no status packet!')
+        return original(register, joint, normalize, num_retry)
+
+    bus.read = read
+    control.enable_all()
+    control.close()
+    assert reads and all(retries == READ_RETRIES for _, retries in reads)
+    assert bus.sync_read('Goal_Position') == bus.sync_read('Present_Position')
+
+
 def test_scheduled_acceleration_stays_inside_caps_and_restores_original_ram(setup):
     bus, control, _ = setup
     control.position_feedback.profile['native_stream'].update(

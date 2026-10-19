@@ -19,6 +19,11 @@ Local material extraction runs in its own thread without blocking feedback recep
 
 Display transmission uses a separate thread and one latest-state slot, so slow rendering/backlogs do not block perception.
 The remote motor owner holds on camera/motor age over 500 ms, local heartbeat gap over 750 ms, or SSH loss.
+A newly revealed target camera without a same-camera starting measurement pauses the
+remaining path and requests a new plan. The last nominal joint reference and load
+compensation remain active during this pause; motor faults still latch the normal stop.
+Startup register readbacks use the configured finite read retry budget; retries do
+not resend position goals or bypass persistent alarms or voltage limits.
 Repeated side-camera updates retain an unexpired primary measurement using its
 original capture time. A fused secondary pose remains secondary evidence: newer
 secondary measurements replace it, and refreshes never reset its observation age.

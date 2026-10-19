@@ -456,3 +456,60 @@ def test_out_of_range_waypoint_is_rejected_without_killing_feedback_owner(motor)
     instance.submit(state, segments)
     tick(instance, bus)
     assert instance.status()['phase'] == 'running'
+
+
+def test_new_target_camera_pauses_path_without_losing_support_then_replans(motor, monkeypatch):
+    instance, bus, clock, state, segments = motor
+    instance.submit(state, segments)
+    tick(instance, bus)
+    instance.control.position_feedback.integral['shoulder_lift'] = .04
+    instance.control.position_feedback.correction['shoulder_lift'] = .04
+    targets = dict(instance.control.targets)
+    state['objects']['black_t'].update(observation_source='side', observation_age_s=0)
+    clock[0] = .02
+    instance.observe(state, clock[0])
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'paused'
+    assert instance.status()['holding_closed_loop']
+    assert instance.job is None
+    assert instance.control.targets == targets
+    assert instance.control.position_feedback.integral['shoulder_lift'] == pytest.approx(.04)
+    assert not instance.control.stopped
+    clock[0] += .02
+    tick(instance, bus)
+    assert instance.control.targets == targets
+    assert instance.control.position_feedback.integral['shoulder_lift'] == pytest.approx(.04)
+
+    def unexpected_enable():
+        pytest.fail('replanning must reuse the supported controller')
+
+    monkeypatch.setattr(instance.control, 'enable_all', unexpected_enable)
+    instance.observe(state, clock[0])
+    instance.submit(state, segments)
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'running'
+
+
+@pytest.mark.parametrize('fault', [False, True])
+def test_paused_supported_hold_preserves_goals_on_close_but_still_stops_for_fault(motor, fault):
+    instance, bus, clock, state, segments = motor
+    instance.submit(state, segments)
+    tick(instance, bus)
+    instance.control.position_feedback.integral['shoulder_lift'] = .04
+    instance.control.position_feedback.correction['shoulder_lift'] = .04
+    state['objects']['black_t'].update(observation_source='side', observation_age_s=0)
+    clock[0] = .02
+    instance.observe(state, clock[0])
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'paused'
+    if fault:
+        bus.registers['shoulder_lift']['Torque_Enable'] = 0
+        clock[0] += .02
+        tick(instance, bus)
+        assert instance.status()['phase'] == 'stopped'
+        assert instance.control.stopped
+    else:
+        goals = bus.sync_read('Goal_Position')
+        instance.close()
+        assert bus.sync_read('Goal_Position') == goals
+        assert all(bus.sync_read('Torque_Enable').values())

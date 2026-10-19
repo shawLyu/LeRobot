@@ -177,5 +177,5 @@ class PushReceiver:
                 "output": str(self.output)}
 
     def close(self):
-        if self.robot.motor and self.robot.motor.status()['phase'] != 'completed':
+        if self.robot.motor and self.robot.motor.status()['phase'] not in ('completed', 'paused'):
             self.robot.motor.cancel("local session closed: hold")

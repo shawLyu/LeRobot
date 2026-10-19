@@ -372,7 +372,16 @@ class PushMotor:
         target_now = observation.get('objects', {}).get('black_t', {})
         target_start = camera_reference(job['reference']['objects']['black_t'], target_now)
         if target_now.get('observed') and target_start is None:
-            self._hold('target observation source has no initial measurement: replan')
+            # Discard the trajectory, retaining the last commanded supported hold.
+            # Resetting to measured angles here removes gravity compensation.
+            self.job = None
+            self.control.heartbeat()
+            self.control.step(positions, telemetry)
+            if self.control.stopped:
+                self._hold('; '.join(dict.fromkeys(self.control.stopped.values())))
+            else:
+                self._status('paused', holding_closed_loop=True,
+                             reason='target observation source has no initial measurement: replan')
             return
         if target_now.get('observed') and np.linalg.norm(np.subtract(
                 target_now['xy'], target_start['xy'])) > .003:
@@ -433,11 +442,11 @@ class PushMotor:
                 self._status('completed', holding_closed_loop=True)
 
     def close(self):
-        if self.status()['phase'] == 'completed' and not self.control.stopped:
+        if self.status()['phase'] in ('completed', 'paused') and not self.control.stopped:
             # Keep the last supported equilibrium; replacing its preload with the
             # measured angle makes I=0 gravity-loaded joints sag after disconnection.
             self.control.close(preserve_targets=True)
-            self._status('stopped', reason='remote session closed: retain completed targets')
+            self._status('stopped', reason='remote session closed: retain supported targets')
         else:
             self._hold('remote session closed: hold')
             self.control.close()

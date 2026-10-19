@@ -307,6 +307,9 @@ class LocalPush:
                             continue
                         if active:
                             active = False
+                            if motor['phase'] == 'paused':
+                                self._status('replanning', reason=motor.get('reason'))
+                                continue
                             if motor['phase'] != 'completed':
                                 self._status('stopped', reason=motor.get('reason'))
                                 with self.lock:
@@ -452,7 +455,7 @@ class LocalPush:
     def close(self):
         self.stopped.set()
         self.changed.set()
-        if self.robot.motor and self.robot.motor.status()['phase'] != 'completed':
+        if self.robot.motor and self.robot.motor.status()['phase'] not in ('completed', 'paused'):
             self.robot.motor.cancel('local planner closed: hold')
         self.worker.join(timeout=3)
         self.observation_log.close()

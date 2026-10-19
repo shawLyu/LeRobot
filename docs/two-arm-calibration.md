@@ -4,8 +4,10 @@ As of 2026-10-11, the actual visible right marker is
 `DICT_APRILTAG_36h10` / ID 1, with left `DICT_APRILTAG_16h5` / ID 0 as auxiliary.
 Both black borders are 150 mm. The October 9 ID 3 installation is archived.
 The user-selected second October 8 camera calibration remains active.
-Both bases now pass registration using their actual black-border edges and current search regions.
-Each saved record contains 20 accepted observations; current separation is **293.443 mm**.
+The saved October 11 records each contain 20 accepted observations; recorded separation is **293.443 mm**.
+On 2026-10-19 both base markers were replaced with **50 mm** black borders, with centers and
+mounting unchanged. The active geometry is updated; new base observations are required.
+The old 42 mm records and scene snapshot describe the previous installation.
 See [current scene](current-scene.md) for poses, independent table validation and complete saved parameters.
 The measurements in the historical section below remain historical. Simulation remains local.
 
@@ -14,12 +16,12 @@ The measurements in the historical section below remain historical. Simulation r
 | Arm | Appearance in the current camera view | Base marker | Joint feedback/control |
 | --- | --- | --- | --- |
 | `follower` | Left black arm | ArUco `DICT_4X4_50` / ID 7 | Existing follower bus |
-| `arm1` | Right white arm | ArUco `DICT_4X4_50` / ID 6 | Read-only stream with temporary follower mapping; independent alignment pending |
+| `arm1` | Right white arm | ArUco `DICT_4X4_50` / ID 6 | Independent six-joint mapping; read-only feedback for base visualization |
 
-The original dimensions were confirmed for both arms; the follower center height
+The marker size was updated on 2026-10-19; the follower center height
 was remeasured as 70 mm on 2026-10-09:
 
-- Black marker border: **42 x 42 mm**, excluding the white margin.
+- Black marker border: **50 x 50 mm**, excluding the white margin (previously 42 mm).
 - Marker plane: parallel to the tabletop.
 - Marker center: **70 mm above the tabletop for the follower**, **69 mm for arm1**,
   on the base lateral centerline.
@@ -28,7 +30,7 @@ was remeasured as 70 mm on 2026-10-09:
 The original SO101 CAD base frame has rear edge X = -22.365002 mm and table
 contact Z = -2.400002 mm. Thus the marker center in that frame is
 `[-2.865002, 0, 67.599998]` mm for the follower and
-`[-2.865002, 0, 66.599998]` mm for arm1. Each corner is 21 mm from the center along
+`[-2.865002, 0, 66.599998]` mm for arm1. Each corner is 25 mm from the center along
 the base X/Y axes. `corners_base_m` follows decoded marker corner order,
 accounting for the different printed rotations of IDs 7 and 6.
 
@@ -71,7 +73,9 @@ separate `fixed_base.file`; duplicate names, markers or file paths are rejected.
 - `data/calibration/arm1_table_base.json`: white arm fixed pose and mount signature.
 - `data/calibration/two_arm_bases.json`: both measured poses, separation, quality and provenance.
 
-These three records now contain accepted October 11 measurements in the current ID 1 frame.
+These three records contain accepted October 11 measurements in the ID 1 frame,
+using the previous 42 mm marker geometry. They must be recollected for the 50 mm markers;
+the per-arm runtime rejects their old geometry signatures.
 Their prior versions are archived independently of the active records.
 The live stream contains `base_registrations`, indexed by arm name, and
 `base_distances`, containing pairwise displacement and separation in meters.
@@ -105,10 +109,10 @@ visible, deploy the installation configuration, and collect again:
 
 ```sh
 ./scripts/deploy_code.sh --config
-./scripts/lerobot-arm view tabletop --recalibrate-base --fps 5
+./scripts/lerobot-arm calibrate table --fps 5
 ```
 
-`--recalibrate-base` archives both previous base files and collects independent
+`calibrate table` uses camera-only registration and archives both previous base files and collects independent
 20-observation calibrations. Confirm both statuses become `fixed`, then copy
 the two base files back locally and refresh the pair summary. Saved mounting
 poses load on restart without requiring the robot markers to remain visible.

@@ -12,9 +12,9 @@ Enter the lowest fixed finger surface's measured height above the table in milli
 empty Enter means 0 mm, and q saves and exits.
 
 ```bash
-./scripts/lerobot-arm calibrate height collect --count 10
-./scripts/lerobot-arm calibrate height fit
-./scripts/lerobot-arm calibrate height apply
+./scripts/lerobot-arm calibrate angles refine-height collect --count 10
+./scripts/lerobot-arm calibrate angles refine-height fit
+./scripts/lerobot-arm calibrate angles refine-height apply
 ```
 
 Vary reach and wrist orientation; shoulder pan alone cannot identify all three offsets.
@@ -25,14 +25,14 @@ Duplicate poses, moving readings, and motor faults are rejected.
 Replace specific samples using 1-based indices, then fit and validate:
 
 ```bash
-./scripts/lerobot-arm calibrate height resample --poses 3 5 7 --apply
+./scripts/lerobot-arm calibrate angles refine-height resample --poses 3 5 7 --apply
 ```
 
 Old samples are retained under `superseded`. `collect --apply` also performs fitting/validation/application after capture.
 The existing STS3215 setup has verified 4096 ticks per revolution. To refit with its native pitch scale:
 
 ```bash
-./scripts/lerobot-arm calibrate height fit --native-pitch-scale --apply
+./scripts/lerobot-arm calibrate angles refine-height fit --native-pitch-scale --apply
 ```
 
 This mode uses the hardware angle scale and fits three zeros, requiring at least five fitting and two independent validation poses.

@@ -1,5 +1,9 @@
 # Current two-arm tabletop scene — 2026-10-11
 
+Installation update, 2026-10-19: both base markers now have 50 mm black borders,
+with their centers and mounting unchanged. This preserved scene uses the previous
+42 mm markers; obtain new base calibration and a new scene capture for the live installation.
+
 The observed desktop uses right AprilTag `DICT_APRILTAG_36h10` / ID 1 as origin,
 with left `DICT_APRILTAG_16h5` / ID 0 as auxiliary. Both black borders are 150 mm.
 The black follower base is ArUco 4x4 ID 7; the white arm1 base is ID 6.

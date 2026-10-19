@@ -50,6 +50,7 @@ listed in [Code layout](code-layout.md).
 ./scripts/lerobot-arm task pick-t --snapshot data/push_t/measured --output /tmp/pick-demo
 ./scripts/lerobot-arm calibrate camera --help
 ./scripts/lerobot-arm calibrate table --help
+./scripts/lerobot-arm calibrate angles --help
 ./scripts/lerobot-arm verify joints --help
 ```
 
@@ -120,6 +121,10 @@ variables. Hardware identity, calibration and controller tuning remain in their
 own configuration files; a connection change never rewrites them.
 Private `*.local.*` files are excluded from deployment, so another account keeps
 its own connection settings.
+
+The three calibration workflows are camera intrinsics, table-relative poses, and
+independent arm angles. See [Calibration](calibration.md); height and tool-marker
+refinements are nested under `calibrate angles`.
 
 ## Source APIs
 

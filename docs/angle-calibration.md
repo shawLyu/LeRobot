@@ -1,11 +1,11 @@
 # SO-101 angle calibration in one window
 
-The normal local window is `SO101 - live arm control`.
+The dedicated local window is `SO101 <arm> - angle calibration`; reference/capture mode starts immediately.
 The main model shows follower feedback; the small lower-left image is a static calibration reference,
 not another control window. Previews, raw positions, acknowledgements, and capture share one window.
 
 ```sh
-./scripts/lerobot-arm view arm --backend hardware --log logs/realtime-arm-live.json
+./scripts/lerobot-arm calibrate angles --arm follower --log logs/realtime-arm-live.json
 ```
 
 ## Measurements
@@ -24,7 +24,7 @@ Gripper zero also follows the reference; fully closed is not automatically zero.
 
 ## Capture
 
-1. Press B for calibration, then 1 for shoulder_pan.
+1. The window is already in calibration mode. Press 1 for shoulder_pan.
 2. Align to the 0-degree reference, support and hold for at least half a second, then press C.
 3. Press R for +30 degrees; change only that joint, measure the angle, hold steady, then press C.
 4. Press R for +60 degrees and capture similarly. Accepted calibration displays `check passed`.
@@ -53,13 +53,17 @@ Device replacement or upstream EEPROM recalibration invalidates it; archive befo
 The included completed calibration belongs to the existing experimental device. Reuse for another robot
 is explicitly temporary simulation estimation, not independent physical calibration or motion authorization.
 After local capture, close the window, verify the same device identity, and copy the file to the same remote path;
-ordinary deployment preserves remote calibration.
+ordinary deployment preserves remote calibration. Update the corresponding
+`arms.<arm>.resources.calibration.sha256` in `configs/robot.json` together with the
+accepted file on both hosts. Device-bound motion envelopes and saved trajectory
+fingerprints must be reviewed after changing the angle mapping; the automatic
+parameter guard must not be bypassed with an old resource hash.
 Archive an existing `follower_mujoco_kinematic.json` before raw angle recapture.
 
 For the right white arm, select its own hardware identity and independent file:
 
 ```sh
-./scripts/lerobot-arm view arm --backend hardware --arm arm1 \
+./scripts/lerobot-arm calibrate angles --arm arm1 \
   --log logs/arm1-angle-calibration.json
 ```
 
@@ -69,7 +73,7 @@ For display verification, add `--screenshot logs/arm1-calibration.png` to save i
 Window rendering restores its own graphics context after every offscreen reference image.
 
 The default output becomes `data/calibration/arm1_mujoco.json`; this measurement entry
-does not copy or overwrite follower mappings. The same B / 1–6 / R / C procedure applies.
+does not copy or overwrite follower mappings. The same 1–6 / R / C procedure applies. B can toggle the reference display.
 The white leader window displays its acquisition handle and trigger. Joints 1–5
 retain 0/30/60° references; joint 6 uses measured 0/15/30° reference points.
 These points fit the encoder scale; they do not define maximum trigger travel.

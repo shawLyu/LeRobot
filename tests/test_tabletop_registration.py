@@ -396,3 +396,37 @@ def test_observed_border_overrides_oversized_dark_background_detection(monkeypat
     # A failed exact border/code check cannot revive the oversized detection.
     found = registration.detect(detector, marker['dictionary'], np.zeros((100, 100), np.uint8))
     assert marker['id'] not in found
+
+
+@pytest.mark.parametrize('marker_id,turns', [(6, 1), (7, 2)])
+@pytest.mark.parametrize('undecoded_quad', [False, True])
+def test_observed_border_follows_current_quads_instead_of_historical_pixels(
+        marker_id, turns, undecoded_quad):
+    dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+    image = np.full((320, 460), 255, np.uint8)
+    image[150:250, 250:350] = np.rot90(
+        cv2.aruco.generateImageMarker(dictionary, marker_id, 100), turns)
+    marker = {'dictionary': 'DICT_4X4_50', 'id': marker_id,
+              'prefer_observed_border': True,
+              'border_seed_native': [[20, 20], [119, 20], [119, 119], [20, 119]]}
+    registration = BaseRegistration({'marker_size_m': .042, 'markers': [marker]},
+                                    np.eye(3), np.zeros(5))
+    detector = registration.detectors[marker['dictionary']]
+    if undecoded_quad:
+        corners, ids, _ = detector.detectMarkers(image)
+        assert marker_id in ids
+        # An inner contour is rejected by the initial decoder but seeds the real border.
+        corners = [(quad-quad.mean(axis=1, keepdims=True))*.98
+                   + quad.mean(axis=1, keepdims=True) for quad in corners]
+        class QuadCandidate:
+            def detectMarkers(self, frame):
+                return [], None, corners
+        detector = QuadCandidate()
+    found = registration.detect(detector, marker['dictionary'], image)
+    assert marker_id in found
+    np.testing.assert_allclose(found[marker_id][0].mean(axis=0), [299.5, 199.5], atol=1)
+    assert 9500 < cv2.contourArea(found[marker_id]) < 10500
+    # Another visible, correctly decoded ID cannot stand in for this base.
+    marker['id'] = 9
+    found = registration.detect(detector, marker['dictionary'], image)
+    assert 9 not in found

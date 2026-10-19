@@ -366,7 +366,10 @@ def run(args):
                         elif args.push_t and key == glfw.KEY_SPACE:
                             link.send('push_stop')
 
-                    viewer = ControlViewer(model, data, on_key, "Tabletop + SO101 - live mirror")
+                    title = ("Table calibration - camera and arm bases"
+                             if getattr(args, "calibration_mode", False)
+                             else "Tabletop + SO101 - live mirror")
+                    viewer = ControlViewer(model, data, on_key, title)
                     scale = hello["config"]["marker_size_m"] or 1
                     workspace = model.geom("tabletop_workspace")
                     viewer.cam.lookat[:] = [*workspace.pos[:2], 0]
@@ -480,6 +483,10 @@ def run(args):
                              + ("P: start real push | Space: hold | Esc: stop and close"
                                 if args.hardware_control else
                                 "Read-only preview | Esc: close"))
+                if getattr(args, "calibration_mode", False):
+                    from lerobot_arm_control.calibration.table import calibration_text
+
+                    text = calibration_text(hello["config"], state, frame_age)
                 viewer.set_texts([(0, 0, text)])
                 width, height = glfw.get_framebuffer_size(viewer.window)
                 if state["sequence"] != last_image_sequence or (width, height) != last_view_size:

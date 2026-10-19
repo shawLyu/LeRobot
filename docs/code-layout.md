@@ -17,7 +17,7 @@ LeRobot/
 │   │   ├── feetech.py    STS3215 驱动和原生流参数校验
 │   │   └── so101/        SO-101 关节表和工具几何选择
 │   ├── control/          共享 PID、限位、保持、接触/受阻检测、轨迹执行
-│   ├── calibration/      独立关节标定及相机、标记、桌面标定
+│   ├── calibration/      三类标定入口：table / camera / angles；高级拟合归入 angles
 │   ├── perception/       桌面注册、双臂基座定位、物体检测与跟踪
 │   ├── planning/         本地 MuJoCo 规划、IK 与碰撞验证
 │   ├── tasks/

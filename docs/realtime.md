@@ -29,10 +29,11 @@ Closing the window retains supporting torque. Fresh simulation states can mainta
 Use read-only feedback and angle capture with:
 
 ```sh
-./scripts/lerobot-arm view arm --backend hardware --backend hardware
+./scripts/lerobot-arm calibrate angles --arm follower
 ```
 
-This entry executes no motion. `B` enters calibration, `R` changes the reference, and `C` captures.
+This entry starts directly in reference/capture mode and executes no motion.
+`1–6` selects the joint, `R` changes the reference, and `C` captures.
 See [Angle calibration](angle-calibration.md). Hardware motion requires valid calibration for all six joints.
 See [Hardware control](real-control.md) for controls and Reset. Headless Reset uses `./scripts/lerobot-arm reset`,
 sending one trigger plus heartbeats rather than an angle sequence.

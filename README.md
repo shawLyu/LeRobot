@@ -231,12 +231,18 @@ Measure each robot's encoder-to-model angle mapping, zero, direction and usable
 travel. Calibration is bound to the device identity and relevant motor registers;
 renaming an arm does not make another device's calibration valid.
 
-Use the guides appropriate to your installation:
+Calibration has three entry points, all launched from the local workstation:
 
-- [Joint angle calibration](docs/angle-calibration.md) and [two-arm calibration](docs/two-arm-calibration.md).
-- [Single-servo zero and native PID tests](docs/native-pid.md).
-- [Camera intrinsics, table and base registration](docs/tabletop.md).
-- [Height correction](docs/height-calibration.md) and [precision validation](docs/precision-calibration.md).
+| Calibration | Entry | Result |
+| --- | --- | --- |
+| Camera | `calibrate camera --capture … --square-mm … --output …` | Intrinsics and lens distortion candidate from recorded ChArUco views |
+| Table-relative positions | `calibrate table` | Camera/table relationship and both arm-base poses in the table frame; camera-only, no motor bus |
+| Arm joint angles | `calibrate angles --arm follower` / `--arm arm1` | Independent encoder-to-angle mapping, with the reference/capture mode already open |
+
+Prefix each entry with `./scripts/lerobot-arm`. See [Calibration](docs/calibration.md)
+for the workflow, saved results and reference-change rules. Height and tool-marker
+refinements belong under `calibrate angles`; they are optional precision steps.
+The [single-servo zero/PID tests](docs/native-pid.md) remain diagnostic tools.
 
 Teach a new resting pose for your own calibrated arm before using Reset.
 Measurements for an earlier scene or motor are not transferable performance guarantees.

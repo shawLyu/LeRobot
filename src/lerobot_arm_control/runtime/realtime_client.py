@@ -305,7 +305,9 @@ def run(args):
             data.qpos[:] = angles_for_state(hello, state, ranges)
             mujoco.mj_forward(model, data)
             viewer = ControlViewer(model, data, keys.put,
-                                   f"SO101 {getattr(args, 'arm', 'follower')} - live arm control"
+                                   f"SO101 {getattr(args, 'arm', 'follower')} - "
+                                   +('angle calibration' if getattr(args, 'calibration_mode', False)
+                                     else 'live arm control')
                                    if args.backend == "hardware"
                                    else "SO101 - local MuJoCo control",
                                    hold_on_focus_loss=args.backend == "hardware")
@@ -325,7 +327,7 @@ def run(args):
             print("LOCAL_MUJOCO_VIEWER_READY", flush=True)
         selected = 5 if args.hardware_control else 0
         reference_degrees = 0
-        calibration_mode = False
+        calibration_mode = getattr(args, "calibration_mode", False)
         calibration_notice = calibration_error or "B: calibration mode; capture measured poses only"
         last_reference = None
         screenshot_saved = False
@@ -616,6 +618,8 @@ def main():
     parser.add_argument("--model", type=Path)
     parser.add_argument("--calibration", type=Path,
                         help='Defaults to data/calibration/<arm>_mujoco.json')
+    parser.add_argument("--calibration-mode", action="store_true",
+                        help="Start directly in the read-only angle reference/capture mode")
     parser.add_argument("--headless", action="store_true")
     parser.add_argument('--screenshot', type=Path, help='Save the first rendered local GUI frame')
     parser.add_argument("--smoke-test", action="store_true")
@@ -632,6 +636,9 @@ def main():
     parser.add_argument("--duration", type=float)
     parser.add_argument("--log", type=Path, default=ROOT / "logs/realtime-latest.json")
     args = parser.parse_args()
+    if args.calibration_mode and (args.backend != "hardware" or args.hardware_control
+                                  or args.circle or args.verify_gripper or args.smoke_test):
+        parser.error("calibration-mode requires read-only hardware without motion/test modes")
     if Path(args.arm).name != args.arm or args.arm in ('.', '..'):
         parser.error('arm must be a configured name, not a path')
     if args.arm != 'follower' and (args.hardware_control or args.verify_gripper):

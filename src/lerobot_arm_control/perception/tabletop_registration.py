@@ -183,9 +183,18 @@ class BaseRegistration:
     def detect_border(self, marker, image):
         """Recover a complete tag from observed edge lines when a shadow joins its border."""
         seed = np.asarray(marker['border_seed_native'], dtype=np.float32)
+        dictionary = cv2.aruco.getPredefinedDictionary(getattr(cv2.aruco, marker['dictionary']))
+        cells = dictionary.markerSize+2
+        edge_lengths = np.linalg.norm(np.roll(seed, -1, axis=0)-seed, axis=1)
+        if edge_lengths.min() < 4:
+            return None
+        # Detector quads can follow an inner edge. Search within one code cell,
+        # then require an exact decode of the observed outer border.
+        radius = max(5., .8*float(np.median(edge_lengths))/cells)
+        margin = max(20., 2*radius)
         height, width = image.shape[:2]
-        lo = np.maximum(np.floor(seed.min(axis=0)-20).astype(int), 0)
-        hi = np.minimum(np.ceil(seed.max(axis=0)+20).astype(int), [width, height])
+        lo = np.maximum(np.floor(seed.min(axis=0)-margin).astype(int), 0)
+        hi = np.minimum(np.ceil(seed.max(axis=0)+margin).astype(int), [width, height])
         crop = image[lo[1]:hi[1], lo[0]:hi[0]]
         if crop.size == 0:
             return None
@@ -205,7 +214,7 @@ class BaseRegistration:
                 direction = line[1]-line[0]
                 span = np.linalg.norm(direction)
                 offset = abs(np.dot(line.mean(axis=0)-(first+second)/2, normal))
-                if span > length*.3 and abs(direction@tangent)/span > .98 and offset < 5:
+                if span > length*.3 and abs(direction@tangent)/span > .98 and offset < radius:
                     options.append((offset, line))
             if not options:
                 return None
@@ -218,11 +227,9 @@ class BaseRegistration:
             fraction = np.linalg.solve(matrix, following[0]-previous[0])[0]
             corners.append(previous[0]+fraction*(previous[1]-previous[0]))
         corners = np.asarray(corners, np.float32)
-        if (np.max(np.linalg.norm(corners-seed, axis=1)) > 8
+        if (np.max(np.linalg.norm(corners-seed, axis=1)) > max(8., np.sqrt(2)*radius)
                 or not cv2.isContourConvex(corners)):
             return None
-        dictionary = cv2.aruco.getPredefinedDictionary(getattr(cv2.aruco, marker['dictionary']))
-        cells = dictionary.markerSize+2
         side = cells*20
         transform = cv2.getPerspectiveTransform(corners, np.array(
             [[0, 0], [side-1, 0], [side-1, side-1], [0, side-1]], np.float32))
@@ -240,14 +247,8 @@ class BaseRegistration:
 
     def detect(self, detector, dictionary, image):
         """Decode small tags at two scales; track a crop after the first detection."""
-        corners, ids, _ = detector.detectMarkers(image)
+        corners, ids, rejected = detector.detectMarkers(image)
         found = {} if ids is None else dict(zip(ids.flatten(), corners))
-        for marker in self.markers:
-            if (marker['dictionary'] == dictionary and marker['id'] not in found
-                    and marker.get('border_seed_native') is not None):
-                recovered = self.detect_border(marker, image)
-                if recovered is not None:
-                    found[marker['id']] = recovered
         expected = {m['id'] for m in self.markers
                     if m['dictionary'] == dictionary}
         height, width = image.shape[:2]
@@ -295,8 +296,16 @@ class BaseRegistration:
         for marker in self.markers:
             if marker['dictionary'] == dictionary and marker.get('prefer_observed_border'):
                 # A dark robot surrounding a white margin can produce an oversized quad.
-                # Enforce real black-border lines and an exact code after all detection paths.
-                recovered = self.detect_border(marker, image)
+                # Seed from this frame, including undecoded quads joined to shadows.
+                # A historical pixel location must never veto a visible marker.
+                candidates = ([found[marker['id']]] if marker['id'] in found else [])
+                candidates += list(rejected)
+                recovered = None
+                for candidate in candidates:
+                    observed = {**marker, 'border_seed_native': candidate[0].tolist()}
+                    recovered = self.detect_border(observed, image)
+                    if recovered is not None:
+                        break
                 if recovered is None:
                     found.pop(marker['id'], None)
                 else:

@@ -11,6 +11,7 @@ from lerobot_arm_control.control.control_defaults import (
     CONTROL_CONFIG_SHA256,
     CONTROL_HZ,
 )
+from lerobot_arm_control.control.manual_control import hardware_command_limits
 from lerobot_arm_control.control.servo_feedback import read_control_feedback
 from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.files import file_digest
@@ -98,7 +99,16 @@ class RobotFeedback:
                 references = joint_references(self.config,
                     calibration_sha256=self.metadata['joint_calibration_sha256'])
                 ranges = joint_ranges(model_path, references=references)
+                command_limits = hardware_command_limits(calibration)
+                command_ranges = []
+                for name in JOINTS:
+                    fit = fits[name]
+                    low, high = sorted((raw-fit['zero_raw'])*fit['radians_per_tick']
+                                       for raw in identity['raw_limits'][name])
+                    bound = command_limits.get(name, (low, high))
+                    command_ranges.append([max(low, bound[0]), min(high, bound[1])])
                 self.metadata.update(model_joint_ranges=ranges,
+                                     command_joint_ranges=command_ranges,
                                      model_joint_references=references,
                                      entry_tolerance_rad=entry_tolerance(self.config))
                 if self.hardware_control:

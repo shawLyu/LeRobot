@@ -2,6 +2,7 @@
 
 import argparse
 import base64
+import copy
 import json
 import math
 import os
@@ -111,6 +112,7 @@ def main():
     perception.restore_static_map(static_map)
     last_map_save = 0
     camera_config = tomllib.loads((ROOT / "configs/camera.toml").read_text())["camera"]
+    cv2.setNumThreads(camera_config.get('opencv_threads', 2))
     device = camera_config["device"]
     if not os.access(device, os.R_OK | os.W_OK):
         raise PermissionError(f"Cannot access camera {device}")
@@ -123,6 +125,7 @@ def main():
         camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, capture_size[0])
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, capture_size[1])
+    camera.set(cv2.CAP_PROP_FPS, camera_config.get('capture_fps', 15))
     camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     try:
         camera_controls = configure_focus(camera, config)
@@ -140,6 +143,30 @@ def main():
                               task='pick_t' if args.pick_t else 'push_t')
         robot.start()
     additional_feedback = start_additional_feedback(config, camera_only=args.camera_only)
+    from lerobot_arm_control.runtime.tabletop_cameras import (
+        CameraObserver,
+        fuse_objects,
+        refresh_observation,
+    )
+
+    observers, observer_errors = {}, {}
+    if not (args.recalibrate_base or args.recalibrate_table or args.marker_only):
+        for entry in camera_config.get('observers', []):
+            if not entry.get('enabled'):
+                continue
+            try:
+                if entry['name'] in observers or Path(entry['device']).resolve() == (
+                        Path(device).resolve()):
+                    raise ValueError('observer names and camera devices must be unique')
+                observer = CameraObserver(entry)
+                if any(observer.config[key] != config[key] for key in (
+                        'dictionary', 'marker_id', 'marker_size_m', 't_model')):
+                    observer.close()
+                    raise ValueError('observer must use the same table origin and T dimensions')
+                observers[entry['name']] = observer
+            except Exception as exc:
+                observer_errors[entry['name']] = {'status': 'error', 'calibrated': False,
+                                                   'error': str(exc)}
     if (args.push_t or args.pick_t) and robot is None:
         raise ValueError('Robot policies require configured SO101 feedback')
     push = None
@@ -200,10 +227,32 @@ def main():
 
         directory = ROOT/'data/push_t'/('remote-'+datetime.now().strftime('%Y%m%d-%H%M%S-%f'))
         push = PushReceiver(robot, directory, task='pick_t' if args.pick_t else 'push_t')
+    observation_lock, primary_observation = threading.Lock(), []
+
+    def publish_observation():
+        if not push or stopped.is_set():
+            return
+        with observation_lock:
+            if not primary_observation:
+                return
+            source, published = primary_observation
+            views = {**observer_errors, **{name: observer.snapshot(source.get(
+                'secondary_layouts', {})) for name, observer in observers.items()}}
+            updated = refresh_observation(source, (time.monotonic()-published)*1000,
+                                          views, robot.snapshot())
+            push.observe(updated)
+
+    for observer in observers.values():
+        observer.on_update = publish_observation
     send({"type": "hello", "version": 1, "config": config,
                       "control_config_sha256": CONTROL_CONFIG_SHA256,
                       "device": device, "perception_host": os.uname().nodename,
                       'camera_controls': camera_controls,
+                      'capture_fps': camera.get(cv2.CAP_PROP_FPS),
+                      'opencv_threads': cv2.getNumThreads(),
+                      'camera_observers': {name: observer.device
+                                           for name, observer in observers.items()},
+                      'camera_observer_errors': observer_errors,
                       "robot": robot.metadata_snapshot() if robot else None,
                       'robot_feedback': {name: feedback.metadata_snapshot()
                                          for name, feedback in additional_feedback.items()},
@@ -236,8 +285,17 @@ def main():
                 native_frame = frame
                 frame = cv2.warpAffine(frame, cv2.invertAffineTransform(np.array(mapping)),
                                        tuple(config["image_size"]), flags=cv2.INTER_AREA)
-            state = perception.process(frame, sequence, captured_ns, native_frame, mapping,
-                                       marker_only=args.marker_only)
+            observe_objects = not observers or sequence % 3 == 1
+            # Full-resolution corners govern calibration and complete measurements.
+            # Intervening localization uses the calibrated low-resolution rays, avoiding
+            # repeated native-resolution marker scans while the side camera tracks T.
+            native_detection = native_frame if observe_objects else None
+            state = perception.process(frame, sequence, captured_ns, native_detection,
+                                       mapping if native_detection is not None else None,
+                                       marker_only=args.marker_only,
+                                       observe_objects=observe_objects)
+            state['marker_detection_size'] = list((native_detection
+                if native_detection is not None else frame).shape[1::-1])
             if not args.marker_only and time.monotonic()-last_map_save > 1:
                 perception.save_static_map(static_map, state)
                 last_map_save = time.monotonic()
@@ -257,7 +315,17 @@ def main():
             state["capture_sequence"] = last_count
             state["capture_age_at_send_ms"] = (time.monotonic() - captured_at) * 1000
             if push:
-                push.observe(state)
+                source = {key: copy.deepcopy(value) for key, value in state.items()
+                          if key not in ('jpeg', 'annotated_jpeg', 'native_jpeg', 'motor_samples')}
+                with observation_lock:
+                    primary_observation[:] = [source, time.monotonic()]
+            views = {**observer_errors, **{name: observer.snapshot(state.get(
+                'secondary_layouts', {})) for name, observer in observers.items()}}
+            if views:
+                state['camera_views'] = views
+                fuse_objects(state, views)
+            if push:
+                publish_observation()
                 state['push_t'] = push.status()
             state['stream_queued_unix_ns'] = time.time_ns()
             display.offer(state)
@@ -270,6 +338,8 @@ def main():
         stopped.set()
         worker.join(timeout=2)
         camera.release()
+        for observer in observers.values():
+            observer.close()
         if push:
             push.close()
         if robot:

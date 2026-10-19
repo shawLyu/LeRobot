@@ -9,12 +9,14 @@ class MotorLink:
         self.link, self.model_hash = link, model_hash
         self.lock = threading.Lock()
         self.job_id = None
+        self.stop_id = None
         self.progress = {"phase": "idle", "writes_enabled": False}
 
     def submit(self, state, segments, *, recovery=False):
         reference = {key: copy.deepcopy(state[key]) for key in
                      ("captured_unix_ns", "robot", "objects")}
         with self.lock:
+            self.stop_id = None
             self.job_id = self.link.send("push_execute", reference=reference, segments=segments,
                                          recovery=recovery, model_sha256=self.model_hash)
             self.progress = {"phase": "pending", "writes_enabled": False}
@@ -22,7 +24,7 @@ class MotorLink:
     def cancel(self, reason):
         with self.lock:
             try:
-                self.link.send("push_stop", reason=reason)
+                self.stop_id = self.link.send("push_stop", reason=reason)
             except OSError:
                 self.progress = {**self.progress, "phase": "stopped",
                                  "reason": "remote connection lost; watchdog holds"}
@@ -36,6 +38,17 @@ class MotorLink:
 
     def acknowledge(self, message):
         with self.lock:
+            if message.get('id') == self.stop_id and self.stop_id is not None:
+                result = message.get('result', {})
+                if message['ok']:
+                    self.job_id = result.get('job_id')
+                    if result.get('motor'):
+                        self.progress = dict(result['motor'])
+                else:
+                    self.progress = {'phase': 'stopped', 'writes_enabled': False,
+                                     'reason': message.get('error')}
+                self.stop_id = None
+                return
             if message.get("id") == self.job_id:
                 if not message["ok"]:
                     self.progress = {"phase": "stopped", "writes_enabled": False,

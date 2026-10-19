@@ -299,3 +299,36 @@ def test_two_base_poses_are_published_without_replacing_follower_registration(mo
     assert state['robot_registration'] is first
     assert state['base_registrations'] == {'follower': first, 'arm1': second}
     assert state['base_distances'][0]['planar_distance_m'] == pytest.approx(math.hypot(.3, .04))
+
+
+def test_fast_marker_frame_keeps_cached_object_age_and_still_updates_bases(monkeypatch):
+    config = perception_config()
+    config['robot']['enabled'] = False
+    config['additional_robots'] = []
+    perception = Perception(config)
+    for tracker in perception.trackers.values():
+        tracker.last = {'xy': [.1, .2], 'yaw': .3, 'iou': .9}
+        tracker.last_observed = time.monotonic()-3
+
+    class Registration:
+        calls = 0
+
+        def process(self, frame, state, native, mapping):
+            self.calls += 1
+            return {'status': 'fixed', 'markers': [], 'position': [0., 0., 0.],
+                    'quaternion': [1., 0., 0., 0.]}
+
+    registration = Registration()
+    perception.base_registrations = {'follower': registration}
+
+    def no_shape_fit(*args):
+        pytest.fail('fast marker frames must not run silhouette searches')
+
+    monkeypatch.setattr('lerobot_arm_control.perception.tabletop_perception.fit_t', no_shape_fit)
+    state = perception.process(tag_image(config)[0], 1, time.time_ns(), observe_objects=False)
+    assert state['marker_visible'] and registration.calls == 1
+    assert 'follower' in state['base_registrations']
+    assert state['objects']['wood_t']['tracking_status'] == 'lost'
+    assert state['objects']['black_t']['tracking_status'] == 'static_cached'
+    assert all(not obj['observed'] and obj['observation_age_s'] >= 3
+               for obj in state['objects'].values())

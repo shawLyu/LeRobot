@@ -109,6 +109,7 @@ class Perception:
         self.models = {}
         self.secondary_layouts = {}
         self.trackers = {}
+        self.object_captured_ns = {}
         self.robot_registration = None
         from lerobot_arm_control.perception.tabletop_registration import (
             BaseRegistration,
@@ -210,7 +211,7 @@ class Perception:
         return min(solutions, key=lambda x: x[0]) if solutions else None
 
     def process(self, frame, sequence, captured_ns, native_frame=None, low_to_native=None,
-                *, marker_only=False):
+                *, marker_only=False, observe_objects=True):
         started = time.monotonic()
         if list(frame.shape[1::-1]) != self.config["image_size"]:
             raise ValueError("Camera resolution differs from calibrated image_size")
@@ -307,8 +308,17 @@ class Perception:
                     state["secondary_layouts"] = self.secondary_layouts
                     cv2.drawFrameAxes(annotated, self.matrix, self.distortion,
                                       rvec, translation, self.scale * .5)
-                    hsv = None if marker_only else cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-                    for name, height in (() if marker_only else
+                    hsv = (cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                           if observe_objects and not marker_only else None)
+                    if not observe_objects and not marker_only:
+                        state['object_observation_scope'] = 'cached; no new silhouette measurement'
+                        now = time.monotonic()
+                        state['objects'] = {name: tracker.cached(now)
+                            for name, tracker in self.trackers.items() if tracker.last is not None}
+                        for name, obj in state['objects'].items():
+                            if name in self.object_captured_ns:
+                                obj['observation_captured_unix_ns'] = self.object_captured_ns[name]
+                    for name, height in (() if marker_only or not observe_objects else
                                          (("black_t", 0), ("wood_t", self.wood_height))):
                         limits = self.config["black_hsv" if name == "black_t" else "wood_hsv"]
                         mask = cv2.inRange(hsv, np.array(limits[0]), np.array(limits[1]))
@@ -332,6 +342,20 @@ class Perception:
                             if not .01 < area < 1.5:
                                 continue
                             fitted = fit_t(points)
+                            if (fitted and name == 'wood_t'
+                                    and self.config.get('extruded_wood_observation')):
+                                dimensions = self.models.get(name)
+                                if (not dimensions or any(not .7 < fitted[key]/dimensions[key] < 1.5
+                                        for key in ('width', 'length'))):
+                                    continue
+                                from .tabletop_silhouette import fit_extruded_t
+
+                                tracker = self.trackers[name]
+                                previous = (tracker.last if
+                                            time.monotonic()-tracker.last_observed < .5 else None)
+                                fitted = fit_extruded_t(
+                                    contour, dimensions, self.matrix, self.distortion,
+                                    rotation, translation, fitted, previous)
                             if fitted and fitted["iou"] >= self.config["min_t_iou"]:
                                 fitted["contour_xy"] = cv2.approxPolyDP(
                                     points.astype(np.float32), .01*self.scale, True
@@ -342,6 +366,9 @@ class Perception:
                                 [item[0] for item in detections], mask, self.matrix,
                                 self.distortion, rotation, translation, time.monotonic())
                             if tracked is not None:
+                                if tracked['observed']:
+                                    self.object_captured_ns[name] = captured_ns
+                                    tracked['observation_captured_unix_ns'] = captured_ns
                                 state["objects"][name] = tracked
                                 points_3d = np.column_stack((tracked["complete_outline_xy"],
                                                             np.full(8, height)))

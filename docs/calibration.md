@@ -59,6 +59,23 @@
 
 ## 2. 相机
 
+Linux 相机可以直接打开实时标定页面（不连接电机）：
+
+```sh
+./scripts/lerobot-arm calibrate camera --live \
+  --device /dev/v4l/by-id/<camera>-video-index0 \
+  --capture data/calibration/camera-session --square-mm 30 \
+  --output data/calibration/camera-candidate.json --fixed-focus --port 8879
+```
+
+在本机浏览器打开 `http://127.0.0.1:8879`。如果相机连接在远端电脑，先用
+`ssh -L 8879:127.0.0.1:8879 <robot-host>` 转发，再在远端运行上面的命令。
+页面显示实时角点、已保存姿态、覆盖图和停稳进度。点击“开始采集”，在不同位置与倾角
+停稳 1–2 秒；点击“暂停并验证内参”计算训练及独立留出误差。支持继续同一目录，
+但设备、分辨率、方格尺寸和镜头设置必须一致。新会话需要明确确认固定焦距；
+Linux 曝光设置会保存并读回核对，不具备对应曝光控制的相机需单独配置采集。
+验证只保存未激活的候选，不修改正在运行的相机参数。
+
 采集不同位置、倾角的 ChArUco 标定板图像，保持镜头焦距锁定。
 可以用现有相机专用采集入口录制，然后拟合：
 

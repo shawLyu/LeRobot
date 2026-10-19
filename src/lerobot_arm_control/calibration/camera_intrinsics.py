@@ -91,7 +91,17 @@ def main():
     parser.add_argument('--capture', type=Path, required=True)
     parser.add_argument('--square-mm', type=float, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--live', action='store_true', help='Open loopback live acquisition UI')
+    parser.add_argument('--device', help='Linux camera device for live acquisition')
+    parser.add_argument('--port', type=int, default=8879)
+    parser.add_argument('--fixed-focus', action='store_true',
+                        help='Confirm lens focus is fixed for a new live capture')
     args = parser.parse_args()
+    if args.live:
+        if not args.device:
+            parser.error('--live requires --device')
+        from .camera_live import serve
+        return serve(args)
     result = fit_capture(args.capture, args.square_mm)
     args.output.write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
     print(json.dumps({'candidate': str(args.output), 'validation': result['validation']}))

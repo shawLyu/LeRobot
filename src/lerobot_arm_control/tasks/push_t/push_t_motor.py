@@ -36,8 +36,16 @@ def observation_issue(state, received, now, *, require_base=False, initialized=F
         cached_target = initialized and name == 'black_t' and (
             obj.get('tracking_status') == 'static_cached')
         visible = obj.get('observed') and obj.get('tracking_status') in ('observed', 'partial')
-        if not obj.get('pose_valid') or not (cached_target or visible):
+        recent = (obj.get('tracking_status') == 'recent'
+                  and obj.get('observation_source') == 'primary_previous_frame'
+                  and type(obj.get('observation_captured_unix_ns')) is int)
+        if not obj.get('pose_valid') or not (cached_target or visible or recent):
             return f'{name} has no current valid observation'
+        if obj.get('observation_source') and (
+                obj.get('observation_age_s', math.inf)+now-received > .5):
+            camera = ('primary' if obj['observation_source'] == 'primary_previous_frame'
+                      else 'secondary')
+            return f'{name} {camera} camera observation older than 500 ms'
         if not np.isfinite([*obj.get('xy', [math.inf]*2), obj.get('yaw', math.inf)]).all():
             return f'{name} pose is not finite'
     robot = state.get('robot', {})
@@ -94,13 +102,16 @@ def recovery_issue(state, received, now):
 
 
 def joint_segments(initial, action, limits, *, speed=.15, push_speed=.004,
-                   entry_tolerance=0.):
+                   entry_tolerance=0., entry_speed=None):
     """Circle's quintic entry timing; slower, bounded contact waypoints for pushing."""
     start = np.asarray(initial, float)
     if start.shape != (6,) or not np.isfinite(start).all():
         raise ValueError('invalid measured joint seed')
     if joint_limit_issue(start, limits, tolerance=entry_tolerance):
         raise ValueError('measured joint seed violates calibrated CAD joint limits')
+    entry_speed = ENTRY_PROFILE['entry_speed_rad_s'] if entry_speed is None else entry_speed
+    if not math.isfinite(entry_speed) or not 0 < entry_speed <= ENTRY_PROFILE['entry_speed_rad_s']:
+        raise ValueError('entry speed must be positive and within the shared trajectory limit')
     segments = []
     for index, value in enumerate(action.joints):
         end = np.asarray(value, float)
@@ -109,7 +120,7 @@ def joint_segments(initial, action, limits, *, speed=.15, push_speed=.004,
         if np.any(end < limits[:, 0]+.003) or np.any(end > limits[:, 1]-.003):
             raise ValueError('push waypoint violates calibrated CAD joint limits')
         entering = index < action.approach_count
-        joint_speed = ENTRY_PROFILE['entry_speed_rad_s'] if entering else speed
+        joint_speed = entry_speed if entering else speed
         minimum = ENTRY_PROFILE['min_entry_seconds'] if entering else .06
         duration = max(minimum, 1.875*float(np.max(np.abs(end-start)))/joint_speed)
         if index >= action.approach_count:
@@ -249,7 +260,8 @@ class PushMotor:
                 for joint, value in zip(JOINTS, segment['end']):
                     low, high = self.control.limits[joint]
                     if not math.isfinite(value) or not low <= value <= high:
-                        raise ValueError(f'{joint}: motor waypoint outside encoder limits')
+                        self._hold(f'{joint}: motor waypoint outside encoder limits')
+                        return
             self.control.enable_all()
             segments[0]['start'] = [self.control.targets[j] for j in JOINTS]
             segments[0]['seconds'] = max(segments[0]['seconds'], 1.875*max(

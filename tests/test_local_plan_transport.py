@@ -42,6 +42,21 @@ def test_closing_planner_after_disconnect_does_not_raise_or_send_new_goals():
     link.send.assert_called_once_with('push_stop', reason='session closed')
 
 
+def test_stop_after_rejected_job_tracks_the_remote_idle_job_id():
+    link = Mock()
+    link.send.side_effect = [7, 8]
+    motor = MotorLink(link, 'model')
+    motor.submit({'captured_unix_ns': 1, 'robot': {}, 'objects': {}}, [])
+    motor.acknowledge({'id': 7, 'ok': False, 'error': 'observation stale'})
+    motor.cancel('hold')
+    motor.acknowledge({'id': 8, 'ok': True, 'result': {
+        'job_id': None, 'motor': {'phase': 'stopping', 'writes_enabled': False}}})
+    motor.update({'job_id': None, 'motor': {'phase': 'stopped', 'writes_enabled': False,
+                                          'reason': 'hold'}})
+    assert motor.status()['phase'] == 'stopped'
+    assert motor.status()['reason'] == 'hold'
+
+
 def test_table_link_starts_local_planner_and_sends_results_only(monkeypatch, tmp_path):
     pytest.importorskip('mujoco')
     pytest.importorskip('cv2')

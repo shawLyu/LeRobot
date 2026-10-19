@@ -235,3 +235,36 @@ def test_push_ik_uses_calibration_bound_physical_closed_jaw(tmp_path):
     (snapshot/'calibration.json').write_text(json.dumps(metadata))
     with pytest.raises(ValueError, match='matching joint calibration'):
         build_scene(snapshot, tmp_path/'rejected')
+
+
+def test_planner_intersects_saved_software_travel_before_generating_waypoints(tmp_path):
+    snapshot = tmp_path/'snapshot'
+    shutil.copytree(ROOT/'data/push_t/measured', snapshot)
+    metadata = json.loads((snapshot/'calibration.json').read_text())
+    metadata.setdefault('robot', {})['command_joint_ranges'] = [[-1., 1.]]*6
+    metadata['robot']['command_joint_ranges'][3] = [-.8, .9]
+    (snapshot/'calibration.json').write_text(json.dumps(metadata))
+    _, _, path = build_scene(snapshot, tmp_path/'model')
+    model = mujoco.MjModel.from_xml_path(str(path))
+    np.testing.assert_allclose(model.joint('wrist_flex').range, [-.8, .9])
+    np.testing.assert_allclose(model.actuator('sim_wrist_flex').ctrlrange, [-.8, .9])
+
+
+def test_ik_continues_cartesian_motion_when_wrist_reaches_software_bound(tmp_path):
+    sim = PushSimulation(output=tmp_path/'model')
+    arm = sim.arm
+    arm.limits[3, 1] = math.radians(76.38095238095238)
+    previous = np.deg2rad([24.898, 52.064, -49.756, 75.5215, 0., 0.])
+    previous[5] = arm.jaw_closed
+    arm.data.qpos[arm.qadr] = previous
+    mujoco.mj_forward(sim.model, arm.data)
+    origin = arm.data.site('push_contact').xpos.copy()
+    rotation = arm.data.body('robot_root').xmat.reshape(3, 3)
+    direction = rotation@np.array([.8173, .5761, 0.])
+    for distance in np.linspace(.0004, .004, 10):
+        target = origin+direction*distance
+        q = arm.solve(target, previous, clearance=False)
+        assert q is not None, distance
+        assert np.max(np.abs(q-previous)) < .1
+        assert np.all(q >= arm.limits[:, 0]) and np.all(q <= arm.limits[:, 1])
+        previous = q

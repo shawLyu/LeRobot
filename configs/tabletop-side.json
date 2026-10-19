@@ -1,0 +1,99 @@
+{
+  "dictionary": "DICT_APRILTAG_36h11",
+  "marker_id": 3,
+  "marker_size_m": 0.15,
+  "wood_height_m": 0.006,
+  "fps": 10,
+  "max_reprojection_error_px": 2.0,
+  "min_t_iou": 0.78,
+  "black_hsv": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      179,
+      255,
+      110
+    ]
+  ],
+  "wood_hsv": [
+    [
+      15,
+      35,
+      100
+    ],
+    [
+      42,
+      255,
+      255
+    ]
+  ],
+  "additional_markers": [
+    {
+      "dictionary": "DICT_APRILTAG_16h5",
+      "id": 0
+    }
+  ],
+  "t_model": {
+    "width": 0.048,
+    "length": 0.06,
+    "cap_depth": 0.012,
+    "stem_width": 0.012
+  },
+  "occlusion_hold_s": 2.0,
+  "camera_matrix": [
+    [
+      804.2651837540712,
+      0.0,
+      603.0818510703757
+    ],
+    [
+      0.0,
+      804.2711264916667,
+      355.6135615503959
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "dist_coeffs": [
+    0.07178468772427835,
+    -0.01919156077461086,
+    0.0005401292200698594,
+    0.003267558140323605,
+    -0.1411210959123507
+  ],
+  "image_size": [
+    1280,
+    720
+  ],
+  "capture_size": [
+    1280,
+    720
+  ],
+  "low_to_capture_affine": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ]
+  ],
+  "robot": {
+    "enabled": false
+  },
+  "additional_robots": [],
+  "camera_calibration": {
+    "file": "configs/camera_intrinsics_side.json",
+    "sha256": "b9845ebc9812fd04c5f2cc7105d98b4b6cde2f7456fd11dcf3e287baf31ef418"
+  },
+  "extruded_wood_observation": true
+}

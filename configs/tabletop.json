@@ -272,7 +272,8 @@
       "joint_reference_source": "2026-10-18 measured closed endpoint, command raw 464: map physical closed angle to CAD closed jaw (-0.16 rad); encoder angles remain unchanged."
     },
     "push_t": {
-      "entry_tolerance_degrees": 5
+      "entry_tolerance_degrees": 5,
+      "entry_speed_rad_s": 0.2
     }
   },
   "capture_size": [

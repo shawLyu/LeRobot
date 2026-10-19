@@ -145,6 +145,17 @@ class TableLink:
                         message.update(self.appearance.take())
                     if self.motor:
                         self.motor.update(message.get("push_t", {}))
+                    filename = f'{message["sequence"]:08d}.jpg'
+                    for name, view in message.get('camera_views', {}).items():
+                        if not name.replace('_', '').replace('-', '').isalnum():
+                            raise ValueError('invalid observer camera name')
+                        directory = self.output/'cameras'/name
+                        directory.mkdir(parents=True, exist_ok=True)
+                        for key, suffix in (('jpeg', '.jpg'), ('annotated_jpeg', '-annotated.jpg')):
+                            if key in view:
+                                target = directory/(Path(filename).stem+suffix)
+                                target.write_bytes(base64.b64decode(view.pop(key), validate=True))
+                                view[key+'_file'] = str(target.relative_to(self.output))
                     if self.planner:
                         self.planner.observe(message)
                         message["push_t"] = self.planner.status()
@@ -410,8 +421,9 @@ def run(args):
                                                   math.sin(obj["yaw"]/2)]
                     for suffix in ("_cap", "_stem"):
                         status = obj.get("tracking_status", "observed") if obj else "lost"
-                        alpha = {"observed": 1., "partial": 1., "static_cached": .65,
-                                 "held": .45, "lost": .15}[status]
+                        alpha = {"observed": 1., "partial": 1., "recent": .8, "static_cached": .65,
+                                 "held": .45, "lost": .15,
+                                 "camera_disagreement": .15}.get(status, .15)
                         if obj is None and name not in state["objects"]:
                             alpha = 0
                         model.geom_rgba[model.geom(name+suffix).id, 3] = alpha
@@ -461,6 +473,12 @@ def run(args):
                 for detail in (other_bases, distances):
                     if detail:
                         text += '\n'+detail
+                for name, view in state.get('camera_views', {}).items():
+                    text += (f"\nCamera {name}: {view.get('status')} | "
+                             f"{view.get('intrinsics_quality', 'unknown')} | "
+                             f"{view.get('error') or ''}")
+                if state.get('observation_sources'):
+                    text += '\nT observations: '+str(state['observation_sources'])
                 tool = state.get('tool_marker')
                 if tool:
                     from lerobot_arm_control.visualization.ui import tool_marker_text
@@ -494,8 +512,18 @@ def run(args):
                     image = Image.open(io.BytesIO(annotation)).convert("RGB")
                     image.thumbnail((round(width*.35), round(height*.43)))
                     image_width, image_height = image.size
-                    viewer.set_images((mujoco.MjrRect(12, 16, image_width, image_height),
-                                       np.asarray(image)))
+                    images = [(mujoco.MjrRect(12, 16, image_width, image_height),
+                               np.asarray(image))]
+                    offset = 16+image_height+8
+                    for view in state.get('camera_views', {}).values():
+                        path = view.get('annotated_jpeg_file')
+                        if path:
+                            picture = Image.open(output/path).convert('RGB')
+                            picture.thumbnail((round(width*.35), round(height*.32)))
+                            images.append((mujoco.MjrRect(12, offset, *picture.size),
+                                           np.asarray(picture)))
+                            offset += picture.height+8
+                    viewer.set_images(images)
                     last_image_sequence, last_view_size = state["sequence"], (width, height)
                 if (args.screenshot and not screenshot_saved and valid
                         and len(state["objects"]) == 2 and count >= 10

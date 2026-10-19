@@ -21,6 +21,21 @@ from lerobot_arm_control.transport.realtime import WATCHDOG_SECONDS
 from lerobot_arm_control.visualization.ui import motor_fault_text
 
 
+def hardware_command_limits(calibration):
+    """Saved software travel in calibrated radians, shared by planning and control."""
+    limits = {}
+    for envelope in CONTROL['hardware_command_envelopes']:
+        if envelope['port'] != getattr(calibration, 'fingerprint', {}).get('port'):
+            continue
+        if file_digest(calibration.path) != envelope['calibration_sha256']:
+            raise ValueError('hardware command envelope calibration changed; review limits')
+        for joint, bounds in envelope['raw_limits'].items():
+            fit = calibration.fit(joint)
+            limits[joint] = tuple(sorted((raw-fit['zero_raw'])*fit['radians_per_tick']
+                                          for raw in bounds))
+    return limits
+
+
 class ManualControl:
     def __init__(self, bus, calibration, raw_limits, clock=time.monotonic,
                  rest_path=None, feedback_profile=None):
@@ -70,15 +85,8 @@ class ManualControl:
         validate_position_stream(self.position_feedback.profile.get('native_stream'), JOINTS)
         self.gripper_contact = GripperContact(CONTROL['gripper_contact'])
         self.motion_stall = MotionStall(CONTROL['motion_stall'])
-        for envelope in CONTROL['hardware_command_envelopes']:
-            if envelope['port'] != getattr(calibration, 'fingerprint', {}).get('port'):
-                continue
-            digest = file_digest(calibration.path)
-            if digest != envelope['calibration_sha256']:
-                raise ValueError('hardware command envelope calibration changed; review limits')
-            for joint, bounds in envelope['raw_limits'].items():
-                self.set_command_limits(joint, tuple(sorted(self.angle(joint, raw)
-                                                           for raw in bounds)))
+        for joint, bounds in hardware_command_limits(calibration).items():
+            self.set_command_limits(joint, bounds)
         from lerobot_arm_control.control.parking import Parking
 
         self.parking = Parking(self, rest_path)

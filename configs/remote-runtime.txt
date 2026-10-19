@@ -9,6 +9,8 @@ scripts/uv
 tests/fakes.py
 tests/test_angle_calibration.py
 tests/test_camera_runtime_calibration.py
+tests/test_camera_intrinsics.py
+tests/test_camera_live.py
 tests/test_circle_playback.py
 tests/test_remote_circle.py
 tests/test_control_timing.py
@@ -29,6 +31,7 @@ tests/test_tabletop_reference.py
 tests/test_tabletop_registration.py
 tests/test_tabletop_robot.py
 tests/test_tabletop_tracking.py
+tests/test_tabletop_cameras.py
 tests/test_tool_marker.py
 assets/so101/so101.xml
 data/trajectories/circle.json
@@ -47,6 +50,9 @@ src/lerobot_arm_control/cli.py
 src/lerobot_arm_control/__main__.py
 src/lerobot_arm_control/__init__.py
 src/lerobot_arm_control/calibration/__init__.py
+src/lerobot_arm_control/calibration/camera_intrinsics.py
+src/lerobot_arm_control/calibration/camera_live.py
+src/lerobot_arm_control/calibration/camera_live.html
 src/lerobot_arm_control/calibration/angle_calibration.py
 src/lerobot_arm_control/calibration/height_records.py
 src/lerobot_arm_control/calibration/height_sampling.py
@@ -69,10 +75,13 @@ src/lerobot_arm_control/core/processes.py
 src/lerobot_arm_control/diagnostics/__init__.py
 src/lerobot_arm_control/diagnostics/cli.py
 src/lerobot_arm_control/perception/__init__.py
+src/lerobot_arm_control/perception/camera_controls.py
 src/lerobot_arm_control/perception/tabletop_geometry.py
 src/lerobot_arm_control/perception/tabletop_perception.py
 src/lerobot_arm_control/perception/tabletop_registration.py
 src/lerobot_arm_control/perception/tabletop_tracking.py
+src/lerobot_arm_control/perception/tabletop_silhouette.py
+tests/test_tabletop_silhouette.py
 src/lerobot_arm_control/perception/tool_marker.py
 src/lerobot_arm_control/robot/__init__.py
 src/lerobot_arm_control/robot/so101/__init__.py
@@ -85,6 +94,7 @@ src/lerobot_arm_control/runtime/realtime_server.py
 src/lerobot_arm_control/runtime/follow_server.py
 src/lerobot_arm_control/runtime/tabletop_robot.py
 src/lerobot_arm_control/runtime/tabletop_server.py
+src/lerobot_arm_control/runtime/tabletop_cameras.py
 src/lerobot_arm_control/tasks/__init__.py
 src/lerobot_arm_control/tasks/circle/__init__.py
 src/lerobot_arm_control/tasks/circle/circle_trajectory.py

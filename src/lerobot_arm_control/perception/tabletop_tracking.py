@@ -119,6 +119,10 @@ class TTracker:
         self.last_observed = 0.0
         self.undistort_maps = None
 
+    def cached(self, now):
+        return self._state('static_cached' if self.static else (
+            'held' if now-self.last_observed <= self.hold_seconds else 'lost'), now, False)
+
     def update(self, detections, mask, matrix, distortion, rotation, translation, now):
         matches = [item for item in detections if all(
             .85 < item[key]/self.dimensions[key] < 1.2 for key in ("width", "length"))]
@@ -152,8 +156,7 @@ class TTracker:
                                             (214, 214), flags=cv2.INTER_NEAREST)
             match = match_partial(rectified, origin, resolution, self.dimensions, self.last)
             if match is not None:
-                if not self.static:
-                    self.last = match
+                self.last = match
                 self.last_observed = now
                 state = self._state("partial", now, True)
                 state.update(edge_support=match["edge_support"],

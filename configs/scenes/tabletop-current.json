@@ -805,7 +805,8 @@
         "joint_reference_source": "2026-10-18 measured closed endpoint, command raw 464: map physical closed angle to CAD closed jaw (-0.16 rad); encoder angles remain unchanged."
       },
       "push_t": {
-        "entry_tolerance_degrees": 5
+        "entry_tolerance_degrees": 5,
+        "entry_speed_rad_s": 0.2
       }
     },
     "capture_size": [
@@ -1188,7 +1189,7 @@
   "configuration_files": {
     "tabletop.json": {
       "file": "configs/tabletop.json",
-      "sha256": "35abc1f92954039315e97d67a79a9f6be274e54fc72dd2b1442a1e61314cde09"
+      "sha256": "5f3acd590434ca97bdc1c2ee9f40522e7aee427444c3c9b77490bccd7229c252"
     },
     "camera_intrinsics.json": {
       "file": "configs/camera_intrinsics.json",
@@ -1196,7 +1197,7 @@
     },
     "camera.toml": {
       "file": "configs/camera.toml",
-      "sha256": "219cdd27ce07b979a04b2ae1d8606e990344a8f64b0776cbc01053d7e14d3520"
+      "sha256": "95d3fe3008dbe66795327070443c9b9ea6230f4072c44ab8e6ae4b57c8f85733"
     },
     "robot.json": {
       "file": "configs/robot.json",
@@ -1205,6 +1206,14 @@
     "runtime.json": {
       "file": "configs/runtime.json",
       "sha256": "cbc08fa75801617af5da18ab8b33ae81f78d77287ac502fb72ce3a871c05a3c4"
+    },
+    "camera_intrinsics_side.json": {
+      "file": "configs/camera_intrinsics_side.json",
+      "sha256": "b9845ebc9812fd04c5f2cc7105d98b4b6cde2f7456fd11dcf3e287baf31ef418"
+    },
+    "tabletop-side.json": {
+      "file": "configs/tabletop-side.json",
+      "sha256": "b0e46a44b3e3637cac0d9f22935cf0ff36ed5d5156bff143bb4b1a24233b542e"
     }
   },
   "calibration_records": {
@@ -1343,5 +1352,17 @@
   "source_capture": "logs/world-mirror-id3-validation",
   "calibration_scope": "camera/table/accepted bases plus independently calibrated live six-joint feedback for both arms",
   "joint_feedback_sampled": true,
-  "motion_commands_sent": false
+  "motion_commands_sent": false,
+  "configuration_updated_unix_ns": 1792410636330434000,
+  "camera_observers": [
+    {
+      "name": "side",
+      "device": "/dev/v4l/by-id/usb-icSpring_icspring_camera-video-index0",
+      "enabled": true,
+      "tabletop_config": "configs/tabletop-side.json",
+      "intrinsics_quality": "provisional",
+      "strict_validation_passed": false,
+      "extrinsics_source": "live table markers; no saved camera transform imposed"
+    }
+  ]
 }

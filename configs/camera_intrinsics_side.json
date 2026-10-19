@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "method": "native_charuco_5x7_30mm",
+  "activated": true,
+  "camera_device": "/dev/v4l/by-id/usb-icSpring_icspring_camera-video-index0",
+  "camera_controls": {
+    "verified": true,
+    "focus_mode": "manual_fixed",
+    "verification": "User confirmed fixed focus, rigid flat board and measured 30 mm squares",
+    "exposure_readback": "gain: 32\nauto_exposure: 1 (Manual Mode)\nexposure_time_absolute: 80\n",
+    "v4l2_controls": {
+      "auto_exposure": 1,
+      "exposure_time_absolute": 80,
+      "gain": 32
+    }
+  },
+  "image_size": [
+    1280,
+    720
+  ],
+  "camera_matrix": [
+    [
+      804.2651837540712,
+      0.0,
+      603.0818510703757
+    ],
+    [
+      0.0,
+      804.2711264916667,
+      355.6135615503959
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "dist_coeffs": [
+    0.07178468772427835,
+    -0.01919156077461086,
+    0.0005401292200698594,
+    0.003267558140323605,
+    -0.1411210959123507
+  ],
+  "measured_square_mm": 30.0,
+  "marker_to_square_ratio": 0.7333333333333333,
+  "view_sequences": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42
+  ],
+  "held_out_sequences": [
+    5,
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40
+  ],
+  "validation": {
+    "passed": false,
+    "reasons": [
+      "Image reprojection exceeds 0.35 native pixels"
+    ],
+    "training_reprojection_rms_px": 0.5254596350437254,
+    "held_out_reprojection_rms_px": [
+      0.23789674043655396,
+      0.22156529128551483,
+      0.19534794986248016,
+      0.42290955781936646,
+      0.7097933888435364,
+      0.47718995809555054,
+      0.9060884714126587,
+      0.5544691681861877
+    ],
+    "normal_spread_deg": 56.653560522536154,
+    "centroid_coverage_fraction": [
+      0.6529493808746338,
+      0.4348514133029514
+    ]
+  },
+  "accuracy_scope": "Independent image reprojection; physical dimensions and Cartesian accuracy require separate verification",
+  "quality": "provisional",
+  "acceptance": {
+    "mode": "temporary_use_with_recorded_error",
+    "strict_validation_passed": false,
+    "scope": "secondary camera observation; recalibrate later"
+  }
+}

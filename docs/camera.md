@@ -46,6 +46,47 @@ close Push-T or other capture programs before opening an occupied camera.
 Prefer by-id paths because video numbers can change.
 `LEROBOT_HOST` and `LEROBOT_REMOTE_ROOT` override the wrapper's SSH destination and project directory.
 
+## Two observation cameras
+
+`[[camera.observers]]` entries in `configs/camera.toml` enable independent camera
+workers. Each entry selects its own stable device and tabletop configuration;
+`configs/tabletop-side.json` uses `configs/camera_intrinsics_side.json` for the
+icSpring camera. Secondary cameras share the primary table marker definitions,
+T dimensions and learned auxiliary-marker locations, but never register arm bases
+or open motor buses. The tabletop viewer records and displays both images.
+
+The current icSpring record is explicitly **provisional**: 42 stationary poses,
+training RMS 0.525 px, maximum error on eight held-out images 0.906 px. Strict
+0.35 px validation remains failed. Temporary use requires both `quality:
+"provisional"` in the activated record and `allow_provisional = true` in the
+observer entry. The viewer labels this quality; it is not a physical accuracy
+guarantee. Recalibrate later without changing the lens focus in the meantime.
+
+An observer can supply a currently visible T when the primary view is occluded.
+An observation must be younger than 500 ms. Views within 150 ms of each other
+must agree within 5 mm and 0.15 rad when both cameras have validated intrinsics,
+otherwise the object is invalid and motion holds. A provisional view that
+disagrees with the trusted primary is rejected and logged; it does not invalidate
+an otherwise valid primary measurement. Recent primary measurements remain
+available only within the same 500 ms bound, labeled `recent` with their original
+capture time and `observed=false`. Success requires three different wood-T
+measurement timestamps, not three republished copies of a prior frame.
+The side camera runs in an independent process. With observers enabled, the main
+camera checks table/base markers every frame and measures T silhouettes every
+third frame; intervening object states retain their actual cached age. Fast
+localization uses the calibrated processing-resolution rays; full measurements
+and reference calibration retain native-resolution detection. Side-view
+arrivals also refresh the remote controller immediately, preserving the original
+main-camera capture age and reading current joint feedback. Display cadence does
+not gate these updates.
+Saved exposure controls are applied and read back when opening the side camera.
+The current side-view exposure override is 2 ms with gain 32, while the original
+intrinsic capture exposure stays recorded separately in the calibration evidence.
+`extruded_wood_observation` fits the measured 6 mm T prism, including its visible
+side walls. It changes only position/yaw, requires silhouette IoU at least 0.85,
+and retains the measured dimensions. This avoids interpreting side walls as a
+larger T lying entirely in its top plane.
+
 ## Resolution
 
 ```bash

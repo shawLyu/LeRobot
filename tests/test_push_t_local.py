@@ -19,6 +19,22 @@ from lerobot_arm_control.tasks.push_t.push_t_motor import (  # noqa: E402
 )
 
 
+def test_short_push_crosses_free_clearance_and_moves_the_real_cad_contact_model(tmp_path):
+    from lerobot_arm_control.planning.push_t import CONTACT_CLEARANCE, pose
+    from lerobot_arm_control.tasks.push_t.push_t_local import ShortPushSimulation
+
+    sim = ShortPushSimulation(ROOT/'data/push_t/measured', tmp_path/'sim')
+    initial = pose(sim.data).copy()
+    candidates = sim.candidates(initial)
+    assert all(CONTACT_CLEARANCE < action.distance <= CONTACT_CLEARANCE+.004
+               for action in candidates if action.transition != 'contact continuation')
+    action = sim.plan()
+    assert action is not None
+    sim.execute(action)
+    assert sum(sim.contact_counts.values()) > 0
+    assert np.linalg.norm(pose(sim.data)[:2]-initial[:2]) > .0001
+
+
 @pytest.mark.parametrize('fixed', [False, True])
 def test_remote_recovery_plans_a_reachable_clearance_from_original_jaw_contact(tmp_path, fixed):
     from lerobot_arm_control.planning.push_t import PushSimulation, pose

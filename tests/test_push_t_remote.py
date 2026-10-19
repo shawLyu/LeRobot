@@ -249,6 +249,12 @@ def test_circle_quintic_entry_and_bounded_push_speed_reject_out_of_limit_paths()
                <= s['speed_rad_s']+1e-9 for s in segments)
     assert segments[0]['speed_rad_s'] == .8 and segments[0]['seconds'] >= .35
     assert segments[1]['speed_rad_s'] == .15
+    slow = joint_segments([0.]*6, action, limits, entry_speed=.2)
+    assert slow[0]['speed_rad_s'] == .2
+    assert slow[0]['seconds'] >= 1.875*.1/.2
+    assert slow[1]['seconds'] == segments[1]['seconds']
+    with pytest.raises(ValueError, match='shared trajectory limit'):
+        joint_segments([0.]*6, action, limits, entry_speed=.9)
     action.joints[-1][0] = 2
     with pytest.raises(ValueError, match='joint limits'):
         joint_segments([0.]*6, action, limits)
@@ -296,3 +302,17 @@ def test_saved_fixed_base_does_not_expire_but_feedback_and_camera_still_do(obser
     base['fixed_to_table'] = True
     observed['robot']['sample_age_at_send_ms'] = 600
     assert observation_issue(observed, 0, .1, require_base=True)
+
+
+def test_out_of_range_waypoint_is_rejected_without_killing_feedback_owner(motor):
+    instance, bus, clock, state, segments = motor
+    invalid = copy.deepcopy(segments)
+    invalid[0]['end'][3] = 10.
+    instance.submit(state, invalid)
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'stopped'
+    assert 'wrist_flex: motor waypoint outside encoder limits' == instance.status()['reason']
+    assert bus.writes == []
+    instance.submit(state, segments)
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'running'

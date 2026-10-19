@@ -51,6 +51,14 @@ class DisplayStream:
                 # Describe age at transmission, including throttling or network backpressure.
                 queued = (time.time_ns()-state['stream_queued_unix_ns'])/1e6
                 state['capture_age_at_send_ms'] += max(0, queued)
+                if 'camera_views' in state:
+                    state['camera_views'] = {name: {**view, 'capture_age_at_send_ms':
+                        view.get('capture_age_at_send_ms', 0)+max(0, queued)}
+                        for name, view in state['camera_views'].items()}
+                    state['objects'] = {name: ({**obj, 'observation_age_s':
+                        obj.get('observation_age_s', 0)+max(0, queued)/1000}
+                        if obj.get('observation_source') else obj)
+                        for name, obj in state['objects'].items()}
                 if 'robot' in state and 'sample_age_at_send_ms' in state['robot']:
                     state['robot'] = {**state['robot'], 'sample_age_at_send_ms':
                                      state['robot']['sample_age_at_send_ms']+max(0, queued)}

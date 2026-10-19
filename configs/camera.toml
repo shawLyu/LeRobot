@@ -3,3 +3,19 @@ device = "/dev/v4l/by-id/usb-CN02KX4NLG0004ABK00_USB_Camera_CN02KX4NLG0004ABK00-
 width = 640
 height = 480
 display_fps = 15
+capture_fps = 15
+opencv_threads = 2
+
+[[camera.observers]]
+name = "side"
+enabled = true
+device = "/dev/v4l/by-id/usb-icSpring_icspring_camera-video-index0"
+tabletop_config = "configs/tabletop-side.json"
+fps = 15
+opencv_threads = 2
+allow_provisional = true
+
+[camera.observers.exposure_controls]
+auto_exposure = 1
+exposure_time_absolute = 20
+gain = 32

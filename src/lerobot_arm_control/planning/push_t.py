@@ -149,8 +149,10 @@ def build_scene(snapshot, output, *, freeze_bystanders=True):
                 geom.set('name', f"{body.get('name')}_collision_{index}")
     actuator = ET.SubElement(root, 'actuator')
     calibration = json.loads((source/'joint_calibration.json').read_text())
-    fits = json.loads((source/'calibration.json').read_text()).get('robot', {}).get('fits', {})
-    for joint in JOINTS:
+    metadata = json.loads((source/'calibration.json').read_text()).get('robot', {})
+    fits = metadata.get('fits', {})
+    command_ranges = metadata.get('command_joint_ranges')
+    for index, joint in enumerate(JOINTS):
         element = root.find(f".//joint[@name='{joint}']")
         low, high = np.fromstring(element.get('range'), sep=' ')
         points = calibration['points'][joint]
@@ -160,7 +162,12 @@ def build_scene(snapshot, output, *, freeze_bystanders=True):
             zero, scale = fits[joint]['zero_raw'], fits[joint]['radians_per_tick']
         raw_limits = calibration['fingerprint']['raw_limits'][joint]
         measured = sorted((raw-zero)*scale for raw in raw_limits)
-        limits = f'{max(low, measured[0])} {min(high, measured[1])}'
+        if command_ranges is not None:
+            low, high = max(low, command_ranges[index][0]), min(high, command_ranges[index][1])
+        low, high = max(low, measured[0]), min(high, measured[1])
+        if not math.isfinite(low+high) or low >= high:
+            raise ValueError(f'{joint}: model/encoder/command limits have no intersection')
+        limits = f'{low} {high}'
         element.set('range', limits)
         ET.SubElement(actuator, 'position', name='sim_'+joint, joint=joint,
                       kp=str(SIMULATION_ACTUATOR['kp']), kv=str(SIMULATION_ACTUATOR['kv']),
@@ -189,7 +196,10 @@ class Arm:
         self.qadr = np.array([model.joint(name).qposadr[0] for name in JOINTS])
         self.dadr = np.array([model.joint(name).dofadr[0] for name in JOINTS])
         self.limits = np.array([model.joint(name).range for name in JOINTS])
-        self.jaw_closed = JAW_CLOSED+model.qpos0[self.qadr[5]]
+        # Leave the same interior margin required by bounded trajectory waypoints,
+        # even when the measured closed endpoint is exactly a software travel bound.
+        self.jaw_closed = float(np.clip(JAW_CLOSED+model.qpos0[self.qadr[5]],
+                                       self.limits[5, 0]+.004, self.limits[5, 1]-.004))
         self.jp = np.zeros((3, model.nv))
         self.jr = np.zeros((3, model.nv))
         self.rng = np.random.default_rng(42)
@@ -200,6 +210,7 @@ class Arm:
         for attempt in range(attempts):
             q = np.array(seed).copy() if attempt == 0 else self.rng.uniform(
                 self.limits[:, 0]+.015, self.limits[:, 1]-.015)
+            q[:4] = np.clip(q[:4], self.limits[:4, 0]+.015, self.limits[:4, 1]-.015)
             q[4], q[5] = 0, self.jaw_closed
             d.qpos[self.qadr] = q
             for _ in range(100):
@@ -213,10 +224,23 @@ class Arm:
                                  [-axis[1], axis[0], 0]])
                 jac = np.vstack([self.jp[:, self.dadr[:4]],
                                  -.0005*skew@self.jr[:, self.dadr[:4]]])
-                dq = jac.T@np.linalg.solve(jac@jac.T+np.eye(6)*2e-7, residual)
-                d.qpos[self.qadr[:4]] = np.clip(d.qpos[self.qadr[:4]]+np.clip(dq, -.12, .12),
-                                               self.limits[:4, 0]+.015,
-                                               self.limits[:4, 1]-.015)
+                lower = np.maximum(-.12, self.limits[:4, 0]+.015-d.qpos[self.qadr[:4]])
+                upper = np.minimum(.12, self.limits[:4, 1]-.015-d.qpos[self.qadr[:4]])
+                dq, free = np.zeros(4), np.ones(4, dtype=bool)
+                # Re-solve with a saturated joint fixed, rather than repeatedly clipping
+                # a solution that relies on unavailable wrist travel.
+                for _ in range(4):
+                    part = jac[:, free]
+                    dq[free] = part.T@np.linalg.solve(
+                        part@part.T+np.eye(6)*2e-7, residual-jac[:, ~free]@dq[~free])
+                    excess = np.maximum(lower-dq, dq-upper)
+                    excess[~free] = -np.inf
+                    index = int(np.argmax(excess))
+                    if excess[index] <= 0:
+                        break
+                    dq[index] = np.clip(dq[index], lower[index], upper[index])
+                    free[index] = False
+                d.qpos[self.qadr[:4]] += dq
                 if np.linalg.norm(error) < .00025:
                     break
             mujoco.mj_forward(m, d)

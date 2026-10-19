@@ -14,7 +14,13 @@ import numpy as np
 
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.core.paths import resource_path
-from lerobot_arm_control.planning.push_t import Push, PushSimulation, errors, rotation
+from lerobot_arm_control.planning.push_t import (
+    CONTACT_CLEARANCE,
+    Push,
+    PushSimulation,
+    errors,
+    rotation,
+)
 from lerobot_arm_control.robot.so101.model_metadata import entry_tolerance
 from lerobot_arm_control.tasks.push_t.push_t_motor import (
     calibrated_base,
@@ -34,13 +40,15 @@ class ShortPushSimulation(PushSimulation):
     def candidates(self, current):
         candidates = super().candidates(current)
         for action in candidates:
-            action.distance = min(action.distance, .004)
+            clearance = 0 if action.transition == 'contact continuation' else CONTACT_CLEARANCE
+            action.distance = min(action.distance, clearance+.004)
         return candidates
 
     def play_action(self, action, model, data):
         controller = self.position_controller(model, data)
         segments = joint_segments(controller.reference, action, self.arm.limits,
-                                  entry_tolerance=entry_tolerance(self.config.get('robot', {})))
+            entry_tolerance=entry_tolerance(self.config.get('robot', {})),
+            entry_speed=self.config.get('robot', {}).get('push_t', {}).get('entry_speed_rad_s'))
         skipped = 0
         if self.fast_free_approach and data is self.roll_data:
             skipped = self.free_approach(action.approach_count, segments, model, data)
@@ -96,6 +104,7 @@ class LocalPush:
         self.height_compensation = float(config.get('robot', {}).get(
             'push_height_compensation_m', 0))
         self.entry_tolerance = entry_tolerance(config.get('robot', {}))
+        self.entry_speed = config.get('robot', {}).get('push_t', {}).get('entry_speed_rad_s')
         if not math.isfinite(self.height_compensation):
             raise ValueError('push height compensation must be finite')
         self.marker_png = marker_png
@@ -326,9 +335,11 @@ class LocalPush:
                                                  state['objects']['black_t']['yaw']])
                     self._status('observing', position_error_m=distance, yaw_error_rad=yaw)
                     if requested and distance < .002 and yaw < math.radians(3):
-                        if success_sequence != state['sequence']:
+                        measurement = state['objects']['wood_t'].get(
+                            'observation_captured_unix_ns', state['sequence'])
+                        if success_sequence != measurement:
                             self.success_frames += 1
-                            success_sequence = state['sequence']
+                            success_sequence = measurement
                         if self.success_frames >= 3:
                             with self.lock:
                                 self.requested = False
@@ -391,7 +402,8 @@ class LocalPush:
                         command_action = self._execution_action(action, current['robot']['qpos'])
                         segments = joint_segments(current['robot']['qpos'], command_action,
                                                   self.sim.arm.limits,
-                                                  entry_tolerance=self.entry_tolerance)
+                                                  entry_tolerance=self.entry_tolerance,
+                                                  entry_speed=self.entry_speed)
                     except ValueError as exc:
                         self._status('execution blocked', reason=str(exc), executable=False)
                         with self.lock:
@@ -487,7 +499,8 @@ class LocalPush:
                 continue
             action = Push(site[:2], outward, 0, joints=joints,
                           approach_count=len(joints), transition='visibility recovery')
-            segments = joint_segments(seed, action, arm.limits, entry_tolerance=tolerance)
+            segments = joint_segments(seed, action, arm.limits, entry_tolerance=tolerance,
+                                      entry_speed=getattr(self, 'entry_speed', None))
             if sum(s['seconds'] for s in segments) > 7:
                 continue
             self.robot.motor.submit(reference, segments, recovery=True)

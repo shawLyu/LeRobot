@@ -87,7 +87,7 @@ def observation_issue(state, received, now, *, require_base=False, initialized=F
             obj.get('tracking_status') == 'static_cached')
         visible = obj.get('observed') and obj.get('tracking_status') in ('observed', 'partial')
         recent = (obj.get('tracking_status') == 'recent'
-                  and obj.get('observation_source') == 'primary_previous_frame'
+                  and bool(obj.get('observation_source'))
                   and type(obj.get('observation_captured_unix_ns')) is int)
         if not obj.get('pose_valid') or not (cached_target or visible or recent):
             return f'{name} has no current valid observation'

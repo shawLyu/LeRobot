@@ -159,6 +159,21 @@ def test_unlabelled_primary_object_with_old_capture_cannot_displace_fresh_side()
     assert primary['objects']['wood_t']['observation_age_s'] == .1
 
 
+def test_missing_side_silhouette_retains_only_unexpired_real_capture():
+    primary, side = state(), state(age=100)
+    primary['objects'] = {}
+    side['objects']['wood_t'].update(observed=False, tracking_status='held',
+        observation_captured_unix_ns=900_000_000)
+    fused = fuse_objects(primary, {'side': side})
+    obj = fused['objects']['wood_t']
+    assert obj['tracking_status'] == 'recent' and not obj['observed']
+    assert obj['observation_captured_unix_ns'] == 900_000_000
+    assert obj['observation_age_s'] == pytest.approx(.2)
+    side['capture_age_at_send_ms'] = 401
+    expired = refresh_observation(fused, 301, {'side': side})
+    assert expired['objects']['wood_t']['tracking_status'] == 'held'
+
+
 @pytest.mark.parametrize('matching_reference', [True, False])
 def test_secondary_table_reference_can_bridge_primary_age_only_in_same_world(matching_reference):
     primary, side = state(age=550), state(age=80)

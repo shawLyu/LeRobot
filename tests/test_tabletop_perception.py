@@ -261,6 +261,23 @@ def test_saved_secondary_layout_localizes_after_restart_with_anchor_hidden(tmp_p
     assert restored.secondary_layouts == perception.secondary_layouts
 
 
+def test_missing_silhouette_keeps_last_real_measurement_capture_time():
+    config = perception_config()
+    config['robot']['enabled'] = False
+    config['marker_size_m'] = .1
+    config['dist_coeffs'] = [0.]*5
+    perception = Perception(config)
+    tracker = perception.trackers['wood_t']
+    tracker.last = {'xy': [.1, .2], 'yaw': .3, 'iou': .9}
+    tracker.last_observed = time.monotonic()-.1
+    perception.object_captured_ns['wood_t'] = 1000
+    frame, _, _ = tag_image(config)
+    current = perception.process(frame, 2, 2000)
+    obj = current['objects']['wood_t']
+    assert not obj['observed']
+    assert obj['observation_captured_unix_ns'] == 1000
+
+
 def test_wrong_camera_resolution_is_rejected():
     perception = Perception(perception_config())
     with pytest.raises(ValueError, match="resolution"):

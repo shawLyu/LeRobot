@@ -16,11 +16,14 @@ from lerobot_arm_control.perception.camera_controls import apply_v4l2_controls
 from lerobot_arm_control.perception.tabletop_perception import Perception, read_config
 
 
-def current_object(state, name, age):
+def current_object(state, name, age, *, include_recent=False):
     obj = state.get('objects', {}).get(name, {})
+    recent = (include_recent and obj.get('tracking_status') in ('held', 'recent')
+              and type(obj.get('observation_captured_unix_ns')) is int)
     return (0 <= age <= .5 and state.get('marker_visible') and state.get('units') == 'm'
-            and obj.get('observed') is True and obj.get('pose_valid') is True
-            and obj.get('tracking_status') in ('observed', 'partial')
+            and obj.get('pose_valid') is True and (recent or (
+                obj.get('observed') is True and obj.get('tracking_status') in
+                ('observed', 'partial')))
             and np.isfinite([*obj.get('xy', [np.inf]*2), obj.get('yaw', np.inf)]).all())
 
 
@@ -51,8 +54,9 @@ def fuse_objects(primary, views):
             primary, name, primary.get('capture_age_at_send_ms', np.inf)/1000)
         stamp = a.get('observation_captured_unix_ns')
         if type(stamp) is int:
-            age = max(0., (primary['captured_unix_ns']-stamp)/1e9+primary.get(
-                'capture_age_at_send_ms', np.inf)/1000)
+            age = max(a.get('observation_age_s', 0.), 0.,
+                      (primary['captured_unix_ns']-stamp)/1e9+primary.get(
+                          'capture_age_at_send_ms', np.inf)/1000)
             a['observation_age_s'] = age
             if age > .5 and a.get('tracking_status') != 'static_cached':
                 a.update(observed=False, tracking_status='held')
@@ -60,8 +64,9 @@ def fuse_objects(primary, views):
         if (not own and primary_source and type(stamp) is int and a.get('pose_valid')
                 and not (name == 'black_t' and a.get('tracking_status') == 'static_cached')
                 and a.get('tracking_status') in ('held', 'static_cached', 'recent')):
-            age = (primary['captured_unix_ns']-stamp)/1e9+primary.get(
-                'capture_age_at_send_ms', np.inf)/1000
+            age = max(a.get('observation_age_s', 0.),
+                      (primary['captured_unix_ns']-stamp)/1e9+primary.get(
+                          'capture_age_at_send_ms', np.inf)/1000)
             if 0 <= age <= .5:
                 a = {**a, 'tracking_status': 'recent', 'observed': False,
                      'observation_source': 'primary_previous_frame', 'observation_age_s': age}
@@ -72,7 +77,10 @@ def fuse_objects(primary, views):
             if reference is not None and view.get('table_reference') != reference:
                 continue
             age = view.get('capture_age_at_send_ms', np.inf)/1000
-            if view.get('calibrated') and current_object(view, name, age):
+            stamp = view.get('objects', {}).get(name, {}).get('observation_captured_unix_ns')
+            if type(stamp) is int:
+                age += (view['captured_unix_ns']-stamp)/1e9
+            if view.get('calibrated') and current_object(view, name, age, include_recent=True):
                 candidates.append((camera, view, age))
         primary_measurement = own
         if name == 'black_t' and own and a.get('tracking_status') == 'partial':
@@ -106,9 +114,12 @@ def fuse_objects(primary, views):
         elif candidates:
             camera, view, age = min(candidates, key=lambda item: item[2])
             obj = copy.deepcopy(view['objects'][name])
+            if not obj['observed']:
+                obj['tracking_status'] = 'recent'
             obj.update(observation_source=camera,
-                       observation_captured_unix_ns=view['captured_unix_ns'],
-                       observation_age_s=age+obj.get('observation_age_s', 0.))
+                       observation_captured_unix_ns=obj.get(
+                           'observation_captured_unix_ns', view['captured_unix_ns']),
+                       observation_age_s=age)
             primary['objects'][name] = obj
             primary['observation_sources'][name] = camera
         # Movement checks compare a camera to its own initial measurement, rather
@@ -131,8 +142,11 @@ def fuse_objects(primary, views):
                 obj = view['objects'][name]
                 measurements[camera] = {'xy': list(obj['xy']), 'yaw': obj['yaw'],
                                         'observed': obj['observed'],
-                                        'tracking_status': obj['tracking_status'],
-                                        'captured_unix_ns': view['captured_unix_ns']}
+                                        'tracking_status': (obj['tracking_status']
+                                            if obj['observed'] else 'recent'),
+                                        'captured_unix_ns': obj.get(
+                                            'observation_captured_unix_ns',
+                                            view['captured_unix_ns'])}
         if name in primary.get('objects', {}):
             primary['objects'][name]['camera_observations'] = measurements
     return primary
@@ -142,6 +156,9 @@ def refresh_observation(primary, elapsed_ms, views, robot=None):
     """A newly arrived side view can refresh control without resetting the primary frame age."""
     state = copy.deepcopy(primary)
     state['capture_age_at_send_ms'] += max(0., elapsed_ms)
+    for obj in state.get('objects', {}).values():
+        if 'observation_age_s' in obj:
+            obj['observation_age_s'] += max(0., elapsed_ms)/1000
     if robot is not None:
         state['robot'] = {**robot, 'registration': state['robot']['registration']}
     elif 'sample_age_at_send_ms' in state.get('robot', {}):

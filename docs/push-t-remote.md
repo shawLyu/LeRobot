@@ -32,6 +32,9 @@ Execution preflight and each motor tick re-evaluate the age of these validated
 per-camera measurements. If the selected primary expires between publications,
 an already received fresh secondary pose can take over with its original timestamp.
 Both stale sources still stop execution; no timeout is extended.
+An intervening silhouette miss retains the last actual measurement's capture
+timestamp in either camera. Such a pose is labelled `recent`, never newly observed,
+and expires at the same 500 ms limit. Refreshing another camera cannot reset its age.
 Partial fits of the fixed paper target are diagnostic candidates only. They do
 not move its cached pose or refresh its observation timestamp; a complete outline
 can reacquire a moved target. Only complete observations replace its persistent

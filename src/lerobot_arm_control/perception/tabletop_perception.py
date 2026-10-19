@@ -178,6 +178,7 @@ class Perception:
             tracker.last = {key: pose[key] for key in ("xy", "yaw", "iou")}
             age = max(0, (time.time_ns()-saved["observed_unix_ns"])/1e9)
             tracker.last_observed = time.monotonic()-age
+            self.object_captured_ns['black_t'] = saved['observed_unix_ns']
 
     def save_static_map(self, path, state):
         pose = state.get("objects", {}).get("black_t")
@@ -391,7 +392,9 @@ class Perception:
                             if tracked is not None:
                                 if tracked['observed']:
                                     self.object_captured_ns[name] = captured_ns
-                                    tracked['observation_captured_unix_ns'] = captured_ns
+                                if name in self.object_captured_ns:
+                                    tracked['observation_captured_unix_ns'] = (
+                                        self.object_captured_ns[name])
                                 state["objects"][name] = tracked
                                 points_3d = np.column_stack((tracked["complete_outline_xy"],
                                                             np.full(8, height)))

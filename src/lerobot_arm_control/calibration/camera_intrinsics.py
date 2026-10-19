@@ -7,6 +7,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from lerobot_arm_control.perception.marker_detection import detect_board
+
 
 def fit_capture(directory, square_mm):
     directory = Path(directory)
@@ -30,7 +32,7 @@ def fit_capture(directory, square_mm):
         if size is not None and dimensions != size:
             raise ValueError('Capture resolution changed during calibration')
         size = dimensions
-        corners, ids, _, _ = detector.detectBoard(image)
+        corners, ids, _, _ = detect_board(detector, image)
         if ids is None or len(ids) < 16:
             continue
         current = {int(i): p for i, p in zip(ids[:, 0], corners[:, 0], strict=True)}

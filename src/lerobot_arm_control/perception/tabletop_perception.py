@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 
 from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.perception.marker_detection import detect_markers
 from lerobot_arm_control.perception.tabletop_tracking import TTracker
 
 
@@ -223,7 +224,7 @@ class Perception:
                          if native_frame is not None else None)
 
         def detect(detector):
-            detected, values, _ = detector.detectMarkers(detection_frame)
+            detected, values, _ = detect_markers(detector, detection_frame)
             if native_to_low is not None:
                 detected = [cv2.transform(corner, native_to_low) for corner in detected]
             return detected, values

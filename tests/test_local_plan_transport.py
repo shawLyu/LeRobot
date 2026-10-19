@@ -57,6 +57,24 @@ def test_stop_after_rejected_job_tracks_the_remote_idle_job_id():
     assert motor.status()['reason'] == 'hold'
 
 
+def test_table_link_close_tolerates_broken_pipe_on_already_exited_remote():
+    import threading
+
+    from lerobot_arm_control.runtime.tabletop_client import TableLink
+
+    link = TableLink.__new__(TableLink)
+    link.stopped = threading.Event()
+    link.planner = link.appearance = None
+    link.hardware_control = False
+    link.process, link.reader = Mock(), Mock()
+    link.process.poll.return_value = 1
+    link.process.stdin.close.side_effect = BrokenPipeError('remote exited')
+    link.close()
+    assert link.stopped.is_set()
+    link.process.wait.assert_called_once_with(timeout=5)
+    link.reader.join.assert_called_once_with(timeout=3)
+
+
 def test_table_link_starts_local_planner_and_sends_results_only(monkeypatch, tmp_path):
     pytest.importorskip('mujoco')
     pytest.importorskip('cv2')

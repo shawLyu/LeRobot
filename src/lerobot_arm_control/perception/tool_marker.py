@@ -5,6 +5,8 @@ import math
 import cv2
 import numpy as np
 
+from lerobot_arm_control.perception.marker_detection import detect_markers
+
 
 class ToolMarker:
     def __init__(self, config, matrix, distortion):
@@ -104,7 +106,7 @@ class ToolMarker:
 
     def process(self, frame, table, native_frame=None, low_to_native=None):
         image = native_frame if native_frame is not None else frame
-        corners, ids, _ = self.detector.detectMarkers(image)
+        corners, ids, _ = detect_markers(self.detector, image)
         if ids is None or self.config['id'] not in ids:
             return {'status': 'marker_missing', 'position_valid': False,
                     'orientation_valid': False, 'id': self.config['id']}

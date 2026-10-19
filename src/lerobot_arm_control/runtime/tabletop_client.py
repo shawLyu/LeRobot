@@ -286,7 +286,10 @@ class TableLink:
                 self.send('stop')
             except BrokenPipeError:
                 pass
-        self.process.stdin.close()
+        try:
+            self.process.stdin.close()
+        except BrokenPipeError:
+            pass
         try:
             self.process.wait(timeout=5)
         except subprocess.TimeoutExpired:

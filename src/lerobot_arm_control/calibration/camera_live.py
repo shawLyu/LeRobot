@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 
 from lerobot_arm_control.perception.camera_controls import apply_v4l2_controls
+from lerobot_arm_control.perception.marker_detection import detect_board
 
 from .camera_intrinsics import fit_capture
 
@@ -74,7 +75,7 @@ class LiveCapture:
             image = cv2.imread(str(self.directory/state['native_frame']))
             if image is None:
                 raise ValueError('Saved calibration image is missing')
-            corners, ids, _, _ = self.detector.detectBoard(image)
+            corners, ids, _, _ = detect_board(self.detector, image)
             if ids is not None and len(ids) >= 16:
                 self.selection.accepted = self.points(corners, ids)
                 self.centers.append((corners[:, 0].mean(0)/image.shape[1::-1]).tolist())
@@ -156,7 +157,7 @@ class LiveCapture:
                     raise RuntimeError('Camera stopped returning frames')
                 if list(image.shape[1::-1]) != self.metadata['image_size']:
                     raise ValueError('Camera resolution differs from saved calibration')
-                corners, ids, _, _ = self.detector.detectBoard(image)
+                corners, ids, _, _ = detect_board(self.detector, image)
                 points = {} if ids is None else self.points(corners, ids)
                 with self.lock:
                     ready, held, distinct = self.selection.update(points, now)

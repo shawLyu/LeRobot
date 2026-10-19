@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 
 from lerobot_arm_control.core.paths import workspace_root
+from lerobot_arm_control.perception.marker_detection import detect_markers
 from lerobot_arm_control.perception.tabletop_perception import pixels_on_plane
 
 
@@ -247,7 +248,7 @@ class BaseRegistration:
 
     def detect(self, detector, dictionary, image):
         """Decode small tags at two scales; track a crop after the first detection."""
-        corners, ids, rejected = detector.detectMarkers(image)
+        corners, ids, rejected = detect_markers(detector, image)
         found = {} if ids is None else dict(zip(ids.flatten(), corners))
         expected = {m['id'] for m in self.markers
                     if m['dictionary'] == dictionary}
@@ -265,12 +266,12 @@ class BaseRegistration:
                 roi = (0, 0, width, height)
             x, y, right, bottom = roi
             crop = image[y:bottom, x:right]
-            decoded, decoded_ids, _ = detector.detectMarkers(cv2.resize(
+            decoded, decoded_ids, _ = detect_markers(detector, cv2.resize(
                 crop, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC))
             scale = 2
             if (decoded_ids is None or marker_id not in decoded_ids) and max(crop.shape[:2]) < 512:
                 scale = 4
-                decoded, decoded_ids, _ = detector.detectMarkers(cv2.resize(
+                decoded, decoded_ids, _ = detect_markers(detector, cv2.resize(
                     crop, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC))
             if decoded_ids is None or marker_id not in decoded_ids:
                 continue
@@ -280,12 +281,12 @@ class BaseRegistration:
             lo = np.maximum(np.floor(corner[0].min(axis=0)-20).astype(int), 0)
             hi = np.minimum(np.ceil(corner[0].max(axis=0)+20).astype(int), [width, height])
             local = image[lo[1]:hi[1], lo[0]:hi[0]]
-            check, check_ids, _ = detector.detectMarkers(cv2.resize(
+            check, check_ids, _ = detect_markers(detector, cv2.resize(
                 local, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC))
             if check_ids is None or marker_id not in check_ids:
                 gray = cv2.cvtColor(local, cv2.COLOR_BGR2GRAY) if local.ndim == 3 else local
                 enhanced = cv2.createCLAHE(2, (4, 4)).apply(gray)
-                check, check_ids, _ = detector.detectMarkers(cv2.resize(
+                check, check_ids, _ = detect_markers(detector, cv2.resize(
                     enhanced, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC))
             if check_ids is None or marker_id not in check_ids:
                 continue

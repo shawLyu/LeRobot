@@ -76,6 +76,8 @@ src/lerobot_arm_control/diagnostics/__init__.py
 src/lerobot_arm_control/diagnostics/cli.py
 src/lerobot_arm_control/perception/__init__.py
 src/lerobot_arm_control/perception/camera_controls.py
+src/lerobot_arm_control/perception/marker_detection.py
+tests/test_marker_detection.py
 src/lerobot_arm_control/perception/tabletop_geometry.py
 src/lerobot_arm_control/perception/tabletop_perception.py
 src/lerobot_arm_control/perception/tabletop_registration.py

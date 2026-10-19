@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "sequence": 182,
-  "captured_unix_ns": 1792394570476829425,
+  "sequence": 97,
+  "captured_unix_ns": 1792395226911800518,
   "units": "m",
   "reference": "anchor AprilTag center; +X right; +Y up; +Z out",
   "table": {
@@ -45,25 +45,25 @@
   "camera": {
     "device": "/dev/v4l/by-id/usb-CN02KX4NLG0004ABK00_USB_Camera_CN02KX4NLG0004ABK00-video-index0",
     "position": [
-      -0.3155227030842939,
-      -0.10844253139664531,
-      0.6341137349595964
+      -0.3112282021954548,
+      -0.11012708200654751,
+      0.6330950821245156
     ],
     "rotation": [
       [
-        0.9981823471482489,
-        0.025943279837081973,
-        -0.05439621377363658
+        0.9978852711849044,
+        0.02523512072486872,
+        -0.05990137088775496
       ],
       [
-        0.008562387598789044,
-        -0.9544941048375826,
-        -0.29810684217057154
+        0.006217350440898649,
+        -0.9543922910964852,
+        -0.2984907021149854
       ],
       [
-        -0.059654734600200994,
-        0.2970992259525373,
-        -0.9529813023234941
+        -0.06470185550450724,
+        0.29748704741148513,
+        -0.9525309058065626
       ]
     ],
     "controls": {
@@ -71,9 +71,9 @@
       "focus": 68.0,
       "verified": true
     },
-    "anchor_visible": true,
-    "pose_source": "both",
-    "reprojection_error_px": 0.3435129759107016
+    "anchor_visible": false,
+    "pose_source": "secondary",
+    "reprojection_error_px": 0.015985492490579806
   },
   "arms": {
     "follower": {
@@ -104,21 +104,21 @@
         "calibrated_unix_ns": 1792394542320763324,
         "calibration_position_spread_m": 0.0008571168993509109,
         "calibration_yaw_spread_rad": 0.002716563143730033,
-        "calibration_age_s": 28.25687327
+        "calibration_age_s": 684.654561714
       },
       "qpos": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        0.045722709981823276,
+        -1.6707425318236315,
+        1.4734903596483098,
+        1.3164769215042942,
+        0.238862281315236,
+        -1.6043962482236642
       ],
-      "joint_pose_source": "unmeasured_preview",
-      "calibration_mode": "uncalibrated",
-      "calibration_source_arm": null,
-      "independently_calibrated": false,
-      "feedback_status": "disabled"
+      "joint_pose_source": "live_encoders",
+      "calibration_mode": "independent",
+      "calibration_source_arm": "follower",
+      "independently_calibrated": true,
+      "feedback_status": "live"
     },
     "arm1": {
       "registration": {
@@ -148,21 +148,21 @@
         "calibrated_unix_ns": 1792394542374904848,
         "calibration_position_spread_m": 0.0008112736532112066,
         "calibration_yaw_spread_rad": 0.0064371075084159735,
-        "calibration_age_s": 28.202763286
+        "calibration_age_s": 684.60045148
       },
       "qpos": [
-        0,
-        1.5,
-        -1.6,
-        0.3,
-        0,
-        0.5
+        0.04894832746386363,
+        -1.6270109192671065,
+        1.5784289620076997,
+        1.2144815050618687,
+        -1.2982169642040173,
+        0.5536139920338701
       ],
-      "joint_pose_source": "unmeasured_preview",
-      "calibration_mode": "uncalibrated",
-      "calibration_source_arm": null,
-      "independently_calibrated": false,
-      "feedback_status": "disabled"
+      "joint_pose_source": "live_encoders",
+      "calibration_mode": "independent",
+      "calibration_source_arm": "arm1",
+      "independently_calibrated": true,
+      "feedback_status": "live"
     }
   },
   "base_distances": [
@@ -183,10 +183,10 @@
   ],
   "objects": {
     "black_t": {
-      "iou": 0.9042904290429042,
+      "iou": 0.925280199252802,
       "xy": [
-        -0.39051323861873793,
-        0.23323297008000443
+        -0.38937622616906536,
+        0.23147572670333416
       ],
       "yaw": 3.12413936106985,
       "width": 0.048,
@@ -195,44 +195,44 @@
       "stem_width": 0.012,
       "contour_xy": [
         [
-          -0.39306002855300903,
-          0.2627091407775879
+          -0.3919394016265869,
+          0.2610476016998291
         ],
         [
-          -0.394460529088974,
-          0.2176540195941925
+          -0.39337068796157837,
+          0.21602106094360352
         ],
         [
-          -0.3975772559642792,
-          0.21413737535476685
+          -0.39648985862731934,
+          0.21251735091209412
         ],
         [
-          -0.4123990833759308,
-          0.21595802903175354
+          -0.41122451424598694,
+          0.21262425184249878
         ],
         [
-          -0.4134984016418457,
-          0.20540958642959595
+          -0.4124196171760559,
+          0.20384928584098816
         ],
         [
-          -0.367927223443985,
-          0.20355403423309326
+          -0.36685389280319214,
+          0.2018372267484665
         ],
         [
-          -0.368252694606781,
-          0.214043989777565
+          -0.36717188358306885,
+          0.21232019364833832
         ],
         [
-          -0.3828924298286438,
-          0.21408800780773163
+          -0.38180646300315857,
+          0.21241599321365356
         ],
         [
-          -0.384589284658432,
-          0.21585410833358765
+          -0.38350173830986023,
+          0.21418701112270355
         ],
         [
-          -0.3847281336784363,
-          0.262641966342926
+          -0.38360828161239624,
+          0.26094740629196167
         ]
       ],
       "height": 0,
@@ -245,110 +245,110 @@
       "z": 0.0,
       "complete_outline_xy": [
         [
-          -0.36704046612810304,
-          0.20281868147081789
+          -0.36590345367843047,
+          0.20106143809414762
         ],
         [
-          -0.4150331554956098,
-          0.2036563969798075
+          -0.41389614304593725,
+          0.20189915360313723
         ],
         [
-          -0.4148237266183624,
-          0.2156545693216842
+          -0.41368671416868985,
+          0.21389732594501393
         ],
         [
-          -0.3968264681055474,
-          0.2153404260058131
+          -0.3956894556558748,
+          0.21358318262914283
         ],
         [
-          -0.3959887525965578,
-          0.2633331153733199
+          -0.39485174014688523,
+          0.2615758719966496
         ],
         [
-          -0.3839905802546811,
-          0.2631236864960725
+          -0.3828535678050085,
+          0.2613664431194022
         ],
         [
-          -0.38482829576367067,
-          0.2151309971285657
+          -0.3836912833139981,
+          0.21337375375189543
         ],
         [
-          -0.36683103725085564,
-          0.21481685381269458
+          -0.36569402480118307,
+          0.2130596104360243
         ]
       ]
     },
     "wood_t": {
-      "iou": 0.8984137698278771,
+      "iou": 0.8940060954961057,
       "xy": [
-        -0.2732670022842843,
-        0.22036508736830143
+        -0.27212147762035305,
+        0.2182983766625431
       ],
-      "yaw": 3.429571980168858,
+      "yaw": 3.420845333908886,
       "width": 0.048,
       "length": 0.06,
       "cap_depth": 0.012,
       "stem_width": 0.012,
       "contour_xy": [
         [
-          -0.2763931155204773,
-          0.2512856423854828
+          -0.27697935700416565,
+          0.24918338656425476
         ],
         [
-          -0.2844754159450531,
-          0.2495252639055252
+          -0.2850591540336609,
+          0.24567125737667084
         ],
         [
-          -0.2877216935157776,
-          0.24596303701400757
+          -0.2851393222808838,
+          0.23325112462043762
         ],
         [
-          -0.27681198716163635,
-          0.20911255478858948
+          -0.28203433752059937,
+          0.22095400094985962
         ],
         [
-          -0.276862233877182,
-          0.20395365357398987
+          -0.2788686454296112,
+          0.21919509768486023
         ],
         [
-          -0.2800503075122833,
-          0.20052741467952728
+          -0.2758729159832001,
+          0.20191499590873718
         ],
         [
-          -0.2879515588283539,
-          0.19881688058376312
+          -0.2901090681552887,
+          0.193426713347435
         ],
         [
-          -0.29112011194229126,
-          0.1954032927751541
+          -0.2870173454284668,
+          0.183258056640625
         ],
         [
-          -0.2880149781703949,
-          0.1852298229932785
+          -0.2509225308895111,
+          0.19162492454051971
         ],
         [
-          -0.25814810395240784,
-          0.1920289248228073
+          -0.2414172738790512,
+          0.19669292867183685
         ],
         [
-          -0.2439306527376175,
-          0.19713807106018066
+          -0.24128465354442596,
+          0.20180469751358032
         ],
         [
-          -0.24227692186832428,
-          0.20054644346237183
+          -0.24582737684249878,
+          0.20867395401000977
         ],
         [
-          -0.24675092101097107,
-          0.21082988381385803
+          -0.2537727952003479,
+          0.20526646077632904
         ],
         [
-          -0.26102614402770996,
-          0.20738762617111206
+          -0.263192355632782,
+          0.20701688528060913
         ],
         [
-          -0.26413092017173767,
-          0.21083185076713562
+          -0.27221593260765076,
+          0.2437952160835266
         ]
       ],
       "height": 0.006,
@@ -361,36 +361,36 @@
       "z": 0.003,
       "complete_outline_xy": [
         [
-          -0.24173486830632998,
-          0.1984168635951498
+          -0.24078207624332343,
+          0.1960758223240015
         ],
         [
-          -0.28775821558000325,
-          0.18478412704936148
+          -0.28692263764836273,
+          0.18284522924478555
         ],
         [
-          -0.2911663997164503,
-          0.1962899638677798
+          -0.29023028591816674,
+          0.19438036959604538
         ],
         [
-          -0.2739076444888229,
-          0.20140224007245042
+          -0.272927575391277,
+          0.19934184200075136
         ],
         [
-          -0.28754038103461116,
-          0.2474255873461237
+          -0.2861581684704929,
+          0.24548240340579067
         ],
         [
-          -0.27603454421619283,
-          0.25083377148257074
+          -0.2746230281192331,
+          0.24879005167559465
         ],
         [
-          -0.26240180767040455,
-          0.2048104242088975
+          -0.26139243504001713,
+          0.20264949027055534
         ],
         [
-          -0.24514305244277707,
-          0.20992270041356811
+          -0.2440897245131274,
+          0.20761096267526133
         ]
       ]
     }
@@ -416,7 +416,93 @@
     }
   },
   "wood_height_measured": true,
-  "appearance": null,
+  "appearance": {
+    "version": 1,
+    "source_sequence": 42,
+    "source_captured_unix_ns": 1792395218726808260,
+    "perception_location": "remote",
+    "bounds": [
+      -0.8787784959877911,
+      0.1275,
+      -0.3136203825812087,
+      0.48011450664773964
+    ],
+    "texture_rows": "world +Y to -Y; MuJoCo PNG convention, vflip=false",
+    "materials_rgb": {
+      "black_t_cap": [
+        0.23489063676946212,
+        0.24844201966000803,
+        0.25295914729019
+      ],
+      "black_t_stem": [
+        0.1987536157280064,
+        0.21230499861855232,
+        0.21682212624873426
+      ],
+      "wood_t_cap": [
+        0.9169769089269386,
+        0.876322760255301,
+        0.5194696774709259
+      ],
+      "wood_t_stem": [
+        0.9124597812967566,
+        0.876322760255301,
+        0.5239868051011078
+      ]
+    },
+    "robot_plastic_rgb": [
+      0.0496884039320016,
+      0.07227404208291142,
+      0.07227404208291142
+    ],
+    "background_rgb": [
+      0.3215686274509804,
+      0.2901960784313726,
+      0.28627450980392155
+    ],
+    "observed_table_fraction": 0.18314647674560547,
+    "paper_material_detected": false,
+    "texture_method": "observed desk/paper colors and fine photo detail; broad lighting removed",
+    "hidden_surfaces": "inpainted or uniform estimated material",
+    "lighting": {
+      "headlight_ambient": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "main_pos": [
+        -0.5426867228708826,
+        -0.6991180324956396,
+        1.4
+      ],
+      "main_dir": [
+        0.167047474876987,
+        0.7823650945289051,
+        -1.4
+      ],
+      "main_diffuse": [
+        0.32,
+        0.31,
+        0.3
+      ],
+      "fill_diffuse": [
+        0.1,
+        0.11,
+        0.13
+      ],
+      "plane_gain": 0.8681553740585823,
+      "source": "robust bright-table exposure gradient; approximate",
+      "physically_calibrated": false
+    },
+    "texture_files": [
+      "tabletop.png",
+      "secondary_tag.png",
+      "black_t_cap.png",
+      "black_t_stem.png",
+      "wood_t_cap.png",
+      "wood_t_stem.png"
+    ]
+  },
   "config": {
     "camera_matrix": [
       [
@@ -830,13 +916,239 @@
     }
   },
   "control_config_sha256": "f82e54c43e874e5a3c5c7430cef5077247e15b107e3ecabebef3f3f180045d6b",
-  "joint_calibrations": {},
+  "joint_calibrations": {
+    "arm1": {
+      "model": "so101",
+      "joints": [
+        "shoulder_pan",
+        "shoulder_lift",
+        "elbow_flex",
+        "wrist_flex",
+        "wrist_roll",
+        "gripper"
+      ],
+      "read_only": true,
+      "joint_calibration": "/home/xy/Research/lerobot/data/calibration/arm1_mujoco.json",
+      "joint_calibration_sha256": "87c7e6c2786678761aaa2e760887f80508b4999cbdfba1ae3c0b4eaf857a6963",
+      "kinematic_correction": null,
+      "calibration_mode": "independent",
+      "calibration_source_arm": "arm1",
+      "independently_calibrated": true,
+      "fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91028324-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            699,
+            3416
+          ],
+          "shoulder_lift": [
+            795,
+            3280
+          ],
+          "elbow_flex": [
+            807,
+            3094
+          ],
+          "wrist_flex": [
+            794,
+            3200
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            1512,
+            2759
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -2030,
+          "shoulder_lift": 1084,
+          "elbow_flex": 924,
+          "wrist_flex": -1986,
+          "wrist_roll": 1818,
+          "gripper": 1844
+        },
+        "phase": {
+          "shoulder_pan": 76,
+          "shoulder_lift": 12,
+          "elbow_flex": 76,
+          "wrist_flex": 76,
+          "wrist_roll": 76,
+          "gripper": 76
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "fits": {
+        "shoulder_pan": {
+          "zero_raw": 1991.0,
+          "radians_per_tick": 0.00148328265042011,
+          "check_error_degrees": 1.5297450424929138
+        },
+        "shoulder_lift": {
+          "zero_raw": 2042.0,
+          "radians_per_tick": 0.0016061312134917141,
+          "check_error_degrees": 0.36809815950919444
+        },
+        "elbow_flex": {
+          "zero_raw": 2087.0,
+          "radians_per_tick": 0.001526527042560638,
+          "check_error_degrees": 1.4868804664722997
+        },
+        "wrist_flex": {
+          "zero_raw": 1984.0,
+          "radians_per_tick": 0.0016728395386527118,
+          "check_error_degrees": 1.8210862619808341
+        },
+        "wrist_roll": {
+          "zero_raw": 2027.0,
+          "radians_per_tick": 0.001539996398818526,
+          "check_error_degrees": 0.7941176470588213
+        },
+        "gripper": {
+          "zero_raw": 1531.0,
+          "radians_per_tick": 0.0016675120241984038,
+          "check_error_degrees": 1.9108280254777061
+        }
+      },
+      "motion_available": false,
+      "status": "live"
+    },
+    "follower": {
+      "model": "so101",
+      "joints": [
+        "shoulder_pan",
+        "shoulder_lift",
+        "elbow_flex",
+        "wrist_flex",
+        "wrist_roll",
+        "gripper"
+      ],
+      "read_only": true,
+      "joint_calibration": "/home/xy/Research/lerobot/data/calibration/follower_mujoco.json",
+      "joint_calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+      "kinematic_correction": null,
+      "calibration_mode": "independent",
+      "calibration_source_arm": "follower",
+      "independently_calibrated": true,
+      "fingerprint": {
+        "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B8E114461-if00",
+        "motors": {
+          "shoulder_pan": 1,
+          "shoulder_lift": 2,
+          "elbow_flex": 3,
+          "wrist_flex": 4,
+          "wrist_roll": 5,
+          "gripper": 6
+        },
+        "raw_limits": {
+          "shoulder_pan": [
+            844,
+            3440
+          ],
+          "shoulder_lift": [
+            809,
+            3238
+          ],
+          "elbow_flex": [
+            773,
+            3126
+          ],
+          "wrist_flex": [
+            862,
+            3192
+          ],
+          "wrist_roll": [
+            0,
+            4095
+          ],
+          "gripper": [
+            452,
+            1893
+          ]
+        },
+        "homing_offsets": {
+          "shoulder_pan": -1110,
+          "shoulder_lift": 1932,
+          "elbow_flex": 1070,
+          "wrist_flex": -1980,
+          "wrist_roll": -1910,
+          "gripper": -1632
+        },
+        "phase": {
+          "shoulder_pan": 12,
+          "shoulder_lift": 12,
+          "elbow_flex": 12,
+          "wrist_flex": 12,
+          "wrist_roll": 12,
+          "gripper": 12
+        },
+        "mode": {
+          "shoulder_pan": 0,
+          "shoulder_lift": 0,
+          "elbow_flex": 0,
+          "wrist_flex": 0,
+          "wrist_roll": 0,
+          "gripper": 0
+        },
+        "model": "so101",
+        "mjcf_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      },
+      "fits": {
+        "shoulder_pan": {
+          "zero_raw": 2039.0,
+          "radians_per_tick": 0.0014749261284459122,
+          "check_error_degrees": 0.5915492957746462
+        },
+        "shoulder_lift": {
+          "zero_raw": 2007.0,
+          "radians_per_tick": 0.0014917344034139567,
+          "check_error_degrees": 1.8803418803418854
+        },
+        "elbow_flex": {
+          "zero_raw": 2143.0,
+          "radians_per_tick": 0.0015445391610569286,
+          "check_error_degrees": 0.8849557522123864
+        },
+        "wrist_flex": {
+          "zero_raw": 2066.0,
+          "radians_per_tick": 0.0016622183352326947,
+          "check_error_degrees": 1.7142857142857184
+        },
+        "wrist_roll": {
+          "zero_raw": 2010.0,
+          "radians_per_tick": 0.0015818694126836822,
+          "check_error_degrees": 1.6314199395770352
+        },
+        "gripper": {
+          "zero_raw": 1620.0,
+          "radians_per_tick": 0.00139999672619866,
+          "check_error_degrees": 0.5614973262032035
+        }
+      },
+      "motion_available": false,
+      "status": "live"
+    }
+  },
   "snapshot_directory": "data/tabletop/current-scene",
-  "source_capture": "logs/table-calibration-20261019-152215-679234",
-  "calibration_scope": "camera/table/arm bases; joint poses are unmeasured previews",
-  "motor_writes_performed": false,
-  "orientation_source": "User confirmed both base fronts toward T; native replacement marker orientation checked on 2026-10-19",
-  "physical_precision_validated": false,
   "configuration_files": {
     "tabletop.json": {
       "file": "configs/tabletop.json",
@@ -985,5 +1297,11 @@
     "alignment_tolerance_degrees": 2,
     "follower_gripper_range_source": "2026-10-18 user-guided gripper travel: native raw 452..1893, shared command envelope raw 464..1881. Converted with current follower calibration acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652; supersedes 2026-10-13 raw 1479..2982."
   },
-  "pending_calibration": {}
+  "pending_calibration": {},
+  "orientation_source": "User confirmed both base fronts toward T; native replacement marker orientation checked on 2026-10-19",
+  "physical_precision_validated": false,
+  "source_capture": "logs/world-mirror-validation",
+  "calibration_scope": "camera/table/accepted bases plus independently calibrated live six-joint feedback for both arms",
+  "joint_feedback_sampled": true,
+  "motion_commands_sent": false
 }

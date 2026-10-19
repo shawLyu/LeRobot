@@ -92,6 +92,16 @@ References: [OpenCV PnP](https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.htm
 ## Live SO101 mirror
 
 `./scripts/lerobot-arm view tabletop` displays the table and SO101 together.
+For the current two-arm physical-world mirror, run:
+
+```sh
+./scripts/lerobot-arm view tabletop --fps 10
+```
+
+Both arms must show `live` joint feedback and `fixed` bases. Each uses its own
+six-joint mapping; the simulator updates only from measured feedback. Do not use
+`--camera-only` for joint mirroring: that mode deliberately shows unmeasured joint previews.
+The mirror sends no motion commands. Esc closes it and releases the camera and buses.
 The remote follower bus is sampled read-only by stable USB identity, normally at 20 Hz.
 Angles use the 0/30/60-degree fit in `data/calibration/follower_mujoco.json`.
 Startup checks USB identity, motor IDs, limits, Homing Offset, Phase, Operating Mode, and original MJCF hash.
@@ -106,7 +116,7 @@ with maximum residual about 1.03 native pixels. Table processing images and smal
 calibrated 640x480 coordinates; original K/distortion are retained. Remeasure after changing camera crop, device, or mode.
 
 The current system independently registers the left black follower (ArUco 4x4 ID 7)
-and right white arm1 (ID 6). Both markers have 42 mm black borders. The follower marker center
+and right white arm1 (ID 6). Both markers have 50 mm black borders. The follower marker center
 is 70 mm above the table; arm1's configured height is 69 mm. Both centers are
 19.5 mm forward of each base rear edge, on its centerline.
 See [Two-arm calibration](two-arm-calibration.md) for the measured poses and separation.
@@ -125,7 +135,7 @@ Closing a live view freezes its final observation in `state.json`, `scene_parame
 `model.json` and the `scene.xml` recorded keyframe. The parameters distinguish measured
 independent encoder mappings, temporary shared mappings and unmeasured previews,
 and include the actual camera/table frame and both bases.
-The accepted October 11 scene is preserved separately at `data/tabletop/current-scene/`;
+The accepted October 19 scene is preserved separately at `data/tabletop/current-scene/`;
 see [saved scene and white-arm alignment](current-scene.md).
 The old CAD silhouette fitting interface is retired; the remote host loads no mesh or forward kinematics.
 

@@ -27,7 +27,7 @@ The unchanged acceptance limits are 2 mm position spread, 0.025 rad yaw spread,
 1.5 processing pixels of base reprojection error, and at least one second of sampling.
 These describe observation consistency; absolute physical precision remains unvalidated.
 
-The final camera position in the table frame is approximately
+At the end of base calibration, the camera position in the table frame was approximately
 `[−315.523, −108.443, 634.114]` mm. The scene records its full rotation and provenance.
 The table mesh is the observed workspace patch; its physical perimeter is unmeasured.
 
@@ -41,12 +41,20 @@ The table mesh is the observed workspace patch; its physical perimeter is unmeas
   and calibration hashes, and the current controller fingerprint.
 - `data/tabletop/current-scene/`: current recorded state, generated scene, source images,
   copied meshes, configuration and calibration records; also synchronized remotely.
-- `logs/table-calibration-20261019-152215-679234/`: original local capture.
+- `logs/table-calibration-20261019-152215-679234/`: original local base-calibration capture.
+- `logs/world-mirror-validation/`: subsequent 18-second live mirror validation, with 97 camera states,
+  independent joint feedback, observed textures and a rendered screenshot.
 
-This session sampled **base poses only**. Joint poses in its saved scene are explicitly
-`unmeasured_preview`, and joint feedback is disabled. They must not be presented as
-current encoder measurements. Existing independent joint-angle files remain unchanged.
-The old 42 mm scene is superseded by this capture.
+The base-calibration session sampled base poses only. The current scene was subsequently
+refreshed from live feedback: both arms now record `live_encoders`, `independent` calibration
+and six measured joint angles. All 12 simulator joint positions matched their measured
+angles, including the saved MJCF keyframe. Both arms had torque off and the mirror sent no
+motion commands. Existing independent joint-angle files remain unchanged.
+
+Run `./scripts/lerobot-arm view tabletop --fps 10` for ongoing synchronization;
+the saved scene is one recorded observation. On stale or failed feedback the viewer marks
+the affected arm as unavailable rather than treating a preview as live feedback.
+The old 42 mm scene and intermediate camera-only joint previews are superseded by this capture.
 
 ## View and recalibrate
 

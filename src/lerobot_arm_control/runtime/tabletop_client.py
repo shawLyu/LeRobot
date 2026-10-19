@@ -462,9 +462,9 @@ def run(args):
                         text += '\n'+detail
                 tool = state.get('tool_marker')
                 if tool:
-                    text += (f"\nTool ID {tool['id']}: {tool['status']}"
-                             f" | edge {tool.get('source_short_edge_px', 0):.1f} px"
-                             "\nTool precision: unvalidated")
+                    from lerobot_arm_control.visualization.ui import tool_marker_text
+
+                    text += '\n'+tool_marker_text(tool)
                 if robot.get('error'):
                     text += f"\nMotor error: {robot['error']}"
                 if args.push_t:

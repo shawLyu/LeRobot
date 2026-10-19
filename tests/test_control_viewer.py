@@ -10,7 +10,7 @@ import pytest
 from PIL import Image, ImageFont
 
 from lerobot_arm_control.visualization.control_viewer import ControlViewer, panel_lines
-from lerobot_arm_control.visualization.ui import motor_fault_text
+from lerobot_arm_control.visualization.ui import motor_fault_text, tool_marker_text
 
 
 def viewer_without_window():
@@ -122,6 +122,12 @@ def test_modified_shortcuts_do_not_trigger_motor_commands():
 def test_voltage_fault_is_explicit_instead_of_only_a_number():
     assert motor_fault_text(1) == "input voltage error"
     assert motor_fault_text(5) == "input voltage error, overheating"
+
+
+@pytest.mark.parametrize('edge,expected', [(None, 'unavailable'), (19.25, '19.2 px')])
+def test_missing_tool_marker_does_not_break_live_arm_display(edge, expected):
+    text = tool_marker_text({'id': 8, 'status': 'marker_missing', 'source_short_edge_px': edge})
+    assert 'Tool ID 8: marker_missing' in text and f'edge {expected}' in text
 
 
 def test_rest_buttons_route_clicks_to_same_keyboard_commands(monkeypatch):

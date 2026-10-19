@@ -1,4 +1,11 @@
-"""Operator-facing motor fault descriptions, using Feetech SDK error bits."""
+"""Operator-facing live status and motor fault descriptions."""
+
+
+def tool_marker_text(marker):
+    edge = marker.get('source_short_edge_px')
+    size = f'{edge:.1f} px' if edge is not None else 'unavailable'
+    return (f"Tool ID {marker['id']}: {marker['status']} | edge {size}"
+            '\nTool precision: unvalidated')
 
 
 def motor_fault_text(status):

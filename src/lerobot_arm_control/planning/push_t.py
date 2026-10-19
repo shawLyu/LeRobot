@@ -20,6 +20,7 @@ from lerobot_arm_control.control.control_defaults import SIMULATION_ACTUATOR
 from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
+from lerobot_arm_control.perception.tabletop_geometry import workspace_bounds
 from lerobot_arm_control.robot.so101.joints import JOINTS
 from lerobot_arm_control.robot.so101.model_metadata import joint_references
 from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_arms, scene_xml
@@ -314,7 +315,8 @@ class PushSimulation:
                              self.state['objects']['wood_t']['yaw']]
         self.wood_joint = self.model.joint('wood_free')
         self.wood_qadr = self.wood_joint.qposadr[0]
-        self.bounds = self.state['appearance']['bounds']
+        self.bounds = self.state.get('appearance', {}).get(
+            'bounds', workspace_bounds(self.state, self.config))
         self.trace = []
         self.pushes = 0
         self.phase = 'ready'

@@ -104,3 +104,26 @@ def test_fresh_partial_observation_updates_a_displaced_static_target():
 
 def test_missing_first_observation_does_not_invent_a_pose():
     assert update_without_visible_shape(TTracker(DIMENSIONS), 10.) is None
+
+
+def test_static_target_rejects_single_frame_jitter_but_tracks_sustained_displacement():
+    tracker = TTracker(DIMENSIONS, static=True)
+    for now, x in [(1., 0.), (1.1, .0002), (1.2, .004)]:
+        tracker._record({'xy': [x, 0.], 'yaw': 2*math.pi-.01}, now)
+    assert tracker.last['xy'][0] == pytest.approx(.0002)
+    assert tracker.last['measured_xy'][0] == .004
+    tracker._record({'xy': [.004, 0.], 'yaw': .01}, 1.3)
+    assert tracker.last['xy'][0] == .004
+    assert abs(math.atan2(math.sin(tracker.last['yaw']), math.cos(tracker.last['yaw']))) < .02
+    cached = tracker.cached(2.)
+    assert not cached['observed'] and cached['observation_age_s'] == pytest.approx(.7)
+    tracker._record({'xy': [.03, 0.], 'yaw': .01}, 2.1)
+    assert tracker.last['xy'][0] == .03
+
+
+def test_moving_wood_is_never_temporally_filtered():
+    tracker = TTracker(DIMENSIONS)
+    for now, x in [(1., 0.), (1.1, .0002), (1.2, .004)]:
+        tracker._record({'xy': [x, 0.], 'yaw': .3}, now)
+    assert tracker.last['xy'][0] == .004
+    assert 'filter_window_s' not in tracker.last

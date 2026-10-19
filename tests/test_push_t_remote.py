@@ -84,6 +84,17 @@ def test_preview_constructs_no_torque_or_goal_writes(motor):
     assert bus.writes == []
 
 
+def test_controller_fault_reason_is_preserved_in_remote_push_status(motor, monkeypatch):
+    instance, bus, _, state, segments = motor
+    reason = 'shoulder_lift: loaded motion stall: hold'
+    monkeypatch.setattr(instance.control, 'step', lambda *args: instance.control.stop(reason))
+    instance.submit(state, segments)
+    tick(instance, bus)
+    assert instance.status()['phase'] == 'stopped'
+    assert instance.status()['reason'] == reason
+    assert set(instance.control.stopped.values()) == {reason}
+
+
 @pytest.mark.parametrize('valid', [True, False])
 def test_motor_preflight_accepts_only_valid_saved_fixed_base(motor, valid):
     instance, bus, _, state, segments = motor

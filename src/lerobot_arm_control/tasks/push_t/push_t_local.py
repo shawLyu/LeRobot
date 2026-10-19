@@ -191,11 +191,11 @@ class LocalPush:
         (source/'marker.png').write_bytes(self.marker_png)
         appearance = source/'appearance'
         appearance.mkdir()
-        for filename, data in state['appearance_pngs'].items():
+        for filename, data in state.get('appearance_pngs', {}).items():
             if Path(filename).name != filename or not filename.endswith('.png'):
                 raise ValueError('invalid texture file')
             (appearance/filename).write_bytes(base64.b64decode(data, validate=True))
-        (appearance/'appearance.json').write_text(json.dumps(state['appearance'], indent=2))
+        (appearance/'appearance.json').write_text(json.dumps(state.get('appearance', {}), indent=2))
         self.sim = ShortPushSimulation(source, self.output/'model')
 
     def _update_model(self, state):
@@ -285,11 +285,15 @@ class LocalPush:
                     if self.sim is None:
                         with self.lock:
                             appearance_state = self.appearance_state
-                        if appearance_state is None:
-                            self._status('waiting for textures', reason='new session appearance')
-                            continue
                         initial = copy.deepcopy(state)
-                        initial['appearance_pngs'] = appearance_state['appearance_pngs']
+                        if appearance_state is not None:
+                            initial['appearance_pngs'] = appearance_state['appearance_pngs']
+                            if 'appearance' in appearance_state:
+                                initial['appearance'] = appearance_state['appearance']
+                        else:
+                            # Photographic textures are optional; measured geometry and
+                            # fresh observations still govern planning and execution.
+                            initial.pop('appearance', None)
                         self._prepare(initial)
                     if self.robot.motor:
                         motor = self.robot.motor.status()

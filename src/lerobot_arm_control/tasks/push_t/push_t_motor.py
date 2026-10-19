@@ -319,7 +319,7 @@ class PushMotor:
         self.control.heartbeat()
         self.control.step(positions, telemetry)
         if self.control.stopped:
-            self._hold('position controller stopped')
+            self._hold('; '.join(dict.fromkeys(self.control.stopped.values())))
             return
         self._status('running', waypoint=job['index'], tracking_error_rad=error, recovery=recovery)
         if elapsed >= segment['seconds']:

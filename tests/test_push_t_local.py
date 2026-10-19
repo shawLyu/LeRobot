@@ -35,6 +35,26 @@ def test_short_push_crosses_free_clearance_and_moves_the_real_cad_contact_model(
     assert np.linalg.norm(pose(sim.data)[:2]-initial[:2]) > .0001
 
 
+def test_planning_model_initializes_without_photographic_textures(tmp_path):
+    from lerobot_arm_control.perception.tabletop_geometry import workspace_bounds
+    from lerobot_arm_control.tasks.push_t.push_t_local import LocalPush
+
+    source = ROOT/'data/push_t/measured'
+    calibration = json.loads((source/'calibration.json').read_text())
+    state = json.loads((source/'state.json').read_text())
+    state.pop('appearance', None)
+    state.pop('appearance_pngs', None)
+    coordinator = LocalPush.__new__(LocalPush)
+    coordinator.config = calibration['config']
+    coordinator.robot = SimpleNamespace(metadata=calibration['robot'])
+    coordinator.output = tmp_path
+    coordinator.marker_png = (source/'marker.png').read_bytes()
+    coordinator._prepare(state)
+    assert coordinator.sim.bounds == workspace_bounds(state, calibration['config'])
+    assert coordinator.sim.model.nq > 6
+    np.testing.assert_allclose(coordinator.sim.initial[:2], state['objects']['wood_t']['xy'])
+
+
 @pytest.mark.parametrize('fixed', [False, True])
 def test_remote_recovery_plans_a_reachable_clearance_from_original_jaw_contact(tmp_path, fixed):
     from lerobot_arm_control.planning.push_t import PushSimulation, pose
@@ -144,7 +164,7 @@ def test_remote_worker_keeps_observing_invalid_seed_then_plans_after_it_recovers
                           plan=lambda: planned.append(True) or action)
     monkeypatch.setattr(LocalPush, '_prepare', lambda self, state: setattr(self, 'sim', sim))
     monkeypatch.setattr(LocalPush, '_update_model', lambda self, state: None)
-    observed.update(sequence=1, captured_unix_ns=1, appearance_pngs={})
+    observed.update(sequence=1, captured_unix_ns=1)
     observed['robot']['qpos'][1] = -1.01
     coordinator = LocalPush({}, SimpleNamespace(motor=None), tmp_path/'remote', b'')
 

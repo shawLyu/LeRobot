@@ -1,6 +1,7 @@
 """Remote known-shape tracking from partially visible T boundaries."""
 
 import math
+from collections import deque
 
 import cv2
 import numpy as np
@@ -118,6 +119,29 @@ class TTracker:
         self.last = None
         self.last_observed = 0.0
         self.undistort_maps = None
+        self.static_samples = deque(maxlen=3)
+
+    def _record(self, measurement, now):
+        self.last = dict(measurement)
+        if self.static:
+            while self.static_samples and now-self.static_samples[0][0] > .35:
+                self.static_samples.popleft()
+            if self.static_samples and np.linalg.norm(np.subtract(
+                    measurement['xy'], self.static_samples[-1][1]['xy'])) > .01:
+                self.static_samples.clear()
+            self.static_samples.append((now, dict(measurement)))
+            # Suppress isolated contour/PnP jitter in the stationary paper target.
+            # Every estimate still requires a new measurement; occlusion never
+            # enters this window or refreshes its observation timestamp.
+            samples = [sample for _, sample in self.static_samples]
+            yaw = measurement['yaw']
+            offsets = [math.atan2(math.sin(s['yaw']-yaw), math.cos(s['yaw']-yaw))
+                       for s in samples]
+            self.last.update(xy=np.median([s['xy'] for s in samples], axis=0).tolist(),
+                             yaw=float(yaw+np.median(offsets)),
+                             measured_xy=measurement['xy'], measured_yaw=yaw,
+                             filter_window_s=now-self.static_samples[0][0])
+        self.last_observed = now
 
     def cached(self, now):
         return self._state('static_cached' if self.static else (
@@ -134,8 +158,7 @@ class TTracker:
                 observed = max(matches, key=lambda x: x["iou"])
             # A clear observation can reacquire a moved paper target; otherwise the
             # static target keeps its last measured pose during occlusion.
-            self.last = dict(observed)
-            self.last_observed = now
+            self._record(observed, now)
             return self._state("observed", now, True)
         if self.last is None:
             return None
@@ -156,8 +179,7 @@ class TTracker:
                                             (214, 214), flags=cv2.INTER_NEAREST)
             match = match_partial(rectified, origin, resolution, self.dimensions, self.last)
             if match is not None:
-                self.last = match
-                self.last_observed = now
+                self._record(match, now)
                 state = self._state("partial", now, True)
                 state.update(edge_support=match["edge_support"],
                              visible_fraction=match["visible_fraction"])

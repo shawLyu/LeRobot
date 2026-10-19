@@ -71,6 +71,12 @@ an otherwise valid primary measurement. Recent primary measurements remain
 available only within the same 500 ms bound, labeled `recent` with their original
 capture time and `observed=false`. Success requires three different wood-T
 measurement timestamps, not three republished copies of a prior frame.
+The stationary printed target uses the median of up to three actual measurements
+within 350 ms to suppress isolated contour/pose jitter. Original measurements and
+window duration remain in `measured_xy`, `measured_yaw` and `filter_window_s`.
+A position jump above 10 mm resets the window immediately; sustained smaller
+motion passes through within two measurements. The moving wood T is unfiltered,
+and missing detections never refresh either object's observation time.
 The side camera runs in an independent process. With observers enabled, the main
 camera checks table/base markers every frame and measures T silhouettes every
 third frame; intervening object states retain their actual cached age. Fast

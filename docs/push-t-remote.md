@@ -18,7 +18,10 @@ Display transmission uses a separate thread and one latest-state slot, so slow r
 The remote motor owner holds on camera/motor age over 500 ms, local heartbeat gap over 750 ms, or SSH loss.
 During an active trajectory, local display-frame age does not override fresh remote control observations.
 Local stream loss still cancels execution and stops heartbeats; planning/submission still require fresh observations.
-Execution remains unavailable during initial material extraction.
+Photographic material extraction is optional for planning/execution. If the
+primary view cannot see a surface but another accepted view supplies its measured
+pose, planning uses the measured geometry and ordinary CAD materials. Texture
+extraction never replaces the live observation, calibration or collision checks.
 Remote `data/tabletop/static_map.json` retains the auxiliary marker's measured relative pose,
 allowing the same frame when the primary marker is occluded. Reobserve both after moving markers.
 

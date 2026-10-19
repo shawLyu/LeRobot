@@ -241,3 +241,23 @@ def test_free_approach_never_shortcuts_actual_execution_or_initial_contact(tmp_p
         segments = joint_segments(seed, action, sim.arm.limits)
         assert sim.free_approach(1, segments, sim.roll_model, sim.roll_data) == 0
         np.testing.assert_array_equal(sim.roll_data.qpos, before)
+
+
+def test_small_measured_start_tolerance_does_not_expand_commanded_waypoints():
+    limits = np.array([[-1., 1.]]*6)
+    seed = np.array([0., -1.04, 0., 0., 0., -1.01])
+    original = seed.copy()
+    tolerance = np.deg2rad(5.)
+    assert joint_limit_issue(seed, limits)
+    assert joint_limit_issue(seed, limits, tolerance=tolerance) is None
+    action = Push(np.zeros(2), np.ones(2), 0., joints=[np.zeros(6)], approach_count=1)
+    segments = joint_segments(seed, action, limits, entry_tolerance=tolerance)
+    np.testing.assert_array_equal(segments[0]['start'], original)
+    np.testing.assert_array_equal(seed, original)
+    action.joints[0][5] = -1.01
+    with pytest.raises(ValueError, match='waypoint violates'):
+        joint_segments(seed, action, limits, entry_tolerance=tolerance)
+    seed[1] = -1.1
+    assert joint_limit_issue(seed, limits, tolerance=tolerance)
+    with pytest.raises(ValueError, match='seed violates'):
+        joint_segments(seed, action, limits, entry_tolerance=tolerance)

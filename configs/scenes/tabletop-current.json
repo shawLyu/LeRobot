@@ -797,7 +797,15 @@
         }
       },
       "simulation": {
-        "end_effector": "gripper"
+        "end_effector": "gripper",
+        "joint_reference_degrees": {
+          "gripper": -83.55994800517955
+        },
+        "joint_reference_calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652",
+        "joint_reference_source": "2026-10-18 measured closed endpoint, command raw 464: map physical closed angle to CAD closed jaw (-0.16 rad); encoder angles remain unchanged."
+      },
+      "push_t": {
+        "entry_tolerance_degrees": 5
       }
     },
     "capture_size": [
@@ -1180,7 +1188,7 @@
   "configuration_files": {
     "tabletop.json": {
       "file": "configs/tabletop.json",
-      "sha256": "a91a2f732346cbd194ebbda9416ee3794314d0a8039a6f4065e824244e3773c6"
+      "sha256": "35abc1f92954039315e97d67a79a9f6be274e54fc72dd2b1442a1e61314cde09"
     },
     "camera_intrinsics.json": {
       "file": "configs/camera_intrinsics.json",
@@ -1278,7 +1286,11 @@
       "role": "follower",
       "end_effector": "gripper",
       "model_file": "assets/so101/so101.xml",
-      "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805"
+      "sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+      "joint_reference_degrees": {
+        "gripper": -83.55994800517955
+      },
+      "joint_reference_calibration_sha256": "acb0d391485df339b9fd31dba78c753ddf1774a6d95312d1b646bdf6423e4652"
     }
   },
   "follow_demo_interface": {

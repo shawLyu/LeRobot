@@ -15,6 +15,7 @@ import numpy as np
 from lerobot_arm_control.control.parking import smooth_fraction
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.planning.push_t import Push, PushSimulation, errors, rotation
+from lerobot_arm_control.robot.so101.model_metadata import entry_tolerance
 from lerobot_arm_control.tasks.push_t.push_t_motor import (
     calibrated_base,
     joint_limit_issue,
@@ -38,7 +39,8 @@ class ShortPushSimulation(PushSimulation):
 
     def play_action(self, action, model, data):
         controller = self.position_controller(model, data)
-        segments = joint_segments(controller.reference, action, self.arm.limits)
+        segments = joint_segments(controller.reference, action, self.arm.limits,
+                                  entry_tolerance=entry_tolerance(self.config.get('robot', {})))
         skipped = 0
         if self.fast_free_approach and data is self.roll_data:
             skipped = self.free_approach(action.approach_count, segments, model, data)
@@ -93,6 +95,7 @@ class LocalPush:
         self.publish = publish
         self.height_compensation = float(config.get('robot', {}).get(
             'push_height_compensation_m', 0))
+        self.entry_tolerance = entry_tolerance(config.get('robot', {}))
         if not math.isfinite(self.height_compensation):
             raise ValueError('push height compensation must be finite')
         self.marker_png = marker_png
@@ -295,7 +298,8 @@ class LocalPush:
                                 self.changed.clear()
                             continue
                     recovery_attempts = 0
-                    seed_issue = joint_limit_issue(state['robot']['qpos'], self.sim.arm.limits)
+                    seed_issue = joint_limit_issue(state['robot']['qpos'], self.sim.arm.limits,
+                                                  tolerance=self.entry_tolerance)
                     if seed_issue:
                         last_preview = None
                         self._status('waiting for valid joint pose', reason=seed_issue,
@@ -376,7 +380,8 @@ class LocalPush:
                     try:
                         command_action = self._execution_action(action, current['robot']['qpos'])
                         segments = joint_segments(current['robot']['qpos'], command_action,
-                                                  self.sim.arm.limits)
+                                                  self.sim.arm.limits,
+                                                  entry_tolerance=self.entry_tolerance)
                     except ValueError as exc:
                         self._status('execution blocked', reason=str(exc), executable=False)
                         with self.lock:
@@ -443,7 +448,8 @@ class LocalPush:
         current, arrived, _, _ = self._latest()
         if recovery_issue(current, arrived, time.monotonic()):
             return False
-        if joint_limit_issue(current['robot']['qpos'], self.sim.arm.limits):
+        tolerance = getattr(self, 'entry_tolerance', 0.)
+        if joint_limit_issue(current['robot']['qpos'], self.sim.arm.limits, tolerance=tolerance):
             return False
         reference['robot']['qpos'] = current['robot']['qpos']
         self._update_model(reference)
@@ -471,7 +477,7 @@ class LocalPush:
                 continue
             action = Push(site[:2], outward, 0, joints=joints,
                           approach_count=len(joints), transition='visibility recovery')
-            segments = joint_segments(seed, action, arm.limits)
+            segments = joint_segments(seed, action, arm.limits, entry_tolerance=tolerance)
             if sum(s['seconds'] for s in segments) > 7:
                 continue
             self.robot.motor.submit(reference, segments, recovery=True)

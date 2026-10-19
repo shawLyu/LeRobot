@@ -55,6 +55,28 @@ def test_metadata_ranges_match_the_canonical_explicit_joint_limits():
     assert Circle().model_hash == hashlib.sha256(MODEL.read_bytes()).hexdigest()
 
 
+def test_model_references_require_the_original_calibration_and_shift_only_model_ranges():
+    from lerobot_arm_control.robot.so101.model_metadata import entry_tolerance, joint_references
+
+    config = {'simulation': {'joint_reference_degrees': {'gripper': -83.56},
+                             'joint_reference_calibration_sha256': 'a'*64},
+              'push_t': {'entry_tolerance_degrees': 5}}
+    offsets = joint_references(config, calibration_sha256='a'*64)
+    assert offsets[:5] == [0.]*5
+    shifted = joint_ranges(references=offsets)
+    assert shifted[:5] == joint_ranges()[:5]
+    assert shifted[5][0] == pytest.approx(joint_ranges()[5][0]+math.radians(-83.56))
+    assert entry_tolerance(config) == pytest.approx(math.radians(5))
+    with pytest.raises(ValueError, match='matching joint calibration'):
+        joint_references(config, calibration_sha256='b'*64)
+    config['simulation']['joint_reference_degrees']['gripper'] = float('nan')
+    with pytest.raises(ValueError, match='finite'):
+        joint_references(config)
+    config['push_t']['entry_tolerance_degrees'] = 6
+    with pytest.raises(ValueError, match='between 0 and 5'):
+        entry_tolerance(config)
+
+
 @pytest.mark.parametrize('axis', [0, 1, 2])
 @pytest.mark.parametrize('angle', [0, .5, math.pi-1e-6, math.pi, -2.5])
 def test_camera_registration_quaternion_without_mujoco(axis, angle):

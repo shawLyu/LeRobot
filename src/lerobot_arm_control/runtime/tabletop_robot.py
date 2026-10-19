@@ -16,7 +16,11 @@ from lerobot_arm_control.core.config import load_arms
 from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.robot.feetech import connected_sts3215 as connected
-from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
+from lerobot_arm_control.robot.so101.model_metadata import (
+    entry_tolerance,
+    joint_ranges,
+    joint_references,
+)
 from lerobot_arm_control.runtime.common import defer_cyclic_gc, next_deadline
 from lerobot_arm_control.transport.realtime import JOINTS
 
@@ -91,13 +95,19 @@ class RobotFeedback:
                     calibration_mode='independent',
                     calibration_source_arm=self.config['arm'], independently_calibrated=True)
                 self.metadata.update(fingerprint=identity, fits=fits)
+                references = joint_references(self.config,
+                    calibration_sha256=self.metadata['joint_calibration_sha256'])
+                ranges = joint_ranges(model_path, references=references)
+                self.metadata.update(model_joint_ranges=ranges,
+                                     model_joint_references=references,
+                                     entry_tolerance_rad=entry_tolerance(self.config))
                 if self.hardware_control:
                     from lerobot_arm_control.tasks.push_t.push_t_motor import (
                         ENTRY_PROFILE_HASH,
                         PushMotor,
                     )
 
-                    self.motor = PushMotor(bus, calibration, joint_ranges(model_path),
+                    self.motor = PushMotor(bus, calibration, ranges,
                                            identity['raw_limits'], task=self.task)
                     self.metadata.update(control_hz=CONTROL_HZ,
                                          control_config=str(CONTROL_CONFIG),

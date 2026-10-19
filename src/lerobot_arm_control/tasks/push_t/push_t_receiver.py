@@ -24,10 +24,12 @@ from lerobot_arm_control.transport.pick_t_protocol import (
 from lerobot_arm_control.transport.realtime import JOINTS, WATCHDOG_SECONDS
 
 
-def validate_segments(segments):
+def validate_segments(segments, *, ranges=None, entry_tolerance=0.):
     if not isinstance(segments, list) or not 1 <= len(segments) <= 128:
         raise ValueError("plan must contain 1..128 joint segments")
-    ranges = joint_ranges()
+    ranges = joint_ranges() if ranges is None else ranges
+    if not math.isfinite(entry_tolerance) or not 0 <= entry_tolerance <= math.radians(5):
+        raise ValueError('invalid measured-start tolerance')
     for index, segment in enumerate(segments):
         if not isinstance(segment, dict):
             raise ValueError("invalid joint segment")
@@ -36,7 +38,9 @@ def validate_segments(segments):
             if (not isinstance(values, list) or len(values) != len(JOINTS)
                     or any(type(v) not in (int, float) or not math.isfinite(v) for v in values)):
                 raise ValueError("segment requires six finite joint angles")
-            if any(not low <= v <= high for v, (low, high) in zip(values, ranges)):
+            tolerance = entry_tolerance if index == 0 and key == 'start' else 0.
+            if any(not low-tolerance <= v <= high+tolerance
+                   for v, (low, high) in zip(values, ranges, strict=True)):
                 raise ValueError("segment exceeds SO101 joint limits")
         duration, speed = segment.get("seconds"), segment.get("speed_rad_s")
         if (type(duration) not in (int, float) or not math.isfinite(duration)
@@ -96,7 +100,10 @@ class PushReceiver:
                 raise ValueError("hardware execution disabled")
             if command.get("model_sha256") != self.robot.metadata["fingerprint"]["mjcf_sha256"]:
                 raise ValueError("local/remote SO101 model differs")
-            segments = validate_segments(command.get("segments"))
+            segments = validate_segments(command.get("segments"),
+                ranges=self.robot.metadata.get('model_joint_ranges'),
+                entry_tolerance=(self.robot.metadata.get('entry_tolerance_rad', 0.)
+                                 if self.task == 'push_t' else 0.))
             reference = command.get("reference")
             recovery = command.get("recovery", False)
             if type(recovery) is not bool:

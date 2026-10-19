@@ -98,3 +98,13 @@ Physical following runs entirely on the remote computer with
 `./scripts/lerobot-arm demo follow`. The optional `view follow` observer reads telemetry;
 it does not participate in the controller. See [follow operation](follow.md)
 and [the shared robot configuration](robot-config.md) for the current parameters.
+
+## Follower jaw model reference
+
+The physical jaw's saved closed command endpoint is raw 464 / −92.7273°.
+The generated scene uses a −83.55995° joint reference to show that endpoint as
+CAD closed jaw −0.16 rad; all 12 stored/live joint angles remain in measured encoder
+coordinates. This binding is saved under `robot.simulation` in `configs/tabletop.json`,
+tied to the unchanged follower joint-calibration SHA256. Push-T allows up to 5° of
+starting-pose discrepancy while retaining strict bounds for commanded destinations.
+See [Push-T start-pose validation](push-t-remote.md#measured-start-pose-and-model-joint-references).

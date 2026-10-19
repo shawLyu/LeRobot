@@ -69,7 +69,8 @@ def live(args, result):
             hello, state, received = read_state(link)
             issue = pick_observation_issue(state, received, time.monotonic(), STAGES[0])
             if issue is None:
-                issue = joint_limit_issue(state['robot']['qpos'], joint_ranges())
+                issue = joint_limit_issue(state['robot']['qpos'],
+                                         hello['robot'].get('model_joint_ranges', joint_ranges()))
             if issue is None:
                 break
             result['waiting_reason'] = issue

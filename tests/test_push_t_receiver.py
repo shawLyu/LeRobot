@@ -107,3 +107,34 @@ def test_preview_result_is_saved_without_enabling_hardware(receiver):
         endpoint.handle(command)
     assert motor.status()['phase'] == 'idle'
     assert bus.writes == []
+
+
+def test_receiver_uses_physical_gripper_coordinates_and_start_only_tolerance(receiver):
+    import math
+
+    from lerobot_arm_control.robot.so101.model_metadata import joint_ranges
+    from lerobot_arm_control.tasks.push_t.push_t_receiver import validate_segments
+
+    endpoint, command, (motor, bus, _, state, _) = receiver
+    offsets = [0.]*5+[math.radians(-83.56)]
+    ranges = joint_ranges(references=offsets)
+    endpoint.robot.metadata.update(model_joint_ranges=ranges,
+                                   entry_tolerance_rad=math.radians(5))
+    state['robot']['qpos'][5] = math.radians(-94.25)
+    command['reference'] = copy.deepcopy(state)
+    command['segments'][0]['start'][5] = state['robot']['qpos'][5]
+    command['segments'][0]['end'][5] = math.radians(-92.727)
+    # The physically valid gripper pose lies outside the original CAD coordinates.
+    with pytest.raises(ValueError, match='joint limits'):
+        validate_segments(command['segments'])
+    endpoint.observe(state)
+    endpoint.handle(command)
+    assert motor.status()['phase'] == 'pending'
+    assert bus.writes == []
+    invalid = copy.deepcopy(command['segments'])
+    invalid[0]['end'][5] = math.radians(-94.25)
+    with pytest.raises(ValueError, match='joint limits'):
+        validate_segments(invalid, ranges=ranges, entry_tolerance=math.radians(5))
+    invalid[0]['end'][5] = math.radians(40)
+    with pytest.raises(ValueError, match='joint limits'):
+        validate_segments(invalid, ranges=ranges, entry_tolerance=math.radians(5))

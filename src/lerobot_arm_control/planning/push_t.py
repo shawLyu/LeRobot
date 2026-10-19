@@ -17,9 +17,11 @@ import mujoco
 import numpy as np
 
 from lerobot_arm_control.control.control_defaults import SIMULATION_ACTUATOR
+from lerobot_arm_control.core.files import file_digest
 from lerobot_arm_control.core.paths import resource_path
 from lerobot_arm_control.core.runtime_config import add_remote_arguments
 from lerobot_arm_control.robot.so101.joints import JOINTS
+from lerobot_arm_control.robot.so101.model_metadata import joint_references
 from lerobot_arm_control.visualization.tabletop_scene import ROOT, scene_arms, scene_xml
 
 CONTACT_CLEARANCE = .007
@@ -68,7 +70,7 @@ def freeze_additional_arms(world, state, config):
         model = mujoco.MjModel.from_xml_path(str(display_model(
             arm['config'].get('simulation', {}).get('end_effector', 'gripper'))))
         data = mujoco.MjData(model)
-        data.qpos[:] = arm['qpos']
+        data.qpos[:] = np.subtract(arm['qpos'], joint_references(arm['config']))
         mujoco.mj_forward(model, data)
         root = world.find(f"body[@name='{arm['root']}']")
         root.attrib.pop('mocap')
@@ -92,6 +94,8 @@ def build_scene(snapshot, output, *, freeze_bystanders=True):
     source = Path(snapshot)
     state = json.loads((source/'state.json').read_text())
     config = json.loads((source/'calibration.json').read_text())['config']
+    joint_references(config.get('robot', {}),
+                     calibration_sha256=file_digest(source/'joint_calibration.json'))
     if not all(name in state['objects'] for name in ('black_t', 'wood_t')):
         raise ValueError('Measured poses for both T shapes are required')
     if 'position' not in state['robot']['registration']:
@@ -185,6 +189,7 @@ class Arm:
         self.qadr = np.array([model.joint(name).qposadr[0] for name in JOINTS])
         self.dadr = np.array([model.joint(name).dofadr[0] for name in JOINTS])
         self.limits = np.array([model.joint(name).range for name in JOINTS])
+        self.jaw_closed = JAW_CLOSED+model.qpos0[self.qadr[5]]
         self.jp = np.zeros((3, model.nv))
         self.jr = np.zeros((3, model.nv))
         self.rng = np.random.default_rng(42)
@@ -195,7 +200,7 @@ class Arm:
         for attempt in range(attempts):
             q = np.array(seed).copy() if attempt == 0 else self.rng.uniform(
                 self.limits[:, 0]+.015, self.limits[:, 1]-.015)
-            q[4], q[5] = 0, JAW_CLOSED
+            q[4], q[5] = 0, self.jaw_closed
             d.qpos[self.qadr] = q
             for _ in range(100):
                 mujoco.mj_forward(m, d)
@@ -582,7 +587,7 @@ class PushSimulation:
                                       for t in self.trace),
                 'contact_continuations': sum(t['action']['transition'] == 'contact continuation'
                                             for t in self.trace),
-                'gripper_angle_rad': JAW_CLOSED,
+                'gripper_angle_rad': self.arm.jaw_closed,
                 'qpos': self.data.qpos.tolist(), 'simulation_time_s': self.data.time}
 
 

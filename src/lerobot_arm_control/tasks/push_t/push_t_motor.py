@@ -93,12 +93,13 @@ def recovery_issue(state, received, now):
     return None
 
 
-def joint_segments(initial, action, limits, *, speed=.15, push_speed=.004):
+def joint_segments(initial, action, limits, *, speed=.15, push_speed=.004,
+                   entry_tolerance=0.):
     """Circle's quintic entry timing; slower, bounded contact waypoints for pushing."""
     start = np.asarray(initial, float)
     if start.shape != (6,) or not np.isfinite(start).all():
         raise ValueError('invalid measured joint seed')
-    if np.any(start < limits[:, 0]) or np.any(start > limits[:, 1]):
+    if joint_limit_issue(start, limits, tolerance=entry_tolerance):
         raise ValueError('measured joint seed violates calibrated CAD joint limits')
     segments = []
     for index, value in enumerate(action.joints):
@@ -122,13 +123,15 @@ def joint_segments(initial, action, limits, *, speed=.15, push_speed=.004):
     return segments
 
 
-def joint_limit_issue(initial, limits):
+def joint_limit_issue(initial, limits, *, tolerance=0.):
     """Keep observing an invalid physical seed without clipping measured encoder angles."""
     seed = np.asarray(initial, float)
     limits = np.asarray(limits, float)
     if seed.shape != (6,) or not np.isfinite(seed).all():
         return 'invalid measured joint seed'
-    outside = (seed < limits[:, 0]) | (seed > limits[:, 1])
+    if not math.isfinite(tolerance) or not 0 <= tolerance <= math.radians(5):
+        raise ValueError('invalid measured-start tolerance')
+    outside = (seed < limits[:, 0]-tolerance) | (seed > limits[:, 1]+tolerance)
     violations = [f'{JOINTS[i]}={math.degrees(seed[i]):.2f} deg '
                   f'outside [{math.degrees(limits[i, 0]):.2f}, '
                   f'{math.degrees(limits[i, 1]):.2f}] deg'

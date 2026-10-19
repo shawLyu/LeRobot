@@ -220,3 +220,29 @@ For the chosen 4 mm action across three friction settings, final prediction diff
 This covers that scene; live runtime still depends on geometry/load.
 Evidence: `data/push_t/planning-performance-20261006/prediction-profile.json` and profile-state.json.
 Forty-eight related remote tests passed; running hardware processes do not hot-reload changes.
+
+## Measured start pose and model joint references
+
+`robot.simulation.joint_reference_degrees` in `configs/tabletop.json` specifies
+physical encoder angle minus CAD angle. It changes generated MJCF `ref` and ranges;
+encoder feedback, joint-angle calibration, EEPROM and hardware command limits stay unchanged.
+The mapping is bound to `joint_reference_calibration_sha256`; recalibration requires review.
+The current follower jaw maps the saved closed command endpoint (raw 464, −92.7273°)
+to CAD closed jaw −0.16 rad, with a −83.55995° model reference.
+Push IK, live visualization and the remote trajectory validator use the same coordinates.
+
+`robot.push_t.entry_tolerance_degrees` is currently 5° (maximum allowed).
+It accepts small measured starting-pose deviations, including a manually closed jaw
+just beyond the normal command envelope. Feedback is never clipped or relabeled.
+Only the first segment's measured start gets this allowance: every destination remains
+inside the intersection of model and calibrated encoder limits; the hardware owner
+also checks its saved command envelope before enabling torque. Collision, freshness,
+base-registration, speed and alarm checks still apply. The accepted pose is a planning
+seed, not a declaration that arbitrary subsequent motion is collision-free.
+
+2026-10-19 validation: replaying the rejected observation (gripper raw 445 / −94.2513°)
+passed the revised seed check and produced 11 strictly bounded segments. A subsequent
+35-second live read-only session (`logs/valid-joint-pose-live/`, 160 camera states)
+reached `preview ready` with a 4 mm next-push plan; both arms reported live independent
+encoders and follower torque stayed off on all six joints. This validates observation
+and planning; no physical push was executed in this check.

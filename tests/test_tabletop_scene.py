@@ -43,6 +43,37 @@ def test_six_joints_preserved_and_no_actuators(tmp_path):
     )
 
 
+def test_measured_closed_gripper_matches_cad_geometry_without_changing_feedback(tmp_path):
+    import copy
+    import math
+
+    config = json.loads((ROOT/'configs/tabletop.json').read_text())
+    closed = json.loads((ROOT/'configs/robot.json').read_text())['follow'][
+        'follower_gripper_degrees'][0]
+    state = {'objects': {}, 'models': {}, 'robot': {'status': 'live',
+             'qpos': [0., 0., 0., 0., 0., math.radians(closed)]}}
+    (tmp_path/'marker.png').write_bytes((ROOT/'assets/tabletop/marker.png').read_bytes())
+    path = tmp_path/'scene.xml'
+    path.write_text(scene_xml(state, config))
+    model = mujoco.MjModel.from_xml_path(str(path))
+    data = mujoco.MjData(model)
+    mujoco.mj_resetDataKeyframe(model, data, 0)
+    mujoco.mj_forward(model, data)
+    np.testing.assert_array_equal(data.qpos, state['robot']['qpos'])
+    measured_tip = data.geom('moving_jaw_sph_tip1').xpos.copy()
+    original = copy.deepcopy(config)
+    original['robot']['simulation'].pop('joint_reference_degrees')
+    original['robot']['simulation'].pop('joint_reference_calibration_sha256')
+    state['robot']['qpos'][5] = -.16
+    path.write_text(scene_xml(state, original))
+    cad = mujoco.MjModel.from_xml_path(str(path))
+    cad_data = mujoco.MjData(cad)
+    mujoco.mj_resetDataKeyframe(cad, cad_data, 0)
+    mujoco.mj_forward(cad, cad_data)
+    np.testing.assert_allclose(measured_tip, cad_data.geom('moving_jaw_sph_tip1').xpos,
+                               atol=1e-12)
+
+
 def test_base_mocap_moves_complete_articulated_chain(tmp_path):
     model = load_scene(tmp_path)
     data = mujoco.MjData(model)

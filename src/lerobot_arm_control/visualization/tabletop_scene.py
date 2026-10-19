@@ -7,7 +7,8 @@ from pathlib import Path
 
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.perception.tabletop_geometry import workspace_bounds
-from lerobot_arm_control.robot.so101.model_metadata import display_model
+from lerobot_arm_control.robot.so101.joints import JOINTS
+from lerobot_arm_control.robot.so101.model_metadata import display_model, joint_references
 
 ROOT = workspace_root()
 
@@ -186,6 +187,13 @@ def scene_xml(state, config, robot_mesh_dir=None):
                                  quat=' '.join(map(str, registration.get(
                                      'quaternion', [1, 0, 0, 0]))))
             chain = deepcopy(robot.find('worldbody/body'))
+            for joint, offset in zip(JOINTS, joint_references(arm['config'])):
+                element = chain.find(f".//joint[@name='{joint}']")
+                if not offset:
+                    continue
+                element.set('ref', str(float(element.get('ref', '0'))+offset))
+                element.set('range', ' '.join(str(float(v)+offset)
+                                              for v in element.get('range').split()))
             for element in chain.iter():
                 if prefix and element.get('name'):
                     element.set('name', prefix+element.get('name'))

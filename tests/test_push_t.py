@@ -204,3 +204,34 @@ def test_wood_table_contact_does_not_block_robot_departure(sim):
                                       for g in (c.geom1, c.geom2))
                for c in arm.data.contact)
     assert arm.path_clear(q, q, avoid_wood=True)
+
+
+def test_push_ik_uses_calibration_bound_physical_closed_jaw(tmp_path):
+    from lerobot_arm_control.core.files import file_digest
+
+    snapshot = tmp_path/'snapshot'
+    shutil.copytree(ROOT/'data/push_t/measured', snapshot)
+    shutil.copyfile(ROOT/'data/calibration/follower_mujoco.json', snapshot/'joint_calibration.json')
+    metadata = json.loads((snapshot/'calibration.json').read_text())
+    offset = math.radians(-83.56)
+    metadata['config']['robot']['simulation'] = {
+        'joint_reference_degrees': {'gripper': math.degrees(offset)},
+        'joint_reference_calibration_sha256': file_digest(snapshot/'joint_calibration.json')}
+    (snapshot/'calibration.json').write_text(json.dumps(metadata))
+    sim = PushSimulation(snapshot, tmp_path/'model')
+    assert sim.arm.jaw_closed == pytest.approx(-.16+offset)
+    sim.arm.data.qpos[sim.qadr] = sim.state['robot']['qpos']
+    sim.arm.data.qpos[sim.qadr[5]] = sim.arm.jaw_closed
+    mujoco.mj_forward(sim.model, sim.arm.data)
+    actuator = sim.model.actuator('sim_gripper').id
+    assert sim.arm.data.actuator_length[actuator] == pytest.approx(sim.arm.jaw_closed)
+    target = sim.arm.data.site('push_contact').xpos.copy()
+    result = sim.arm.solve(target, sim.arm.data.qpos[sim.qadr].copy(), clearance=False)
+    assert result is not None
+    assert result[5] == pytest.approx(sim.arm.jaw_closed)
+    assert np.all(result >= sim.arm.limits[:, 0])
+    assert np.all(result <= sim.arm.limits[:, 1])
+    metadata['config']['robot']['simulation']['joint_reference_calibration_sha256'] = '0'*64
+    (snapshot/'calibration.json').write_text(json.dumps(metadata))
+    with pytest.raises(ValueError, match='matching joint calibration'):
+        build_scene(snapshot, tmp_path/'rejected')

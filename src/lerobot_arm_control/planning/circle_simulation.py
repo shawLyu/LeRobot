@@ -63,6 +63,69 @@ def validate_hardware_entry(circle, initial):
             "control_config_sha256": circle.profile_hash, 'motion_budget': timing}
 
 
+def bind_held_joints(plan_path, initial, output):
+    """Re-solve a table circle for the observed tool joints without moving hardware."""
+    import mujoco
+    import numpy as np
+
+    from lerobot_arm_control.core.files import atomic_json
+
+    source, output = Path(plan_path), Path(output)
+    circle = Circle(source)
+    if (len(initial) != 6 or not np.isfinite(initial).all()
+            or any(type(value) not in (int, float) for value in initial)):
+        raise ValueError('circle binding requires six finite observed joint angles')
+    if not circle.table_bound or np.allclose(initial[4:], circle.points[0][4:],
+                                             atol=1e-9, rtol=0):
+        return source
+    if source.resolve() == output.resolve():
+        raise ValueError('bound circle must not overwrite its source plan')
+    model = collision_model(circle)
+    data = mujoco.MjData(model)
+    site = model.site('gripperframe').id
+    points, max_error = [], 0.
+    for index, original in enumerate(circle.points):
+        data.qpos[:] = original
+        mujoco.mj_forward(model, data)
+        target = data.site_xpos[site].copy()
+        q = np.array(original, dtype=float)
+        q[4:] = initial[4:]
+        pitch = sum(original[1:4])
+        for _ in range(100):
+            data.qpos[:] = q
+            mujoco.mj_forward(model, data)
+            error = np.r_[target-data.site_xpos[site], pitch-sum(q[1:4])]
+            if np.linalg.norm(error[:3]) < 1e-7 and abs(error[3]) < 1e-6:
+                break
+            jacobian = np.zeros((3, model.nv))
+            mujoco.mj_jacSite(model, data, jacobian, None, site)
+            jacobian = np.vstack((jacobian[:, :4], [0, 1, 1, 1]))
+            update = jacobian.T @ np.linalg.solve(
+                jacobian @ jacobian.T+np.eye(4)*1e-8, error)
+            q[:4] += np.clip(update, -.05, .05)
+        else:
+            raise ValueError(f'observed tool pose makes circle unreachable at sample {index}')
+        points.append(q.tolist())
+        max_error = max(max_error, float(np.linalg.norm(error[:3])))
+    saved = json.loads(source.read_text())
+    saved.update(qpos=points, initial_qpos=list(initial), ik_max_error_m=max_error,
+                 source_plan_sha256=circle.plan_hash,
+                 held_joint_binding={'wrist_roll': initial[4], 'gripper': initial[5]},
+                 scene_clearance_confirmed=False)
+    saved.pop('initial_raw', None)
+    # A failed candidate is never left marked executable. The final proof is
+    # generated again after the successful plan receives its final file hash.
+    output.parent.mkdir(parents=True, exist_ok=True)
+    candidate = output.with_name(output.stem+'.candidate.json')
+    try:
+        atomic_json(candidate, {**saved, 'execution_ready': False})
+        validate_hardware_entry(Circle(candidate), initial)
+        atomic_json(output, saved)
+    finally:
+        candidate.unlink(missing_ok=True)
+    return output
+
+
 def collision_model(circle):
     import mujoco
 

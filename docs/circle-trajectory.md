@@ -117,7 +117,26 @@ Malformed or contradictory bases are rejected before hardware enable.
 
 ## Remote execution and saved responses
 
-`--from-current` reads a fresh remote pose without enabling motion. The local
+`--from-current` reads a fresh remote pose without enabling motion. If the observed
+wrist roll or gripper differs from a table-circle plan, it creates a new
+`logs/circle-bound-<stamp>.json` plan holding those two observed angles. It re-solves
+the first four joints for the original Cartesian path and tool pitch, then checks
+the complete circle and entry again. The original plan remains unchanged; source
+hashes and the effective execution plan are retained with the proof. Unreachable,
+colliding or over-budget adaptations are rejected before motor enable.
+
+To prepare and inspect without enabling motors:
+
+```bash
+./scripts/lerobot-arm verify tracking --prepare-only --from-current --laps 3 \
+  --plan data/trajectories/table-circle-8cm.json
+```
+
+Entry currently uses a checked joint-space interpolation. It does not search for
+a route around an obstructed direct approach, and cannot recover an already
+colliding pose. Successful model validation does not measure physical clearance.
+
+ The local
 computer checks the entire approach, circle geometry, table/self collisions and
 sampled speed/acceleration, then uploads a proof bound to the exact model,
 calibration, plan, configuration and initial pose. The remote computer checks the

@@ -19,7 +19,7 @@ from lerobot_arm_control.core.files import atomic_json, file_digest
 from lerobot_arm_control.core.paths import resource_path, workspace_root
 from lerobot_arm_control.core.runtime_config import add_remote_arguments, remote_runtime
 from lerobot_arm_control.runtime.realtime_client import Link
-from lerobot_arm_control.tasks.circle.circle_trajectory import Circle
+from lerobot_arm_control.tasks.circle.circle_trajectory import PLAN, Circle
 from lerobot_arm_control.transport.realtime import JOINTS, checked_command
 
 ROOT = workspace_root()
@@ -27,15 +27,21 @@ ROOT = workspace_root()
 
 def prepare_remote_entry(remote, plan_path, stamp):
     """Read without enabling, check the full approach, then upload the bound proof."""
-    from lerobot_arm_control.planning.circle_simulation import validate_hardware_entry
+    from lerobot_arm_control.planning.circle_simulation import (
+        bind_held_joints,
+        validate_hardware_entry,
+    )
 
+    (ROOT/'logs').mkdir(parents=True, exist_ok=True)
     reader = Link(remote.host, remote.root, 'hardware')
     try:
         deadline = time.monotonic()+15
         while True:
             hello, state, received, *_ = reader.snapshot()
             if reader.error or reader.process.poll() is not None:
-                raise RuntimeError(reader.error or 'read-only worker exited')
+                raise RuntimeError(reader.error or (
+                    f'read-only SSH worker for {remote.host} exited '
+                    f'(code {reader.process.returncode}); check the host and SSH connection'))
             if hello and state and time.monotonic()-received < .5:
                 break
             if time.monotonic() > deadline:
@@ -44,15 +50,23 @@ def prepare_remote_entry(remote, plan_path, stamp):
         identity = {**hello['fingerprint'], 'model': 'so101',
                     'mjcf_sha256': file_digest(resource_path('assets/so101/so101.xml'))}
         calibration = AngleCalibration(ROOT/'data/calibration/follower_mujoco.json', identity)
-        circle = Circle() if plan_path is None else Circle(plan_path)
-        validation = validate_hardware_entry(circle, calibration.angles(state['raw'], [0.]*6))
+        initial = calibration.angles(state['raw'], [0.]*6)
+        original = plan_path or PLAN
+        plan_path = bind_held_joints(original, initial,
+                                    ROOT/'logs'/f'circle-bound-{stamp}.json')
+        circle = Circle(plan_path)
+        validation = validate_hardware_entry(circle, initial)
         path = ROOT/'logs'/f'circle-validation-{stamp}.json'
         atomic_json(path, validation)
     finally:
         reader.close()
+    if plan_path != Path(original):
+        subprocess.run(['scp', str(plan_path),
+                        f'{remote.host}:{remote.root}/logs/{plan_path.name}'],
+                       check=True, timeout=20)
     subprocess.run(['scp', str(path), f'{remote.host}:{remote.root}/logs/{path.name}'],
                    check=True, timeout=20)
-    return path
+    return path, plan_path
 
 
 def measure(proof, plan_path=None):
@@ -98,6 +112,10 @@ def measure(proof, plan_path=None):
 def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
     remote = remote_runtime(host, remote_root)
     stamp = time.time_ns()
+    autonomous = not reset
+    validation_path = None
+    if autonomous:
+        validation_path, plan_path = prepare_remote_entry(remote, plan_path, stamp)
     circle = Circle() if plan_path is None else Circle(plan_path)
     proof = {"completed": False, "samples": [], "acks": [], "laps": laps,
              "profile": circle.feedback_profile, "control_config_sha256": CONTROL_CONFIG_SHA256,
@@ -105,8 +123,6 @@ def trial(laps, *, host=None, remote_root=None, plan_path=None, reset=True):
              'plan_sha256': circle.plan_hash}
     trace_name = f"tracking-trace-{stamp}.json"
     remote_trace = f"{remote.root}/logs/{trace_name}"
-    autonomous = not reset
-    validation_path = prepare_remote_entry(remote, plan_path, stamp) if autonomous else None
     proof['autonomous_remote_circle'] = autonomous
     link = Link(remote.host, remote.root, "hardware", hardware_control=True,
                 circle=True, control_log=remote_trace, circle_plan=plan_path,
@@ -245,11 +261,24 @@ def main():
     parser.add_argument('--plan', type=Path, help='Reviewed workspace-local circle plan')
     parser.add_argument('--from-current', action='store_true',
                         help='Approach from the observed pose without invoking Reset')
+    parser.add_argument('--prepare-only', action='store_true',
+                        help='Read pose and validate/upload the plan without enabling motors')
     args = parser.parse_args()
-    if not args.execute or not 1 <= args.laps <= 5:
-        parser.error("requires --execute and 1..5 laps with an observed, clear arm")
-    raise SystemExit(0 if trial(args.laps, host=args.host, remote_root=args.remote_root,
-                               plan_path=args.plan, reset=not args.from_current) else 1)
+    if args.prepare_only and (not args.from_current or args.execute):
+        parser.error('--prepare-only requires --from-current and excludes --execute')
+    if not (args.execute or args.prepare_only) or not 1 <= args.laps <= 5:
+        parser.error("requires --execute or --prepare-only and 1..5 laps")
+    try:
+        if args.prepare_only:
+            validation, plan = prepare_remote_entry(
+                remote_runtime(args.host, args.remote_root), args.plan, time.time_ns())
+            print(json.dumps({'prepared': True, 'motion_enabled': False,
+                              'plan': str(plan), 'validation': str(validation)}))
+            return
+        raise SystemExit(0 if trial(args.laps, host=args.host, remote_root=args.remote_root,
+                                   plan_path=args.plan, reset=not args.from_current) else 1)
+    except (ValueError, RuntimeError, TimeoutError, subprocess.SubprocessError) as exc:
+        parser.exit(2, f'error: {exc}\n')
 
 
 if __name__ == "__main__":

@@ -269,9 +269,8 @@ class Circle:
         target = self.sample(now)
         if 'transition_acceleration' in self.feedback_profile.get('native_stream', {}):
             control.schedule_stream_acceleration(self.speed_fraction(now))
-        if self.phase == "completed":
-            control.stop("circle completed: hold")
-            return
+        # Keep the final supported reference and learned load compensation.
+        # Replacing it with measured angles makes gravity-loaded I=0 joints sag.
         control.targets.update(zip(JOINTS, target))
 
     def status(self, now=None):

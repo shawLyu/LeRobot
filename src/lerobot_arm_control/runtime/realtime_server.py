@@ -111,7 +111,8 @@ def serve(args):
             trace_metadata['position_feedback_profile'] = controller.position_feedback.profile
             trace_metadata['joint_calibration_sha256'] = file_digest(calibration.path)
             defer_cyclic_gc(stack)
-            stack.callback(controller.close)
+            stack.callback(lambda: controller.close(preserve_targets=bool(
+                circle and circle.phase == 'completed' and not controller.stopped)))
         if circle and controller:
             controller.trajectory = circle
         publish({"type": "hello", "backend": "hardware", "joints": JOINTS,

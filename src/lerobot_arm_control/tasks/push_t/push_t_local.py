@@ -269,6 +269,11 @@ class LocalPush:
                             self._status('clearing camera occlusion' if recovering else
                                          'executing real push', reason=None)
                             continue
+                    if (active and self.robot.motor
+                            and self.robot.motor.status()['phase'] == 'paused'):
+                        active = recovering = False
+                        self._status('replanning', reason=self.robot.motor.status().get('reason'))
+                        continue
                     issue = (recovery_issue(state, received, time.monotonic()) if recovering else
                              observation_issue(state, received, time.monotonic(),
                                                initialized=self.sim is not None))
@@ -455,7 +460,8 @@ class LocalPush:
     def close(self):
         self.stopped.set()
         self.changed.set()
-        if self.robot.motor and self.robot.motor.status()['phase'] not in ('completed', 'paused'):
+        if (self.robot.motor and self.robot.motor.status()['phase'] != 'completed'
+                and not self.robot.motor.status().get('holding_closed_loop')):
             self.robot.motor.cancel('local planner closed: hold')
         self.worker.join(timeout=3)
         self.observation_log.close()

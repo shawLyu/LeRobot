@@ -273,13 +273,28 @@ class PushMotor:
             self.control.stop(reason)
         self._status('stopped', reason=reason)
 
+    def _pause(self, reason, positions, telemetry, *, phase='paused'):
+        """Cancel future waypoints while the bus owner retains the supported hold."""
+        self.job = None
+        with self.lock:
+            self.pending = None
+        if not self.control.enabled or self.control.stopped:
+            self._hold(reason)
+            return
+        self.control.heartbeat()
+        self.control.step(positions, telemetry)
+        if self.control.stopped:
+            self._hold('; '.join(dict.fromkeys(self.control.stopped.values())))
+        else:
+            self._status(phase, reason=reason, holding_closed_loop=True)
+
     def tick(self, positions, telemetry):
         with self.lock:
             observation, received = self.observation, self.observed_at
             pending, self.pending = self.pending, None
             stop, self.stop_reason = self.stop_reason, None
         if stop:
-            self._hold(stop)
+            self._pause(stop, positions, telemetry, phase='stopped')
             return
         observation = refresh_camera_observations(observation, received, self.clock())
         if not self.job and not pending:
@@ -303,7 +318,7 @@ class PushMotor:
                      observation_issue(observation, received, self.clock(), require_base=True,
                                        initialized=True))
         if issue:
-            self._hold(issue)
+            self._pause(issue, positions, telemetry)
             return
         if pending:
             reference, segments, recovery, stage = pending
@@ -372,16 +387,8 @@ class PushMotor:
         target_now = observation.get('objects', {}).get('black_t', {})
         target_start = camera_reference(job['reference']['objects']['black_t'], target_now)
         if target_now.get('observed') and target_start is None:
-            # Discard the trajectory, retaining the last commanded supported hold.
-            # Resetting to measured angles here removes gravity compensation.
-            self.job = None
-            self.control.heartbeat()
-            self.control.step(positions, telemetry)
-            if self.control.stopped:
-                self._hold('; '.join(dict.fromkeys(self.control.stopped.values())))
-            else:
-                self._status('paused', holding_closed_loop=True,
-                             reason='target observation source has no initial measurement: replan')
+            self._pause('target observation source has no initial measurement: replan',
+                        positions, telemetry)
             return
         if target_now.get('observed') and np.linalg.norm(np.subtract(
                 target_now['xy'], target_start['xy'])) > .003:
@@ -442,7 +449,7 @@ class PushMotor:
                 self._status('completed', holding_closed_loop=True)
 
     def close(self):
-        if self.status()['phase'] in ('completed', 'paused') and not self.control.stopped:
+        if self.status().get('holding_closed_loop') and not self.control.stopped:
             # Keep the last supported equilibrium; replacing its preload with the
             # measured angle makes I=0 gravity-loaded joints sag after disconnection.
             self.control.close(preserve_targets=True)

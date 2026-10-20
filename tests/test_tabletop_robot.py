@@ -246,3 +246,13 @@ def test_failed_bus_initialization_reports_error_without_a_fingerprint(
     assert metadata['motion_available'] is False
     assert 'fingerprint' not in metadata
     assert feedback.motor is None
+
+
+def test_incident_inhibit_keeps_feedback_read_only_even_if_control_is_requested():
+    from lerobot_arm_control.runtime.tabletop_robot import RobotFeedback
+
+    feedback = RobotFeedback({'cartesian_motion_inhibit': 'geometry requires revalidation'},
+                             hardware_control=True)
+    assert not feedback.hardware_control
+    assert feedback.motor is None
+    assert feedback.metadata['motion_inhibit_reason'] == 'geometry requires revalidation'

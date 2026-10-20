@@ -219,3 +219,20 @@ def test_matching_local_validation_starts_pure_playback_without_mutating_proof(p
     assert control.enabled == set(JOINTS)
     assert validation == original
     control.close()
+
+
+def test_completed_circle_keeps_supported_reference_and_compensation(playback):
+    bus, control, circle, validation = playback
+    circle.start_hardware(control, validation, laps=1)
+    control.position_feedback.integral['shoulder_lift'] = .04
+    control.position_feedback.correction['shoulder_lift'] = .04
+    end = circle.entry_seconds + circle.period + circle.ramp_seconds
+    circle.started = control.clock()-end-.01
+    circle.advance_hardware(bus.sync_read('Present_Position'), {})
+    assert circle.phase == 'completed'
+    assert not control.stopped
+    assert control.targets == dict(zip(JOINTS, circle.points[0]))
+    assert control.position_feedback.integral['shoulder_lift'] == .04
+    goals = bus.sync_read('Goal_Position')
+    control.close(preserve_targets=True)
+    assert bus.sync_read('Goal_Position') == goals

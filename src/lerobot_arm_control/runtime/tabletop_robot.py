@@ -63,7 +63,7 @@ def calibration_identity(bus, arm, model_path):
 class RobotFeedback:
     def __init__(self, config, *, hardware_control=False, task='push_t'):
         self.config = config
-        self.hardware_control = hardware_control
+        self.hardware_control = hardware_control and not config.get('cartesian_motion_inhibit')
         self.task = task
         self.motor = None
         self.stopped = threading.Event()
@@ -73,6 +73,8 @@ class RobotFeedback:
         self.samples = deque(maxlen=200)
         self.sampled_at = 0
         self.metadata = {"model": "so101", "joints": list(JOINTS), "read_only": True}
+        if config.get('cartesian_motion_inhibit'):
+            self.metadata['motion_inhibit_reason'] = config['cartesian_motion_inhibit']
         self.worker = threading.Thread(target=self._run, daemon=True)
 
     def start(self):

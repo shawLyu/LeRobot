@@ -340,7 +340,7 @@ def test_fault_cancels_motion_and_holds(motor, failure):
     else:
         instance.cancel('operator hold')
     tick(instance, bus)
-    assert instance.status()['phase'] == 'stopped'
+    assert instance.status()['phase'] == ('paused' if failure == 'stale_image' else 'stopped')
     assert instance.job is None
 
 
@@ -359,7 +359,7 @@ def test_visibility_recovery_allows_missing_visual_poses_but_not_stale_camera(mo
     assert instance.status()['recovery']
     clock[0] = .6
     tick(instance, bus)
-    assert instance.status()['phase'] == 'stopped'
+    assert instance.status()['phase'] == 'paused'
     assert 'camera stream stale' in instance.status()['reason']
 
 
@@ -513,3 +513,31 @@ def test_paused_supported_hold_preserves_goals_on_close_but_still_stops_for_faul
         instance.close()
         assert bus.sync_read('Goal_Position') == goals
         assert all(bus.sync_read('Torque_Enable').values())
+
+
+@pytest.mark.parametrize('event', ['stale_camera', 'operator_stop'])
+def test_nonmotor_stop_cancels_path_without_dropping_load_compensation(motor, event):
+    instance, bus, clock, state, segments = motor
+    instance.submit(state, segments)
+    tick(instance, bus)
+    instance.control.position_feedback.integral['shoulder_lift'] = .04
+    instance.control.position_feedback.correction['shoulder_lift'] = .04
+    instance.control.position_feedback.feedback_correction['shoulder_lift'] = .04
+    target = dict(instance.control.targets)
+    if event == 'stale_camera':
+        clock[0] = .6
+    else:
+        instance.cancel('operator hold')
+        clock[0] = .02
+    tick(instance, bus)
+    assert instance.job is None
+    assert instance.status()['holding_closed_loop']
+    assert not instance.control.stopped
+    assert instance.control.targets == target
+    assert instance.control.position_feedback.correction['shoulder_lift'] == pytest.approx(.04)
+    clock[0] += .02
+    tick(instance, bus)
+    assert instance.control.targets == target
+    goals = bus.sync_read('Goal_Position')
+    instance.close()
+    assert bus.sync_read('Goal_Position') == goals

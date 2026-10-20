@@ -113,8 +113,9 @@ class TableLink:
                             if self.hardware_control and (
                                     not model_hash or robot.get('status') in ('error', 'stale')
                                     or robot.get('motion_available') is not True):
-                                reason = robot.get('error') or (
-                                    'verified motor identity and hardware executor are unavailable')
+                                reason = (robot.get('motion_inhibit_reason') or robot.get('error')
+                                          or 'verified motor identity and hardware executor '
+                                          'are unavailable')
                                 raise RuntimeError(
                                     'Remote SO101 is not ready for hardware control: '+reason)
                             self.motor = (MotorLink(self, model_hash)

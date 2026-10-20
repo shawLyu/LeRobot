@@ -21,7 +21,14 @@ Display transmission uses a separate thread and one latest-state slot, so slow r
 The remote motor owner holds on camera/motor age over 500 ms, local heartbeat gap over 750 ms, or SSH loss.
 A newly revealed target camera without a same-camera starting measurement pauses the
 remaining path and requests a new plan. The last nominal joint reference and load
-compensation remain active during this pause; motor faults still latch the normal stop.
+compensation remain active during this pause; motor faults still latch the normal stop. Camera/object observation loss
+also cancels the remaining path while preserving supported hold on the fresh motor
+bus. Explicit hold does the same; faulted or disabled motors retain their fault
+handling. Neither pause nor hold executes future waypoints. A camera pause requires
+new valid observations and planning before motion resumes.
+The per-scene `robot.cartesian_motion_inhibit` string disables motor execution in
+tabletop Push-T/pick-T workers while retaining read-only feedback. Use it after a
+physical collision until the geometry and stopping behavior have been revalidated.
 Startup register readbacks use the configured finite read retry budget; retries do
 not resend position goals or bypass persistent alarms or voltage limits.
 Repeated side-camera updates retain an unexpired primary measurement using its
@@ -40,9 +47,9 @@ Both stale sources still stop execution; no timeout is extended.
 An intervening silhouette miss retains the last actual measurement's capture
 timestamp in either camera. Such a pose is labelled `recent`, never newly observed,
 and expires at the same 500 ms limit. Refreshing another camera cannot reset its age.
-Partial fits of the fixed paper target are diagnostic candidates only. They do
-not move its cached pose or refresh its observation timestamp; a complete outline
-can reacquire a moved target. Only complete observations replace its persistent
+Partial silhouettes of the fixed paper target keep its last complete measurement.
+The unused partial-template diagnostic search is skipped during occlusion, reducing
+processing latency; a complete outline can reacquire a moved target. Only complete observations replace its persistent
 cache. A previously measured static primary pose may serve as that camera's
 movement baseline, explicitly labelled cached, while a fresh side view supplies
 the current target observation. Moving wood still requires current visual evidence.

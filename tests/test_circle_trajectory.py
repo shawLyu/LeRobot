@@ -276,8 +276,9 @@ def test_valid_hardware_entry_and_laps_follow_without_local_angle_commands(laps)
         if circle.phase != "completed":
             assert not control.stopped
         else:
-            assert set(control.stopped) == set(JOINTS)
-            assert bus.sync_read("Goal_Position") == bus.sync_read("Present_Position")
+            assert not control.stopped
+            assert list(control.targets.values()) == pytest.approx(circle.points[0])
+            assert all(bus.sync_read("Torque_Enable").values())
             continue
         # This fake bus follows corrected goals instantly. Check the nominal
         # trajectory speed separately from the bounded hardware compensation.
